@@ -134,7 +134,7 @@ namespace monogameMinecraft
                     return;
                 }
                
-                Thread.Sleep(50);
+                Thread.Sleep(500);
                 if (player.isChunkNeededUpdate == true)
                 {
                 //    Debug.WriteLine("update");

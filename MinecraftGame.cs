@@ -99,7 +99,11 @@ namespace monogameMinecraft
             {
                 element.OnResize();
             }
-            foreach(UIElement element1 in UIElement.settingsUIs)
+            foreach(UIElement element1 in UIElement.settingsUIsPage1)
+            {
+                element1.OnResize();
+            }
+            foreach (UIElement element1 in UIElement.settingsUIsPage2)
             {
                 element1.OnResize();
             }
@@ -122,8 +126,8 @@ namespace monogameMinecraft
                            ssrRenderer.renderTargetSSR=new RenderTarget2D(ssrRenderer.graphicsDevice, width,height,false,SurfaceFormat.Vector4, DepthFormat.Depth24);
                            volumetricLightRenderer.lightShaftTarget = new RenderTarget2D(GraphicsDevice, (int)((float)width), (int)((float)height), false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                             contactShadowRenderer.contactShadowRenderTarget=new RenderTarget2D(contactShadowRenderer.device, width, height,false,SurfaceFormat.Color, DepthFormat.Depth24);
-                    ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                    ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.renderTargetLum = new RenderTarget2D(contactShadowRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
@@ -182,7 +186,7 @@ namespace monogameMinecraft
             gameTimeManager = new GameTimeManager(gamePlayer);
             chunkRenderer = new ChunkRenderer(this, GraphicsDevice, chunkSolidEffect,null, gameTimeManager);
             pointLightUpdater = new PointLightUpdater(chunkSolidEffect, gamePlayer);
-            chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth);
+            chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth,terrainTexNoMip);
             gBufferEffect = Content.Load<Effect>("gbuffereffect");
             gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
             entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, entityEffect, Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), chunkShadowEffect, null, gameTimeManager);
@@ -250,7 +254,14 @@ namespace monogameMinecraft
         public void GoToSettings(object obj)
         {
             GameOptions.ReadOptionsJson();
-            
+            foreach (UIElement element1 in UIElement.settingsUIsPage1)
+            {
+                element1.Initialize();
+            }
+            foreach (UIElement element1 in UIElement.settingsUIsPage2)
+            {
+                element1.Initialize();
+            }
             this.status = GameStatus.Settings;
         }
 
@@ -276,6 +287,7 @@ namespace monogameMinecraft
             base.Initialize();
         }
         Texture2D terrainTex;
+        Texture2D terrainTexNoMip;
         Texture2D terrainNormal;
         Texture2D terrainDepth;
         protected override void LoadContent()
@@ -283,6 +295,7 @@ namespace monogameMinecraft
            
             
             terrainTex = Content.Load<Texture2D>("terrain");
+            terrainTexNoMip = Content.Load<Texture2D>("terrainnomipmap");
             terrainNormal = Content.Load<Texture2D>("terrainnormal");
             chunkSolidEffect = Content.Load<Effect>("blockeffect");
             terrainDepth = Content.Load<Texture2D>("terrainheight");
@@ -312,9 +325,26 @@ namespace monogameMinecraft
 
 
                 case GameStatus.Settings:
-                    foreach (var el in UIElement.settingsUIs)
+                    switch (UIElement.settingsUIsPageID)
                     {
-                        el.Update();
+                        case 0:
+                            foreach (var el in UIElement.settingsUIsPage1)
+                            {
+                                el.Update();
+                            }
+                            break;
+                        case 1:
+                            foreach (var el in UIElement.settingsUIsPage2)
+                            {
+                                el.Update();
+                            }
+                            break;
+                        default:
+                            foreach (var el in UIElement.settingsUIsPage1)
+                            {
+                                el.Update();
+                            }
+                            break;
                     }
                     break;
                 case GameStatus.Started:
@@ -507,10 +537,28 @@ namespace monogameMinecraft
                     GraphicsDevice.Clear(Color.CornflowerBlue);
                     _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-                    foreach (var el in UIElement.settingsUIs)
+                    switch (UIElement.settingsUIsPageID)
                     {
-                        el.DrawString(el.text);
+                        case 0:
+                            foreach (var el in UIElement.settingsUIsPage1)
+                            {
+                                el.DrawString(el.text);
+                            }
+                            break;
+                            case 1:
+                            foreach (var el in UIElement.settingsUIsPage2)
+                            {
+                                el.DrawString(el.text);
+                            }
+                            break;
+                       default:
+                            foreach (var el in UIElement.settingsUIsPage1)
+                            {
+                                el.DrawString(el.text);
+                            }
+                            break;
                     }
+                   
                     _spriteBatch.End();
                     break;
 

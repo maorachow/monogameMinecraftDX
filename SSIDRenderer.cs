@@ -30,8 +30,8 @@ namespace monogameMinecraftDX
             this.gBufferRenderer = gBufferRenderer;
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            this.renderTargetSSID = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            this.renderTargetSSIDPrev = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetSSID = new RenderTarget2D(device, width/2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetSSIDPrev = new RenderTarget2D(device, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.player = player;
             InitializeVertices();
             InitializeQuadBuffers(device);
@@ -42,7 +42,11 @@ namespace monogameMinecraftDX
 
 
         public void Draw(GameTime gameTime,SpriteBatch sb)
-        {  
+        {
+            if (GameOptions.renderSSID == false)
+            {
+                return;
+            }
             SSIDEffect.Parameters["PrevSSIDTexture"]?.SetValue(renderTargetSSIDPrev);
             SSIDEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             SSIDEffect.Parameters["GameTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);

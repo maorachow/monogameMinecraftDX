@@ -35,6 +35,10 @@ namespace monogameMinecraft
         public bool preIsKeyDown;
         public void Draw()
         {
+            if (GameOptions.renderSSR == false)
+            {
+                return;
+            }
         //    if(Keyboard.GetState().IsKeyDown(Keys.B)&& preIsKeyDown==false)
       //      {
                

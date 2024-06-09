@@ -25,10 +25,12 @@ namespace monogameMinecraft
     {
         public Rectangle ButtonRect;
         public Action<UIButton> ButtonAction;
+        public Action<UIButton> ButtonUpdateAction;
         public Vector2Int textPixelPos;
         public Vector2 textPos;
         public Vector2 textWH;
         public float textHeight;
+        public float textScale;
         public Vector2 element00Pos;
         public Vector2 element01Pos;
         public Vector2 element11Pos;
@@ -39,21 +41,24 @@ namespace monogameMinecraft
         public SpriteFont font;
         public GameWindow window;
         public string text { get;set; }
-        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos ,SpriteFont font,SpriteBatch sb,GameWindow window,Action<UIButton> action,string text) {
+        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos , SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction,float textScale)
+        {
             element00Pos = position;
-            element10Pos = new Vector2(position.X+width,position.Y);
-            element11Pos = new Vector2(position.X + width, position.Y+height);
-            element01Pos = new Vector2(position.X , position.Y+height);
+            element10Pos = new Vector2(position.X + width, position.Y);
+            element11Pos = new Vector2(position.X + width, position.Y + height);
+            element01Pos = new Vector2(position.X, position.Y + height);
             Debug.WriteLine(element00Pos + " " + element10Pos + " " + element11Pos + " " + element01Pos);
-            this.texture=tex; 
+            this.texture = tex;
             this.textPos = tPos;
             this.font = font;
-           
+
             this.spriteBatch = sb;
             this.window = window;
             this.ButtonAction = action;
             this.text = text;
+            this.textScale = textScale;
             OnResize();
+            ButtonUpdateAction = buttonUpdateAction;
         }
         public void  Draw()
         {
@@ -71,8 +76,9 @@ namespace monogameMinecraft
            
             this.textPixelPos =new Vector2Int( ButtonRect.Center.X, ButtonRect.Center.Y);
             Vector2 textSize = font.MeasureString(text) / 2f ;
-           float textSizeScaling=((float)UIElement.ScreenRect.Height/ (float)UIElement.ScreenRectInital.Height)*2f;
+           float textSizeScaling=((float)UIElement.ScreenRect.Height/ (float)UIElement.ScreenRectInital.Height)*2f*textScale;
             textSize*=textSizeScaling;
+            
          //   Debug.WriteLine(textSize/2f);
          // textSize.Y = 0;
          // spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x,textPixelPos.y), Color.White);
@@ -107,7 +113,7 @@ namespace monogameMinecraft
             mouseState = Mouse.GetState();
             if (isHovered && mouseState.LeftButton==ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)
             {
-                //Debug.WriteLine("pressed");
+             //   Debug.WriteLine("pressed");
                 ButtonAction(this);
             }
 
@@ -124,6 +130,12 @@ namespace monogameMinecraft
 
       //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));
             Debug.WriteLine(this.textPixelPos.x+" "+this.textPixelPos.y);
+        }
+
+        public void Initialize()
+        {
+            if (ButtonUpdateAction != null) {  ButtonUpdateAction(this); }
+          
         }
     }
 }

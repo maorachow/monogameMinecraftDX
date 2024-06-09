@@ -259,7 +259,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 worldPos = tex2D(gPositionWS, input.TexCoords).xyz;
     float3 normal = tex2D(gNormalWS, input.TexCoords).xyz * 2 - 1;
-    
+    worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
     float3 randomVec = float3(tex2D(noiseTex, input.TexCoords * 5).r * 2 - 1 + 0.0001 + GameTime, tex2D(noiseTex, input.TexCoords * 5).g * 2 - 1 + 0.0001 + GameTime, 0);
     float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     float3 bitangent = cross(normal, tangent);
@@ -269,10 +269,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 finalColor = 0;
     float2 prevTexCoord = input.TexCoords+tex2D(motionVectorTex, input.TexCoords).xy;
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSIDTex, prevTexCoord).xyz : 0;
-    float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5 + GameTime/2.5).r-0.5;
+    float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5 + GameTime*2.5).r-0.5;
     for (int i = 0; i <1; i++)
     {
-        float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime).b);
+        float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
         sampleDir.z = clamp(sampleDir.z, 0.2, 1);
         sampleDir = normalize(sampleDir);
         sampleDir = mul(sampleDir, TBN);
@@ -330,7 +330,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
   //      finalColor = finalColor * 0.01 + prevColor;
             float3 irradiance = finalColor;
             float3 diffuse = irradiance * pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
-            return float4(diffuse.xyz * kD * 0.2 + prevColor*0.8, 1);
+    return float4(diffuse.xyz * kD*0.1 +prevColor* 0.9, 1);
 }
 
 technique SSID

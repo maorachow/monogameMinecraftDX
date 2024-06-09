@@ -475,8 +475,8 @@
 /processorParam:GenerateMipmaps=True
 /processorParam:PremultiplyAlpha=False
 /processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=True
-/processorParam:TextureFormat=Color16Bit
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
 /build:terrain.png
 
 #begin terrainheight.png
@@ -490,6 +490,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:terrainheight.png
+
+#begin terrainnomipmap.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:terrainnomipmap.png
 
 #begin terrainnormal.png
 /importer:TextureImporter

@@ -44,8 +44,8 @@ sampler2D ssidSampler = sampler_state
     Texture = <TextureIndirectDiffuse>;
  
     MipFilter = Linear;
-    MagFilter = Point;
-    MinFilter = Point;
+    MagFilter = Linear;
+    MinFilter = Linear;
     AddressU = Wrap;
     AddressV = Wrap;
 };

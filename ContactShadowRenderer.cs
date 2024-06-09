@@ -26,14 +26,22 @@ namespace monogameMinecraft
             InitializeVertices();
             InitializeQuadBuffers(device);
             this.player = player;
-            this.contactShadowRenderTarget = new RenderTarget2D(device, 800, 600, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            int width = device.PresentationParameters.BackBufferWidth;
+            int height = device.PresentationParameters.BackBufferHeight;
+            this.contactShadowRenderTarget = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
         }
 
 
         public void Draw()
         {
+            if (GameOptions.renderContactShadow == false)
+            {
+                RenderQuad(device, contactShadowRenderTarget, null,true,false);
+                return;
+            }
             var cam = player.cam;
             if (contactShadowEffect.Parameters["NoiseTex"] != null) { contactShadowEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
+            if (contactShadowEffect.Parameters["NormalTex"] != null) { contactShadowEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
             if (contactShadowEffect.Parameters["PositionWSTex"] != null) { contactShadowEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             if (contactShadowEffect.Parameters["View"] != null) { contactShadowEffect.Parameters["View"].SetValue(cam.viewMatrix); }
             if (contactShadowEffect.Parameters["CameraPos"] != null) { contactShadowEffect.Parameters["CameraPos"].SetValue(cam.position); }

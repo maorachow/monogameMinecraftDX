@@ -10,6 +10,16 @@ sampler2D gPositionWS = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
+sampler2D gNormal = sampler_state
+{
+    Texture = <NormalTex>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 
 sampler2D noiseTex = sampler_state
 {
@@ -86,6 +96,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 worldPos = tex2D(gPositionWS, input.TexCoords).xyz;
+    float3 normal = tex2D(gNormal, input.TexCoords) * 2 - 1;
+    worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
     float3 marchDir = normalize(LightDir);
     if (marchDir.y < 0.1)
     {

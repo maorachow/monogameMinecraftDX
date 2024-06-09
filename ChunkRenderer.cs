@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Reflection.Emit;
 using System.Diagnostics.Contracts;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace monogameMinecraft
 {
@@ -30,16 +31,17 @@ namespace monogameMinecraft
         public SSRRenderer SSRRenderer;
         public GameTimeManager gameTimeManager;
         public PointLightUpdater lightUpdater;
-        public void SetTexture(Texture2D tex,Texture2D texNormal,Texture2D textureDepth)
+        public void SetTexture(Texture2D tex,Texture2D texNormal,Texture2D textureDepth,Texture2D texNoMip)
         {
-            
-            atlas = tex;
-     /*       Color[] atlasMip0= new Color[tex.Width* tex.Height];
+           
+            atlas = texNoMip;
+       /*    Color[] atlasMip0= new Color[tex.Width* tex.Height];
             Color[] atlasMip1 = new Color[tex.Width/2 * tex.Height/2];
             Color[] atlasMip2 = new Color[tex.Width/4 * tex.Height/4];
             Color[] atlasMip3 = new Color[tex.Width / 8 * tex.Height / 8];
             Color[] atlasMip4 = new Color[tex.Width / 16 * tex.Height / 16];
             Color[] atlasMip5 = new Color[tex.Width / 32 * tex.Height / 32];
+        
             tex.GetData<Color>(0,null, atlasMip0, 0, tex.Width * tex.Height);
             tex.GetData<Color>(1, null, atlasMip1, 0, tex.Width/2 * tex.Height / 2);
             tex.GetData<Color>(2, null, atlasMip2, 0, tex.Width / 4 * tex.Height / 4);

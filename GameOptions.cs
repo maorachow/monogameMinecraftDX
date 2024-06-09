@@ -19,7 +19,10 @@ namespace monogameMinecraft
         public static bool renderShadow = false;
         public static bool renderFarShadow = false;
         public static bool renderSSAO=false;
+        public static bool renderSSR = false;
+        public static bool renderSSID = false;
         public static bool renderLightShaft = false;
+        public static bool renderContactShadow = false;
         public static void ReadOptionsJson()
         {
             if (!Directory.Exists(path + "unityMinecraftServerData"))
@@ -45,7 +48,11 @@ namespace monogameMinecraft
             renderFarShadow = dataOptions.renderFarShadow;
                     renderSSAO= dataOptions.renderSSAO;
                     renderLightShaft= dataOptions.renderLightShaft;
-                }catch(Exception ex)
+                    renderSSR = dataOptions.renderSSR;
+                    renderSSID = dataOptions.renderSSID;
+                    renderContactShadow = dataOptions.renderContactShadow;
+                }
+                catch(Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
                 }
@@ -70,7 +77,7 @@ namespace monogameMinecraft
             
 
           
-            GameOptionsData data=new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow,GameOptions.renderSSAO,GameOptions.renderLightShaft);
+            GameOptionsData data=new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow,GameOptions.renderSSAO,GameOptions.renderLightShaft,GameOptions.renderSSR,GameOptions.renderSSID,GameOptions.renderContactShadow);
             string dataSerialized = JsonSerializer.Serialize<GameOptionsData>(data);
             File.WriteAllText(path + "unityMinecraftServerData/options.json", dataSerialized);
             
@@ -85,11 +92,22 @@ namespace monogameMinecraft
             }
             obj.text = "Render Distance : "+renderDistance;
         }
+
+        public static void UpdateRenderDistanceUIText(UIButton obj)
+        {
+            obj.text = "Render Distance : " + renderDistance;
+           
+        }
         public static void ChangeRenderShadow(UIButton obj)
         {
             obj.text = "Render Shadow : " + renderShadow.ToString();
             renderShadow = !renderShadow;
             obj.text="Render Shadow : "+renderShadow.ToString();
+        }
+        public static void UpdateRenderShadowUIText(UIButton obj)
+        {
+            obj.text = "Render Shadow : " + renderShadow.ToString();
+           
         }
         public static void ChangeRenderFarShadow(UIButton obj)
         {
@@ -98,6 +116,13 @@ namespace monogameMinecraft
             renderFarShadow = !renderFarShadow;
             obj.text = "Render Far Shadow : " + renderFarShadow.ToString();
         }
+
+        public static void UpdateRenderFarShadowUIText(UIButton obj)
+        {
+
+            obj.text = "Render Far Shadow : " + renderFarShadow.ToString();
+          
+        }
         public static void ChangeRenderSSAO(UIButton obj)
         {
 
@@ -105,12 +130,68 @@ namespace monogameMinecraft
             renderSSAO = !renderSSAO;
             obj.text = "Render SSAO : " + renderSSAO.ToString();
         }
+        public static void UpdateRenderSSAOUIText(UIButton obj)
+        {
+
+            obj.text = "Render SSAO : " + renderSSAO.ToString();
+        
+        }
+        public static void ChangeRenderSSR(UIButton obj)
+        {
+
+            obj.text = "Render SSR : " + renderSSR.ToString();
+            renderSSR = !renderSSR;
+            obj.text = "Render SSR : " + renderSSR.ToString();
+        }
+        public static void UpdateRenderSSRUIText(UIButton obj)
+        {
+
+            obj.text = "Render SSR : " + renderSSR.ToString();
+           
+        }
+
+
+        public static void ChangeRenderContactShadow(UIButton obj)
+        {
+
+            obj.text = "Render Contact Shadow : " + renderContactShadow.ToString();
+            renderContactShadow = !renderContactShadow;
+            obj.text = "Render Contact Shadow : " + renderContactShadow.ToString();
+        }
+        public static void UpdateRenderContactShadowUIText(UIButton obj)
+        {
+
+            obj.text = "Render Contact Shadow : " + renderContactShadow.ToString();
+
+        }
+
+        public static void ChangeRenderSSID(UIButton obj)
+        {
+
+            obj.text = "Render SSID : " + renderSSID.ToString();
+            renderSSID = !renderSSID;
+            obj.text = "Render SSID : " + renderSSID.ToString();
+        }
+
+        public static void UpdateRenderSSIDUIText(UIButton obj)
+        {
+
+            obj.text = "Render SSID : " + renderSSID.ToString();
+           
+        }
         public static void ChangeRenderLightShaft(UIButton obj)
         {
 
             obj.text = "Render Light Shaft : " + renderLightShaft.ToString();
             renderLightShaft = !renderLightShaft;
             obj.text = "Render Light Shaft : " + renderLightShaft.ToString();
+        }
+
+        public static void UpdateRenderLightShaftUIText(UIButton obj)
+        {
+
+            obj.text = "Render Light Shaft : " + renderLightShaft.ToString();
+           
         }
     }
 
@@ -126,13 +207,22 @@ namespace monogameMinecraft
         public bool renderSSAO;
         [JsonInclude]
         public bool renderLightShaft;
-        public GameOptionsData(int renderDistance,bool renderShadow,bool renderFarShadow,bool renderSSAO,bool renderLightShaft)
+        [JsonInclude]
+        public bool renderSSR;
+        [JsonInclude]
+        public bool renderSSID;
+        [JsonInclude]
+        public bool renderContactShadow;
+        public GameOptionsData(int renderDistance,bool renderShadow,bool renderFarShadow,bool renderSSAO,bool renderLightShaft, bool renderSSR,bool renderSSID,bool renderContactShadow)
         {
             this.renderDistance = renderDistance;
             this.renderShadow = renderShadow;
             this.renderFarShadow = renderFarShadow;
             this.renderSSAO= renderSSAO;
             this.renderLightShaft = renderLightShaft;
+            this.renderSSR = renderSSR;
+            this.renderSSID = renderSSID;
+            this.renderContactShadow = renderContactShadow;
         }
     }
 }

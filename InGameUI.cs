@@ -104,5 +104,10 @@ namespace monogameMinecraft
         {
             
         }
+
+        public void Initialize()
+        {
+            
+        }
     }
 }
