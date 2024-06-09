@@ -23,6 +23,7 @@ namespace monogameMinecraft
         public static bool renderSSID = false;
         public static bool renderLightShaft = false;
         public static bool renderContactShadow = false;
+        public static bool showGraphicsDebug = false;
         public static void ReadOptionsJson()
         {
             if (!Directory.Exists(path + "unityMinecraftServerData"))
@@ -51,6 +52,7 @@ namespace monogameMinecraft
                     renderSSR = dataOptions.renderSSR;
                     renderSSID = dataOptions.renderSSID;
                     renderContactShadow = dataOptions.renderContactShadow;
+                    showGraphicsDebug = dataOptions.showGraphicsDebug;
                 }
                 catch(Exception ex)
                 {
@@ -77,7 +79,7 @@ namespace monogameMinecraft
             
 
           
-            GameOptionsData data=new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow,GameOptions.renderSSAO,GameOptions.renderLightShaft,GameOptions.renderSSR,GameOptions.renderSSID,GameOptions.renderContactShadow);
+            GameOptionsData data=new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow,GameOptions.renderSSAO,GameOptions.renderLightShaft,GameOptions.renderSSR,GameOptions.renderSSID,GameOptions.renderContactShadow,GameOptions.showGraphicsDebug);
             string dataSerialized = JsonSerializer.Serialize<GameOptionsData>(data);
             File.WriteAllText(path + "unityMinecraftServerData/options.json", dataSerialized);
             
@@ -193,6 +195,22 @@ namespace monogameMinecraft
             obj.text = "Render Light Shaft : " + renderLightShaft.ToString();
            
         }
+
+
+        public static void ChangeShowGraphicsDebug(UIButton obj)
+        {
+
+            obj.text = "Show Graphics Debug : " + showGraphicsDebug.ToString();
+            showGraphicsDebug = !showGraphicsDebug;
+            obj.text = "Show Graphics Debug : " + showGraphicsDebug.ToString();
+        }
+
+        public static void UpdateShowGraphicsDebugUIText(UIButton obj)
+        {
+
+            obj.text = "Show Graphics Debug : " + showGraphicsDebug.ToString();
+
+        }
     }
 
     public class GameOptionsData
@@ -213,7 +231,9 @@ namespace monogameMinecraft
         public bool renderSSID;
         [JsonInclude]
         public bool renderContactShadow;
-        public GameOptionsData(int renderDistance,bool renderShadow,bool renderFarShadow,bool renderSSAO,bool renderLightShaft, bool renderSSR,bool renderSSID,bool renderContactShadow)
+        [JsonInclude]
+        public bool showGraphicsDebug;
+        public GameOptionsData(int renderDistance,bool renderShadow,bool renderFarShadow,bool renderSSAO,bool renderLightShaft, bool renderSSR,bool renderSSID,bool renderContactShadow,bool showGraphicsDebug)
         {
             this.renderDistance = renderDistance;
             this.renderShadow = renderShadow;
@@ -223,6 +243,7 @@ namespace monogameMinecraft
             this.renderSSR = renderSSR;
             this.renderSSID = renderSSID;
             this.renderContactShadow = renderContactShadow;
+            this.showGraphicsDebug = showGraphicsDebug;
         }
     }
 }

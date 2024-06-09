@@ -70,7 +70,7 @@ namespace monogameMinecraft
         public GlobalMaterialParamsManager globalMaterialParamsManager;
         public BRDFLUTRenderer brdfLUTRenderer;
         public MotionVectorRenderer motionVectorRenderer;
-        public bool renderDebug=true;
+        
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -498,7 +498,7 @@ namespace monogameMinecraft
                     }
                    _spriteBatch.End();
                      _spriteBatch.Begin();
-                    if (renderDebug)
+                    if (GameOptions.showGraphicsDebug)
                     {
                         _spriteBatch.Draw(shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
                         _spriteBatch.Draw(shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
