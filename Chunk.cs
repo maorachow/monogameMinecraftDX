@@ -553,7 +553,9 @@ public struct RandomGenerator3D
     public SemaphoreSlim semaphore = new SemaphoreSlim(1);
     public List<Vector3> lightPoints=new List<Vector3>();
     public int usedByOthersCount = 0;
-        public async void InitMap(Vector2Int chunkPos)
+    public bool isUnused = false;
+    public float unusedSeconds = 0f;
+        public void InitMap(Vector2Int chunkPos)
         {
             
             semaphore.Wait();
@@ -578,8 +580,40 @@ public struct RandomGenerator3D
             leftChunk = ChunkManager.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y));
 
             rightChunk = ChunkManager.GetChunk(new Vector2Int(chunkPos.x + chunkWidth, chunkPos.y));
+       if(frontLeftChunk?.isUnused == true)
+        {
+            frontLeftChunk = null;
+        }
+        if (frontRightChunk?.isUnused == true)
+        {
+            frontRightChunk = null;
+        }
+        if (backLeftChunk?.isUnused == true)
+        {
+            backLeftChunk = null;
+        }
+        if (backRightChunk?.isUnused == true)
+        {
+            backRightChunk = null;
+        }
+        if (backChunk?.isUnused == true)
+        {
+            backChunk = null;
+        }
+        if (frontChunk?.isUnused == true)
+        {
+            frontChunk = null;
+        }
+        if (leftChunk?.isUnused == true)
+        {
+            leftChunk = null;
+        }
+        if (rightChunk?.isUnused == true)
+        {
+            rightChunk = null;
+        }
 
-            if (frontChunk != null)
+        if (frontChunk != null)
             {
                 frontChunk.usedByOthersCount += 1;
           
@@ -599,30 +633,34 @@ public struct RandomGenerator3D
                 rightChunk.usedByOthersCount += 1;
           
         }
-            if (isMapGenCompleted == true)
+
+
+
+        if (frontRightChunk != null)
+        {
+            frontRightChunk.usedByOthersCount += 1;
+
+        }
+        if (backLeftChunk != null)
+        {
+            backLeftChunk.usedByOthersCount += 1;
+
+        }
+        if (frontLeftChunk != null)
+        {
+            frontLeftChunk.usedByOthersCount += 1;
+
+        }
+        if (backRightChunk != null)
+        {
+            backRightChunk.usedByOthersCount += 1;
+
+        }
+        if (isMapGenCompleted == true)
         {
             GenerateMesh(verticesOpq, verticesNS, verticesWT,indicesOpq,indicesNS,indicesWT);
-                if (frontChunk != null)
-                {
-                    frontChunk.usedByOthersCount -= 1;
-            
-            }
-                if (backChunk != null)
-                {
-                    backChunk.usedByOthersCount -= 1;
-              
-            }
-                if (leftChunk != null)
-                {
-                    leftChunk.usedByOthersCount -= 1;
-             
-            }
-                if (rightChunk != null)
-                {
-                    rightChunk.usedByOthersCount -= 1;
-                
-            }
-                semaphore.Release();
+            ReleaseChunkUsage();
+            semaphore.Release();
                 return;
         }
         if (ChunkManager.chunkDataReadFromDisk.ContainsKey(chunkPos))
@@ -631,26 +669,7 @@ public struct RandomGenerator3D
             map =   (short[,,])ChunkManager.chunkDataReadFromDisk[chunkPos].map.Clone();
             GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
             isMapGenCompleted = true;
-            if (frontChunk != null)
-            {
-                frontChunk.usedByOthersCount -= 1;
-               
-            }
-            if (backChunk != null)
-            {
-                backChunk.usedByOthersCount -= 1;
-             
-            }
-            if (leftChunk != null)
-            {
-                leftChunk.usedByOthersCount -= 1;
-              
-            }
-            if (rightChunk != null)
-            {
-                rightChunk.usedByOthersCount -= 1;
-             
-            }
+            ReleaseChunkUsage();
             semaphore.Release();
             return;
             }
@@ -661,29 +680,54 @@ public struct RandomGenerator3D
                 FreshGenMap(chunkPos);
         isMapGenCompleted = true;
         GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
-        if (frontChunk != null)
-        {
-            frontChunk.usedByOthersCount -= 1;
-          
-        }
-        if (backChunk != null)
-        {
-            backChunk.usedByOthersCount -= 1;
-           
-        }
-        if (leftChunk != null)
-        {
-            leftChunk.usedByOthersCount -= 1;
-          
-        }
-        if (rightChunk != null)
-        {
-            rightChunk.usedByOthersCount -= 1;
-           
-        }
+        ReleaseChunkUsage();
         semaphore.Release();
 
+        void ReleaseChunkUsage()
+        {
+            if (frontChunk != null)
+            {
+                frontChunk.usedByOthersCount -= 1;
 
+            }
+            if (backChunk != null)
+            {
+                backChunk.usedByOthersCount -= 1;
+
+            }
+            if (leftChunk != null)
+            {
+                leftChunk.usedByOthersCount -= 1;
+
+            }
+            if (rightChunk != null)
+            {
+                rightChunk.usedByOthersCount -= 1;
+
+            }
+
+
+            if (frontLeftChunk != null)
+            {
+                frontLeftChunk.usedByOthersCount -= 1;
+
+            }
+            if (frontRightChunk != null)
+            {
+                frontRightChunk.usedByOthersCount -= 1;
+
+            }
+            if (backLeftChunk != null)
+            {
+                backLeftChunk.usedByOthersCount -= 1;
+
+            }
+            if (backRightChunk != null)
+            {
+                backRightChunk.usedByOthersCount -= 1;
+
+            }
+        }
         void FreshGenMap(Vector2Int pos)
             {
            
@@ -1213,7 +1257,7 @@ public struct RandomGenerator3D
                             map[i, 0, j] = 5;
                         }
                     }
-                if (isBackChunkUpdated)
+            /*    if (isBackChunkUpdated)
                 {
                     if (backChunk != null&&backChunk.isReadyToRender)
                     {
@@ -1239,7 +1283,7 @@ public struct RandomGenerator3D
                     {
                         rightChunk.BuildChunk();
                     }
-                }
+                }*/
 
                 isMapGenCompleted = true;
             }
@@ -2007,6 +2051,8 @@ public struct RandomGenerator3D
         
           
             this.map= null;
+                this.thisHeightMap = null;
+               
             this.verticesNSArray= null;
             this.additiveMap = null;
             this.verticesWTArray= null;
@@ -2054,7 +2100,9 @@ public struct RandomGenerator3D
            this.IBOpq = null;
            this.VBWT = null;
            this.IBWT = null;
-        }
+                this.VBNS = null;
+                this.IBNS = null;
+            }
         }
        
       

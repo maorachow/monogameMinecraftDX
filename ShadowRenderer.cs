@@ -25,7 +25,7 @@ namespace monogameMinecraft
                        Vector3.Up);
         public Matrix lightViewFar = Matrix.CreateLookAt(new Vector3(100, 100, 100), new Vector3(0, 0, 0),
                      Vector3.Up);
-        public Matrix lightProjection = Matrix.CreateOrthographic(100, 100, 0.01f, 200f);
+        public Matrix lightProjection = Matrix.CreateOrthographic(100, 100, 0.1f, 200f);
         public Matrix lightProjectionFar = Matrix.CreateOrthographic(400, 400, 0.1f, 250f);
         public Matrix lightSpaceMat;
         public Matrix lightSpaceMatFar;
@@ -49,14 +49,14 @@ namespace monogameMinecraft
         public void UpdateLightMatrices(GamePlayer player)
         {
             Vector3 lightDir = gameTimeManager.sunDir;
-            Vector3 lightDirFar = gameTimeManager.sunDir*2f;
-            lightView = Matrix.CreateLookAt(player.playerPos+ lightDir, player.playerPos, Vector3.UnitY);
-            lightViewFar = Matrix.CreateLookAt(player.playerPos + lightDirFar, player.playerPos, Vector3.UnitY);
-            //    lightSpaceMat = lightView  *lightProjection;
+            Vector3 lightDirFar =gameTimeManager.sunDir*2f;
+                                                          //   lightView = GetLightSpaceMatrix(0.1f, 50f, player, lightDir);//Matrix.CreateLookAt(player.playerPos+ lightDir, player.playerPos, Vector3.UnitY);
+                                                          //    lightViewFar = GetLightSpaceMatrix(50f, 300f, player, lightDir);// Matrix.CreateLookAt(player.playerPos + lightDirFar, player.playerPos, Vector3.UnitY);
+                                                          //    lightSpaceMat = lightView  *lightProjection;
 
-            lightSpaceMat = lightView*lightProjection;
-            lightSpaceMatFar = lightViewFar * lightProjectionFar;
-        
+            lightSpaceMat =  GetLightSpaceMatrix(0.1f, 30f, player, lightDir);//lightView*lightProjection;
+            lightSpaceMatFar = GetLightSpaceMatrix(30f, 100f, player, lightDirFar); ;// GetLightSpaceMatrix(30f, 300f, player, lightDir);//lightViewFar * lightProjectionFar;
+
         }
 
         List<Vector4> GetFrustumCornersWorldSpace( Matrix proj, Matrix view)
@@ -81,22 +81,31 @@ namespace monogameMinecraft
             return frustumCorners;
         }
 
-       
-    Matrix GetLightSpaceMatrix(  float nearPlane,   float farPlane,GamePlayer player,Vector3 lightDir)
+        Vector3[] GetFrustumCornersWorldSpaceBoundingFrustum(Matrix proj, Matrix view)
+        {
+
+            BoundingFrustum frustum = new BoundingFrustum(view * proj);
+            Vector3[] frustumCorners = frustum.GetCorners();
+            
+
+            //     Debug.WriteLine(frustumCorners[7]);
+            return frustumCorners;
+        }
+        Matrix GetLightSpaceMatrix(  float nearPlane,   float farPlane,GamePlayer player,Vector3 lightDir)
     {
             Matrix proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f),player.cam.aspectRatio, nearPlane, farPlane); ;
-       var corners = GetFrustumCornersWorldSpace(proj, player.cam.viewMatrixHorizontal);
+       var corners = GetFrustumCornersWorldSpaceBoundingFrustum(proj, player.cam.viewMatrix);
 
         Vector3 center =new Vector3(0, 0, 0);
         foreach (var v in corners)
         {
             center +=new Vector3(v.X,v.Y,v.Z);
         }
-        center /= corners.Count;
+        center /= corners.Length;
             //   zombieModel.Draw(Matrix.CreateTranslation(center.X,center.Y,center.Z),player.cam.viewMatrix, player.cam.projectionMatrix);
             //         Debug.WriteLine(center);
-           Matrix lightView1 = Matrix.CreateLookAt(center+ lightDir, center, Vector3.UnitY);
-
+           Matrix lightView1 = Matrix.CreateLookAt(center+Vector3.Normalize( lightDir), center, Vector3.UnitY);
+     //       Debug.WriteLine(center.ToString());
         float minX = float.MaxValue;
         float maxX = float.MinValue;
         float minY = float.MaxValue;
@@ -105,7 +114,7 @@ namespace monogameMinecraft
         float maxZ = float.MinValue;
         foreach (var v in corners)
         {
-           Vector3 trf = Vector3.Transform(new Vector3(v.X,v.Y,v.Z),lightView);
+           Vector3 trf = Vector3.Transform(new Vector3(v.X,v.Y,v.Z),lightView1);
             minX = MathF.Min(minX, trf.X);
             maxX = MathF.Max(maxX, trf.X);
             minY = MathF.Min(minY, trf.Y);
@@ -115,15 +124,15 @@ namespace monogameMinecraft
         }
 
             // Tune this parameter according to the scene
-            /*     float zMult = 10.0f;
+                 float zMult = 3.0f;
                if (minZ < 0)
                {
                    minZ *= zMult;
                }
                else
-                   {
-                   minZ /= zMult;
-                   }
+                {
+               minZ /= zMult;
+               }
                    if (maxZ < 0)
                    {
                        maxZ /= zMult;
@@ -131,11 +140,12 @@ namespace monogameMinecraft
                    else
                    {
                        maxZ *= zMult;
-                   }*/
+                   }
             //   Debug.WriteLine(MathF.Abs(minX - maxX));
-            //  Debug.WriteLine(MathF.Abs(minY - maxY));
-        
-            Matrix lightProjection1 = Matrix.CreateOrthographic(MathF.Abs(minX - maxX), MathF.Abs(minY - maxY), 0.1f,250f);
+             //   Debug.WriteLine("max:"+(-minZ));
+            //    Debug.WriteLine("min:"+(-maxZ));
+            Matrix lightProjection1 = Matrix.CreateOrthographicOffCenter(minX , maxX, minY , maxY, -maxZ, -minZ);
+       //     Debug.WriteLine(MathF.Abs(minX - maxX)+"  "+MathF.Abs(minY - maxY));
             return lightView1 * lightProjection1;
         }
         public bool isRenderingFarShadow = true;
@@ -157,7 +167,7 @@ namespace monogameMinecraft
             device.SetRenderTarget(shadowMapTarget);
             UpdateLightMatrices(player);
         //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMat, shadowMapShader);
+            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMat, shadowMapShader,64);
            
 
             foreach (var entity in EntityBeh.worldEntities)
@@ -183,7 +193,7 @@ namespace monogameMinecraft
          device.SetRenderTarget(shadowMapTargetFar);
             UpdateLightMatrices(player);
             //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMatFar, shadowMapShader);
+            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMatFar, shadowMapShader,256);
           
 
             foreach (var entity in EntityBeh.worldEntities)

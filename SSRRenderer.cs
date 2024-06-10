@@ -10,18 +10,22 @@ using System.Diagnostics;
 using monogameMinecraftDX;
 namespace monogameMinecraft
 {
-    public class SSRRenderer
+    public class SSRRenderer:FullScreenQuadRenderer
     {
 
         public GraphicsDevice graphicsDevice;
         public GamePlayer player;
         public GBufferRenderer gBufferRenderer;
         public RenderTarget2D renderTargetSSR;
+
+        public RenderTarget2D renderTargetSSRPrev;
+        public MotionVectorRenderer motionVectorRenderer;
         public DeferredShadingRenderer deferredShadingRenderer;
         public Effect SSREffect;
+        public Effect textureCopyEffect;
         public bool binarySearch = true;
 
-        public SSRRenderer(GraphicsDevice graphicsDevice, GamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer)
+        public SSRRenderer(GraphicsDevice graphicsDevice, GamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer)
         {
             this.graphicsDevice = graphicsDevice;
             this.player = player;
@@ -29,23 +33,31 @@ namespace monogameMinecraft
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             this.renderTargetSSR = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetSSRPrev = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             SSREffect = sSREffect;
             this.deferredShadingRenderer = deferredShadingRenderer;
+            InitializeVertices();
+            InitializeQuadBuffers(graphicsDevice);
+            this.textureCopyEffect = textureCopyEffect;
+            this.motionVectorRenderer = motionVectorRenderer;
         }
         public bool preIsKeyDown;
-        public void Draw()
+        public void Draw(GameTime gameTime)
         {
             if (GameOptions.renderSSR == false)
             {
                 return;
             }
-        //    if(Keyboard.GetState().IsKeyDown(Keys.B)&& preIsKeyDown==false)
-      //      {
-               
-        //        binarySearch = !binarySearch;
+            //    if(Keyboard.GetState().IsKeyDown(Keys.B)&& preIsKeyDown==false)
+            //      {
+
+            //        binarySearch = !binarySearch;
             //    Debug.WriteLine("binSearch:" + binarySearch);
-          //  }
-         //   SSREffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            //  }
+            //   SSREffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            SSREffect.Parameters["GameTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+            SSREffect.Parameters["PrevSSRTexture"]?.SetValue(renderTargetSSRPrev);
+            SSREffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             SSREffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
            SSREffect.Parameters["NormalTex"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
 
@@ -64,11 +76,13 @@ namespace monogameMinecraft
             SSREffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             SSREffect.Parameters["CameraPos"]?.SetValue(player.cam.position);
          //   SSREffect.Parameters["RoughnessMap"].SetValue(gBufferRenderer.renderTargetPositionWS);
-            RenderQuad(renderTargetSSR, SSREffect);
-            preIsKeyDown = Keyboard.GetState().IsKeyDown(Keys.B);
+            RenderQuad(graphicsDevice,renderTargetSSR, SSREffect);
+
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(renderTargetSSR);
+            RenderQuad(graphicsDevice, renderTargetSSRPrev, textureCopyEffect);
         }
 
-        public void RenderQuad(RenderTarget2D target, Effect quadEffect, bool isPureWhite = false)
+  /*      public void RenderQuad(RenderTarget2D target, Effect quadEffect, bool isPureWhite = false)
         {
             graphicsDevice.SetRenderTarget(target);
 
@@ -93,6 +107,6 @@ namespace monogameMinecraft
             //    graphicsDevice.Clear(Color.White);
             graphicsDevice.SetRenderTarget(null);
             graphicsDevice.Clear(Color.CornflowerBlue);
-        }
+        }*/
     }
 }

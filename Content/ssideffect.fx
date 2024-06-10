@@ -270,7 +270,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 prevTexCoord = input.TexCoords+tex2D(motionVectorTex, input.TexCoords).xy;
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSIDTex, prevTexCoord).xyz : 0;
     float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5 + GameTime*2.5).r-0.5;
-    for (int i = 0; i <1; i++)
+    for (int i = 0; i <4; i++)
     {
         float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
         sampleDir.z = clamp(sampleDir.z, 0.2, 1);
@@ -314,7 +314,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
         }
     }      
-    finalColor /= 1;
+    finalColor /= 4;
    // finalColor = finalColor*0.01+prevColor;
             float3 F0 = float3(0.04, 0.04, 0.04);
             F0 = lerp(F0, tex2D(gAlbedo, input.TexCoords).xyz, metallic);
@@ -330,7 +330,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
   //      finalColor = finalColor * 0.01 + prevColor;
             float3 irradiance = finalColor;
             float3 diffuse = irradiance * pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
-    return float4(diffuse.xyz * kD*0.1 +prevColor* 0.9, 1);
+    return float4(lerp(diffuse.xyz * kD, prevColor,0.9), 1);
 }
 
 technique SSID

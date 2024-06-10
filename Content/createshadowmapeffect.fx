@@ -53,7 +53,7 @@ technique ShadowMap
 {
     pass Pass0
     {
-        VertexShader = compile vs_4_0_level_9_1 VertexShaderFunction();
-        PixelShader = compile ps_4_0_level_9_1 PixelShaderFunction();
+        VertexShader = compile vs_4_0 VertexShaderFunction();
+        PixelShader = compile ps_4_0 PixelShaderFunction();
     }
 }

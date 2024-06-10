@@ -22,7 +22,7 @@ Texture2D NormalTex;
 Texture2D LumTex;
 Texture2D RoughnessMap;
  
-
+float GameTime;
 float metallic;
 float roughness;
 SamplerState defaultSampler
@@ -34,6 +34,27 @@ SamplerState defaultSampler
     MinFilter = Linear;
     AddressU = Wrap;
     AddressV = Wrap;
+};
+
+sampler2D motionVectorTex = sampler_state
+{
+    Texture = <MotionVectorTex>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+sampler2D prevSSRTex = sampler_state
+{
+    Texture = <PrevSSRTexture>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Border;
+    AddressV = Border;
 };
 sampler gPositionWS = sampler_state
 {
@@ -466,15 +487,19 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float ssrThickness = 0.2;
     float3 preMarchPos = rayOrigin;
    
-    float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0).g - 0.5;
+    float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0+GameTime*5).g + 0.5;
   //  return float4(noiseValue1.xxx, 1);
     float3 marchPos = 0;
+    
+    
+    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
     //float2 brdf1 = tex2D(texBRDFLUT, input.TexCoord.xy).rg;
    // return float4(brdf1, 0, 1);
     [unroll]
     for (int i = 0; i < 16; i++)
     {
-        marchPos = rayOrigin + (rDir) * 0.5 * (pow((i + 1), 1.41) + noiseValue1) * rayLengthAmp;
+        marchPos = rayOrigin + (rDir) * 0.5 * (pow((i + 1), 1.41) * noiseValue1) * rayLengthAmp;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);
         offset = mul(offset, ViewProjection);
@@ -568,7 +593,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), roughness)).rg;
            
             float3 specular = albedo * (F * brdf.x + brdf.y);
-            return float4(specular, 1);
+            return float4(specular * 0.4 + prevColor*0.6, 1);
 
         }
         preMarchPos = marchPos;

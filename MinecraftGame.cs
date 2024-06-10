@@ -45,6 +45,7 @@ namespace monogameMinecraft
         public Effect brdfLUTEffect;
         public Effect motionVectorEffect;
         public Effect textureCopyEffect;
+        public Effect terrainMipmapEffect;
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
         public ChunkRenderer chunkRenderer;
@@ -70,7 +71,7 @@ namespace monogameMinecraft
         public GlobalMaterialParamsManager globalMaterialParamsManager;
         public BRDFLUTRenderer brdfLUTRenderer;
         public MotionVectorRenderer motionVectorRenderer;
-        
+        public TerrainMipmapGenerator terrainMipmapGenerator;
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -132,7 +133,7 @@ namespace monogameMinecraft
                     deferredShadingRenderer.renderTargetLum = new RenderTarget2D(contactShadowRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
                     gamePlayer.cam.aspectRatio= aspectRatio;
-                    gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);
+                    gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f,1000f);
                     break;
             }
           //  button.OnResize();
@@ -163,6 +164,7 @@ namespace monogameMinecraft
 
             randomTextureGenerator=new RandomTextureGenerator();
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
+           
             globalMaterialParamsManager = new GlobalMaterialParamsManager();
             chunkSolidEffect = Content.Load<Effect>("blockeffect");
             chunkShadowEffect = Content.Load<Effect>("createshadowmapeffect");
@@ -180,7 +182,9 @@ namespace monogameMinecraft
             deferredBlendEffect = Content.Load<Effect>("deferredblendeffect");
             brdfLUTEffect = Content.Load<Effect>("brdfluteffect");
             motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
-            textureCopyEffect = Content.Load<Effect>("texturecopyeffect");
+            textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
+            terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
+            terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, terrainMipmapEffect);
             brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, brdfLUTEffect);
             brdfLUTRenderer.CalculateLUT();
             gameTimeManager = new GameTimeManager(gamePlayer);
@@ -198,7 +202,7 @@ namespace monogameMinecraft
             motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice,motionVectorEffect,gBufferRenderer, gamePlayer);
                  ssaoRenderer = new SSAORenderer(ssaoEffect, gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
             deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect);
-            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect,deferredShadingRenderer);
+            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect, deferredShadingRenderer, textureCopyEffect,motionVectorRenderer) ;
             ssidRenderer = new SSIDRenderer(GraphicsDevice, ssidEffect, gBufferRenderer, gamePlayer, deferredShadingRenderer, textureCopyEffect, motionVectorRenderer);
             deferredShadingRenderer.ssidRenderer = ssidRenderer;
             deferredShadingRenderer.ssrRenderer = ssrRenderer;
@@ -239,6 +243,12 @@ namespace monogameMinecraft
             }*/
             EntityManager.SaveWorldEntityData();
             ChunkManager.isJsonReadFromDisk=false;
+            foreach(var c in ChunkManager.chunks)
+            {
+                c.Value.semaphore.Wait();
+                c.Value.Dispose();
+                c.Value.semaphore.Release();
+            }
             ChunkManager.chunks .Clear();
             ChunkManager.chunkDataReadFromDisk.Clear();
             EntityBeh.InitEntityList();
@@ -455,7 +465,7 @@ namespace monogameMinecraft
             shadowRenderer.UpdateLightMatrices(gamePlayer);
           
             shadowRenderer.UpdateLightMatrices(gamePlayer);
-            ssrRenderer.Draw();
+            ssrRenderer.Draw(gameTime);
             ssidRenderer.Draw(gameTime,sb);
         
             skyboxRenderer.Draw();

@@ -12,10 +12,13 @@ sampler textureSampler = sampler_state
 {
     Texture = (blockTex);
     AddressU = CLAMP;
-    AddressV = Wrap;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = POINT;
+    AddressV = CLAMP;
+   
+    Filter = Point;
+    Mipfilter = Linear;
+    MipLODBias = -2;
+   
+   
 };
 
 sampler normalSampler = sampler_state
@@ -23,9 +26,10 @@ sampler normalSampler = sampler_state
     Texture = (normalTex);
     AddressU = CLAMP;
     AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
+    MagFilter = Point;
+    MinFilter = Point;
     Mipfilter = Linear;
+    MipLODBias = -4;
 };
 struct VertexShaderInput
 {
@@ -112,7 +116,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
   //  psOut.ProjectionDepth.rgb = packedZ;
     float3 normal = mul(abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).x < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).y < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).z < 0.99 ? tex2D(normalSampler, input.TexCoords).xyz * 2 - 1 : float3(0, 0, 1), input.TBN);
     psOut.NormalWS = float4(normal*0.5+0.5, 1);
-    psOut.Albedo = float4(tex2Dlod(textureSampler, float4(input.TexCoords, 0, 2)).xyz, 1);
+    psOut.Albedo = float4(tex2D(textureSampler,input.TexCoords).xyz, 1);
     
     psOut.Albedo.a = 1;
 

@@ -606,13 +606,13 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
     
-    LoDirLight += CalculateLightP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
+    LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
     
     
-    Lo += CalculateLightP(worldPos, LightPosition1, N, V, albedo, roughness, F0);
-    Lo += CalculateLightP(worldPos, LightPosition2, N, V, albedo, roughness, F0);
-    Lo += CalculateLightP(worldPos, LightPosition3, N, V, albedo, roughness, F0);
-    Lo += CalculateLightP(worldPos, LightPosition4, N, V, albedo, roughness, F0);
+    Lo += CalculateLightDiffuseP(worldPos, LightPosition1, N, V, albedo, roughness, F0);
+    Lo += CalculateLightDiffuseP(worldPos, LightPosition2, N, V, albedo, roughness, F0);
+    Lo += CalculateLightDiffuseP(worldPos, LightPosition3, N, V, albedo, roughness, F0);
+    Lo += CalculateLightDiffuseP(worldPos, LightPosition4, N, V, albedo, roughness, F0);
    
     float3 ambient = float3(0.01, 0.01, 0.01) * albedo * tex2D(AOSampler, input.TexCoords.xy).r;
     
@@ -622,7 +622,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     if (receiveShadow == true)
     {
         shadow = ShadowCalculation(LightSpacePosition, ShadowMapSampler, 0);
-        if (length(viewPos - worldPos) > 32)
+        float viewZ = -mul(float4(worldPos, 1), View).z;
+        if (viewZ > 30)
         {
             shadow1 = ShadowCalculation(LightSpacePositionFar, ShadowMapFarSampler, 0);
         }
@@ -652,9 +653,9 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
   //  color = pow(color, float3(1.0 / 1, 1.0 / 1, 1.0 /1));
    
  
-   
     
-    output.Color = float4(color, 1.0);
+    
+    output.Color = float4(color , 1.0);
     return output;
 }
 

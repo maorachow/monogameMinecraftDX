@@ -114,7 +114,7 @@ namespace monogameMinecraft
             if (isRenderingOnDcreen == false)
             {
                 device.SetRenderTarget(target);
-                device.Clear(Color.Black);
+                device.Clear(Color.Transparent);
             }
             if (isPureWhite)
             {
@@ -129,6 +129,7 @@ namespace monogameMinecraft
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
             device.RasterizerState = rasterizerState;
+            device.BlendState=BlendState.AlphaBlend;
             foreach (var pass in quadEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
@@ -142,23 +143,19 @@ namespace monogameMinecraft
             }
            
         }
-        public void CopyQuad(GraphicsDevice device, RenderTarget2D source, RenderTarget2D target,SpriteBatch sb)
+        public void RenderQuadPureColor(GraphicsDevice device, RenderTarget2D target,Color color)
         {
-          
+            
                 device.SetRenderTarget(target);
-                device.Clear(Color.Black);
+                device.Clear(color);
+             
+            
+              
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+                return;
+             
 
-
-
-            sb.Begin(blendState: BlendState.Additive);
-            sb.Draw(source, new Rectangle(0, 0, target.Width, target.Height), Color.White);
-            sb.End();
-
-            device.DepthStencilState = DepthStencilState.Default;
-            //    graphicsDevice.Clear(Color.White);
-
-            device.SetRenderTarget(null);
-            //    device.Clear(Color.CornflowerBlue);
            
 
         }

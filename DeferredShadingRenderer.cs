@@ -60,6 +60,7 @@ namespace monogameMinecraft
             blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10,10, 10));
             blockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             //  basicShader.Parameters["LightPos"].SetValue(player.playerPos + new Vector3(10, 50, 30));
+            blockDeferredEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             blockDeferredEffect.Parameters["viewPos"].SetValue(player.cam.position);
             if (blockDeferredEffect.Parameters["PositionWSTex"] != null) { blockDeferredEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             // shadowmapShader.Parameters["LightSpaceMat"].SetValue(shadowRenderer.lightSpaceMat);

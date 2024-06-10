@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Reflection.Emit;
 using System.Diagnostics.Contracts;
 using static System.Net.Mime.MediaTypeNames;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -34,28 +35,30 @@ namespace monogameMinecraft
         public void SetTexture(Texture2D tex,Texture2D texNormal,Texture2D textureDepth,Texture2D texNoMip)
         {
            
-            atlas = texNoMip;
-       /*    Color[] atlasMip0= new Color[tex.Width* tex.Height];
-            Color[] atlasMip1 = new Color[tex.Width/2 * tex.Height/2];
-            Color[] atlasMip2 = new Color[tex.Width/4 * tex.Height/4];
-            Color[] atlasMip3 = new Color[tex.Width / 8 * tex.Height / 8];
-            Color[] atlasMip4 = new Color[tex.Width / 16 * tex.Height / 16];
-            Color[] atlasMip5 = new Color[tex.Width / 32 * tex.Height / 32];
-        
-            tex.GetData<Color>(0,null, atlasMip0, 0, tex.Width * tex.Height);
-            tex.GetData<Color>(1, null, atlasMip1, 0, tex.Width/2 * tex.Height / 2);
-            tex.GetData<Color>(2, null, atlasMip2, 0, tex.Width / 4 * tex.Height / 4);
-            tex.GetData<Color>(3, null, atlasMip3, 0, tex.Width /8* tex.Height/8);
-            tex.GetData<Color>(4, null, atlasMip4, 0, tex.Width / 16 * tex.Height /16);
-            tex.GetData<Color>(5, null, atlasMip5, 0, tex.Width / 32 * tex.Height / 32);
+           
+           // TerrainMipmapGenerator.instance.GenerateMipmap(texNoMip);
+            atlas = TerrainMipmapGenerator.instance.GenerateMipmap(texNoMip);
+            /*    Color[] atlasMip0= new Color[tex.Width* tex.Height];
+                 Color[] atlasMip1 = new Color[tex.Width/2 * tex.Height/2];
+                 Color[] atlasMip2 = new Color[tex.Width/4 * tex.Height/4];
+                 Color[] atlasMip3 = new Color[tex.Width / 8 * tex.Height / 8];
+                 Color[] atlasMip4 = new Color[tex.Width / 16 * tex.Height / 16];
+                 Color[] atlasMip5 = new Color[tex.Width / 32 * tex.Height / 32];
 
-            atlas.SetData<Color>(0, 0,null, atlasMip0, 0, atlas.Width * atlas.Height);
-            atlas.SetData<Color>(1, 0,null, atlasMip1, 0, atlas.Width/2 * atlas.Height / 2);
-            atlas.SetData<Color>(2, 0,null, atlasMip2, 0, atlas.Width / 4 * atlas.Height / 4);
-            atlas.SetData<Color>(3, 0, null, atlasMip3, 0, atlas.Width/8 * atlas.Height/8);
-            atlas.SetData<Color>(4, 0, null, atlasMip4, 0, atlas.Width / 16 * atlas.Height / 16);
-            atlas.SetData<Color>(5, 0, null, atlasMip5, 0, atlas.Width /32 * atlas.Height / 32);*/
-            atlasNormal = texNormal;
+                 tex.GetData<Color>(0,null, atlasMip0, 0, tex.Width * tex.Height);
+                 tex.GetData<Color>(1, null, atlasMip1, 0, tex.Width/2 * tex.Height / 2);
+                 tex.GetData<Color>(2, null, atlasMip2, 0, tex.Width / 4 * tex.Height / 4);
+                 tex.GetData<Color>(3, null, atlasMip3, 0, tex.Width /8* tex.Height/8);
+                 tex.GetData<Color>(4, null, atlasMip4, 0, tex.Width / 16 * tex.Height /16);
+                 tex.GetData<Color>(5, null, atlasMip5, 0, tex.Width / 32 * tex.Height / 32);
+
+                 atlas.SetData<Color>(0, 0,null, atlasMip0, 0, atlas.Width * atlas.Height);
+                 atlas.SetData<Color>(1, 0,null, atlasMip1, 0, atlas.Width/2 * atlas.Height / 2);
+                 atlas.SetData<Color>(2, 0,null, atlasMip2, 0, atlas.Width / 4 * atlas.Height / 4);
+                 atlas.SetData<Color>(3, 0, null, atlasMip3, 0, atlas.Width/8 * atlas.Height/8);
+                 atlas.SetData<Color>(4, 0, null, atlasMip4, 0, atlas.Width / 16 * atlas.Height / 16);
+                 atlas.SetData<Color>(5, 0, null, atlasMip5, 0, atlas.Width /32 * atlas.Height / 32);*/
+            atlasNormal = TerrainMipmapGenerator.instance.GenerateMipmap(texNormal) ;
             this.atlasDepth= textureDepth;
             
             basicShader.Parameters["Texture"].SetValue(atlas);
@@ -93,7 +96,7 @@ namespace monogameMinecraft
                     continue;
                 }
 
-                if (c.isReadyToRender == true && c.disposed == false)
+                if (c.isReadyToRender == true && c.disposed == false&&c.isUnused==false)
                 {
                   
                     if (frustum.Intersects(c.chunkBounds))
@@ -383,7 +386,7 @@ namespace monogameMinecraft
 
 
         public static bool isBusy = false;
-       public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks,GamePlayer player,Matrix lightSpaceMat,Effect shadowmapShader)
+       public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks,GamePlayer player,Matrix lightSpaceMat,Effect shadowmapShader,int maxRenderDistance)
         {
 
             shadowmapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);
@@ -397,7 +400,7 @@ namespace monogameMinecraft
                 {
                     continue;
                 }              
-                if((MathF.Abs(c.chunkPos.x - player.playerPos.X) < ( 256) && MathF.Abs(c.chunkPos.y - player.playerPos.Z) < (256)))
+                if((MathF.Abs(c.chunkPos.x - player.playerPos.X) < (maxRenderDistance) && MathF.Abs(c.chunkPos.y - player.playerPos.Z) < (maxRenderDistance)))
                 {
                     if(frustum.Intersects(c.chunkBounds))
                     {

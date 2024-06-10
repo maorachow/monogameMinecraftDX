@@ -173,7 +173,7 @@ namespace monogameMinecraft
                 {
                     return;
                 }
-                Thread.Sleep(150);
+                Thread.Sleep(1500);
               if (ChunkRenderer.isBusy == true)
                 {
                     continue;
@@ -194,18 +194,45 @@ namespace monogameMinecraft
                             
                             c.isReadyToRender = false;
                             c.SaveSingleChunk();
-                            c.Dispose();
                             
-                            ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
-                      
-                           
+                            c.isUnused = true;
+                        
+                       //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
+                    //  c.Dispose();
+                          
                  
                     }
 
                     c.semaphore.Release();
-
+                     
                 }
-               
+
+
+                foreach (Chunk c in ChunkManager.chunks.Values)
+                {
+                    c.semaphore.Wait();
+                    if (c.isUnused==true)
+                    {
+                        c.unusedSeconds += 1.5f;
+
+                        if (c.unusedSeconds > 10f)
+                        {
+                            
+                            c.Dispose();
+                                 ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
+                              
+                        }
+
+                        //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
+                        //  c.Dispose();
+
+
+                    }
+
+                    c.semaphore.Release();
+                    
+                }
+
             }
         }
         public static short GetBlock(Vector3 pos)
