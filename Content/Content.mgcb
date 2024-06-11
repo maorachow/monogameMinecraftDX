@@ -237,6 +237,12 @@
 /processorParam:DebugMode=Auto
 /build:entityeffect.fx
 
+#begin fxaaeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:fxaaeffect.fx
+
 #begin gbuffereffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor

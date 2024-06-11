@@ -82,8 +82,8 @@ namespace monogameMinecraft
      //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.renderTargetProjectionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
             this.renderTargetPositionWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            this.renderTargetAlbedo = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            this.renderTargetNormalWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetAlbedo = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
+            this.renderTargetNormalWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.binding = new RenderTargetBinding[4];
          
             this.binding[0] = new RenderTargetBinding(this.renderTargetProjectionDepth);

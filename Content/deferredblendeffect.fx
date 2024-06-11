@@ -84,7 +84,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     
-    if (any(tex2D(albedoSampler, input.TexCoords).xyz) < 0.02)
+    if (any(tex2D(albedoSampler, input.TexCoords).xyz) < 0.01)
     {
         discard;
     }

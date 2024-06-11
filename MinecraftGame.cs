@@ -46,6 +46,7 @@ namespace monogameMinecraft
         public Effect motionVectorEffect;
         public Effect textureCopyEffect;
         public Effect terrainMipmapEffect;
+        public Effect fxaaEffect;
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
         public ChunkRenderer chunkRenderer;
@@ -72,6 +73,7 @@ namespace monogameMinecraft
         public BRDFLUTRenderer brdfLUTRenderer;
         public MotionVectorRenderer motionVectorRenderer;
         public TerrainMipmapGenerator terrainMipmapGenerator;
+        public FXAARenderer fxaaRenderer;
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -126,11 +128,12 @@ namespace monogameMinecraft
                            volumetricLightRenderer.renderTargetLum = new RenderTarget2D(volumetricLightRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                            ssrRenderer.renderTargetSSR=new RenderTarget2D(ssrRenderer.graphicsDevice, width,height,false,SurfaceFormat.Vector4, DepthFormat.Depth24);
                            volumetricLightRenderer.lightShaftTarget = new RenderTarget2D(GraphicsDevice, (int)((float)width), (int)((float)height), false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                            contactShadowRenderer.contactShadowRenderTarget=new RenderTarget2D(contactShadowRenderer.device, width, height,false,SurfaceFormat.Color, DepthFormat.Depth24);
+                            contactShadowRenderer.contactShadowRenderTarget=new RenderTarget2D(GraphicsDevice, width, height,false,SurfaceFormat.Color, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                    motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                    deferredShadingRenderer.renderTargetLum = new RenderTarget2D(contactShadowRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+                    deferredShadingRenderer.renderTargetLum = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    deferredShadingRenderer.finalImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
                     float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
                     gamePlayer.cam.aspectRatio= aspectRatio;
                     gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f,1000f);
@@ -184,6 +187,7 @@ namespace monogameMinecraft
             motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
             textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
             terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
+            fxaaEffect = Content.Load<Effect>("fxaaeffect");
             terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, terrainMipmapEffect);
             brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, brdfLUTEffect);
             brdfLUTRenderer.CalculateLUT();
@@ -195,13 +199,16 @@ namespace monogameMinecraft
             gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
             entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, entityEffect, Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), chunkShadowEffect, null, gameTimeManager);
             gBufferRenderer = new GBufferRenderer(this.GraphicsDevice, gBufferEffect, gBufferEntityEffect, gamePlayer, chunkRenderer, entityRenderer);
+            skyboxRenderer = new SkyboxRenderer(GraphicsDevice, skyboxEffect, null, gamePlayer, Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
+               Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightup"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightdown"), Content.Load<Texture2D>("skybox/skyboxnight"), gameTimeManager
+               );
 
-           
             contactShadowRenderer = new ContactShadowRenderer(GraphicsDevice, contactShadowEffect, gBufferRenderer, gameTimeManager, gamePlayer);
             shadowRenderer = new ShadowRenderer(this, GraphicsDevice,chunkShadowEffect, chunkRenderer, entityRenderer,gameTimeManager);
             motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice,motionVectorEffect,gBufferRenderer, gamePlayer);
                  ssaoRenderer = new SSAORenderer(ssaoEffect, gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
-            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect);
+            fxaaRenderer = new FXAARenderer(GraphicsDevice, fxaaEffect);
+            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect, skyboxRenderer,fxaaRenderer);
             ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect, deferredShadingRenderer, textureCopyEffect,motionVectorRenderer) ;
             ssidRenderer = new SSIDRenderer(GraphicsDevice, ssidEffect, gBufferRenderer, gamePlayer, deferredShadingRenderer, textureCopyEffect, motionVectorRenderer);
             deferredShadingRenderer.ssidRenderer = ssidRenderer;
@@ -211,9 +218,7 @@ namespace monogameMinecraft
             entityRenderer.shadowRenderer = shadowRenderer;
             chunkRenderer.lightUpdater = pointLightUpdater;
             shadowRenderer.zombieModel = Content.Load<Model>("zombiemodelref");
-            skyboxRenderer = new SkyboxRenderer(GraphicsDevice, skyboxEffect, null, gamePlayer,Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
-                Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightup"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightdown"), Content.Load<Texture2D>("skybox/skyboxnight"),gameTimeManager
-                );
+           
             volumetricLightRenderer = new VolumetricLightRenderer(GraphicsDevice, gBufferRenderer, _spriteBatch,Content.Load<Effect>("volumetricmaskblend"), lightShaftEffect,gamePlayer, gameTimeManager);
             chunkRenderer.SSRRenderer = ssrRenderer;
             volumetricLightRenderer.entityRenderer = entityRenderer;
@@ -468,7 +473,7 @@ namespace monogameMinecraft
             ssrRenderer.Draw(gameTime);
             ssidRenderer.Draw(gameTime,sb);
         
-            skyboxRenderer.Draw();
+        //    skyboxRenderer.Draw(null);
             
             //   GraphicsDevice.RasterizerState = rasterizerState1;
             pointLightUpdater.UpdatePointLight();

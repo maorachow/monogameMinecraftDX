@@ -109,15 +109,20 @@ namespace monogameMinecraft
             if (effect.Parameters["CameraViewYExtent"] != null) effect.Parameters["CameraViewYExtent"].SetValue(cameraYExtent1);
             //    effect.Parameters["CameraPos"].SetValue(cam.position);
         }
-        public void RenderQuad(GraphicsDevice device,RenderTarget2D target, Effect quadEffect, bool isPureWhite = false,bool isRenderingOnDcreen=false)
+        public void RenderQuad(GraphicsDevice device,RenderTarget2D target, Effect quadEffect, bool isPureWhite = false,bool isRenderingOnDcreen=false,bool clearColor=true)
         {
             if (isRenderingOnDcreen == false)
             {
                 device.SetRenderTarget(target);
+                if(clearColor == true)
+                {
                 device.Clear(Color.Transparent);
+                }
+                
             }
             if (isPureWhite)
             {
+
                 device.Clear(Color.White);
                 device.SetRenderTarget(null);
                 device.Clear(Color.CornflowerBlue);

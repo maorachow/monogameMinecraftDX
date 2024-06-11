@@ -17,7 +17,7 @@ sampler textureSampler = sampler_state
     Filter = Point;
     Mipfilter = Linear;
     MipLODBias = -2;
-   
+    MaxLOD = 8;
    
 };
 
@@ -28,8 +28,9 @@ sampler normalSampler = sampler_state
     AddressV = CLAMP;
     MagFilter = Point;
     MinFilter = Point;
-    Mipfilter = Linear;
-    MipLODBias = -4;
+    Mipfilter = Point;
+    MipLODBias =-3;
+   
 };
 struct VertexShaderInput
 {

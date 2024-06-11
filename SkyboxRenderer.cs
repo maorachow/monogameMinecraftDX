@@ -108,8 +108,9 @@ new VertexPosition(   new Vector3(   1.0f, -1.0f,  1.0f)),
             skyboxTextureNight.SetData(CubeMapFace.NegativeZ, data);
 
         }
-        public void Draw( )
+        public void Draw(RenderTarget2D renderTarget,bool keepRenderTarget=false)
         {
+            device.SetRenderTarget(renderTarget);
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
             device.RasterizerState = rasterizerState ;
@@ -155,6 +156,11 @@ new VertexPosition(   new Vector3(   1.0f, -1.0f,  1.0f)),
             RasterizerState rasterizerState1 = new RasterizerState();
             rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
             device.RasterizerState = rasterizerState1;
+            if (keepRenderTarget == false)
+            {
+            device.SetRenderTarget(null);
+            }
+            
         }
     }
 }

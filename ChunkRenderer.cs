@@ -58,7 +58,7 @@ namespace monogameMinecraft
                  atlas.SetData<Color>(3, 0, null, atlasMip3, 0, atlas.Width/8 * atlas.Height/8);
                  atlas.SetData<Color>(4, 0, null, atlasMip4, 0, atlas.Width / 16 * atlas.Height / 16);
                  atlas.SetData<Color>(5, 0, null, atlasMip5, 0, atlas.Width /32 * atlas.Height / 32);*/
-            atlasNormal = TerrainMipmapGenerator.instance.GenerateMipmap(texNormal) ;
+            atlasNormal = TerrainMipmapGenerator.instance.GenerateMipmap(texNormal,true) ;
             this.atlasDepth= textureDepth;
             
             basicShader.Parameters["Texture"].SetValue(atlas);

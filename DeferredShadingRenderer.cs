@@ -26,13 +26,16 @@ namespace monogameMinecraft
         public GBufferRenderer gBufferRenderer;
         public ContactShadowRenderer contactShadowRenderer;
         public RenderTarget2D renderTargetLum;
-        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer,SSRRenderer sSRRenderer,SSIDRenderer sSIDRenderer,Effect deferredBlendEffect)
+        public SkyboxRenderer skyboxRenderer;
+        public RenderTarget2D finalImage;
+        public FXAARenderer fxaaRenderer;
+        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer)
         {
             this.device = device;
             this.blockDeferredEffect = blockDeferredEffect;
             this.shadowRenderer = shadowRenderer;
             SSAORenderer = sSAORenderer;
-           
+
             this.gameTimeManager = gameTimeManager;
             this.lightUpdater = lightUpdater;
             this.gBufferRenderer = gBufferRenderer;
@@ -40,11 +43,14 @@ namespace monogameMinecraft
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
             this.renderTargetLum = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.finalImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             this.ssrRenderer = sSRRenderer;
-            this.ssidRenderer=sSIDRenderer;
-            this.deferredBlendEffect= deferredBlendEffect;
+            this.ssidRenderer = sSIDRenderer;
+            this.deferredBlendEffect = deferredBlendEffect;
+            this.skyboxRenderer = skyboxRenderer;
             InitializeVertices();
             InitializeQuadBuffers(device);
+            this.fxaaRenderer = fxaaRenderer;
         }
 
         public void Draw(GamePlayer player)
@@ -127,13 +133,17 @@ namespace monogameMinecraft
 
         public void FinalBlend(SpriteBatch sb,VolumetricLightRenderer vlr,GraphicsDevice device)
         {
-
+            skyboxRenderer.Draw(finalImage,true);
             deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
             deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLum);
             deferredBlendEffect.Parameters["TextureAO"].SetValue(SSAORenderer.ssaoTarget);
             deferredBlendEffect.Parameters["TextureReflection"].SetValue(ssrRenderer.renderTargetSSR);
             deferredBlendEffect.Parameters["TextureIndirectDiffuse"].SetValue(ssidRenderer.renderTargetSSID);
-            RenderQuad(device, null, deferredBlendEffect, false, true);
+            RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor:false) ;
+            fxaaRenderer.Draw(true, finalImage);
+         //   sb.Begin(blendState: BlendState.Opaque);
+        //    sb.Draw(finalImage, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
+         //   sb.End();
             sb.Begin(blendState:BlendState.Additive);
             sb.Draw(vlr.lightShaftTarget, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth , device.PresentationParameters.BackBufferHeight), Color.White);
             sb.End();

@@ -40,7 +40,7 @@ namespace monogameMinecraftDX
             InitializeQuadBuffers(device);
 
         }
-        public Texture2D GenerateMipmap(in Texture2D sourceTex)
+        public Texture2D GenerateMipmap(in Texture2D sourceTex,bool isNormalMap=false)
         {
          //   Texture2D sourceTex1 = sourceTex;
             Texture2D mipmapSourceTex = new Texture2D(device,sourceTex.Width,sourceTex.Height,true, sourceTex.Format);
@@ -77,14 +77,20 @@ namespace monogameMinecraftDX
             textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip5);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip5.Width, 1f / terrainMip5.Height));
             RenderQuad(device, terrainMip6, textureCopyEffect);
+            if (isNormalMap)
+            {
+                RenderQuadPureColor(device, terrainMip7, new Color(0.5f, 0.5f,1f, 1f));
 
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip6);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip6.Width, 1f / terrainMip6.Height));
-            RenderQuad(device, terrainMip7, textureCopyEffect);
 
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip7);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip7.Width, 1f / terrainMip7.Height));
-            RenderQuad(device, terrainMip8, textureCopyEffect);
+                RenderQuadPureColor(device, terrainMip8, new Color(0.5f, 0.5f, 1f, 1f));
+                RenderQuadPureColor(device, terrainMip9, new Color(0.5f, 0.5f, 1f, 1f));
+                RenderQuadPureColor(device, terrainMip10, new Color(0.5f, 0.5f, 1f, 1f));
+            }
+           
+        //    RenderQuad(device, terrainMip7, textureCopyEffect);
+
+           
+          //  RenderQuad(device, terrainMip8, textureCopyEffect);
             //   RenderQuadPureColor(device, terrainMip10, new Color(0.266f, 0.534f, 0.281f, 1f));
             Color[] atlasMip0 = new Color[sourceTex.Width * sourceTex.Height];
         
