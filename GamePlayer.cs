@@ -316,7 +316,8 @@ namespace monogameMinecraft
 
         void UpdatePlayerChunk()
         {
-            if (!ChunkManager.CheckIsPosInChunk(playerPos, curChunk))
+        //    Debug.WriteLine(ChunkManager.CheckIsPosInChunkBorder(playerPos, curChunk));
+            if (ChunkManager.CheckIsPosInChunkBorder(playerPos, curChunk) || !ChunkManager.CheckIsPosInChunk(playerPos,curChunk))
             {
                 isChunkNeededUpdate = true;
                 curChunk = ChunkManager.GetChunk(ChunkManager.Vec3ToChunkPos(playerPos));
@@ -472,9 +473,15 @@ namespace monogameMinecraft
             tmpfront.X = MathF.Cos(MathHelper.ToRadians(Yaw)) * MathF.Cos(MathHelper.ToRadians(Pitch));
             tmpfront.Y = MathF.Sin(MathHelper.ToRadians(Pitch));
             tmpfront.Z = MathF.Sin(MathHelper.ToRadians(Yaw)) * MathF.Cos(MathHelper.ToRadians(Pitch));
-            horizontalFront=new Vector3(tmpfront.X,0,tmpfront.Z);
-            horizontalFront.Normalize();
+         //   Quaternion q = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(Yaw), MathHelper.ToRadians(Pitch), MathHelper.ToRadians(0f));
+           // Matrix rotMat=Matrix.CreateFromQuaternion(q);
            
+
+
+         //   var lookAtOffset = Vector3.Transform(Vector3.UnitZ, rotMat);
+            horizontalFront =new Vector3(tmpfront.X,0,tmpfront.Z);
+            horizontalFront.Normalize();
+
             front = tmpfront;
             front.Normalize();
             // also re-calculate the Right and Up vector

@@ -18,8 +18,7 @@ sampler2D copyTexture = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
-float3 backgroundCol;
-bool useBkgColor;
+float2 PixelSize;
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
@@ -44,16 +43,16 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	
-    if ((tex2D(copyTexture, input.TexCoord.xy).x) < 0.0001 && useBkgColor)
-    {
-        
-        return float4(backgroundCol.xyz, 1);
-    }
-    return float4(tex2D(copyTexture, input.TexCoord.xy).xyz, 1);
+    float4 depth = float4(
+    tex2D(copyTexture, input.TexCoord.xy + float2(0.5, 0.5) * PixelSize).x,
+     tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, -0.5) * PixelSize).x,
+     tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, 0.5) * PixelSize).x,
+     tex2D(copyTexture, input.TexCoord.xy + float2(0.5, -0.5) * PixelSize).x);
+   
+    return float4(min(min(depth.x, depth.y), min(depth.z, depth.w)).x,0,0, 1);
 }
 
-technique TextureCopy
+technique HiZBuffer
 {
     pass P0
     {

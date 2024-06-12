@@ -29,8 +29,8 @@ sampler2D gProjectionDepth = sampler_state
     MipFilter = Linear;
     MagFilter = Point;
     MinFilter = Point;
-    AddressU = Wrap;
-    AddressV = Wrap;
+    AddressU = Clamp;
+    AddressV = Clamp;
 };
 
 sampler2D gPositionWS = sampler_state
@@ -80,9 +80,9 @@ sampler2D texNoise = sampler_state
 
 
  float4 ProjectionParams2;
- float3 CameraViewTopLeftCorner;
- float3 CameraViewXExtent;
- float3 CameraViewYExtent;
+ float4 CameraViewTopLeftCorner;
+ float4 CameraViewXExtent;
+ float4 CameraViewYExtent;
 
 float3 CameraPos;
 matrix View;
@@ -131,10 +131,10 @@ float Random2DTo1D(float2 value)
 }
 float4 MainPS(VertexShaderOutput input):SV_Target0
 {
-    float linearDepth = LinearizeDepth(tex2D(gProjectionDepth, input.TexCoords).x);
+    float linearDepth =tex2D(gProjectionDepth, input.TexCoords).x;
    
     float3 normal = tex2D(gNormal, input.TexCoords).xyz * 2.0 - 1.0;
-    float3 worldPos = tex2D(gPositionWS, input.TexCoords).xyz-CameraPos; //ReconstructViewPos(input.TexCoords, linearDepth) ;
+    float3 worldPos = /*!usingDepthReconstructWorldPos?tex2D(gPositionWS, input.TexCoords).xyz:*/ReconstructViewPos(input.TexCoords, linearDepth) + CameraPos;
    // return float4(worldPos.xyz, 1);
  
  
@@ -153,21 +153,23 @@ float4 MainPS(VertexShaderOutput input):SV_Target0
         float3 samplePos = mul(float3(tex2D(texNoise, input.TexCoords + float2(i / 10.0, i / 10.0)).r * 2 - 1, tex2D(texNoise, input.TexCoords + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0)).g * 2 - 1, tex2D(texNoise, input.TexCoords - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0)).b)*(i/8.0), TBN);
   
         samplePos = worldPos+samplePos*0.3;
-    float4 sampleDepthView = mul(float4(samplePos, 0), View);
+    float4 sampleDepthView = mul(float4(samplePos,1), View);
     
-    float4 offset = float4(samplePos, 0.0);
+    float4 offset = float4(samplePos, 1.0);
         offset= mul(offset, ViewProjection);
         offset.xyz /= offset.w;
         offset.xy = offset.xy * 0.5 + 0.5 ;
     offset.y = 1 - offset.y;
  //   sampleDepthView.z = sampleDepthView.z+sampleDepthView.x * 0.000000000000000000000000000000001 + sampleDepthView.y * 0.000000000000000000000000000000000001;
-        float3 worldPosProj = tex2D(gPositionWS, offset.xy).xyz-CameraPos;
-        float4 sampleViewPosDepth = mul(float4(worldPosProj, 0), View);
-   
+        
+   //     float3 worldPosProj = tex2D(gPositionWS, offset.xy).xyz;
+    //   float4 sampleViewPosDepth = mul(float4(worldPosProj, 1), View);
+     //   float3 sampleViewPosDepth = tex2D(gPositionWS, offset.xy).xyz;
+      
   //      sampleViewPosDepth.z = sampleViewPosDepth.z + sampleViewPosDepth.x * 0.000000000000000000000000000000001 + sampleViewPosDepth.y * 0.000000000000000000000000000000000001;
-        float sampleDepth = -sampleViewPosDepth.z; // LinearizeDepth(tex2D(gProjectionDepth, offset.xy).x);
+        float sampleDepth =/* !usingDepthReconstructWorldPos? - sampleViewPosDepth.z:*/(tex2D(gProjectionDepth, offset.xy).x);
         
-        
+      
    // return float4(sampleDepth.xxx, 1);
         if (sampleDepth < -sampleDepthView.z-0.03 && abs(sampleDepth - (-sampleDepthView.z)) < 0.3)
         {

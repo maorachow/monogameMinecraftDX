@@ -8,7 +8,9 @@ using Microsoft.Xna.Framework;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.ComponentModel;
+
+
+using Microsoft.Xna.Framework.Input;
 
 
 namespace monogameMinecraft
@@ -73,7 +75,7 @@ namespace monogameMinecraft
         Random random = new Random();
 
 
-         
+    
         public void Draw()
         {
 
@@ -82,6 +84,7 @@ namespace monogameMinecraft
                 RenderQuad(this.graphicsDevice, ssaoTarget, this.ssaoEffect, true);
                 return;
             }
+          
           /*  ssaoKernel.Clear();
             for (int i = 0; i < 32; ++i)
             {
@@ -94,7 +97,7 @@ namespace monogameMinecraft
                 sample *= scale;
                 ssaoKernel.Add(sample);
             }*/
-        //    SetCameraFrustum(cam, this.ssaoEffect);
+            SetCameraFrustum(cam, this.ssaoEffect);
             /*  graphicsDevice.SetRenderTargets(renderTargetPositionDepth,renderTargetProjectionDepth,renderTargetNormal);
 
               chunkRenderer.RenderAllChunksGBuffer(ChunkManager.chunks, player, this.gBufferEffect);
@@ -107,14 +110,15 @@ namespace monogameMinecraft
                //     ssaoEffect.Parameters["projection"].SetValue(player.cam.projectionMatrix);
                    
                     ssaoEffect.Parameters["NormalTex"].SetValue(this.renderTargetNormal);*/
+          
             if (ssaoEffect.Parameters["NormalTex"] != null) { ssaoEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
          //   if (ssaoEffect.Parameters["samples"] != null) {ssaoEffect.Parameters["samples"].SetValue(ssaoKernel.ToArray());}
             if (ssaoEffect.Parameters["NoiseTex"] != null) { ssaoEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             if (ssaoEffect.Parameters["ProjectionDepthTex"] != null) { ssaoEffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth); }
             if (ssaoEffect.Parameters["PositionWSTex"] != null) { ssaoEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
-            if (ssaoEffect.Parameters["View"] != null) { ssaoEffect.Parameters["View"].SetValue(cam.viewMatrixOrigin); }
+            if (ssaoEffect.Parameters["View"] != null) { ssaoEffect.Parameters["View"].SetValue(cam.viewMatrix); }
             if (ssaoEffect.Parameters["CameraPos"] != null) { ssaoEffect.Parameters["CameraPos"].SetValue(cam.position); }
-            if (ssaoEffect.Parameters["ViewProjection"] != null) { ssaoEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrixOrigin * cam.projectionMatrix);}
+            if (ssaoEffect.Parameters["ViewProjection"] != null) { ssaoEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix);}
             /*        
                            ssaoEffect.Parameters["param_normalMap"].SetValue(gBufferRenderer.renderTargetNormalWS);
                    ssaoEffect.Parameters["transposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(player.cam.viewMatrix)));

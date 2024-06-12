@@ -79,8 +79,8 @@ namespace monogameMinecraft
             this.entityRenderer = er;
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
-     //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            this.renderTargetProjectionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+            //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
             this.renderTargetPositionWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.renderTargetAlbedo = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.renderTargetNormalWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
@@ -99,7 +99,7 @@ namespace monogameMinecraft
         }
         public void Resize(int width,int height,GraphicsDevice device)
         {
-            this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Single, DepthFormat.Depth24);
+            this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
             this.renderTargetPositionWS = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.renderTargetAlbedo = new RenderTarget2D(device, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.renderTargetNormalWS = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);

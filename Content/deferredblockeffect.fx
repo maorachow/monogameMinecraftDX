@@ -227,14 +227,7 @@ float4 CameraViewXExtent;
 float4 CameraViewYExtent;
 
  
-float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
-{
-  //  uv.y = 1.0 - uv.y;
-    float zScale = linearEyeDepth * ProjectionParams2.x; // divide by near plane  
-    float3 viewPos = CameraViewTopLeftCorner.xyz + CameraViewXExtent.xyz * uv.x + CameraViewYExtent.xyz * uv.y;
-    viewPos *= zScale;
-    return viewPos;
-}
+
 
 
 
@@ -558,6 +551,17 @@ float3 CalculateLightDiffuseP(float3 W, float3 LP, float3 N, float3 V, float3 al
     Lo = (kD * albedo / PI) * radiance * NdotL;
     return Lo;
 }
+
+float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
+{
+  //  uv.y = 1.0 - uv.y;
+    float zScale = linearEyeDepth * ProjectionParams2.x; // divide by near plane  
+    float3 viewPos = CameraViewTopLeftCorner.xyz + CameraViewXExtent.xyz * uv.x + CameraViewYExtent.xyz * uv.y;
+    viewPos *= zScale;
+    return viewPos;
+}
+
+
 PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
 {
     if (any(tex2D(AlbedoSampler, input.TexCoords).xyz) < 0.01)
@@ -567,8 +571,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     PixelShaderOutput output = (PixelShaderOutput) 0;
  
     float3 N = tex2D(NormalsSampler, input.TexCoords).xyz * 2.0 - 1.0;
-    float3 worldPos = tex2D(gPositionWS, input.TexCoords).xyz;
-    
+    float3 worldPos = /*tex2D(gPositionWS, input.TexCoords).xyz;*/ ReconstructViewPos(input.TexCoords,tex2D(DepthSampler, input.TexCoords).r)+viewPos;
+  
     float4 LightSpacePosition = mul(float4(worldPos, 1), LightSpaceMat);
 
     float4 LightSpacePositionFar = mul(float4(worldPos, 1), LightSpaceMatFar);
@@ -655,7 +659,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
  
     
     
-    output.Color = float4(color , 1.0);
+    output.Color = float4(color, 1.0);
     return output;
 }
 

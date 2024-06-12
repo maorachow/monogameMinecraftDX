@@ -11,7 +11,7 @@ namespace monogameMinecraft
     public class FullScreenQuadRenderer
     {
         
-        public VertexPositionTexture[] quadVertices =
+        public static VertexPositionTexture[] quadVertices =
         {
 
             new VertexPositionTexture(new Vector3(-1.0f,  1.0f, 0.0f),new Vector2(  0.0f, 0.0f)),
@@ -32,7 +32,8 @@ namespace monogameMinecraft
 
         
         };
-
+        public static bool isVertsInited=false;
+        public static bool isQuadBuffersInited=false;  
 
         public ushort[] quadIndices =
         {
@@ -40,11 +41,12 @@ namespace monogameMinecraft
                 2, 3, 0
         };
 
-        public IndexBuffer quadIndexBuffer;
+        public static IndexBuffer quadIndexBuffer;
 
-        public VertexBuffer quadVertexBuffer;
+        public static VertexBuffer quadVertexBuffer;
         public void InitializeVertices()
         {
+            if (isVertsInited == true) { return; }
             quadVertices = new VertexPositionTexture[4];
 
             quadVertices[0].Position = new Vector3(-1, 1, 0);
@@ -58,14 +60,20 @@ namespace monogameMinecraft
 
             quadVertices[3].Position = new Vector3(-1, -1, 0);
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
+            isVertsInited = true;
         }
         public void InitializeQuadBuffers(GraphicsDevice device)
         {
-            this.quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 6, BufferUsage.None);
+            if(isQuadBuffersInited == true)
+            {
+                return;
+            }
+            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 6, BufferUsage.None);
 
-            this.quadVertexBuffer.SetData(quadVertices);
-            this.quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);
+            quadVertexBuffer.SetData(quadVertices);
+            quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);
             quadIndexBuffer.SetData(quadIndices);
+            isQuadBuffersInited = true;
         }
 
 
@@ -80,23 +88,23 @@ namespace monogameMinecraft
 
             // 将camera view space 的平移置为0，用来计算world space下相对于相机的vector  
             Matrix cview = view;
-         //   cview.Translation = new Vector3(0.0f, 0.0f, 0.0f);
+            cview.Translation = new Vector3(0.0f, 0.0f, 0.0f);
             Matrix cviewProj = cview * proj;
 
             // 计算viewProj逆矩阵，即从裁剪空间变换到世界空间  
             Matrix cviewProjInv = Matrix.Invert(cviewProj);
             var near = 0.1f;
-            BoundingFrustum frustum = new BoundingFrustum(camera.viewMatrix*camera.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(camera.viewMatrixOrigin*camera.projectionMatrix);
             Vector3[] corners = frustum.GetCorners();
-            Vector3 topLeftCorner = corners[0] - camera.position;
-            Vector3 topRightCorner = corners[1] - camera.position;
-            Vector3 bottomLeftCorner = corners[3] - camera.position;
+            Vector3 topLeftCorner = corners[0];
+            Vector3 topRightCorner = corners[1];
+            Vector3 bottomLeftCorner = corners[3] ;
             Vector3 cameraXExtent = topRightCorner - topLeftCorner;
             Vector3 cameraYExtent = bottomLeftCorner - topLeftCorner;
 
-            Vector4 topLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, 1.0f, -1,1f),cviewProjInv)/10f;
-            Vector4 topRightCorner1 = Vector4.Transform(new Vector4(1.0f, 1.0f,-1, 1f),cviewProjInv) / 10f;
-            Vector4 bottomLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, -1.0f,-1, 1f), cviewProjInv) / 10f;
+            Vector4 topLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, 1.0f, -1,1f),cviewProjInv);
+            Vector4 topRightCorner1 = Vector4.Transform(new Vector4(1.0f, 1.0f,-1, 1f),cviewProjInv) ;
+            Vector4 bottomLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, -1.0f,-1, 1f), cviewProjInv);
 
             // 计算相机近平面上方向向量
             Vector4 cameraXExtent1 = topRightCorner1 - topLeftCorner1;
@@ -104,10 +112,10 @@ namespace monogameMinecraft
         //      Debug.WriteLine("corners:"+(corners[0] - camera.position)+" "+ (corners[1] - camera.position) + " " + (corners[2] - camera.position) + " " + (corners[3] - camera.position));
       //      Debug.WriteLine("corners1:" + (topLeftCorner1) + " " + (topRightCorner1) + " " + (corners[2] - camera.position) + " " + (bottomLeftCorner1));
             if (effect.Parameters["ProjectionParams2"] != null) effect.Parameters["ProjectionParams2"].SetValue(new Vector4(1.0f / near, camera.position.X, camera.position.Y, camera.position.Z));
-            if (effect.Parameters["CameraViewTopLeftCorner"] != null) effect.Parameters["CameraViewTopLeftCorner"].SetValue(topLeftCorner1);
-            if (effect.Parameters["CameraViewXExtent"] != null) effect.Parameters["CameraViewXExtent"].SetValue(cameraXExtent1);
-            if (effect.Parameters["CameraViewYExtent"] != null) effect.Parameters["CameraViewYExtent"].SetValue(cameraYExtent1);
-            //    effect.Parameters["CameraPos"].SetValue(cam.position);
+            if (effect.Parameters["CameraViewTopLeftCorner"] != null) effect.Parameters["CameraViewTopLeftCorner"].SetValue(topLeftCorner);
+            if (effect.Parameters["CameraViewXExtent"] != null) effect.Parameters["CameraViewXExtent"].SetValue(cameraXExtent);
+            if (effect.Parameters["CameraViewYExtent"] != null) effect.Parameters["CameraViewYExtent"].SetValue(cameraYExtent);
+                effect.Parameters["CameraPos"]?.SetValue(camera.position);
         }
         public void RenderQuad(GraphicsDevice device,RenderTarget2D target, Effect quadEffect, bool isPureWhite = false,bool isRenderingOnDcreen=false,bool clearColor=true)
         {

@@ -22,6 +22,10 @@ namespace monogameMinecraft
         {
             if (chunks.ContainsKey(pos))
             {
+                if (chunks[pos].isUnused == true)
+                {
+                    return null;
+                }
             return chunks[pos];
             }
             else
@@ -124,6 +128,24 @@ namespace monogameMinecraft
                 return false;
             }
         }
+
+        public static bool CheckIsPosInChunkBorder(Vector3 pos, Chunk c)
+        {
+            if (c == null)
+            {
+                return false;
+            }
+
+            Vector3 chunkSpacePos = pos - new Vector3(c.chunkPos.x, 0, c.chunkPos.y);
+            if ((chunkSpacePos.X >= 0 && chunkSpacePos.X < 1)||( chunkSpacePos.X >= Chunk.chunkWidth-1 && chunkSpacePos.X < Chunk.chunkWidth)|| (chunkSpacePos.Z >= 0 && chunkSpacePos.Z < 1) || (chunkSpacePos.Z >= Chunk.chunkWidth - 1 && chunkSpacePos.Z < Chunk.chunkWidth))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public static void UpdateWorldThread( GamePlayer player,MinecraftGame game)
         {
             BoundingFrustum frustum;
@@ -144,13 +166,16 @@ namespace monogameMinecraft
                 {
                     for (float z = player.playerPos.Z - GameOptions.renderDistance; z < player.playerPos.Z + GameOptions.renderDistance; z += Chunk.chunkWidth)
                     {
-                        Vector2Int chunkPos = Vec3ToChunkPos(new Vector3(x, 0, z));
-                        if (GetChunk(chunkPos) == null) {
+                         //   Thread.Sleep(1);
+                            Vector2Int chunkPos = Vec3ToChunkPos(new Vector3(x, 0, z));
+                        
+                        if (GetChunk(chunkPos) == null&& !chunks.ContainsKey(chunkPos)) {
                             BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
                             if (frustum.Intersects(chunkBoundingBox))
                             {
                                 Chunk c = new Chunk(chunkPos, game.GraphicsDevice);
-                            //    break;
+                               // goto endUpdateWorld;
+                                //    break;
                             }
                             else continue;
                                
@@ -160,6 +185,9 @@ namespace monogameMinecraft
                  
                     }
                 }
+
+           // endUpdateWorld:;
+
                 player.isChunkNeededUpdate = false;
                 
                 }
@@ -173,7 +201,7 @@ namespace monogameMinecraft
                 {
                     return;
                 }
-                Thread.Sleep(1500);
+                Thread.Sleep(500);
               if (ChunkRenderer.isBusy == true)
                 {
                     continue;
@@ -213,12 +241,12 @@ namespace monogameMinecraft
                     c.semaphore.Wait();
                     if (c.isUnused==true)
                     {
-                        c.unusedSeconds += 1.5f;
+                        c.unusedSeconds += 0.5f;
 
-                        if (c.unusedSeconds > 10f)
+                        if (c.unusedSeconds >5f)
                         {
                             
-                            c.Dispose();
+                                c.Dispose();
                                  ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
                               
                         }

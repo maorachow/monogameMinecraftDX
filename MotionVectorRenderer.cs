@@ -30,11 +30,13 @@ namespace monogameMinecraftDX
             InitializeQuadBuffers(device);
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            this.renderTargetMotionVector = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+            this.renderTargetMotionVector = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
         }
         public void Draw()
         {
-            motionVectorEffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
+            SetCameraFrustum(player.cam, motionVectorEffect);
+         //   motionVectorEffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
+            motionVectorEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             motionVectorEffect.Parameters["prevView"]?.SetValue(playerPrevViewMat);
             motionVectorEffect.Parameters["prevProjection"]?.SetValue(playerPrevProjectionMat);
             motionVectorEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);

@@ -223,7 +223,13 @@ public struct RandomGenerator3D
         {
             this.device= device;
             this.chunkPos = chunkPos;
-            ChunkManager.chunks.TryAdd(chunkPos, this);
+        if (ChunkManager.chunks.ContainsKey(chunkPos))
+        {
+            Debug.WriteLine("dispose");
+            Dispose();
+            return;
+        }
+            ChunkManager.chunks.TryAdd(chunkPos,this);
             isReadyToRender = false;
             BuildChunk();
         }

@@ -16,6 +16,7 @@ using System.Net.Security;
 using Microsoft.Xna.Framework.Content;
 using monogameMinecraftDX;
  
+
 namespace monogameMinecraft
 {
     public enum GameStatus
@@ -46,7 +47,9 @@ namespace monogameMinecraft
         public Effect motionVectorEffect;
         public Effect textureCopyEffect;
         public Effect terrainMipmapEffect;
+        public Effect hiZBufferEffect;
         public Effect fxaaEffect;
+        public Effect motionBlurEffect;
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
         public ChunkRenderer chunkRenderer;
@@ -74,6 +77,8 @@ namespace monogameMinecraft
         public MotionVectorRenderer motionVectorRenderer;
         public TerrainMipmapGenerator terrainMipmapGenerator;
         public FXAARenderer fxaaRenderer;
+        public HiZBufferRenderer hiZBufferRenderer;
+        public MotionBlurRenderer motionBlurRenderer;
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -131,9 +136,12 @@ namespace monogameMinecraft
                             contactShadowRenderer.contactShadowRenderTarget=new RenderTarget2D(GraphicsDevice, width, height,false,SurfaceFormat.Color, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                    motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+                    motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.renderTargetLum = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.finalImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
+                    
+                    motionBlurRenderer.processedImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
+                    hiZBufferRenderer.ResizeTarget();
                     float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
                     gamePlayer.cam.aspectRatio= aspectRatio;
                     gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f,1000f);
@@ -147,7 +155,7 @@ namespace monogameMinecraft
         }
         public void InitGameplay(object obj)
         {
-            GraphicsDevice.PresentationParameters.MultiSampleCount =2;
+            GraphicsDevice.PresentationParameters.MultiSampleCount =0;
             
             IsMouseVisible = false;
             ChunkManager.chunks = new System.Collections.Concurrent.ConcurrentDictionary<Vector2Int, Chunk>();
@@ -187,7 +195,9 @@ namespace monogameMinecraft
             motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
             textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
             terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
+            hiZBufferEffect = Content.Load<Effect>("hizbuffereffect");
             fxaaEffect = Content.Load<Effect>("fxaaeffect");
+            motionBlurEffect = Content.Load<Effect>("motionblureffect");
             terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, terrainMipmapEffect);
             brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, brdfLUTEffect);
             brdfLUTRenderer.CalculateLUT();
@@ -208,9 +218,12 @@ namespace monogameMinecraft
             motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice,motionVectorEffect,gBufferRenderer, gamePlayer);
                  ssaoRenderer = new SSAORenderer(ssaoEffect, gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(GraphicsDevice, fxaaEffect);
-            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect, skyboxRenderer,fxaaRenderer);
-            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect, deferredShadingRenderer, textureCopyEffect,motionVectorRenderer) ;
-            ssidRenderer = new SSIDRenderer(GraphicsDevice, ssidEffect, gBufferRenderer, gamePlayer, deferredShadingRenderer, textureCopyEffect, motionVectorRenderer);
+            motionBlurRenderer = new MotionBlurRenderer(GraphicsDevice, motionBlurEffect, motionVectorRenderer);
+            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect, skyboxRenderer,fxaaRenderer, motionBlurRenderer);
+            hiZBufferRenderer = new HiZBufferRenderer(GraphicsDevice, hiZBufferEffect, gBufferRenderer, textureCopyEffect);
+            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect, deferredShadingRenderer, textureCopyEffect,motionVectorRenderer, hiZBufferRenderer) ;
+            ssidRenderer = new SSIDRenderer(GraphicsDevice, ssidEffect, gBufferRenderer, gamePlayer, deferredShadingRenderer, textureCopyEffect, motionVectorRenderer, hiZBufferRenderer);
+           
             deferredShadingRenderer.ssidRenderer = ssidRenderer;
             deferredShadingRenderer.ssrRenderer = ssrRenderer;
             chunkRenderer.shadowRenderer = shadowRenderer;
@@ -461,8 +474,8 @@ namespace monogameMinecraft
           //  GraphicsDevice.RasterizerState = rasterizerState;
             shadowRenderer.RenderShadow(gamePlayer);
             gBufferRenderer.Draw();
-            ssaoRenderer.Draw();  
-            
+            ssaoRenderer.Draw();
+            hiZBufferRenderer.Draw();
             contactShadowRenderer.Draw();
             deferredShadingRenderer.Draw(gamePlayer);
             volumetricLightRenderer.Draw();
@@ -496,7 +509,8 @@ namespace monogameMinecraft
             {
                 case GameStatus.Started:
                     //            Debug.WriteLine("started");
-                    GraphicsDevice.Clear(Color.CornflowerBlue);
+                    GraphicsDevice.SetRenderTarget(null);
+                  GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
                     gamePlayer.cam.updateCameraVectors();
                    
@@ -512,23 +526,28 @@ namespace monogameMinecraft
                         el.DrawString(el.text);
                     }
                    _spriteBatch.End();
-                     _spriteBatch.Begin();
+                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap) ;
                     if (GameOptions.showGraphicsDebug)
                     {
                         _spriteBatch.Draw(shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
                         _spriteBatch.Draw(shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
+                        for(int i = 0; i < hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                        {
+                            _spriteBatch.Draw(hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200+i*200, 200, 200, 200), Color.White);
+                        }
 
-                        _spriteBatch.Draw(motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
+                      
+                        _spriteBatch.Draw(ssaoRenderer.ssaoTarget, new Rectangle(800, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(ssidRenderer.renderTargetSSIDPrev, new Rectangle(2000, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                        _spriteBatch.Draw(gBufferRenderer.renderTargetPositionWS, new Rectangle(400, 800, 200, 200), Color.White);
+                        _spriteBatch.Draw(gBufferRenderer.renderTargetPositionWS, new Rectangle(1600, 400, 400, 400), Color.White);
                          _spriteBatch.Draw(volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
                          _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
-
+                        _spriteBatch.Draw(motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);
                     }
 

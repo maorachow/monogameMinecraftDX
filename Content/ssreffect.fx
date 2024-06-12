@@ -119,7 +119,7 @@ float4x4 matInverseView;
 float4x4 matInverseProjection;
 float4x4 matView;
 float4x4 matProjection;
-float3 CameraPos;
+ 
 matrix ViewProjection;
 matrix View;
 bool binarySearch;
@@ -148,11 +148,21 @@ float GetDepth(float2 texCoord)
 {
     return tex2D(gProjectionDepth, texCoord).r;
 }
-struct RayTraceOutput
+
+float4 ProjectionParams2;
+float4 CameraViewTopLeftCorner;
+float4 CameraViewXExtent;
+float4 CameraViewYExtent;
+
+float3 CameraPos;
+float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 {
-    bool Hit;
-    float2 UV;
-};
+  //  uv.y = 1.0 - uv.y;
+    float zScale = linearEyeDepth * ProjectionParams2.x; // divide by near plane  
+    float3 viewPos = CameraViewTopLeftCorner.xyz + CameraViewXExtent.xyz * uv.x + CameraViewYExtent.xyz * uv.y;
+    viewPos *= zScale;
+    return viewPos;
+}
 float3 GetUVFromPosition(float3 worldPos)
 {
     float4 viewPos = mul(float4(worldPos, 1), matView);
@@ -469,10 +479,66 @@ float3 CalculateLightDiffuseP(float3 W, float3 LP, float3 N, float3 V, float3 al
     Lo = (kD * albedo / PI) * radiance * NdotL;
     return Lo;
 }
+
+sampler gProjectionDepthM0 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip0);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+
+sampler gProjectionDepthM1 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip1);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler gProjectionDepthM2 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip2);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler gProjectionDepthM3 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip3);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler gProjectionDepthM4 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip4);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler gProjectionDepthM5 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip5);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
- 
-    float3 worldPos = PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
+    float linearDepth = tex2D(gProjectionDepth, input.TexCoord);
+    float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
     float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
   //  float noiseValue = worldPos.x;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 100;
@@ -489,17 +555,20 @@ float4 MainPS(VertexShaderOutput input) : COLOR
    
     float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0+GameTime*5).g + 0.5;
   //  return float4(noiseValue1.xxx, 1);
-    float3 marchPos = 0;
+    float3 marchPos = worldPos+rDir*0.01;
     
     
     float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
     //float2 brdf1 = tex2D(texBRDFLUT, input.TexCoord.xy).rg;
    // return float4(brdf1, 0, 1);
+    
+    int miplevel = 0;
+    float strideLen = 1;
     [unroll]
     for (int i = 0; i < 16; i++)
     {
-        marchPos = rayOrigin + (rDir) * 0.5 * (pow((i + 1), 1.41) * noiseValue1) * rayLengthAmp;
+        marchPos += (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/ noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);
         offset = mul(offset, ViewProjection);
@@ -512,16 +581,31 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         marchDepthView.z = marchDepthView.z + marchDepthView.x * 0.00001 + marchDepthView.y * 0.000001;*/
         float testDepth = GetViewDepthFromWorldPos(marchPos);
         
-        float3 worldPosSampled = PositionWSTex.Sample(defaultSampler, uv.xy).xyz;
+       // float3 worldPosSampled = PositionWSTex.Sample(defaultSampler, uv.xy).xyz;
      /*   float4 sampleViewPosDepth = mul(float4(worldPosSampled, 1), View);
         sampleViewPosDepth.z = sampleViewPosDepth.z + sampleViewPosDepth.x * 0.000001 + sampleViewPosDepth.y * 0.0000001;*/
-        float sampleDepth = GetViewDepthFromWorldPos(worldPosSampled);
         
+        float sampleDepthM0 = tex2D(gProjectionDepth, uv.xy).x;
+
+        float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
+
+        float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
+
+        float sampleDepthM3 = tex2D(gProjectionDepthM3, uv.xy).x;
+
+        float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
+
+        float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
+        
+        float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 }; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
+        float sampleDepth = sampleDepthArray[miplevel];
         if ((uv.x) < 0 || (uv.y) < 0 || (uv.x) > 1 || (uv.y) > 1)
         {
             return float4(0, 0, 0, 1) ;
         }
-        if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < length(preMarchPos - marchPos) * 1.2)
+        if (testDepth > sampleDepth)
+        {
+            if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) <1.2* length(preMarchPos-marchPos) && miplevel == 0)
         {
             float3 finalPoint = preMarchPos;
             float _sign = 1.0;
@@ -535,38 +619,38 @@ float4 MainPS(VertexShaderOutput input) : COLOR
          //   for (int j = 0; j < 2; j++)
           //  {
             
-            if (binarySearch>0)
+            if (true)
             {
                direction *= 0.5;
                 finalPoint += direction * _sign;
                 uv1 = GetScreenCoordFromWorldPos(finalPoint);
-                worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+               // worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                  testDepth = GetViewDepthFromWorldPos(finalPoint);
-                 sampleDepth = GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                 _sign = -sign(testDepth - sampleDepth);
             
             direction *= 0.5;
             finalPoint += direction * _sign;
             uv1 = GetScreenCoordFromWorldPos(finalPoint);
-                worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+            //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
              testDepth = GetViewDepthFromWorldPos(finalPoint);
-             sampleDepth = GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
             _sign = -sign(testDepth - sampleDepth);
             
             direction *= 0.5;
             finalPoint += direction * _sign;
             uv1 = GetScreenCoordFromWorldPos(finalPoint);
-                worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+         //       worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
             testDepth = GetViewDepthFromWorldPos(finalPoint);
-            sampleDepth = GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; //GetViewDepthFromWorldPos(worldPosSampled1);
             _sign = -sign(testDepth - sampleDepth);
             
             direction *= 0.5;
             finalPoint += direction * _sign;
             uv1 = GetScreenCoordFromWorldPos(finalPoint);
-                worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+          //      worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
             testDepth = GetViewDepthFromWorldPos(finalPoint);
-            sampleDepth = GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; //GetViewDepthFromWorldPos(worldPosSampled1);
             _sign = -sign(testDepth - sampleDepth);
                 
                  
@@ -576,10 +660,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                 uv1 = GetScreenCoordFromWorldPos(marchPos);
             }
             
-         
+          
            
       //      }
-        //    uv1 = GetScreenCoordFromWorldPos(finalPoint);
+             //   uv1 = GetScreenCoordFromWorldPos(marchPos);
             
             float3 albedo = LumTex.Sample(defaultSampler, uv1.xy).xyz;
             float3 N = normal;
@@ -592,10 +676,24 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             
             float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), roughness)).rg;
            
-            float3 specular = albedo * (F * brdf.x + brdf.y);
-            return float4(specular * 0.4 + prevColor*0.6, 1);
+            float3 specular = albedo * (F * brdf.x + brdf.y)*2;
+            return float4(specular *0.4 + prevColor*0.6, 1);
 
+        } 
+            miplevel--;
+            marchPos -= (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/ noiseValue1 * rayLengthAmp * strideLen;
+            strideLen /= 2.0;
         }
+        else
+        {
+            if (miplevel < 5)
+            {
+                 miplevel++;
+                strideLen *= 2;
+            }
+           
+        }
+       
         preMarchPos = marchPos;
 
     }

@@ -255,6 +255,12 @@
 /processorParam:DebugMode=Auto
 /build:gbufferentityeffect.fx
 
+#begin hizbuffereffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:hizbuffereffect.fx
+
 #begin hotbar.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -334,6 +340,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:menubackground.png
+
+#begin motionblureffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:motionblureffect.fx
 
 #begin motionvectoreffect.fx
 /importer:EffectImporter

@@ -16,7 +16,7 @@ sampler textureSampler = sampler_state
    
     Filter = Point;
     Mipfilter = Linear;
-    MipLODBias = -2;
+    MipLODBias = -3;
     MaxLOD = 8;
    
 };
@@ -29,7 +29,8 @@ sampler normalSampler = sampler_state
     MagFilter = Point;
     MinFilter = Point;
     Mipfilter = Point;
-    MipLODBias =-3;
+    MipLODBias =-4;
+    MaxLOD = 8;
    
 };
 struct VertexShaderInput
@@ -43,9 +44,9 @@ struct VertexShaderInput
 struct VertexShaderOutput
 {
     float4 PositionScreenSpace  : SV_Position;
-  //  float4 PositionV : TEXCOORD1;
+    float4 PositionV : TEXCOORD1;
     
-    float4 PositionP : TEXCOORD4;
+  //  float4 PositionP : TEXCOORD4;
     float3 PositionWS : TEXCOORD5;
     float3 Normal : TEXCOORD2;
    
@@ -74,8 +75,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     float4 viewPosition = mul(worldPosition, View);
     output.PositionScreenSpace = mul(viewPosition, Projection);
     
-   // output.PositionV = viewPosition;
-    output.PositionP = mul(viewPosition, Projection);
+    output.PositionV = viewPosition;
+  
     float3x3 worldView =   World*View;
     
     
@@ -106,7 +107,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     PixelShaderOutput psOut = (PixelShaderOutput) 0;
     
       
-    if (tex2D(textureSampler, input.TexCoords).a < 0.1)
+    if (tex2D(textureSampler, input.TexCoords).a < 0.001)
     {
         discard;
     }
@@ -114,8 +115,12 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
    // float z = -input.PositionV.z;
   //  float packedZ = ((1 / z) - 1 / 0.1) / (1 / 500 - 1 / 0.1);
   //  float packedZ1 = z / 50.0;
-  //  psOut.ProjectionDepth.rgb = packedZ;
-    float3 normal = mul(abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).x < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).y < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).z < 0.99 ? tex2D(normalSampler, input.TexCoords).xyz * 2 - 1 : float3(0, 0, 1), input.TBN);
+    psOut.ProjectionDepth.r = -input.PositionV.z;
+    float3 normal = mul(abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).x < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).y < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).z < 0.99 ? tex2D(normalSampler, input.TexCoords).xyz * 2 - 1 : float3(0, 0, 1) , input.TBN);
+    if (length(normal) < 0.001 )
+    {
+        normal = mul(float3(0.5,0.5,1), input.TBN);
+    }
     psOut.NormalWS = float4(normal*0.5+0.5, 1);
     psOut.Albedo = float4(tex2D(textureSampler,input.TexCoords).xyz, 1);
     

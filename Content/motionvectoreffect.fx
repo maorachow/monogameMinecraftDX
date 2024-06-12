@@ -24,7 +24,16 @@ sampler2D gPositionWS = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
-
+sampler2D gProjectionDepth = sampler_state
+{
+    Texture = <ProjectionDepthTex>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 struct VertexShaderInput
 {
 	float4 Position : POSITION0;
@@ -37,7 +46,20 @@ struct VertexShaderOutput
     float2 TexCoord : TEXCOORD0;
 };
 
+float4 ProjectionParams2;
+float4 CameraViewTopLeftCorner;
+float4 CameraViewXExtent;
+float4 CameraViewYExtent;
 
+float3 CameraPos;
+float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
+{
+  //  uv.y = 1.0 - uv.y;
+    float zScale = linearEyeDepth * ProjectionParams2.x; // divide by near plane  
+    float3 viewPos = CameraViewTopLeftCorner.xyz + CameraViewXExtent.xyz * uv.x + CameraViewYExtent.xyz * uv.y;
+    viewPos *= zScale;
+    return viewPos;
+}
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
@@ -50,7 +72,12 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 worldPos = tex2D(gPositionWS, input.TexCoord).xyz;
+    if (length(tex2D(gProjectionDepth, input.TexCoord).x) < 0.001)
+    {
+        return float4(0, 0, 1, 1);
+    }
+    float3 worldPos = ReconstructViewPos(input.TexCoord,tex2D(gProjectionDepth,input.TexCoord).x)+CameraPos;
+   
     float4 curClipPos = float4(worldPos, 1);
     curClipPos = mul(curClipPos, View);
     curClipPos = mul(curClipPos, Projection);
@@ -63,7 +90,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 prevTexCoord = prevClipPos.xy / prevClipPos.w;
     prevTexCoord = prevTexCoord * 0.5 + 0.5;
     prevTexCoord.y = 1 - prevTexCoord.y;
-    return float4(prevTexCoord.xy-curTexCoord.xy, 1, 1);
+    return float4(prevTexCoord.xy-curTexCoord.xy, 0, 1);
 }
 
 technique MotionVector
