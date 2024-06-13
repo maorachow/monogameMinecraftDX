@@ -28,8 +28,8 @@ float3 LightPosition4;
 float shadowBias;
 bool renderShadow;
 bool receiveShadow;
-float metallic;
-float roughness;
+//float metallic;
+//float roughness;
 sampler2D texNoise = sampler_state
 {
     Texture = <NoiseTex>;
@@ -138,7 +138,16 @@ sampler2D AOSampler = sampler_state
     AddressU = Border;
     AddressV = Border;
 };
-
+sampler2D MERSampler = sampler_state
+{
+    Texture = <TextureMER>;
+ 
+    MipFilter = Linear;
+    MagFilter = Linear;
+    MinFilter = Linear;
+    AddressU = Border;
+    AddressV = Border;
+};
 sampler2D AlbedoSampler = sampler_state
 {
     Texture = <TextureAlbedo>;
@@ -569,7 +578,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
         discard;
     }
     PixelShaderOutput output = (PixelShaderOutput) 0;
- 
+    
+    float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
     float3 N = tex2D(NormalsSampler, input.TexCoords).xyz * 2.0 - 1.0;
     float3 worldPos = /*tex2D(gPositionWS, input.TexCoords).xyz;*/ ReconstructViewPos(input.TexCoords,tex2D(DepthSampler, input.TexCoords).r)+viewPos;
   
@@ -581,7 +591,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     float3 albedo = pow(tex2D(AlbedoSampler, input.TexCoords).rgb, 2.2);
     
     float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo, metallic);
+    F0 = lerp(F0, albedo, mer.x);
      float3 L = normalize(LightDir);
     float3 Lo = float3(0.0, 0.0, 0.0);
     float3 LoDirLight = float3(0.0, 0.0, 0.0);
@@ -609,7 +619,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
-    
+    float3 emission = albedo / PI * mer.y*4;
+    float roughness = mer.z;
     LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
     
     
@@ -644,12 +655,12 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     float3 color; 
     if (receiveShadow == true)
     {
-        color = ambient + LoDirLight * shadowFinal + Lo;
+        color =  ambient+ emission + LoDirLight * shadowFinal + Lo;
     }
     else
     {
         
-        color = ambient + Lo;
+        color = ambient + emission + Lo;
     }
     
  //color += tex2D(reflectionSampler, input.TexCoords).rgb;

@@ -49,7 +49,7 @@ struct PixelShaderOutput
     
     float4 NormalWS : COLOR1;
     float4 Albedo : COLOR2;
-    float4 PsoitionWS : COLOR3;
+    float4 MetallicEmissionRoughness : COLOR3;
 	
 };
 VertexShaderOutput MainVS(in VertexShaderInput input)
@@ -69,10 +69,10 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
 {
     PixelShaderOutput psOut = (PixelShaderOutput) 0;
-    psOut.ProjectionDepth = float4((-input.PositionV.z / 100).xxx,1);
+    psOut.ProjectionDepth = float4((-input.PositionV.z).x,0,0,1);
     psOut.NormalWS = float4(input.Normal, 1);
     psOut.Albedo = float4((tex2D(textureSampler, input.TexureCoordinate).xyz * DiffuseColor).xyz,1);
-    psOut.PsoitionWS = input.PositionWS;
+    psOut.MetallicEmissionRoughness =float4(0.1,0,0.1,1);
     return psOut;
 }
 

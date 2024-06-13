@@ -319,7 +319,16 @@ sampler gProjectionDepthM5 = sampler_state
     MinFilter = POINT;
     Mipfilter = NONE;
 };
-
+sampler2D MERSampler = sampler_state
+{
+    Texture = <TextureMER>;
+ 
+    MipFilter = Linear;
+    MagFilter = Linear;
+    MinFilter = Linear;
+    AddressU = Border;
+    AddressV = Border;
+};
 float4 ProjectionParams2;
 float4 CameraViewTopLeftCorner;
 float4 CameraViewXExtent;
@@ -344,7 +353,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     float3 bitangent = cross(normal, tangent);
     float3x3 TBN = float3x3(tangent, bitangent, normal);
-    
+    float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
     float3 rayOrigin = worldPos + normalize(normal) * 0.01;
     float3 finalColor = 0;
     float2 prevTexCoord = input.TexCoords+tex2D(motionVectorTex, input.TexCoords).xy;
@@ -366,7 +375,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float3 preMarchPos = marchPos;
         for (int j = 0; j < 16; j++)
         {
-            marchPos += sampleDir * 0.5 * (1 + strideNoiseVal) * strideLen;
+            marchPos += sampleDir * 0.2 * (1 + strideNoiseVal) * strideLen;
              uv = GetScreenCoordFromWorldPos(marchPos);
             
             
@@ -396,7 +405,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             {
                 
                 
-                if (sampleDepth < testDepth && abs(sampleDepth - testDepth) <1.2*length(preMarchPos -marchPos)&&mipLevel<= 0)
+                if (sampleDepth < testDepth && abs(sampleDepth - testDepth) <0.6* (1 + strideNoiseVal) * strideLen /*1.2*length(preMarchPos -marchPos)*/ && mipLevel <= 0)
             {
                     uv = GetScreenCoordFromWorldPos(marchPos);
                 isHit = true;
@@ -404,7 +413,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                 break; //   return float4(0, 0, 0, 1);
             }  
                 mipLevel--;
-               marchPos -= sampleDir * 0.5 * (1+strideNoiseVal)*strideLen;
+               marchPos -= sampleDir * 0.2 * (1+strideNoiseVal)*strideLen;
                 strideLen /= 2.0;
             }
             else
@@ -438,16 +447,16 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     finalColor /= 4;
    // finalColor = finalColor*0.01+prevColor;
             float3 F0 = float3(0.04, 0.04, 0.04);
-            F0 = lerp(F0, tex2D(gAlbedo, input.TexCoords).xyz, metallic);
+            F0 = lerp(F0, tex2D(gAlbedo, input.TexCoords).xyz, mer.x);
               float3 N = normal;
             float3 W = worldPos;
             float3 V = normalize(CameraPos - W);
             
-            float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
     
             float3 kS = F;
             float3 kD = 1.0 - kS;
-            kD *= 1.0 - metallic;
+            kD *= 1.0 - mer.x;
   //      finalColor = finalColor * 0.01 + prevColor;
             float3 irradiance = finalColor;
             float3 diffuse = irradiance * pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);

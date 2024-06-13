@@ -31,7 +31,15 @@ sampler2D noiseTex = sampler_state
     AddressU = Wrap;
     AddressV = Wrap;
 };
-float3 CameraPos;
+sampler gProjectionDepth = sampler_state
+{
+    Texture = (ProjectionDepthTex);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
 matrix View;
 matrix ViewProjection;
 float3 LightDir;
@@ -48,7 +56,20 @@ struct VertexShaderOutput
 };
 
 
+float4 ProjectionParams2;
+float4 CameraViewTopLeftCorner;
+float4 CameraViewXExtent;
+float4 CameraViewYExtent;
 
+float3 CameraPos;
+float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
+{
+  //  uv.y = 1.0 - uv.y;
+    float zScale = linearEyeDepth * ProjectionParams2.x; // divide by near plane  
+    float3 viewPos = CameraViewTopLeftCorner.xyz + CameraViewXExtent.xyz * uv.x + CameraViewYExtent.xyz * uv.y;
+    viewPos *= zScale;
+    return viewPos;
+}
 float2 GetScreenCoordFromWorldPos(float3 worldPos)
 {
     float4 offset = float4(worldPos, 1.0);
@@ -95,7 +116,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 worldPos = tex2D(gPositionWS, input.TexCoords).xyz;
+    float3 worldPos = ReconstructViewPos(input.TexCoords,tex2D(gProjectionDepth, input.TexCoords).x)+CameraPos;
     float3 normal = tex2D(gNormal, input.TexCoords) * 2 - 1;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
     float3 marchDir = normalize(LightDir);
@@ -103,7 +124,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     {
         return float4(0, 0, 0, 1);
     }
-    if (length(worldPos - CameraPos) > 30)
+    float viewDepth = tex2D(gProjectionDepth, input.TexCoords).x;
+    if (viewDepth > 40||viewDepth<0.001)
     {
         return float4(1, 1, 1, 1);
     }
@@ -111,15 +133,17 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float noiseValue = tex2D(noiseTex, input.TexCoords*10).r;
     
     bool isHit = false;
-    [unroll(32)]
-    for (int i = 0; i < 32; i++)
+    [unroll(16)]
+    for (int i = 0; i < 16; i++)
     {
-        float3 marchPos = rayOrigin + marchDir * (0.08 * (i + noiseValue) + 0.02);
+        float3 marchPos = rayOrigin + marchDir * (0.08 * (i + noiseValue) );
        
         float2 uv = GetScreenCoordFromWorldPos(marchPos);
     //    return float4(uv.xy,1, 1);
-        float3 sampleWorldPos = tex2D(gPositionWS, uv).xyz;
-        float sampleViewDepth = GetViewDepthFromWorldPos(sampleWorldPos);
+    //    float3 sampleWorldPos = tex2D(gPositionWS, uv).xyz;
+       
+        float sampleViewDepth = tex2D(gProjectionDepth, uv).x;
+        //GetViewDepthFromWorldPos(sampleWorldPos); 
         float testDepth = GetViewDepthFromWorldPos(marchPos);
        if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
         {
@@ -127,7 +151,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
             break; // return float4(1, 1, 1, 1);
         }
-       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.16)
+       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.1)
         {
             isHit = true;
            

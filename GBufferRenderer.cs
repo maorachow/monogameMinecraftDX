@@ -15,7 +15,7 @@ namespace monogameMinecraft
     //    public RenderTarget2D renderTargetNormal;
         public RenderTarget2D renderTargetNormalWS;
         public RenderTarget2D renderTargetAlbedo;
-        public RenderTarget2D renderTargetPositionWS;
+        public RenderTarget2D renderTargetMER;
         public RenderTargetBinding[] binding;
         public GraphicsDevice graphicsDevice;
         public GamePlayer player;
@@ -81,7 +81,7 @@ namespace monogameMinecraft
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
-            this.renderTargetPositionWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetMER = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             this.renderTargetAlbedo = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.renderTargetNormalWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.binding = new RenderTargetBinding[4];
@@ -89,7 +89,7 @@ namespace monogameMinecraft
             this.binding[0] = new RenderTargetBinding(this.renderTargetProjectionDepth);
             this.binding[1] = new RenderTargetBinding(this.renderTargetNormalWS);
             this.binding[2] = new RenderTargetBinding(this.renderTargetAlbedo);
-            this.binding[3] = new RenderTargetBinding(this.renderTargetPositionWS);
+            this.binding[3] = new RenderTargetBinding(this.renderTargetMER);
             InitializeVertices();
 
             quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);
@@ -100,7 +100,7 @@ namespace monogameMinecraft
         public void Resize(int width,int height,GraphicsDevice device)
         {
             this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
-            this.renderTargetPositionWS = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetMER = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             this.renderTargetAlbedo = new RenderTarget2D(device, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.renderTargetNormalWS = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.binding = new RenderTargetBinding[4];
@@ -108,7 +108,7 @@ namespace monogameMinecraft
             this.binding[0] = new RenderTargetBinding(this.renderTargetProjectionDepth);
             this.binding[1] = new RenderTargetBinding(this.renderTargetNormalWS);
             this.binding[2] = new RenderTargetBinding(this.renderTargetAlbedo);
-            this.binding[3] = new RenderTargetBinding(this.renderTargetPositionWS);
+            this.binding[3] = new RenderTargetBinding(this.renderTargetMER);
         }
         public void Draw()
         {

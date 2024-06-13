@@ -25,6 +25,7 @@ namespace monogameMinecraft
         public Texture2D atlas;
         public Texture2D atlasNormal;
         public Texture2D atlasDepth;
+        public Texture2D atlasMER;
         //Dictionary<Vector2Int,Chunk> RenderingChunks
         
         public ShadowRenderer shadowRenderer;
@@ -32,7 +33,7 @@ namespace monogameMinecraft
         public SSRRenderer SSRRenderer;
         public GameTimeManager gameTimeManager;
         public PointLightUpdater lightUpdater;
-        public void SetTexture(Texture2D tex,Texture2D texNormal,Texture2D textureDepth,Texture2D texNoMip)
+        public void SetTexture(Texture2D tex,Texture2D texNormal,Texture2D textureDepth,Texture2D texNoMip,Texture2D texMER)
         {
            
            
@@ -59,6 +60,7 @@ namespace monogameMinecraft
                  atlas.SetData<Color>(4, 0, null, atlasMip4, 0, atlas.Width / 16 * atlas.Height / 16);
                  atlas.SetData<Color>(5, 0, null, atlasMip5, 0, atlas.Width /32 * atlas.Height / 32);*/
             atlasNormal = TerrainMipmapGenerator.instance.GenerateMipmap(texNormal,true) ;
+            this.atlasMER = texMER;
             this.atlasDepth= textureDepth;
             
             basicShader.Parameters["Texture"].SetValue(atlas);
@@ -85,6 +87,7 @@ namespace monogameMinecraft
 
             gBufferEffect.Parameters["blockTex"].SetValue(atlas);
             gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
+            gBufferEffect.Parameters["merTex"]?.SetValue(atlasMER);
             gBufferEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
             gBufferEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);

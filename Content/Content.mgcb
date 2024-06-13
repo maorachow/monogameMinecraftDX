@@ -146,6 +146,18 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/log_oak.png
 
+#begin blocksprites/sea_lantern.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blocksprites/sea_lantern.png
+
 #begin blocksprites/stone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -508,6 +520,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:terrainheight.png
+
+#begin terrainmer.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:terrainmer.png
 
 #begin terrainnomipmap.png
 /importer:TextureImporter

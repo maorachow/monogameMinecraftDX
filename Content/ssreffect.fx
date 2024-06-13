@@ -32,8 +32,8 @@ SamplerState defaultSampler
     MipFilter = Linear;
     MagFilter = Linear;
     MinFilter = Linear;
-    AddressU = Wrap;
-    AddressV = Wrap;
+    AddressU = Border;
+    AddressV = Border;
 };
 
 sampler2D motionVectorTex = sampler_state
@@ -535,11 +535,40 @@ sampler gProjectionDepthM5 = sampler_state
     MinFilter = POINT;
     Mipfilter = NONE;
 };
+sampler gProjectionDepthM6 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip6);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler gProjectionDepthM7 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip7);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = NONE;
+};
+sampler2D MERSampler = sampler_state
+{
+    Texture = <TextureMER>;
+ 
+    MipFilter = Linear;
+    MagFilter = Linear;
+    MinFilter = Linear;
+    AddressU = Border;
+    AddressV = Border;
+};
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float linearDepth = tex2D(gProjectionDepth, input.TexCoord);
     float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
     float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
+    float3 mer = tex2D(MERSampler, input.TexCoord).xyz;
   //  float noiseValue = worldPos.x;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 100;
     float3 vDir = normalize(worldPos-CameraPos);
@@ -547,12 +576,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     float3 rayOrigin = worldPos ;
     float NdotL =2- max(dot(normal, -vDir), 0.0)*1.5;
-    NdotL = pow(NdotL, 3);
+    NdotL = pow(NdotL,3);
      
     float rayLengthAmp = 1 + NdotL;
     float ssrThickness = 0.2;
     float3 preMarchPos = rayOrigin;
-   
+    bool isRayReturning = false;
     float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0+GameTime*5).g + 0.5;
   //  return float4(noiseValue1.xxx, 1);
     float3 marchPos = worldPos+rDir*0.01;
@@ -566,9 +595,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     int miplevel = 0;
     float strideLen = 1;
     [unroll]
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 20; i++)
     {
-        marchPos += (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/ noiseValue1 * rayLengthAmp * strideLen;
+        marchPos += (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);
         offset = mul(offset, ViewProjection);
@@ -597,104 +626,97 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
         float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
         
-        float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 }; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
+        float sampleDepthM6 = tex2D(gProjectionDepthM6, uv.xy).x;
+        float sampleDepthM7 = tex2D(gProjectionDepthM7, uv.xy).x;
+        
+        float sampleDepthArray[8] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5, sampleDepthM6, sampleDepthM7 }; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
         float sampleDepth = sampleDepthArray[miplevel];
-        if ((uv.x) < 0 || (uv.y) < 0 || (uv.x) > 1 || (uv.y) > 1)
+        if ((uv.x) < 0 || (uv.y) < 0 || (uv.x) > 1 || (uv.y) > 1||sampleDepth>700.0)
         {
             return float4(0, 0, 0, 1) ;
         }
         if (testDepth > sampleDepth)
         {
-            if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) <1.2* length(preMarchPos-marchPos) && miplevel == 0)
-        {
-            float3 finalPoint = preMarchPos;
-            float _sign = 1.0;
-            float3 direction = marchPos - preMarchPos;
-            float2 uv1 = 0;
-            float3 worldPosSampled1=0;
+            if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < 1.5 * noiseValue1 * strideLen * rayLengthAmp /*length(preMarchPos-marchPos)*/ && miplevel == 0 && testDepth < 500 && sampleDepth < 500)
+            {
+                float3 finalPoint = preMarchPos;
+                float _sign = 1.0;
+                float3 direction = (marchPos - preMarchPos);
+                float2 uv1 = 0;
+                float3 worldPosSampled1 = 0;
 
-            float testDepth=0;
+                float testDepth = 0;
 
-            float sampleDepth=0;
+                float sampleDepth = 0;
          //   for (int j = 0; j < 2; j++)
           //  {
             
-            if (true)
-            {
-               direction *= 0.5;
-                finalPoint += direction * _sign;
-                uv1 = GetScreenCoordFromWorldPos(finalPoint);
+          /*    
+                    direction *= 0.5;
+                    finalPoint += direction * _sign;
+                    uv1 = GetScreenCoordFromWorldPos(finalPoint);
                // worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-                 testDepth = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
-                _sign = -sign(testDepth - sampleDepth);
-            
-            direction *= 0.5;
-            finalPoint += direction * _sign;
-            uv1 = GetScreenCoordFromWorldPos(finalPoint);
+                    testDepth = GetViewDepthFromWorldPos(finalPoint);
+                    sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    _sign = -sign(testDepth - sampleDepth);
+                    
+                    direction *= 0.5;
+                    finalPoint += direction * _sign;
+                    uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-             testDepth = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
-            _sign = -sign(testDepth - sampleDepth);
+                    testDepth = GetViewDepthFromWorldPos(finalPoint);
+                    sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    _sign = -sign(testDepth - sampleDepth);*/
             
-            direction *= 0.5;
-            finalPoint += direction * _sign;
-            uv1 = GetScreenCoordFromWorldPos(finalPoint);
-         //       worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-            testDepth = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; //GetViewDepthFromWorldPos(worldPosSampled1);
-            _sign = -sign(testDepth - sampleDepth);
-            
-            direction *= 0.5;
-            finalPoint += direction * _sign;
-            uv1 = GetScreenCoordFromWorldPos(finalPoint);
-          //      worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-            testDepth = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth = tex2D(gProjectionDepth, uv1.xy).x; //GetViewDepthFromWorldPos(worldPosSampled1);
-            _sign = -sign(testDepth - sampleDepth);
-                
+               
+                    
+         
+               
                  
-            }
-            else
-            {
-                uv1 = GetScreenCoordFromWorldPos(marchPos);
-            }
+               
             
-          
+             
            
       //      }
-             //   uv1 = GetScreenCoordFromWorldPos(marchPos);
+                uv1 = GetScreenCoordFromWorldPos(marchPos);
             
-            float3 albedo = LumTex.Sample(defaultSampler, uv1.xy).xyz;
+                float3 albedo = LumTex.Sample(defaultSampler, uv1.xy).xyz;
+             
+
+            
             float3 N = normal;
             float3 V = normalize(CameraPos - worldPos);
             float3 F0 = float3(0.04,0.04,0.04);
-            F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), metallic);
-            float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+            F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), mer.x);
+            float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
        //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
        //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
             
-            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), roughness)).rg;
+            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), mer.z)).rg;
            
-            float3 specular = albedo * (F * brdf.x + brdf.y)*2;
-            return float4(specular *0.4 + prevColor*0.6, 1);
+            float3 specular = albedo * (F * brdf.x + brdf.y);
+            return float4(specular *0.4+ prevColor*0.6, 1);
 
         } 
             miplevel--;
-            marchPos -= (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/ noiseValue1 * rayLengthAmp * strideLen;
+            marchPos -= (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
             strideLen /= 2.0;
+            isRayReturning = true;
+            
         }
         else
         {
-            if (miplevel < 5)
+            if (miplevel < 7)
             {
                  miplevel++;
                 strideLen *= 2;
+                isRayReturning = false;
+
             }
-           
+            
         }
        
-        preMarchPos = marchPos;
+       
 
     }
     return float4(0, 0, 0, 1) ;

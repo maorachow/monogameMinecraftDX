@@ -33,6 +33,19 @@ sampler normalSampler = sampler_state
     MaxLOD = 8;
    
 };
+
+sampler merSampler = sampler_state
+{
+    Texture = (merTex);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = Point;
+    MinFilter = Point;
+    Mipfilter = Point;
+    MipLODBias = -4;
+    MaxLOD = 8;
+   
+};
 struct VertexShaderInput
 {
     float4 Position : Position;
@@ -62,7 +75,7 @@ struct PixelShaderOutput
     
     float4 NormalWS : COLOR1;
     float4 Albedo : COLOR2;
-    float4 PositionWS : COLOR3;
+    float4 MetallcEmissionRoughness : COLOR3;
 };
 
  
@@ -128,8 +141,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
 
     
     
-    psOut.PositionWS.rgb = input.PositionWS.xyz;
-    psOut.PositionWS.a = 1;
+    psOut.MetallcEmissionRoughness.rgb = tex2D(merSampler, input.TexCoords).xyz;
+    psOut.MetallcEmissionRoughness.a = 1;
     
     return psOut;
 

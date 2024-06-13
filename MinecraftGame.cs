@@ -15,7 +15,8 @@ using System.Net.Security;
 //using System.Numerics;
 using Microsoft.Xna.Framework.Content;
 using monogameMinecraftDX;
- 
+using System.Linq;
+
 
 namespace monogameMinecraft
 {
@@ -136,6 +137,8 @@ namespace monogameMinecraft
                             contactShadowRenderer.contactShadowRenderTarget=new RenderTarget2D(GraphicsDevice, width, height,false,SurfaceFormat.Color, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    ssrRenderer.renderTargetSSR = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    ssrRenderer.renderTargetSSRPrev = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.renderTargetLum = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.finalImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
@@ -204,7 +207,7 @@ namespace monogameMinecraft
             gameTimeManager = new GameTimeManager(gamePlayer);
             chunkRenderer = new ChunkRenderer(this, GraphicsDevice, chunkSolidEffect,null, gameTimeManager);
             pointLightUpdater = new PointLightUpdater(chunkSolidEffect, gamePlayer);
-            chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth,terrainTexNoMip);
+            chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth,terrainTexNoMip,terrainMER);
             gBufferEffect = Content.Load<Effect>("gbuffereffect");
             gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
             entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, entityEffect, Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), chunkShadowEffect, null, gameTimeManager);
@@ -261,15 +264,27 @@ namespace monogameMinecraft
             }*/
             EntityManager.SaveWorldEntityData();
             ChunkManager.isJsonReadFromDisk=false;
-            foreach(var c in ChunkManager.chunks)
+            gamePlayer.curChunk = null;
+            lock(ChunkManager.updateWorldThreadLock)
             {
-                c.Value.semaphore.Wait();
+            foreach (var c in ChunkManager.chunks)
+            {
+                
                 c.Value.Dispose();
-                c.Value.semaphore.Release();
+             
+                 
             }
-            ChunkManager.chunks .Clear();
+            }
+          
+    //        ChunkManager.chunks.Keys.Clear() ; 
+        
+
             ChunkManager.chunkDataReadFromDisk.Clear();
-            EntityBeh.InitEntityList();
+         
+         
+            ChunkManager.chunks =null;
+            ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
+           EntityBeh.InitEntityList();
             GC.Collect();
            
             
@@ -318,6 +333,7 @@ namespace monogameMinecraft
         Texture2D terrainTexNoMip;
         Texture2D terrainNormal;
         Texture2D terrainDepth;
+        Texture2D terrainMER;
         protected override void LoadContent()
         {
            
@@ -327,6 +343,7 @@ namespace monogameMinecraft
             terrainNormal = Content.Load<Texture2D>("terrainnormal");
             chunkSolidEffect = Content.Load<Effect>("blockeffect");
             terrainDepth = Content.Load<Texture2D>("terrainheight");
+            terrainMER = Content.Load<Texture2D>("terrainmer");
        //     skyboxTex = Content.Load<TextureCube>("skybox");
             // terrainTex.
             //       Debug.WriteLine(terrainTex.Width + " " + terrainTex.Height);
@@ -544,7 +561,7 @@ namespace monogameMinecraft
                         _spriteBatch.Draw(gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                        _spriteBatch.Draw(gBufferRenderer.renderTargetPositionWS, new Rectangle(1600, 400, 400, 400), Color.White);
+                        _spriteBatch.Draw(gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
                          _spriteBatch.Draw(volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
                          _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
                         _spriteBatch.Draw(motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);

@@ -73,6 +73,7 @@ namespace monogameMinecraft
             player.inventoryData[0] = 1;
             player.inventoryData[1] =7;
             player.inventoryData[2] = 102;
+            player.inventoryData[3] = 12;
             //    isJsonReadFromDisk = true;
         }
         void SetBoundPosition(Vector3 pos)

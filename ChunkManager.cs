@@ -17,9 +17,15 @@ namespace monogameMinecraft
     {
         public static Dictionary<Vector2Int, ChunkData> chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
         public static ConcurrentDictionary<Vector2Int, Chunk> chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
-        public static object chunkLock=new object();
+        public static int buildingChunksCount = 0;
+        public static object updateWorldThreadLock=new object();
+        public static object deleteChunkThreadLock = new object();
         public static Chunk GetChunk(Vector2Int pos)
         {
+            if (chunks == null)
+            {
+                return null;
+            }
             if (chunks.ContainsKey(pos))
             {
                 if (chunks[pos].isUnused == true)
@@ -146,17 +152,27 @@ namespace monogameMinecraft
                 return false;
             }
         }
+       
         public static void UpdateWorldThread( GamePlayer player,MinecraftGame game)
         {
             BoundingFrustum frustum;
             while (true)
             {
-                if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
+                lock (updateWorldThreadLock)
+                {
+                    lock (deleteChunkThreadLock)
+                    {
+if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                 {
                     return;
                 }
                
                 Thread.Sleep(500);
+                if (chunks == null)
+                {
+                    return;
+                }
+       //         Debug.WriteLine("building chunks count:"+buildingChunksCount);
                 if (player.isChunkNeededUpdate == true)
                 {
                 //    Debug.WriteLine("update");
@@ -173,7 +189,7 @@ namespace monogameMinecraft
                             BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
                             if (frustum.Intersects(chunkBoundingBox))
                             {
-                                Chunk c = new Chunk(chunkPos, game.GraphicsDevice);
+                                Chunk c = new Chunk(chunkPos,  game.GraphicsDevice);
                                // goto endUpdateWorld;
                                 //    break;
                             }
@@ -191,76 +207,88 @@ namespace monogameMinecraft
                 player.isChunkNeededUpdate = false;
                 
                 }
+                    }
+                
+                }
+                
             }
         }
         public static void TryDeleteChunksThread( GamePlayer player,MinecraftGame game)
         {
-            while (true) {
-
-                if (game.status == GameStatus.Quiting||game.status==GameStatus.Menu)
+            while (true)
+            {
+                lock (deleteChunkThreadLock)
                 {
-                    return;
-                }
-                Thread.Sleep(500);
-              if (ChunkRenderer.isBusy == true)
-                {
-                    continue;
-                }
-
-                foreach (Chunk c in ChunkManager.chunks.Values)
-                {
-                   c.semaphore.Wait();
-                    if ((MathF.Abs(c.chunkPos.x - player.playerPos.X )> (GameOptions.renderDistance + Chunk.chunkWidth )||MathF.Abs( c.chunkPos.y - player.playerPos.Z) > (GameOptions.renderDistance + Chunk.chunkWidth))
-                        &&(c.isReadyToRender==true&&c.isTaskCompleted==true)&&c.usedByOthersCount<=0
-                    /*    && (c.Value.leftChunk==null||(c.Value.leftChunk!=null&&c.Value.leftChunk.isTaskCompleted == true))
-                        && (c.Value.rightChunk == null || (c.Value.rightChunk != null && c.Value.rightChunk.isTaskCompleted == true))
-                        && (c.Value.frontChunk == null || (c.Value.frontChunk != null && c.Value.frontChunk.isTaskCompleted == true))
-                        && (c.Value.backChunk == null || (c.Value.backChunk != null && c.Value.backChunk.isTaskCompleted == true))*/
-                        )
+                if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                     {
-                        // Chunk c2;
-                            
+                        return;
+                    }
+                    Thread.Sleep(500);
+                    if (ChunkRenderer.isBusy == true)
+                    {
+                        continue;
+                    }
+                    if (chunks == null)
+                    {
+                        return;
+                    }
+                    foreach (Chunk c in ChunkManager.chunks.Values)
+                    {
+                  
+                        if ((MathF.Abs(c.chunkPos.x - player.playerPos.X) > (GameOptions.renderDistance + Chunk.chunkWidth) || MathF.Abs(c.chunkPos.y - player.playerPos.Z) > (GameOptions.renderDistance + Chunk.chunkWidth))
+                            && (c.isReadyToRender == true && c.isTaskCompleted == true) && c.usedByOthersCount <= 0
+                            /*    && (c.Value.leftChunk==null||(c.Value.leftChunk!=null&&c.Value.leftChunk.isTaskCompleted == true))
+                                && (c.Value.rightChunk == null || (c.Value.rightChunk != null && c.Value.rightChunk.isTaskCompleted == true))
+                                && (c.Value.frontChunk == null || (c.Value.frontChunk != null && c.Value.frontChunk.isTaskCompleted == true))
+                                && (c.Value.backChunk == null || (c.Value.backChunk != null && c.Value.backChunk.isTaskCompleted == true))*/
+                            )
+                        {
+                            // Chunk c2;
+
                             c.isReadyToRender = false;
                             c.SaveSingleChunk();
-                            
+
                             c.isUnused = true;
-                        
-                       //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
-                    //  c.Dispose();
-                          
-                 
-                    }
 
-                    c.semaphore.Release();
-                     
-                }
+                            //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
+                            //  c.Dispose();
 
 
-                foreach (Chunk c in ChunkManager.chunks.Values)
-                {
-                    c.semaphore.Wait();
-                    if (c.isUnused==true)
-                    {
-                        c.unusedSeconds += 0.5f;
-
-                        if (c.unusedSeconds >5f)
-                        {
-                            
-                                c.Dispose();
-                                 ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
-                              
                         }
 
-                        //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
-                        //  c.Dispose();
-
+                     
 
                     }
 
-                    c.semaphore.Release();
-                    
-                }
 
+                    foreach (Chunk c in ChunkManager.chunks.Values)
+                    {
+                      //  c.semaphore.Wait();
+                        if (c.isUnused == true)
+                        {
+                            c.unusedSeconds += 0.5f;
+
+                            if (c.unusedSeconds > 5f)
+                            {
+
+                                c.Dispose();
+                                ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int, Chunk>(c.chunkPos, c));
+
+                            }
+
+                            //     ChunkManager.chunks.TryRemove(new KeyValuePair<Vector2Int,Chunk>(c.chunkPos,c));
+                            //  c.Dispose();
+
+
+                        }
+
+                     //   c.semaphore.Release();
+
+                    }
+                }
+                    
+
+                
             }
         }
         public static short GetBlock(Vector3 pos)
@@ -364,31 +392,33 @@ namespace monogameMinecraft
                 chunkNeededUpdate.isModifiedInGame = true;
                 if (chunkSpacePos.x == 0)
                 {
-                if (chunkNeededUpdate.leftChunk != null && chunkNeededUpdate.leftChunk.isMapGenCompleted == true)
-                {
-                    chunkNeededUpdate.leftChunk.BuildChunk();
-                }
+               
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x - Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunk();
+                
                 }
                 if (chunkSpacePos.x == Chunk.chunkWidth - 1)
                 {
-                if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
-                    
-                chunkNeededUpdate.rightChunk.BuildChunk();
+                // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
 
-                }
+                //  chunkNeededUpdate.rightChunk.BuildChunk();
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x + Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunk();
+            }
             if (chunkSpacePos.z == 0)
             {
-            if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
-                {
-                    chunkNeededUpdate.backChunk.BuildChunk();
-                }
+                //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
+                //       {
+                //         chunkNeededUpdate.backChunk.BuildChunk();
+                //     }
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y-Chunk.chunkWidth))?.BuildChunk();
             }
             if (chunkSpacePos.z == Chunk.chunkWidth - 1)
             {
-            if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
-                {
-                    chunkNeededUpdate.frontChunk.BuildChunk();
-                }
+                //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
+                //     {
+                //      chunkNeededUpdate.frontChunk.BuildChunk();
+                //     }
+
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunk();
             }
                 
               

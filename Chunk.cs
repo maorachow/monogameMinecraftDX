@@ -219,8 +219,9 @@ public struct RandomGenerator3D
         [IgnoreMember]
         public bool isChunkDataSavedInDisk = false;
         public GraphicsDevice device;
-        public Chunk(Vector2Int chunkPos, GraphicsDevice device)
+        public Chunk(Vector2Int chunkPos,  GraphicsDevice device)
         {
+    
             this.device= device;
             this.chunkPos = chunkPos;
         if (ChunkManager.chunks.ContainsKey(chunkPos))
@@ -230,8 +231,10 @@ public struct RandomGenerator3D
             return;
         }
             ChunkManager.chunks.TryAdd(chunkPos,this);
-            isReadyToRender = false;
+            isReadyToRender = false;    
+       
             BuildChunk();
+      
         }
     public bool isMapGenCompleted=false;
     public static Dictionary<int, List<Vector2>> blockInfo = new Dictionary<int, List<Vector2>> {
@@ -247,11 +250,11 @@ public struct RandomGenerator3D
  {8, new List<Vector2> { new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.25f, 0f), new Vector2(0.25f, 0f) }},
  {9, new List<Vector2> { new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f) }},
  {10, new List<Vector2> { new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f) }},
- {11, new List<Vector2> { new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f) }}
-    
-    
+ {11, new List<Vector2> { new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f) }},
+    {12, new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) }}
+
     };
-    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand
+    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 12Sea Lantern
     //100Water 101Grass
     //102torch
     //200Leaves
@@ -556,17 +559,18 @@ public struct RandomGenerator3D
 
 
        public object renderLock=new object();
-    public SemaphoreSlim semaphore = new SemaphoreSlim(1);
+  //  public SemaphoreSlim semaphore = new SemaphoreSlim(1);
     public List<Vector3> lightPoints=new List<Vector3>();
     public int usedByOthersCount = 0;
     public bool isUnused = false;
     public float unusedSeconds = 0f;
         public void InitMap(Vector2Int chunkPos)
         {
-            
-            semaphore.Wait();
-       //     Thread.Sleep(400);
-            this.chunkPos = chunkPos;
+       
+     //   semaphore.Wait();
+     
+        //     Thread.Sleep(400);
+        this.chunkPos = chunkPos;
             thisHeightMap = GenerateChunkHeightmap(chunkPos);
         
         //    map = additiveMap;
@@ -666,8 +670,10 @@ public struct RandomGenerator3D
         {
             GenerateMesh(verticesOpq, verticesNS, verticesWT,indicesOpq,indicesNS,indicesWT);
             ReleaseChunkUsage();
-            semaphore.Release();
-                return;
+        
+       //     semaphore.Release();
+           
+            return;
         }
         if (ChunkManager.chunkDataReadFromDisk.ContainsKey(chunkPos))
             {
@@ -676,7 +682,9 @@ public struct RandomGenerator3D
             GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
             isMapGenCompleted = true;
             ReleaseChunkUsage();
-            semaphore.Release();
+         
+      //      semaphore.Release();
+         
             return;
             }
 
@@ -687,8 +695,9 @@ public struct RandomGenerator3D
         isMapGenCompleted = true;
         GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
         ReleaseChunkUsage();
-        semaphore.Release();
-
+        
+    //    semaphore.Release();
+  
         void ReleaseChunkUsage()
         {
             if (frontChunk != null)
@@ -732,6 +741,42 @@ public struct RandomGenerator3D
             {
                 backRightChunk.usedByOthersCount -= 1;
 
+            }
+
+
+
+            if (this.backChunk != null)
+            {
+                this.backChunk = null;
+            }
+            if (this.frontChunk != null)
+            {
+                this.frontChunk = null;
+            }
+            if (this.leftChunk != null)
+            {
+                this.leftChunk = null;
+            }
+            if (this.rightChunk != null)
+            {
+                this.rightChunk = null;
+            }
+
+            if (this.backLeftChunk != null)
+            {
+                this.backLeftChunk = null;
+            }
+            if (this.backRightChunk != null)
+            {
+                this.backRightChunk = null;
+            }
+            if (this.frontLeftChunk != null)
+            {
+                this.frontLeftChunk = null;
+            }
+            if (this.frontRightChunk != null)
+            {
+                this.frontRightChunk = null;
             }
         }
         void FreshGenMap(Vector2Int pos)
@@ -1597,29 +1642,41 @@ public struct RandomGenerator3D
         this.chunkBounds = this.CalculateBounds();
         isReadyToRender = false;
         isVertexBufferDirty = true;
-           //   if (VBOpq == null)
-             //   {
-             VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
+        //   if (VBOpq == null)
+        //   {
+        VBOpq?.Dispose();
+
+        if (verticesOpqArray.Length > 0)
+        {   
+            VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
                      //   }
 
                      VBOpq.SetData(verticesOpqArray);
-                     //  if(IBOpq == null)
-                     //  {
-                     IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
-                     // }
-
+        }
+         
+        //  if(IBOpq == null)
+        //  {
+          IBOpq?.Dispose();
+        if(indicesOpqArray.Length > 0)
+        {
+                    IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
                      IBOpq.SetData(indicesOpqArray);
+        }
+       
+       
 
-                     VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
+       
+        VBWT?.Dispose();
 
                      if (verticesWTArray.Length > 0)
-                     {
+                     { 
+            VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
                          VBWT.SetData(verticesWTArray);
                      }
 
 
-
-                     if (indicesWTArray.Length > 0)
+        IBWT?.Dispose();
+        if (indicesWTArray.Length > 0)
                      { 
                          IBWT = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits,indicesWTArray.Length, BufferUsage.WriteOnly);
                          IBWT.SetData(indicesWTArray);
@@ -1629,18 +1686,18 @@ public struct RandomGenerator3D
 
 
 
+        VBNS?.Dispose();
 
-
-                     if (verticesNSArray.Length > 0)
+        if (verticesNSArray.Length > 0)
                      {
                          VBNS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesNSArray.Length + 1, BufferUsage.WriteOnly);
                          VBNS.SetData(verticesNSArray);
                      }
 
+        IBNS?.Dispose();
 
 
-
-                     if (indicesNSArray.Length > 0)
+        if (indicesNSArray.Length > 0)
                      {
                          IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
                          IBNS.SetData(indicesNSArray);
@@ -1993,12 +2050,15 @@ public struct RandomGenerator3D
         }
         return returnValue;
     }
-   public bool isTaskCompleted;
-    public async void BuildChunk()
+   public bool isTaskCompleted { get { return _isTaskCompleted; } set {  _isTaskCompleted = value;if (_isTaskCompleted == false) { ChunkManager.buildingChunksCount++; } else {  ChunkManager.buildingChunksCount--; } } }
+    public bool _isTaskCompleted;
+    public void BuildChunk()
     {
         isTaskCompleted = false;
-       
-        await Task.Run(()=> InitMap(chunkPos));
+
+
+       Task t=new Task(()=>InitMap(chunkPos));
+        t.RunSynchronously();
       
         isTaskCompleted = true;
         //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
@@ -2007,6 +2067,9 @@ public struct RandomGenerator3D
         isReadyToRender = true;
     
     }
+
+
+ 
     public bool disposed;
     
     
@@ -2025,37 +2088,53 @@ public struct RandomGenerator3D
 
     public void Dispose(bool disposing)
     {
-        lock(renderLock)
-        {
+      
         if (disposed)
         {
             return;
         }
-        disposed = true;
+     //    Debug.WriteLine("dispose"+disposing);
         if (disposing)
         {
             if (isTaskCompleted == false)
             {
+                Debug.WriteLine("dispose failed");
                 return;
             }
-        if (this.backChunk != null)
-        {
-            this.backChunk.frontChunk = null;
-        }
-        if (this.frontChunk != null)
-        {
-            this.frontChunk.backChunk = null;
-        }
-        if (this.leftChunk != null)
-        {
-        this.leftChunk.rightChunk = null;
-        }
-        if(this.rightChunk != null)
-        {
-        this.rightChunk.leftChunk = null;
-        }
-        
-          
+ 
+            if (this.backChunk != null)
+            {
+                this.backChunk= null;
+            }
+            if (this.frontChunk != null)
+            {
+                this.frontChunk = null;
+            }
+            if (this.leftChunk != null)
+            {
+                this.leftChunk = null;
+            }
+            if (this.rightChunk != null)
+            {
+                this.rightChunk = null;
+            }
+
+            if (this.backLeftChunk != null)
+            {
+                this.backLeftChunk = null;
+            }
+            if (this.backRightChunk != null)
+            {
+                this.backRightChunk = null;
+            }
+            if (this.frontLeftChunk != null)
+            {
+                this.frontLeftChunk = null;
+            }
+            if (this.frontRightChunk != null)
+            {
+                this.frontRightChunk = null;
+            }
             this.map= null;
                 this.thisHeightMap = null;
                
@@ -2108,8 +2187,12 @@ public struct RandomGenerator3D
            this.IBWT = null;
                 this.VBNS = null;
                 this.IBNS = null;
+            this.device=null;
+            this.lightPoints=null;
+         //   this.semaphore=null;
             }
-        }
+            disposed = true;
+        
        
       
 
