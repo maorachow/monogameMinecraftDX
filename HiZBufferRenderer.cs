@@ -8,6 +8,7 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 namespace monogameMinecraftDX
 {
     public class HiZBufferRenderer : FullScreenQuadRenderer
@@ -38,7 +39,7 @@ namespace monogameMinecraftDX
             var height = Math.Max((int)Math.Ceiling(Math.Log(heightO, 2) - 1.0f), 1);
             width = 1 << width;
             height = 1 << height;
-          
+      //      Debug.WriteLine("width height: "+ width + " " + height);
             for (int i = 0; i < 8; i++)
             {
                 this.hiZBufferTargetMips[i] = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
@@ -51,9 +52,11 @@ namespace monogameMinecraftDX
         }
         public void Draw()
         {
+          
+
             //   textureCopyEffect.Parameters["TextureCopy"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
-            textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f,0f,0f));
-            textureCopyEffect.Parameters["useBkgColor"]?.SetValue(false);
+            textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(1000,0f,0f));
+            textureCopyEffect.Parameters["useBkgColor"]?.SetValue(true);
             textureCopyEffect.Parameters["TextureCopy"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
             RenderQuad(device, hiZBufferTargetMips[0], textureCopyEffect);
             for(int i = 1; i < 8; i++)
@@ -62,6 +65,7 @@ namespace monogameMinecraftDX
                 hiZBufferEffect.Parameters["TextureCopy"].SetValue(hiZBufferTargetMips[i - 1]);
                 RenderQuad(device, hiZBufferTargetMips[i], hiZBufferEffect);
             }
+             
         }
     }
 }

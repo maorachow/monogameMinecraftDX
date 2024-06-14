@@ -118,7 +118,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 worldPos = ReconstructViewPos(input.TexCoords,tex2D(gProjectionDepth, input.TexCoords).x)+CameraPos;
     float3 normal = tex2D(gNormal, input.TexCoords) * 2 - 1;
-    worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
+    worldPos = worldPos + normal * 0.2 * length(worldPos - CameraPos) / 150;
     float3 marchDir = normalize(LightDir);
     if (marchDir.y < 0.1)
     {
@@ -133,10 +133,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float noiseValue = tex2D(noiseTex, input.TexCoords*10).r;
     
     bool isHit = false;
-    [unroll(16)]
-    for (int i = 0; i < 16; i++)
+    [unroll(8)]
+    for (int i = 0; i < 8; i++)
     {
-        float3 marchPos = rayOrigin + marchDir * (0.08 * (i + noiseValue) );
+        float3 marchPos = rayOrigin + marchDir * (0.08 * (i+0.5 + noiseValue) );
        
         float2 uv = GetScreenCoordFromWorldPos(marchPos);
     //    return float4(uv.xy,1, 1);
@@ -151,7 +151,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
             break; // return float4(1, 1, 1, 1);
         }
-       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.1)
+       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.12)
         {
             isHit = true;
            

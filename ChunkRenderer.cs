@@ -86,11 +86,12 @@ namespace monogameMinecraft
         {
 
             gBufferEffect.Parameters["blockTex"].SetValue(atlas);
-            gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
+           gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
             gBufferEffect.Parameters["merTex"]?.SetValue(atlasMER);
             gBufferEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
             gBufferEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
+            
             foreach (var chunk in RenderingChunks)
             {
                 Chunk c = chunk.Value;
@@ -121,7 +122,7 @@ namespace monogameMinecraft
                     continue;
                 }
 
-                if (c.isReadyToRender == true && c.disposed == false)
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
                 {
                     
                         if (frustum.Intersects(c.chunkBounds))
@@ -143,7 +144,7 @@ namespace monogameMinecraft
                     continue;
                 }
 
-                if (c.isReadyToRender == true && c.disposed == false)
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
                 {
                     
                         if (frustum.Intersects(c.chunkBounds))
@@ -157,6 +158,8 @@ namespace monogameMinecraft
 
                 }
             }
+            
+            
         }
         public void RenderSingleChunkGBuffer(Chunk c,GamePlayer player,Effect gBufferEffect)
         {

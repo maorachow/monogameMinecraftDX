@@ -29,7 +29,11 @@ namespace monogameMinecraftDX
 
         public void ProcessImage(in RenderTarget2D tex)
         {
-        
+            if (GameOptions.renderMotionBlur == false)
+            {
+                processedImage = tex;
+                return;
+            }
             motionBlurEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             motionBlurEffect.Parameters["InputTexture"]?.SetValue(tex);
             motionBlurEffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f/ tex.Width,1f/ tex.Height));

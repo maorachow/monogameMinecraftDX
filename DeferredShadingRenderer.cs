@@ -143,6 +143,7 @@ namespace monogameMinecraft
             deferredBlendEffect.Parameters["TextureReflection"].SetValue(ssrRenderer.renderTargetSSR);
             deferredBlendEffect.Parameters["TextureIndirectDiffuse"].SetValue(ssidRenderer.renderTargetSSID);
             RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor:false) ;
+           
             motionBlurRenderer.ProcessImage(finalImage);
            // motionBlurRenderer.renderTargetMotionBlur;
             fxaaRenderer.Draw(true, motionBlurRenderer.processedImage);

@@ -104,7 +104,7 @@ namespace monogameMinecraft
             blendEffect.Parameters["flareWeight"].SetValue(2f);
             RenderQuad(device,blendVolumetricMap, blendEffect);
           
-            LightShafts(blendVolumetricMap, new Vector2(screenSpaceLightPos.X,screenSpaceLightPos.Y), 1.15f, 0.986f, 0.191f, 0.051f, 400);
+            LightShafts(blendVolumetricMap, new Vector2(screenSpaceLightPos.X,screenSpaceLightPos.Y), 6.15f, 0.986f, 0.391f, 0.051f, 400);
         }
 
 

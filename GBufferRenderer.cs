@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 namespace monogameMinecraft
 {
     public class GBufferRenderer
@@ -112,12 +113,15 @@ namespace monogameMinecraft
         }
         public void Draw()
         {
+            
             graphicsDevice.SetRenderTargets(binding);
            
             chunkRenderer.RenderAllChunksGBuffer(ChunkManager.chunks, player, this.gBufferEffect);
             entityRenderer.DrawGBuffer(gBufferEntityEffect);
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);
+          
+
         }
     }
 }

@@ -33,8 +33,8 @@ sampler2D reflectionSampler = sampler_state
     Texture = <TextureReflection>;
  
     MipFilter = Linear;
-    MagFilter = Point;
-    MinFilter = Point;
+    MagFilter = Linear;
+    MinFilter = Linear;
     AddressU = Wrap;
     AddressV = Wrap;
 };
@@ -54,8 +54,8 @@ sampler2D aoSampler = sampler_state
     Texture = <TextureAO>;
  
     MipFilter = Linear;
-    MagFilter = Point;
-    MinFilter = Point;
+    MagFilter = Linear;
+    MinFilter = Linear;
     AddressU = Wrap;
     AddressV = Wrap;
 };

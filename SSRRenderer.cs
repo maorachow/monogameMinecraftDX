@@ -32,15 +32,16 @@ namespace monogameMinecraft
             this.gBufferRenderer = gBufferRenderer;
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
-            this.renderTargetSSR = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            this.renderTargetSSRPrev = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.hiZBufferRenderer = hiZBufferRenderer;
+            this.renderTargetSSR = new RenderTarget2D(graphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetSSRPrev = new RenderTarget2D(graphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             SSREffect = sSREffect;
             this.deferredShadingRenderer = deferredShadingRenderer;
             InitializeVertices();
             InitializeQuadBuffers(graphicsDevice);
             this.textureCopyEffect = textureCopyEffect;
             this.motionVectorRenderer = motionVectorRenderer;
-            this.hiZBufferRenderer = hiZBufferRenderer;
+          
         }
         public bool preIsKeyDown;
         public void Draw(GameTime gameTime)
@@ -49,6 +50,8 @@ namespace monogameMinecraft
             {
                 return;
             }
+            //   System.Diagnostics.Stopwatch sw=new Stopwatch();
+            //   sw.Start();
             //    if(Keyboard.GetState().IsKeyDown(Keys.B)&& preIsKeyDown==false)
             //      {
 
@@ -56,6 +59,8 @@ namespace monogameMinecraft
             //    Debug.WriteLine("binSearch:" + binarySearch);
             //  }
             //   SSREffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            int width = graphicsDevice.PresentationParameters.BackBufferWidth;
+            int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             SetCameraFrustum(player.cam, SSREffect);
             SSREffect.Parameters["GameTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
             SSREffect.Parameters["PrevSSRTexture"]?.SetValue(renderTargetSSRPrev);
@@ -63,7 +68,7 @@ namespace monogameMinecraft
      //       SSREffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
             SSREffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSREffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
-
+            SSREffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f/width,1f/height));
             SSREffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
             SSREffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
             SSREffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);
@@ -92,8 +97,10 @@ namespace monogameMinecraft
             RenderQuad(graphicsDevice,renderTargetSSR, SSREffect);
             textureCopyEffect.Parameters["useBkgColor"]?.SetValue(false);
             textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f,0f,0f));
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(renderTargetSSR);
+            textureCopyEffect.Parameters["TextureCopy"]?.SetValue(renderTargetSSR);
             RenderQuad(graphicsDevice, renderTargetSSRPrev, textureCopyEffect);
+           // sw.Stop();
+            //Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
         }
 
   /*      public void RenderQuad(RenderTarget2D target, Effect quadEffect, bool isPureWhite = false)

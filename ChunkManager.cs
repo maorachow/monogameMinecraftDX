@@ -216,14 +216,15 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
         public static void TryDeleteChunksThread( GamePlayer player,MinecraftGame game)
         {
             while (true)
-            {
+            { 
+                Thread.Sleep(500);
                 lock (deleteChunkThreadLock)
                 {
                 if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                     {
                         return;
                     }
-                    Thread.Sleep(500);
+                   
                     if (ChunkRenderer.isBusy == true)
                     {
                         continue;
