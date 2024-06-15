@@ -163,11 +163,15 @@ namespace monogameMinecraft
         }
         public void RenderSingleChunkGBuffer(Chunk c,GamePlayer player,Effect gBufferEffect)
         {
+            if (c.indicesOpqArray.Length <= 0)
+            {
+                return;
+            }
             Matrix world = (Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y)));
             gBufferEffect.Parameters["World"].SetValue(world);
             //   gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world*player.cam.viewMatrix)));
             //  gBufferEffect.Parameters["roughness"].SetValue(0.0f);
-         
+       
             device.SetVertexBuffer(c.VBOpq);
 
             device.Indices = c.IBOpq;
@@ -432,8 +436,13 @@ namespace monogameMinecraft
        
         void RenderSingleChunkShadow(Chunk c,Effect shadowmapShader)
         {
-             Matrix world=(Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y)));
-            shadowmapShader.Parameters["World"].SetValue(world); 
+            if (c.indicesOpqArray.Length <= 0)
+            {
+                return;
+            }
+            Matrix world=(Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y)));
+            shadowmapShader.Parameters["World"].SetValue(world);
+          
             device.SetVertexBuffer(c.VBOpq);
  
                device.Indices = c.IBOpq;

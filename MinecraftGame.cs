@@ -84,6 +84,7 @@ namespace monogameMinecraft
         {
             _graphics = new GraphicsDeviceManager(this);
             _graphics.GraphicsProfile=GraphicsProfile.HiDef;
+            
             Content.RootDirectory = "Content";
         //    IsMouseVisible = false;
             Window.AllowUserResizing = true;
@@ -162,20 +163,21 @@ namespace monogameMinecraft
             GraphicsDevice.PresentationParameters.MultiSampleCount =0;
             
             IsMouseVisible = false;
-            ChunkManager.chunks = new System.Collections.Concurrent.ConcurrentDictionary<Vector2Int, Chunk>();
-            ChunkManager.chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
+         //   ChunkManager.chunks = new System.Collections.Concurrent.ConcurrentDictionary<Vector2Int, Chunk>();
+          //  ChunkManager.chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
             Chunk.biomeNoiseGenerator.SetFrequency(0.002f);
-            ChunkManager.ReadJson();
+         //   ChunkManager.ReadJson();
             GameOptions.ReadOptionsJson();
             status = GameStatus.Started;
             gamePlayer = new GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
-          
-            updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
+            //  GamePlayer.ReadPlayerData(gamePlayer, this);
+            VoxelWorld.currentWorld.InitWorld(this);
+       /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
             updateWorldThread.IsBackground = true;
             updateWorldThread.Start();
             tryRemoveChunksThread = new Thread(() => ChunkManager.TryDeleteChunksThread( gamePlayer, this));
             tryRemoveChunksThread.IsBackground = true;
-            tryRemoveChunksThread.Start();
+            tryRemoveChunksThread.Start();*/
 
             randomTextureGenerator=new RandomTextureGenerator();
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
@@ -241,7 +243,7 @@ namespace monogameMinecraft
             volumetricLightRenderer.entityRenderer = entityRenderer;
          
 
-            GamePlayer.ReadPlayerData(gamePlayer,this);
+           
             EntityBeh.InitEntityList();
           //  rasterizerState.CullMode = CullMode.None;
          //   rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
@@ -257,7 +259,7 @@ namespace monogameMinecraft
         {
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
-            ChunkManager.SaveWorldData();
+            VoxelWorld.currentWorld.SaveAndQuitWorld(this);
             GamePlayer.SavePlayerData(gamePlayer);
        /*     foreach(var c in ChunkManager.chunks)
             {
@@ -266,7 +268,7 @@ namespace monogameMinecraft
             EntityManager.SaveWorldEntityData();
             ChunkManager.isJsonReadFromDisk=false;
             gamePlayer.curChunk = null;
-            lock(ChunkManager.updateWorldThreadLock)
+       /*     lock(.updateWorldThreadLock)
             {
             foreach (var c in ChunkManager.chunks)
             {
@@ -275,16 +277,20 @@ namespace monogameMinecraft
              
                  
             }
+            }*/
+        foreach(var world in VoxelWorld.voxelWorlds)
+            {
+                world.DestroyAllChunks();
             }
           
     //        ChunkManager.chunks.Keys.Clear() ; 
         
 
-            ChunkManager.chunkDataReadFromDisk.Clear();
+      //      ChunkManager.chunkDataReadFromDisk.Clear();
          
          
-            ChunkManager.chunks =null;
-            ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
+        //    ChunkManager.chunks =null;
+         //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
            EntityBeh.InitEntityList();
             GC.Collect();
            
@@ -408,7 +414,7 @@ namespace monogameMinecraft
                     ProcessPlayerMouseInput();
                    
 
-                    gamePlayer.UpdatePlayer((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    gamePlayer.UpdatePlayer(this,(float)gameTime.ElapsedGameTime.TotalSeconds);
                   
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -442,13 +448,20 @@ namespace monogameMinecraft
             lastMouseX = mState.X;
         }
         MouseState lastMouseState;
+        KeyboardState lastKeyboardState;
         void ProcessPlayerKeyboardInput(GameTime gameTime)
         {
             
             var kState = Keyboard.GetState();
             var mState = Mouse.GetState();
             Vector3 playerVec = new Vector3(0f, 0f,0f);
-        
+
+            if (kState.IsKeyDown(Keys.T) && !lastKeyboardState.IsKeyDown(Keys.T))
+            {
+             //   gamePlayer.PlayerTryTeleportToEnderWorld(this,);
+
+
+            }
             if (kState.IsKeyDown(Keys.W))
             {
                 playerVec.Z = 1f;
@@ -479,6 +492,7 @@ namespace monogameMinecraft
             gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState,mState,lastMouseState);
          
             lastMouseState = mState;
+            lastKeyboardState= kState;
 
 
         }
@@ -555,7 +569,7 @@ namespace monogameMinecraft
                         }
 
                       
-                        _spriteBatch.Draw(ssaoRenderer.ssaoTarget, new Rectangle(800, 800, 400, 400), Color.White);
+                        _spriteBatch.Draw(ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
                         _spriteBatch.Draw(contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(ssidRenderer.renderTargetSSIDPrev, new Rectangle(2000, 800, 400, 400), Color.White);

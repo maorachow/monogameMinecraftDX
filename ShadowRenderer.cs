@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -167,7 +168,7 @@ namespace monogameMinecraft
             device.SetRenderTarget(shadowMapTarget);
             UpdateLightMatrices(player);
         //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMat, shadowMapShader,64);
+            chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader,64);
            
 
             foreach (var entity in EntityBeh.worldEntities)
@@ -193,7 +194,7 @@ namespace monogameMinecraft
          device.SetRenderTarget(shadowMapTargetFar);
             UpdateLightMatrices(player);
             //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(ChunkManager.chunks, player, lightSpaceMatFar, shadowMapShader,256);
+            chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader,256);
           
 
             foreach (var entity in EntityBeh.worldEntities)

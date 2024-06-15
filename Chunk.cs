@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Reflection;
 using System.Net.Http.Headers;
 using System.Threading;
+using monogameMinecraftDX;
 
 [MessagePackObject]
     public struct Vector2Int : IEquatable<Vector2Int>
@@ -201,12 +202,14 @@ public struct RandomGenerator3D
     public class Chunk:IDisposable
     {
         [IgnoreMember]
-        public static FastNoise noiseGenerator = new FastNoise();
+        public static FastNoise noiseGenerator{ get { return VoxelWorld.currentWorld.noiseGenerator; } set { } }
         [IgnoreMember]
-        public static FastNoise biomeNoiseGenerator = new FastNoise();
-        [IgnoreMember]
-        public static int worldGenType =0;//1 superflat 0 inf
-        [IgnoreMember]
+        public static FastNoise biomeNoiseGenerator { get { return VoxelWorld.currentWorld.biomeNoiseGenerator; } set { } }
+    [IgnoreMember]
+    public static FastNoise frequentNoiseGenerator { get { return VoxelWorld.currentWorld.frequentNoiseGenerator; } }
+    //   [IgnoreMember]
+    //     public static int worldGenType =0;//1 superflat 0 inf
+    [IgnoreMember]
         public static int chunkWidth = 16;
         [IgnoreMember]
         public static int chunkHeight = 256;
@@ -219,18 +222,18 @@ public struct RandomGenerator3D
         [IgnoreMember]
         public bool isChunkDataSavedInDisk = false;
         public GraphicsDevice device;
-        public Chunk(Vector2Int chunkPos,  GraphicsDevice device)
+        public Chunk(Vector2Int chunkPos,  GraphicsDevice device,VoxelWorld world)
         {
     
             this.device= device;
             this.chunkPos = chunkPos;
         if (ChunkManager.chunks.ContainsKey(chunkPos))
         {
-            Debug.WriteLine("dispose");
+            Debug.WriteLine("dispose upon launch");
             Dispose();
             return;
         }
-            ChunkManager.chunks.TryAdd(chunkPos,this);
+            world.chunks.TryAdd(chunkPos,this);
             isReadyToRender = false;    
        
             BuildChunk();
@@ -251,10 +254,14 @@ public struct RandomGenerator3D
  {9, new List<Vector2> { new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f) }},
  {10, new List<Vector2> { new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f) }},
  {11, new List<Vector2> { new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f) }},
-    {12, new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) }}
+  
+    
+        {12, new List<Vector2> { new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f) }},
+    {13, new List<Vector2> { new Vector2(0.75f, 0f), new Vector2(0.75f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.8125f, 0f), new Vector2(0.75f, 0f), new Vector2(0.75f, 0f) }},
 
+          {14, new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) }},
     };
-    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 12Sea Lantern
+    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 14Sea Lantern
     //100Water 101Grass
     //102torch
     //200Leaves
@@ -460,14 +467,14 @@ public struct RandomGenerator3D
 
                 return;
             }
-            if (ChunkManager.chunkDataReadFromDisk.ContainsKey(chunkPos))
+            if (VoxelWorld.currentWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
             {
-                ChunkManager.chunkDataReadFromDisk.Remove(chunkPos);
+            VoxelWorld.currentWorld.chunkDataReadFromDisk.Remove(chunkPos);
                 short[,,] worldDataMap = map;
                 ChunkData wd = new ChunkData(chunkPos);
                 wd.map = worldDataMap;
 
-                ChunkManager.chunkDataReadFromDisk.Add(chunkPos, wd);
+            VoxelWorld.currentWorld.chunkDataReadFromDisk.Add(chunkPos, wd);
             }
             else
             {
@@ -475,7 +482,7 @@ public struct RandomGenerator3D
                 ChunkData wd = new ChunkData(chunkPos);
                 wd.map = worldDataMap;
 
-                ChunkManager.chunkDataReadFromDisk.Add(chunkPos, wd);
+            VoxelWorld.currentWorld.chunkDataReadFromDisk.Add(chunkPos, wd);
             }
         }
         
@@ -675,10 +682,10 @@ public struct RandomGenerator3D
            
             return;
         }
-        if (ChunkManager.chunkDataReadFromDisk.ContainsKey(chunkPos))
+        if (VoxelWorld.currentWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
             {
             isChunkDataSavedInDisk = true;
-            map =   (short[,,])ChunkManager.chunkDataReadFromDisk[chunkPos].map.Clone();
+            map =   (short[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
             GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
             isMapGenCompleted = true;
             ReleaseChunkUsage();
@@ -783,7 +790,7 @@ public struct RandomGenerator3D
             {
            
                 map = additiveMap;
-                if (worldGenType == 0)
+                if (VoxelWorld.currentWorld.worldGenType == 0)
                 {
                     bool isFrontLeftChunkUpdated = false;
                     bool isFrontRightChunkUpdated = false;
@@ -1338,7 +1345,7 @@ public struct RandomGenerator3D
 
                 isMapGenCompleted = true;
             }
-                else if (worldGenType == 1)
+                else if (VoxelWorld.currentWorld.worldGenType == 1)
                 {
                     for (int i = 0; i < chunkWidth; i++)
                     {
@@ -1354,9 +1361,30 @@ public struct RandomGenerator3D
                         }
                     }
                 }
+            else if (VoxelWorld.currentWorld.worldGenType == 2)
+            {
+                for (int i = 0; i < chunkWidth; i++)
+                {
+                    for (int j = 0; j < chunkWidth; j++)
+                    {
+                        //  float noiseValue=200f*Mathf.PerlinNoise(pos.x*0.01f+i*0.01f,pos.z*0.01f+j*0.01f);
+                        for (int k = 0; k < chunkHeight / 2; k++)
+                        {
+                            float yLerpValue = MathHelper.Lerp(-1, 1, (MathF.Abs(k - chunkSeaLevel)) / 40f);
+                            float xzLerpValue = MathHelper.Lerp(-1, 1, (new Vector3(chunkPos.x + i, 0, chunkPos.y + j).Length() / 384f));
+                            float xyzLerpValue = MathHelper.Max(xzLerpValue, yLerpValue);
+                            if (frequentNoiseGenerator.GetSimplex(i + chunkPos.x, k, j + chunkPos.y) > xyzLerpValue)
+                            {
+                                map[i, k, j] = 12;
+                            }
 
 
-                isMapGenCompleted= true; 
+                        }
+                    }
+                }
+            }
+
+            isMapGenCompleted = true; 
             }
         }
 
@@ -1972,6 +2000,23 @@ public struct RandomGenerator3D
         }
         // return 0;
     }
+    public static int PredictBlockType3D(int x, int y, int z)
+    {
+        float yLerpValue = MathHelper.Lerp(-1, 1, (MathF.Abs(y - chunkSeaLevel)) / 40f);
+        float xzLerpValue = MathHelper.Lerp(-1, 1, (new Vector3(x, 0, z).Length() / 384f));
+        float xyzLerpValue = MathHelper.Max(xzLerpValue, yLerpValue);
+        float noiseValue = frequentNoiseGenerator.GetSimplex(x, y, z);
+        if (noiseValue > xyzLerpValue)
+        {
+            return 1;
+        }
+        else
+        {
+
+            return 0;
+        }
+        // return 0;
+    }
 
     public int GetChunkBlockType(int x, int y, int z)
     {
@@ -1982,7 +2027,9 @@ public struct RandomGenerator3D
 
         if ((x < 0) || (z < 0) || (x >= chunkWidth) || (z >= chunkWidth))
         {
-            if (x >= chunkWidth)
+
+            if (VoxelWorld.currentWorld.worldGenType == 0)
+            {   if (x >= chunkWidth)
             {
                 if (  rightChunk != null && rightChunk.isMapGenCompleted == true && rightChunk.disposed == false)
                 {
@@ -2015,6 +2062,70 @@ public struct RandomGenerator3D
                 }
                 else return PredictBlockType(thisHeightMap[x + 8, 8 + z], y);
             }
+            }else if(VoxelWorld.currentWorld.worldGenType == 2)
+            {
+
+                if (x >= chunkWidth)
+                {
+                    if (rightChunk != null && rightChunk.isMapGenCompleted == true)
+                    {
+                        if (rightChunk.isMapGenCompleted == true)
+                        {
+
+                            return rightChunk.map[0, y, z];
+                        }
+                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                    }
+                    else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                }
+                else if (z >= chunkWidth)
+                {
+                    if (frontChunk != null && frontChunk.isMapGenCompleted == true)
+                    {
+                        if (frontChunk.isMapGenCompleted == true)
+                        {
+
+                            return frontChunk.map[x, y, 0];
+                        }
+                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+
+
+                    }
+                    else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                }
+                else if (x < 0)
+                {
+                    if (leftChunk != null && leftChunk.isMapGenCompleted == true)
+                    {
+                        if (leftChunk.isMapGenCompleted == true)
+                        {
+
+                            return leftChunk.map[chunkWidth - 1, y, z];
+                        }
+                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                    }
+                    else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                }
+                else if (z < 0)
+                {
+                    if (backChunk != null && backChunk.isMapGenCompleted == true)
+                    {
+                        if (backChunk.isMapGenCompleted == true)
+                        {
+                            return backChunk.map[x, y, chunkWidth - 1];
+                        }
+                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                    }
+                    else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                }
+
+            }
+              
 
         }
         return map[x, y, z];
@@ -2075,7 +2186,7 @@ public struct RandomGenerator3D
     
     public void Dispose()
     {
-       
+       // Debug.WriteLine("dispose");
         Dispose(true);
        
         GC.SuppressFinalize(this);
@@ -2102,39 +2213,29 @@ public struct RandomGenerator3D
                 return;
             }
  
-            if (this.backChunk != null)
-            {
+           
                 this.backChunk= null;
-            }
-            if (this.frontChunk != null)
-            {
+            
                 this.frontChunk = null;
-            }
-            if (this.leftChunk != null)
-            {
+            
                 this.leftChunk = null;
-            }
-            if (this.rightChunk != null)
-            {
+           
+           
                 this.rightChunk = null;
-            }
+            
 
-            if (this.backLeftChunk != null)
-            {
+           
                 this.backLeftChunk = null;
-            }
-            if (this.backRightChunk != null)
-            {
+           
+           
                 this.backRightChunk = null;
-            }
-            if (this.frontLeftChunk != null)
-            {
+           
+           
                 this.frontLeftChunk = null;
-            }
-            if (this.frontRightChunk != null)
-            {
+          
+          
                 this.frontRightChunk = null;
-            }
+           
             this.map= null;
                 this.thisHeightMap = null;
                

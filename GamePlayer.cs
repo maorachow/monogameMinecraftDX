@@ -11,6 +11,7 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -28,8 +29,8 @@ namespace monogameMinecraft
         public static bool isPlayerDataSaved = false;
         public bool isChunkNeededUpdate=false;
         public Chunk curChunk;
-        
-        public static void ReadPlayerData(GamePlayer player,Game game)
+        public int playerInWorldID;
+        public static int ReadPlayerData(GamePlayer player,Game game, bool ExludePlayerInWorldIDData = false)
         {
        
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
@@ -61,6 +62,7 @@ namespace monogameMinecraft
               {
                   chunkDataReadFromDisk.Add(new Vector2Int(w.chunkPos.x, w.chunkPos.y), w);
               }*/
+            int playerInWorldID = 0;
             if (playerDataBytes.Length > 0)
             {
                 PlayerData playerData = MessagePackSerializer.Deserialize<PlayerData>(playerDataBytes);
@@ -69,19 +71,27 @@ namespace monogameMinecraft
                 player.inventoryData=(short[])playerData.inventoryData.Clone();
                
                 player.GetBlocksAround(player.playerBounds);
+                player.playerInWorldID=playerData.playerInWorldID;
+                if (!ExludePlayerInWorldIDData)
+                {
+            playerInWorldID = playerData.playerInWorldID;
+                }
+              
             }
             player.inventoryData[0] = 1;
             player.inventoryData[1] =7;
             player.inventoryData[2] = 102;
-            player.inventoryData[3] = 12;
+            player.inventoryData[3] = 14;
+            player.inventoryData[4] = 13;
             //    isJsonReadFromDisk = true;
+            return playerInWorldID;
         }
         void SetBoundPosition(Vector3 pos)
         {
             playerBounds.Max = pos + new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f);
             playerBounds.Min = pos - new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f);
         }
-        public static void SavePlayerData(GamePlayer player)
+        public static void SavePlayerData(GamePlayer player,bool savePlayerInWorldID=true)
         {
 
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
@@ -102,7 +112,7 @@ namespace monogameMinecraft
                 fs.Close();
             }
 
-            byte[] playerDataBytes = MessagePackSerializer.Serialize(new PlayerData(player.playerPos.X, player.playerPos.Y, player.playerPos.Z,player.inventoryData));
+            byte[] playerDataBytes = MessagePackSerializer.Serialize(new PlayerData(player.playerPos.X, player.playerPos.Y, player.playerPos.Z,player.inventoryData, savePlayerInWorldID==true?VoxelWorld.currentWorld.worldID:player.playerInWorldID));
             Debug.WriteLine(playerDataBytes.Length);
             File.WriteAllBytes(ChunkManager.gameWorldDataPath + "unityMinecraftServerData/GameData/player.json", playerDataBytes);
             isPlayerDataSaved = true;
@@ -279,6 +289,12 @@ namespace monogameMinecraft
             cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
          
         }
+        public void MoveToPosition(Vector3 pos)
+        {
+            playerBounds = new BoundingBox(pos - new Vector3(0.3f, 0.9f, 0.3f), pos + new Vector3(0.3f, 0.9f, 0.3f));
+            playerPos = GetBoundingBoxCenter(playerBounds);
+            cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
+        }
         public Vector3Int playerCurIntPos;
         public Vector3Int playerLastIntPos;
         public float curGravity;
@@ -325,15 +341,60 @@ namespace monogameMinecraft
             }
         }
 
-        public void UpdatePlayer(float deltaTime)
+        float playerTeleportingCD = 0f;
+        public void PlayerTryTeleportToEnderWorld(MinecraftGame game,float deltaTime)
+        {
+            if (playerTeleportingCD >= 4f)
+            {
+            switch (VoxelWorld.currentWorld.worldID)
+            {
+                case 0:
+                    VoxelWorld.voxelWorlds[1].actionOnSwitchedWorld = () =>
+                    {
+                        Debug.WriteLine("action teleport to world 1");
+                       MoveToPosition(new Vector3(0f, 150f, 0f));
+                    };
+                    VoxelWorld.SwitchToWorld(1, game);
+                    break;
+                case 1:
+                    VoxelWorld.voxelWorlds[0].actionOnSwitchedWorld = () =>
+                    {
+                        Debug.WriteLine("action teleport to world 0");
+                        MoveToPosition(new Vector3(0f, 150f, 0f));
+                    };
+                    VoxelWorld.SwitchToWorld(0, game);
+                    break;
+                default:
+                    break;
+            }
+                playerTeleportingCD = 0f;
+            }
+            else
+            {
+                playerTeleportingCD += deltaTime;
+            }
+            
+             
+            
+               
+            
+        }
+        public void UpdatePlayer(MinecraftGame game,float deltaTime)
         {
             UpdatePlayerChunk();
+            GetBlockOnFoot(game, deltaTime);
+            UpdatePlayerMovement(deltaTime);
             ApplyGravity(deltaTime);
 
         }
         public float jumpCD = 0f;
-        public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState,MouseState mState,MouseState prevMouseState)
+        public bool isJumping=false;
+        public Vector3 finalMoveVec;
+        public bool isLeftMouseButtonDown = false;
+        public bool isRightMouseButtonDown = false;
+        public void UpdatePlayerMovement(float deltaTime)
         {
+
             if (breakBlockCD > 0f)
             {
                 breakBlockCD -= deltaTime;
@@ -342,14 +403,69 @@ namespace monogameMinecraft
             {
                 jumpCD -= deltaTime;
             }
+            if (isJumping == true)
+            {
+                Jump();
+                 isJumping = false;
+            }
+            if (finalMoveVec.X != 0.0f)
+                Move(new Vector3(((cam.horizontalRight * finalMoveVec.X).X), 0f, (cam.horizontalRight * finalMoveVec.X).Z), false);
+
+
+            if (finalMoveVec.Z != 0.0f)
+                Move(new Vector3((cam.horizontalFront * finalMoveVec.Z).X, 0f, (cam.horizontalFront * finalMoveVec.Z).Z), false);
+            if (isPlayerFlying == true)
+            {
+                Move(new Vector3(0f, finalMoveVec.Y, 0f), false);
+            }
+            else
+            {
+                Move(new Vector3(0f, curGravity * deltaTime, 0f), false);
+            }
+            if (breakBlockCD <= 0f && isLeftMouseButtonDown==true)
+            {
+                bool isEntityHit = TryHitEntity();
+                if (!isEntityHit)
+                {
+                    BreakBlock();
+                }
+                breakBlockCD = 0.3f;
+            }
+            if (breakBlockCD <= 0f && isRightMouseButtonDown==true)
+            {
+                PlaceBlock();
+                breakBlockCD = 0.3f;
+            }
+          
+        }
+        public short prevBlockOnFootID = 0;
+        public short blockOnFootID = 0;
+        public void PlayerBlockOnFootChanged(MinecraftGame game,float deltaTime)
+        {
+         //   Debug.WriteLine(blockOnFootID);
+            if (blockOnFootID == 13)
+            {
+                
+                PlayerTryTeleportToEnderWorld(game, deltaTime);
+            }
+        }
+        public void GetBlockOnFoot(MinecraftGame game, float deltaTime)
+        {
+            blockOnFootID = ChunkManager.GetBlock(new Vector3((playerBounds.Min.X + playerBounds.Max.X)/2f, playerBounds.Min.Y-0.1f, (playerBounds.Min.Z + playerBounds.Max.Z) / 2f));
+            PlayerBlockOnFootChanged(game, deltaTime);
+            prevBlockOnFootID = blockOnFootID;
+        }
+        public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState,MouseState mState,MouseState prevMouseState)
+        {
+         
             playerCurIntPos = new Vector3Int((int)playerPos.X, (int)playerPos.Y, (int)playerPos.Z);
             if (playerCurIntPos != playerLastIntPos)
             {
                 GetBlocksAround(playerBounds);
             }
             playerLastIntPos=playerCurIntPos;
-            Vector3 playerMoveVec = new Vector3();
-            Vector3 finalMoveVec = deltaTime * moveVelocity * new Vector3(dir.X,dir.Y,dir.Z);
+           
+             finalMoveVec = deltaTime * moveVelocity * new Vector3(dir.X,dir.Y,dir.Z);
             //    Debug.WriteLine(finalMoveVec);
                 if(kState.IsKeyDown(Keys.F)&&jumpCD<=0f)
                     {
@@ -365,43 +481,33 @@ namespace monogameMinecraft
             }
             if (dir.Y > 0f)
             {
+              //  Debug.WriteLine("dir up");
                 if (jumpCD <=0f)
                 {
-                   
-                    Jump();
-               //     jumpCD = 0.01f;
+            //        Debug.WriteLine("jump");
+                    //Jump();
+                    isJumping = true;
+                    jumpCD = 0.01f;
                 }
 
             }
            
-            
-            if (finalMoveVec.X != 0.0f)
-                Move(new Vector3(((cam.horizontalRight * finalMoveVec.X).X),0f, (cam.horizontalRight * finalMoveVec.X).Z),false);
-
-
-            if (finalMoveVec.Z != 0.0f)
-                Move(new Vector3((cam.horizontalFront * finalMoveVec.Z).X,0f, (cam.horizontalFront * finalMoveVec.Z).Z), false);
-            if (isPlayerFlying == true)
+  
+            if (mState.LeftButton == ButtonState.Pressed)
             {
-            Move(new Vector3(0f, finalMoveVec.Y, 0f), false);
+              isLeftMouseButtonDown = true;
             }
             else
-            {   
-                Move(new Vector3(0f, curGravity*deltaTime, 0f), false);
-            }
-            if (breakBlockCD <= 0f && mState.LeftButton == ButtonState.Pressed)
             {
-                bool isEntityHit = TryHitEntity(); 
-                if (!isEntityHit)
-                {
-                   BreakBlock();
-                }
-                breakBlockCD = 0.3f;
+                isLeftMouseButtonDown = false;
             }
-            if (breakBlockCD <= 0f && mState.RightButton == ButtonState.Pressed)
+            if (mState.RightButton == ButtonState.Pressed)
             {
-                PlaceBlock();
-                breakBlockCD = 0.3f;
+           isRightMouseButtonDown = true;
+            }
+            else
+            {
+                isRightMouseButtonDown = false;
             }
             if(mState.ScrollWheelValue-prevMouseState.ScrollWheelValue != 0f)
             {

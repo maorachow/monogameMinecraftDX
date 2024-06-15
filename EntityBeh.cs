@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -57,7 +58,7 @@ namespace monogameMinecraft
         public void SaveSingleEntity()
         {
       
-            EntityData tmpData = new EntityData(this.typeID,position.X,position.Y+entitySize.Y/2f,position.Z,this.rotationX, this.rotationY, this.rotationZ, this.entityID,this.entityHealth);
+            EntityData tmpData = new EntityData(this.typeID,position.X,position.Y+entitySize.Y/2f,position.Z,this.rotationX, this.rotationY, this.rotationZ, this.entityID,this.entityHealth,VoxelWorld.currentWorld.worldID);
  
             foreach (EntityData ed in entityDataReadFromDisk)
             {
@@ -75,11 +76,14 @@ namespace monogameMinecraft
         {
             foreach(var etd in entityDataReadFromDisk)
             {
-                
+                if (etd.entityInWorldID == VoxelWorld.currentWorld.worldID)
+                {
                 EntityBeh tmp = new EntityBeh(new Vector3(etd.posX,etd.posY,etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.typeid,etd.entityID, etd.entityHealth, false, game);
                 tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
                 tmp.InitBounds();
                 worldEntities.Add(tmp);
+                }
+            
             }
         }
         public static void SpawnNewEntity(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID,MinecraftGame game)

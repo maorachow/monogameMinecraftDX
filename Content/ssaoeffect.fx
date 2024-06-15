@@ -4,8 +4,8 @@
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
 #else
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
+#define VS_SHADERMODEL vs_4_0
+#define PS_SHADERMODEL ps_4_0
 #endif
 #if MGFX
 // This unused parameter helps avoiding crashes due to compiler optimizations in monogame
@@ -16,17 +16,17 @@ sampler2D gNormal = sampler_state
 {
     Texture = <NormalTex>;
  
-    MipFilter = Linear;
+    MipFilter = Point;
     MagFilter = Point;
     MinFilter = Point;
-    AddressU = Wrap;
-    AddressV = Wrap;
+    AddressU = Clamp;
+    AddressV = Clamp;
 };
 sampler2D gProjectionDepth = sampler_state
 {
     Texture = <ProjectionDepthTex>;
  
-    MipFilter = Linear;
+    MipFilter = Point;
     MagFilter = Point;
     MinFilter = Point;
     AddressU = Clamp;
@@ -43,7 +43,16 @@ sampler2D gPositionWS = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
-
+sampler2D gAlbedo = sampler_state
+{
+    Texture = <AlbedoTex>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
@@ -129,20 +138,183 @@ float Random2DTo1D(float2 value)
 		          
 	            );
 }
+float2 PixelSize;
+#define PI 3.1415926
+#define STEP_COUNT 3
+#define DIRECTION_COUNT 3
+#define RADIUS 0.3
+float FallOff(float dist)
+{
+    return 1 - dist * dist / (RADIUS * RADIUS);
+}
+ float ComputeAO(float3 vpos, float3 stepVpos, float3 normal, inout float topOcclusion)
+{
+    
+    
+    float3 h = stepVpos - vpos;
+    float dist = length(h);
+   
+    float occlusion = dot(normal, h) / dist;
+     
+    float diff = max(occlusion - topOcclusion, 0);
+    topOcclusion = max(occlusion, topOcclusion);
+    return diff * saturate(FallOff(dist));
+}
+float4x4 NormalView;
+
+
+
+float2 SearchForLargestAngleDual(uint NumSteps, float2 BaseUV, float2 ScreenDir, float SearchRadius, float InitialOffset, float3 ViewPos, float3 ViewDir, float AttenFactor)
+{
+    float SceneDepth, LenSq, OOLen, Ang, FallOff;
+    float3 V;
+    float2 SceneDepths = 0;
+
+    float2 BestAng = float2(-1, -1);
+    float Thickness =0.9;
+
+    [unroll(STEP_COUNT)]
+    for (uint i = 0; i < NumSteps; i++)
+    {
+        float fi = (float) i;
+
+        float2 UVOffset = ScreenDir * max(SearchRadius * (fi + InitialOffset), (fi + 1));
+        UVOffset.y *= -1;
+        float4 UV2 = BaseUV.xyxy + float4(UVOffset.xy, -UVOffset.xy);
+
+	// Positive Direction
+        float depthh1 = tex2D(gProjectionDepth, UV2.xy).x;
+        float3 worldPosh1 = ReconstructViewPos(UV2.xy, depthh1 > 0.01 ? depthh1 : 1000) + CameraPos;
+        V = mul(float4(worldPosh1,1),View).xyz - ViewPos;
+        LenSq = dot(V, V);
+        OOLen = rsqrt(LenSq + 0.0001);
+        Ang = dot(V, ViewDir) * OOLen;
+
+        FallOff = saturate(LenSq * AttenFactor);
+        Ang = lerp(Ang, BestAng.x, FallOff);
+        BestAng.x = (Ang > BestAng.x) ? Ang : lerp(Ang, BestAng.x, Thickness);
+
+	// Negative Direction
+        float depthh2 = tex2D(gProjectionDepth, UV2.zw).x;
+        float3 worldPosh2 = ReconstructViewPos(UV2.zw, depthh2 > 0.01 ? depthh2 : 1000) + CameraPos;
+        V = mul(float4(worldPosh2, 1), View).xyz - ViewPos;
+        LenSq = dot(V, V);
+        OOLen = rsqrt(LenSq + 0.0001);
+        Ang = dot(V, ViewDir) * OOLen;
+
+        FallOff = saturate(LenSq * AttenFactor);
+        Ang = lerp(Ang, BestAng.y, FallOff);
+
+        BestAng.y = (Ang > BestAng.y) ? Ang : lerp(Ang, BestAng.y, Thickness);
+    }
+
+    BestAng.x = acos(clamp(BestAng.x, -1.0, 1.0));
+    BestAng.y = acos(clamp(BestAng.y, -1.0, 1.0));
+
+    return BestAng;
+}
+
+float ComputeInnerIntegral(float2 Angles, float2 ScreenDir, float3 ViewDir, float3 ViewSpaceNormal)
+{
+	// Given the angles found in the search plane 
+	// we need to project the View Space Normal onto the plane 
+	// defined by the search axis and the View Direction and perform the inner integrate
+    float3 PlaneNormal = normalize(cross(float3(ScreenDir, 0), ViewDir));
+    float3 Perp = cross(ViewDir, PlaneNormal);
+    float3 ProjNormal = ViewSpaceNormal - PlaneNormal * dot(ViewSpaceNormal, PlaneNormal);
+
+    float LenProjNormal = length(ProjNormal) + 0.000001f;
+    float RecipMag = 1.0f / (LenProjNormal);
+
+    float CosAng = dot(ProjNormal, Perp) * RecipMag;
+    float Gamma = acos(CosAng) - PI/2.0;
+    float CosGamma = dot(ProjNormal, ViewDir) * RecipMag;
+    float SinGamma = CosAng * -2.0f;
+
+	// clamp to normal hemisphere 
+    Angles.x = Gamma + max(-Angles.x - Gamma, -(PI / 2.0));
+    Angles.y = Gamma + min(Angles.y - Gamma, (PI / 2.0));
+
+    float AO = ((LenProjNormal) * 0.25 *
+			((Angles.x * SinGamma + CosGamma - cos((2.0 * Angles.x) - Gamma)) +
+			(Angles.y * SinGamma + CosGamma - cos((2.0 * Angles.y) - Gamma))));
+
+    return AO;
+}
+
+ 
 float4 MainPS(VertexShaderOutput input):SV_Target0
 {
     float linearDepth =tex2D(gProjectionDepth, input.TexCoords).x;
    
     float3 normal = tex2D(gNormal, input.TexCoords).xyz * 2.0 - 1.0;
+    normal = mul(float4(normal, 0), NormalView).xyz;
     float3 worldPos = /*!usingDepthReconstructWorldPos?tex2D(gPositionWS, input.TexCoords).xyz:*/ReconstructViewPos(input.TexCoords, linearDepth) + CameraPos;
    // return float4(worldPos.xyz, 1);
+    float3 viewPos = mul(float4(worldPos, 1), View).xyz;
  
+    
+     
+    float stride = ((1 / PixelSize.x)*RADIUS / -viewPos.z) / (STEP_COUNT + 1.0);
+    float stepRadian = PI*2.0 / DIRECTION_COUNT;
+    if (stride < 1)
+    {
+        return 1.0;
+    }
+        
+    float3 randomVec = float3(tex2D(texNoise, input.TexCoords).r , tex2D(texNoise, input.TexCoords).g, 0);
+    float ao = 0;
+  //  float2 ScreenDir = randomVec.xy * stride*PixelSize;
+  //  float SinDeltaAngle = sin(PI * 2 / DIRECTION_COUNT);
+ //   float CosDeltaAngle = cos(PI*2 / DIRECTION_COUNT);
+   float PixelRadius =min(RADIUS / -viewPos.z, 0.1);
+    float StepRadius = PixelRadius / ((float) STEP_COUNT + 1);
+    [unroll(DIRECTION_COUNT)]
+    for (int i = 0; i < DIRECTION_COUNT; i++)
+    {
+       float radian = stepRadian * (i + randomVec.x);
+        float sinr, cosr;
+        sincos(radian, sinr, cosr);
+        float2 direction = float2(cosr, sinr) * stride * PixelSize;
+       
+        float2 horizons = SearchForLargestAngleDual(STEP_COUNT, input.TexCoords, direction, StepRadius, 0.1, viewPos, normalize(-viewPos), 0.5);
+
+        ao += ComputeInnerIntegral(horizons, direction, normalize(-viewPos), normal);
+      //  randomVec.xy += direction;
+      //  float2 TempScreenDir = ScreenDir.xy;
+     //   ScreenDir.x = (TempScreenDir.x * CosDeltaAngle) + (TempScreenDir.y * -SinDeltaAngle);
+     //   ScreenDir.y = (TempScreenDir.x * SinDeltaAngle) + (TempScreenDir.y * CosDeltaAngle);
  
-    float3 randomVec = float3(tex2D(texNoise, input.TexCoords).r * 2 - 1 + 0.0001, tex2D(texNoise, input.TexCoords).g * 2 - 1 + 0.0001, 0);
+                        
+ 
+		// Rotate for the next angle
+        
+ 
+    /*    float radian = stepRadian * (i + randomVec.x);
+        float sinr, cosr;
+        sincos(radian, sinr, cosr);
+        float2 direction = float2(cosr, sinr);
+       
+       
+        float rayPixels = frac(randomVec.y) * stride + 1.0;
+        float topOcclusion = 0.1;
     
+        for (int s = 0; s < STEP_COUNT; s++)
+        {
+            float2 uv2 = round(rayPixels * direction) * PixelSize + input.TexCoords;
+         
+            float linearDepth2 = tex2D(gProjectionDepth, uv2).x;
+            float3 vpos2 = mul(float4(ReconstructViewPos(uv2, linearDepth2).xyz + CameraPos, 1), View).xyz;
+           
+            ao += ComputeAO(viewPos, vpos2, normal, topOcclusion);
+            rayPixels += stride;
+        }*/
+    }
     
-    
-    float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
+    ao /= (DIRECTION_COUNT);
+//    ao *= 2.0 / PI;
+    return float4(ao.xxx, 1);
+  /*      float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     float3 bitangent = cross(normal, tangent);
     float3x3 TBN = float3x3(tangent, bitangent, normal);
     
@@ -167,7 +339,7 @@ float4 MainPS(VertexShaderOutput input):SV_Target0
      //   float3 sampleViewPosDepth = tex2D(gPositionWS, offset.xy).xyz;
       
   //      sampleViewPosDepth.z = sampleViewPosDepth.z + sampleViewPosDepth.x * 0.000000000000000000000000000000001 + sampleViewPosDepth.y * 0.000000000000000000000000000000000001;
-        float sampleDepth =/* !usingDepthReconstructWorldPos? - sampleViewPosDepth.z:*/(tex2D(gProjectionDepth, offset.xy).x);
+        float sampleDepth =/* !usingDepthReconstructWorldPos? - sampleViewPosDepth.z:(tex2D(gProjectionDepth, offset.xy).x);
         
       
    // return float4(sampleDepth.xxx, 1);
@@ -188,7 +360,7 @@ float4 MainPS(VertexShaderOutput input):SV_Target0
     occlusion /= 8.0;
     
     
-    return float4(occlusion.xxx, 1);
+    return float4(occlusion.xxx, 1);*/
 
 }
 /*

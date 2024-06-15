@@ -29,7 +29,9 @@ namespace monogameMinecraft
             Texture2D blockTex7 = game.Content.Load<Texture2D>("blocksprites/log_oak");
             Texture2D blockTex8 = game.Content.Load<Texture2D>("blocksprites/log_oak");
             Texture2D blockTex9 = game.Content.Load<Texture2D>("blocksprites/leaves_oak_carried");
-            Texture2D blockTex12 = game.Content.Load<Texture2D>("blocksprites/sea_lantern");
+            Texture2D blockTex12 = game.Content.Load<Texture2D>("blocksprites/end_stone");
+            Texture2D blockTex13 = game.Content.Load<Texture2D>("blocksprites/endframe_top");
+            Texture2D blockTex14 = game.Content.Load<Texture2D>("blocksprites/sea_lantern");
             Texture2D blockTex102 = game.Content.Load<Texture2D>("blocksprites/torch_on");
             UIElement.UITextures = new Dictionary<string, Texture2D> {
                     { "menubackground" ,menubkgrd},
@@ -46,6 +48,8 @@ namespace monogameMinecraft
                     {"blocktexture8" ,blockTex8},
                     { "blocktexture9",blockTex9},
                     { "blocktexture12",blockTex12},
+                    { "blocktexture13",blockTex13},
+                    { "blocktexture14",blockTex14},
                 { "blocktexture102",blockTex102}
             };
             UIElement.menuUIs = new List<UIElement> {

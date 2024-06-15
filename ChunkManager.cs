@@ -10,6 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -20,8 +21,8 @@ namespace monogameMinecraft
         public static int buildingChunksCount = 0;
         public static object updateWorldThreadLock=new object();
         public static object deleteChunkThreadLock = new object();
-        public static Chunk GetChunk(Vector2Int pos)
-        {
+        public static Chunk GetChunk(Vector2Int pos)=>VoxelWorld.currentWorld.GetChunk(pos);
+      /*  {
             if (chunks == null)
             {
                 return null;
@@ -39,7 +40,7 @@ namespace monogameMinecraft
                 return null;
             }
             
-        }
+        }*/
         public static Vector3Int Vec3ToBlockPos(Vector3 pos)
         {
             Vector3Int intPos = new Vector3Int(FloatToInt(pos.X), FloatToInt(pos.Y), FloatToInt(pos.Z));
@@ -81,7 +82,7 @@ namespace monogameMinecraft
         public static string gameWorldDataPath = AppDomain.CurrentDomain.BaseDirectory;
 
         
-        public static void SaveWorldData()
+   /*     public static void SaveWorldData()
         {
 
             FileStream fs;
@@ -116,7 +117,7 @@ namespace monogameMinecraft
             byte[] allWorldData = MessagePackSerializer.Serialize(chunkDataReadFromDisk);
             File.WriteAllBytes(gameWorldDataPath + "unityMinecraftServerData/GameData/world.json", allWorldData);
             isWorldDataSaved = true;
-        }
+        }*/
         public static  bool CheckIsPosInChunk(Vector3 pos, Chunk c)
         {
             if (c == null)
@@ -153,7 +154,7 @@ namespace monogameMinecraft
             }
         }
        
-        public static void UpdateWorldThread( GamePlayer player,MinecraftGame game)
+     /*   public static void UpdateWorldThread( GamePlayer player,MinecraftGame game)
         {
             BoundingFrustum frustum;
             while (true)
@@ -162,7 +163,7 @@ namespace monogameMinecraft
                 {
                     lock (deleteChunkThreadLock)
                     {
-if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
+                if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                 {
                     return;
                 }
@@ -212,8 +213,8 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                 }
                 
             }
-        }
-        public static void TryDeleteChunksThread( GamePlayer player,MinecraftGame game)
+        }*/
+     /*   public static void TryDeleteChunksThread( GamePlayer player,MinecraftGame game)
         {
             while (true)
             { 
@@ -241,7 +242,7 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                             /*    && (c.Value.leftChunk==null||(c.Value.leftChunk!=null&&c.Value.leftChunk.isTaskCompleted == true))
                                 && (c.Value.rightChunk == null || (c.Value.rightChunk != null && c.Value.rightChunk.isTaskCompleted == true))
                                 && (c.Value.frontChunk == null || (c.Value.frontChunk != null && c.Value.frontChunk.isTaskCompleted == true))
-                                && (c.Value.backChunk == null || (c.Value.backChunk != null && c.Value.backChunk.isTaskCompleted == true))*/
+                                && (c.Value.backChunk == null || (c.Value.backChunk != null && c.Value.backChunk.isTaskCompleted == true))
                             )
                         {
                             // Chunk c2;
@@ -291,13 +292,13 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
 
                 
             }
-        }
+        }*/
         public static short GetBlock(Vector3 pos)
         {
             Vector3Int intPos = Vector3Int.FloorToIntVec3(pos);
             Chunk chunkNeededUpdate = ChunkManager.GetChunk(ChunkManager.Vec3ToChunkPos(pos));
-          
-            if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false)
+            
+            if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false||chunkNeededUpdate.isUnused==true)
             { 
                 return 1;
             }
@@ -426,7 +427,7 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
                 //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
                 //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
             }
-        public static void ReadJson()
+    /*    public static void ReadJson()
         {
             chunkDataReadFromDisk.Clear();
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
@@ -448,7 +449,7 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
             }
 
             byte[] worldData = File.ReadAllBytes(gameWorldDataPath + "unityMinecraftServerData/GameData/world.json");
-            /*  List<ChunkData> tmpList = new List<ChunkData>();
+              List<ChunkData> tmpList = new List<ChunkData>();
               foreach (string s in worldData)
               {
                   ChunkData tmp = JsonConvert.DeserializeObject<ChunkData>(s);
@@ -457,13 +458,13 @@ if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
               foreach (ChunkData w in tmpList)
               {
                   chunkDataReadFromDisk.Add(new Vector2Int(w.chunkPos.x, w.chunkPos.y), w);
-              }*/
+              }
             if (worldData.Length > 0)
             {
                 chunkDataReadFromDisk = MessagePackSerializer.Deserialize<Dictionary<Vector2Int, ChunkData>>(worldData);
             }
 
             isJsonReadFromDisk = true;
-        }
+        }*/
     }
 }

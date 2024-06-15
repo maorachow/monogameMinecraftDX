@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using monogameMinecraftDX;
 namespace monogameMinecraft
 {
     public class GBufferRenderer
@@ -116,7 +117,7 @@ namespace monogameMinecraft
             
             graphicsDevice.SetRenderTargets(binding);
            
-            chunkRenderer.RenderAllChunksGBuffer(ChunkManager.chunks, player, this.gBufferEffect);
+            chunkRenderer.RenderAllChunksGBuffer(VoxelWorld.currentWorld.chunks, player, this.gBufferEffect);
             entityRenderer.DrawGBuffer(gBufferEntityEffect);
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);

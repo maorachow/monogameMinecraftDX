@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Xna.Framework;
+using monogameMinecraftDX;
 namespace monogameMinecraft
 {
     public class EntityManager
@@ -21,7 +22,7 @@ namespace monogameMinecraft
         }
         public static void TrySpawnNewZombie(MinecraftGame game,float deltaTime)
         {
-            if (randomGenerator.NextSingle() >= 1-deltaTime/**0.1f*/ && EntityBeh.worldEntities.Count < 70)
+            if (randomGenerator.NextSingle() >= 1-deltaTime/**0.1f*/ && EntityBeh.worldEntities.Count < 70&&VoxelWorld.currentWorld.worldID==0)
             {
                 Vector2 randSpawnPos = new Vector2(game.gamePlayer.playerPos.X+(randomGenerator.NextSingle() - 0.5f) * 80f, game.gamePlayer.playerPos.Z + (randomGenerator.NextSingle() - 0.5f) * 80f);
                 Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkManager.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
@@ -119,9 +120,11 @@ namespace monogameMinecraft
         public string entityID;
         [Key(8)]
         public float entityHealth;
-      
 
-        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth )
+        [Key(9)]
+        public int entityInWorldID;
+
+        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth,int entityInWorldID )
         {
             this.typeid = typeid;
             this.posX = posX;
@@ -132,7 +135,7 @@ namespace monogameMinecraft
             this.rotZ = rotZ;
             this.entityID = entityID;
             this.entityHealth = entityHealth;
-           
+           this.entityInWorldID = entityInWorldID;
         }
     }
 }

@@ -42,8 +42,9 @@ namespace monogameMinecraft
             this.ssaoEffect = ssaoEffect;
             this.gBufferRenderer = gBufferRenderer;
             this.cam = player.cam;
-          
-            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, 800, 600, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            int width = graphicsDevice.PresentationParameters.BackBufferWidth;
+            int height = graphicsDevice.PresentationParameters.BackBufferHeight;
+            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
       
             this.player = player;
             InitializeVertices();
@@ -110,13 +111,18 @@ namespace monogameMinecraft
                //     ssaoEffect.Parameters["projection"].SetValue(player.cam.projectionMatrix);
                    
                     ssaoEffect.Parameters["NormalTex"].SetValue(this.renderTargetNormal);*/
-          
+
+            int width = graphicsDevice.PresentationParameters.BackBufferWidth;
+            int height = graphicsDevice.PresentationParameters.BackBufferHeight;
+            if (ssaoEffect.Parameters["PixelSize"] != null) { ssaoEffect.Parameters["PixelSize"].SetValue(new Vector2(1f / width, 1f / height)); }
             if (ssaoEffect.Parameters["NormalTex"] != null) { ssaoEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
          //   if (ssaoEffect.Parameters["samples"] != null) {ssaoEffect.Parameters["samples"].SetValue(ssaoKernel.ToArray());}
             if (ssaoEffect.Parameters["NoiseTex"] != null) { ssaoEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             if (ssaoEffect.Parameters["ProjectionDepthTex"] != null) { ssaoEffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth); }
-     //       if (ssaoEffect.Parameters["PositionWSTex"] != null) { ssaoEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
+            if (ssaoEffect.Parameters["AlbedoTex"] != null) { ssaoEffect.Parameters["AlbedoTex"].SetValue(gBufferRenderer.renderTargetAlbedo); }
+            //       if (ssaoEffect.Parameters["PositionWSTex"] != null) { ssaoEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             if (ssaoEffect.Parameters["View"] != null) { ssaoEffect.Parameters["View"].SetValue(cam.viewMatrix); }
+            if (ssaoEffect.Parameters["NormalView"] != null) { ssaoEffect.Parameters["NormalView"].SetValue(cam.viewMatrixOrigin); }
             if (ssaoEffect.Parameters["CameraPos"] != null) { ssaoEffect.Parameters["CameraPos"].SetValue(cam.position); }
             if (ssaoEffect.Parameters["ViewProjection"] != null) { ssaoEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix);}
             /*        
