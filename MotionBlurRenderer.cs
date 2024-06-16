@@ -14,7 +14,8 @@ namespace monogameMinecraftDX
         public GraphicsDevice device;
         public Effect motionBlurEffect;
         public MotionVectorRenderer motionVectorRenderer;
-        public RenderTarget2D processedImage;
+        public RenderTarget2D processedImage { get; set; }
+
         public MotionBlurRenderer(GraphicsDevice device, Effect motionBlurEffect,MotionVectorRenderer motionVectorRenderer)
         {
             this.device = device;

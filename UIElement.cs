@@ -26,5 +26,6 @@ namespace monogameMinecraft
         public static List<UIElement> settingsUIsPage2 = new List<UIElement>();
         public static int settingsUIsPageID;
        public static List<UIElement> inGameUIs = new List<UIElement>();
+        public static List<UIElement> pauseMenuUIs = new List<UIElement>();
     }
 }

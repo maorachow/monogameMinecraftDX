@@ -31,7 +31,7 @@ namespace monogameMinecraft
     {
         private GraphicsDeviceManager _graphics;
         public SpriteBatch _spriteBatch;
-        public Effect chunkSolidEffect;
+    /*    public Effect chunkSolidEffect;
         public Effect chunkShadowEffect;
         public Effect entityEffect;
         public Effect ssaoEffect;
@@ -50,7 +50,7 @@ namespace monogameMinecraft
         public Effect terrainMipmapEffect;
         public Effect hiZBufferEffect;
         public Effect fxaaEffect;
-        public Effect motionBlurEffect;
+        public Effect motionBlurEffect;*/
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
         public ChunkRenderer chunkRenderer;
@@ -80,6 +80,8 @@ namespace monogameMinecraft
         public FXAARenderer fxaaRenderer;
         public HiZBufferRenderer hiZBufferRenderer;
         public MotionBlurRenderer motionBlurRenderer;
+        public EffectsManager effectsManager = new EffectsManager();
+        public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -117,10 +119,17 @@ namespace monogameMinecraft
             {
                 element1.OnResize();
             }
+            foreach (UIElement element1 in UIElement.pauseMenuUIs)
+            {
+                element1.OnResize();
+            }
             switch (status)
             {
                 case GameStatus.Started:
-
+                    foreach (UIElement element1 in UIElement.pauseMenuUIs)
+                    {
+                        element1.OnResize();
+                    }
 
                     int width = GraphicsDevice.PresentationParameters.BackBufferWidth;
                     int height = GraphicsDevice.PresentationParameters.BackBufferHeight;
@@ -147,6 +156,11 @@ namespace monogameMinecraft
                     ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     ssrRenderer.renderTargetSSR = new RenderTarget2D(GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     ssrRenderer.renderTargetSSRPrev = new RenderTarget2D(GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+                    foreach(var processor in customPostProcessors)
+                    {
+                        processor.processedImage.Dispose();
+                        processor.processedImage = new RenderTarget2D(GraphicsDevice, width , height , false, SurfaceFormat.Color, DepthFormat.Depth24);
+                    }
                     float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
                     gamePlayer.cam.aspectRatio= aspectRatio;
                     gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f,1000f);
@@ -172,64 +186,79 @@ namespace monogameMinecraft
             gamePlayer = new GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
-       /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
-            updateWorldThread.IsBackground = true;
-            updateWorldThread.Start();
-            tryRemoveChunksThread = new Thread(() => ChunkManager.TryDeleteChunksThread( gamePlayer, this));
-            tryRemoveChunksThread.IsBackground = true;
-            tryRemoveChunksThread.Start();*/
-
-            randomTextureGenerator=new RandomTextureGenerator();
+            /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
+                 updateWorldThread.IsBackground = true;
+                 updateWorldThread.Start();
+                 tryRemoveChunksThread = new Thread(() => ChunkManager.TryDeleteChunksThread( gamePlayer, this));
+                 tryRemoveChunksThread.IsBackground = true;
+                 tryRemoveChunksThread.Start();*/
+        
+            effectsManager.LoadEffects(Content);
+                 randomTextureGenerator =new RandomTextureGenerator();
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
            
             globalMaterialParamsManager = new GlobalMaterialParamsManager();
-            chunkSolidEffect = Content.Load<Effect>("blockeffect");
-            chunkShadowEffect = Content.Load<Effect>("createshadowmapeffect");
-            entityEffect = Content.Load<Effect>("entityeffect");
-            //  chunkEffect = Content.Load<Effect>("blockeffect");
-            gBufferEffect = Content.Load<Effect>("gbuffereffect");
-            gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
-            ssaoEffect = Content.Load<Effect>("ssaoeffect");
-            lightShaftEffect = Content.Load<Effect>("lightshafteffect");
-            skyboxEffect = Content.Load<Effect>("skyboxeffect");
-            ssrEffect = Content.Load<Effect>("ssreffect");
-            ssidEffect = Content.Load<Effect>("ssideffect");
-            deferredBlockEffect = Content.Load<Effect>("deferredblockeffect");
-            contactShadowEffect = Content.Load<Effect>("contactshadoweffect");
-            deferredBlendEffect = Content.Load<Effect>("deferredblendeffect");
-            brdfLUTEffect = Content.Load<Effect>("brdfluteffect");
-            motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
-            textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
-            terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
-            hiZBufferEffect = Content.Load<Effect>("hizbuffereffect");
-            fxaaEffect = Content.Load<Effect>("fxaaeffect");
-            motionBlurEffect = Content.Load<Effect>("motionblureffect");
-            terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, terrainMipmapEffect);
-            brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, brdfLUTEffect);
+            /*     chunkSolidEffect = Content.Load<Effect>("blockeffect");
+                 chunkShadowEffect = Content.Load<Effect>("createshadowmapeffect");
+                 entityEffect = Content.Load<Effect>("entityeffect");
+                 //  chunkEffect = Content.Load<Effect>("blockeffect");
+                 gBufferEffect = Content.Load<Effect>("gbuffereffect");
+                 gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
+                 ssaoEffect = Content.Load<Effect>("ssaoeffect");
+                 lightShaftEffect = Content.Load<Effect>("lightshafteffect");
+                 skyboxEffect = Content.Load<Effect>("skyboxeffect");
+                 ssrEffect = Content.Load<Effect>("ssreffect");
+                 ssidEffect = Content.Load<Effect>("ssideffect");
+                 deferredBlockEffect = Content.Load<Effect>("deferredblockeffect");
+                 contactShadowEffect = Content.Load<Effect>("contactshadoweffect");
+                 deferredBlendEffect = Content.Load<Effect>("deferredblendeffect");
+                 brdfLUTEffect = Content.Load<Effect>("brdfluteffect");
+                 motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
+                 textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
+                 terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
+                 hiZBufferEffect = Content.Load<Effect>("hizbuffereffect");
+                 fxaaEffect = Content.Load<Effect>("fxaaeffect");
+                 motionBlurEffect = Content.Load<Effect>("motionblureffect");*/
+            terrainTex = Content.Load<Texture2D>("terrain");
+            terrainTexNoMip = Content.Load<Texture2D>("terrainnomipmap");
+            terrainNormal = Content.Load<Texture2D>("terrainnormal");
+         //   chunkSolidEffect = Content.Load<Effect>("blockeffect");
+            terrainDepth = Content.Load<Texture2D>("terrainheight");
+            terrainMER = Content.Load<Texture2D>("terrainmer");
+            terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, effectsManager.gameEffects["texturecopyeffect"]);
+            brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, effectsManager.gameEffects["brdfluteffect"]);
             brdfLUTRenderer.CalculateLUT();
             gameTimeManager = new GameTimeManager(gamePlayer);
-            chunkRenderer = new ChunkRenderer(this, GraphicsDevice, chunkSolidEffect,null, gameTimeManager);
-            pointLightUpdater = new PointLightUpdater(chunkSolidEffect, gamePlayer);
+            chunkRenderer = new ChunkRenderer(this, GraphicsDevice, effectsManager.gameEffects["blockforwardeffect"],null, gameTimeManager);
+            pointLightUpdater = new PointLightUpdater(gamePlayer);
             chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth,terrainTexNoMip,terrainMER);
-            gBufferEffect = Content.Load<Effect>("gbuffereffect");
-            gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
-            entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, entityEffect, Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), chunkShadowEffect, null, gameTimeManager);
-            gBufferRenderer = new GBufferRenderer(this.GraphicsDevice, gBufferEffect, gBufferEntityEffect, gamePlayer, chunkRenderer, entityRenderer);
-            skyboxRenderer = new SkyboxRenderer(GraphicsDevice, skyboxEffect, null, gamePlayer, Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
+           /* gBufferEffect = Content.Load<Effect>("gbuffereffect");
+            gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");*/
+            entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, effectsManager.gameEffects["entityeffect"], Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, gameTimeManager);
+            gBufferRenderer = new GBufferRenderer(this.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], gamePlayer, chunkRenderer, entityRenderer);
+            skyboxRenderer = new SkyboxRenderer(GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, gamePlayer, Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
                Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightup"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightdown"), Content.Load<Texture2D>("skybox/skyboxnight"), gameTimeManager
                );
 
-            contactShadowRenderer = new ContactShadowRenderer(GraphicsDevice, contactShadowEffect, gBufferRenderer, gameTimeManager, gamePlayer);
-            shadowRenderer = new ShadowRenderer(this, GraphicsDevice,chunkShadowEffect, chunkRenderer, entityRenderer,gameTimeManager);
-            motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice,motionVectorEffect,gBufferRenderer, gamePlayer);
-                 ssaoRenderer = new SSAORenderer(ssaoEffect, gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
-            fxaaRenderer = new FXAARenderer(GraphicsDevice, fxaaEffect);
-            motionBlurRenderer = new MotionBlurRenderer(GraphicsDevice, motionBlurEffect, motionVectorRenderer);
-            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, deferredBlockEffect, shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, deferredBlendEffect, skyboxRenderer,fxaaRenderer, motionBlurRenderer);
-            hiZBufferRenderer = new HiZBufferRenderer(GraphicsDevice, hiZBufferEffect, gBufferRenderer, textureCopyEffect);
-            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, ssrEffect, deferredShadingRenderer, textureCopyEffect,motionVectorRenderer, hiZBufferRenderer) ;
-            ssidRenderer = new SSIDRenderer(GraphicsDevice, ssidEffect, gBufferRenderer, gamePlayer, deferredShadingRenderer, textureCopyEffect, motionVectorRenderer, hiZBufferRenderer);
-           
+            contactShadowRenderer = new ContactShadowRenderer(GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, gameTimeManager, gamePlayer);
+            shadowRenderer = new ShadowRenderer(this, GraphicsDevice,effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer,gameTimeManager);
+            motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"],gBufferRenderer, gamePlayer);
+                 ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
+            fxaaRenderer = new FXAARenderer(GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
+            motionBlurRenderer = new MotionBlurRenderer(GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);
+            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer,fxaaRenderer, motionBlurRenderer);
+
+
+            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess0"));
+            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess1"));
+            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess2"));
+            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess3"));
+            effectsManager.LoadCustomPostProcessEffects(GraphicsDevice,customPostProcessors,Content);
+            hiZBufferRenderer = new HiZBufferRenderer(GraphicsDevice, effectsManager.gameEffects["hizbuffereffect"], gBufferRenderer, effectsManager.gameEffects["texturecopyraweffect"]);
+            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, effectsManager.gameEffects["ssreffect"], deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"],motionVectorRenderer, hiZBufferRenderer) ;
+            ssidRenderer = new SSIDRenderer(GraphicsDevice, effectsManager.gameEffects["ssideffect"], gBufferRenderer, gamePlayer, deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer);
+
+            deferredShadingRenderer.customPostProcessors=customPostProcessors;  
             deferredShadingRenderer.ssidRenderer = ssidRenderer;
             deferredShadingRenderer.ssrRenderer = ssrRenderer;
             chunkRenderer.shadowRenderer = shadowRenderer;
@@ -238,7 +267,7 @@ namespace monogameMinecraft
             chunkRenderer.lightUpdater = pointLightUpdater;
             shadowRenderer.zombieModel = Content.Load<Model>("zombiemodelref");
            
-            volumetricLightRenderer = new VolumetricLightRenderer(GraphicsDevice, gBufferRenderer, _spriteBatch,Content.Load<Effect>("volumetricmaskblend"), lightShaftEffect,gamePlayer, gameTimeManager);
+            volumetricLightRenderer = new VolumetricLightRenderer(GraphicsDevice, gBufferRenderer, _spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"],gamePlayer, gameTimeManager);
             chunkRenderer.SSRRenderer = ssrRenderer;
             volumetricLightRenderer.entityRenderer = entityRenderer;
          
@@ -251,11 +280,11 @@ namespace monogameMinecraft
             EntityManager.ReadEntityData();
             Debug.WriteLine(EntityBeh.entityDataReadFromDisk.Count);
             EntityBeh.SpawnEntityFromData(this);
-          
-            
+
+            isGamePaused = false;
         }
 
-        void QuitGameplay()
+       public void QuitGameplay()
         {
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
@@ -345,12 +374,7 @@ namespace monogameMinecraft
         {
            
             
-            terrainTex = Content.Load<Texture2D>("terrain");
-            terrainTexNoMip = Content.Load<Texture2D>("terrainnomipmap");
-            terrainNormal = Content.Load<Texture2D>("terrainnormal");
-            chunkSolidEffect = Content.Load<Effect>("blockeffect");
-            terrainDepth = Content.Load<Texture2D>("terrainheight");
-            terrainMER = Content.Load<Texture2D>("terrainmer");
+          
        //     skyboxTex = Content.Load<TextureCube>("skybox");
             // terrainTex.
             //       Debug.WriteLine(terrainTex.Width + " " + terrainTex.Height);
@@ -361,6 +385,12 @@ namespace monogameMinecraft
         }
         int lastMouseX;
         int lastMouseY;
+        public bool isGamePaused = false;
+        public void ResumeGame()
+        {
+            isGamePaused = false;
+            IsMouseVisible = false;
+        }
         protected override void Update(GameTime gameTime)
         {
             if(!IsActive) return;
@@ -400,15 +430,25 @@ namespace monogameMinecraft
                     }
                     break;
                 case GameStatus.Started:
+                    if (isGamePaused)
+                    {
 
+                        foreach(var el in UIElement.pauseMenuUIs)
+                        {
+                            el.Update();
+                        }
+                        break ;
+                    }
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 //     status = GameStatus.Quiting;
-                QuitGameplay();
+              //  QuitGameplay();
               //  Exit();
              //   Environment.Exit(0);
-            }
+             isGamePaused = true;
+                        IsMouseVisible = true;
+                    }
                     ProcessPlayerKeyboardInput(gameTime);
                   
                     ProcessPlayerMouseInput();
@@ -529,7 +569,7 @@ namespace monogameMinecraft
     //        chunkRenderer.RenderAllChunksTransparent(ChunkManager.chunks, gamePlayer);
 
             
-            deferredShadingRenderer.FinalBlend(_spriteBatch, volumetricLightRenderer, GraphicsDevice);
+            deferredShadingRenderer.FinalBlend(_spriteBatch, volumetricLightRenderer, GraphicsDevice,gamePlayer);
             GraphicsDevice.DepthStencilState = DepthStencilState.None; 
             
         }
@@ -585,6 +625,16 @@ namespace monogameMinecraft
 
 
                     _spriteBatch.End();
+                    if (isGamePaused)
+                    {
+                        _spriteBatch.Begin(samplerState: SamplerState.PointWrap,blendState:BlendState.AlphaBlend);
+
+                        foreach (var el in UIElement.pauseMenuUIs)
+                        {
+                            el.DrawString(el.text);
+                        }
+                        _spriteBatch.End();
+                    }
                     break;
                 case GameStatus.Menu:
                     GraphicsDevice.Clear(Color.CornflowerBlue);

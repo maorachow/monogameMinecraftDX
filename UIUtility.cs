@@ -15,7 +15,8 @@ namespace monogameMinecraft
 
             SpriteFont sf;
             sf = game.Content.Load<SpriteFont>("defaultfont");
-            Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground");
+            Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground"); 
+            Texture2D menubkgrdTransparent = game.Content.Load<Texture2D>("menubackgroundtransparent");
             Texture2D buttonTex = game.Content.Load<Texture2D>("buttontexture");
             Texture2D hotbarTex = game.Content.Load<Texture2D>("hotbar");
             Texture2D selectedHotbarTex = game.Content.Load<Texture2D>("selectedhotbar");
@@ -35,6 +36,7 @@ namespace monogameMinecraft
             Texture2D blockTex102 = game.Content.Load<Texture2D>("blocksprites/torch_on");
             UIElement.UITextures = new Dictionary<string, Texture2D> {
                     { "menubackground" ,menubkgrd},
+                    { "menubackgroundtransparent" ,menubkgrdTransparent},
                     { "buttontexture" ,buttonTex},
                     {"hotbartexture",hotbarTex },
                     {"selectedhotbar",selectedHotbarTex },
@@ -87,6 +89,15 @@ namespace monogameMinecraft
             UIElement.inGameUIs = new List<UIElement>
             {
                 new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"])
+            };
+
+            UIElement.pauseMenuUIs = new List<UIElement>
+            {
+               // new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"])
+               new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackgroundtransparent"],game._spriteBatch),
+                 new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.ResumeGame() ,"Resume Game",null,1),
+                  new UIButton(new Vector2(0.25f, 0.35f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.QuitGameplay() ,"Quit Game",null,1),
+                    new UIButton(new Vector2(0.25f, 0.6f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
             };
             game.status = GameStatus.Menu;
         }

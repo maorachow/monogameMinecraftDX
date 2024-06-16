@@ -1408,8 +1408,8 @@ public struct RandomGenerator3D
 
     public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts,List<VertexPositionNormalTangentTexture> WTVerts,List<ushort> OpqIndices,List<ushort> NSIndices,List<ushort> WTIndices)
     {
-
-        lightPoints.Clear();
+        lightPoints=new List<Vector3>();
+     
         for (int x = 0; x < chunkWidth; x++)
         {
            

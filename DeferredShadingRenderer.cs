@@ -30,6 +30,7 @@ namespace monogameMinecraft
         public RenderTarget2D finalImage;
         public FXAARenderer fxaaRenderer;
         public MotionBlurRenderer motionBlurRenderer;
+        public List<CustomPostProcessor> customPostProcessors;
         public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer, MotionBlurRenderer motionBlurRenderer)
         {
             this.device = device;
@@ -134,7 +135,7 @@ namespace monogameMinecraft
         }
 
 
-        public void FinalBlend(SpriteBatch sb,VolumetricLightRenderer vlr,GraphicsDevice device)
+        public void FinalBlend(SpriteBatch sb,VolumetricLightRenderer vlr,GraphicsDevice device, GamePlayer player)
         {
             skyboxRenderer.Draw(finalImage,true);
             deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
@@ -146,7 +147,21 @@ namespace monogameMinecraft
            
             motionBlurRenderer.ProcessImage(finalImage);
            // motionBlurRenderer.renderTargetMotionBlur;
-            fxaaRenderer.Draw(true, motionBlurRenderer.processedImage);
+
+
+            for(int i=0;i<customPostProcessors.Count;i++)
+            {
+                customPostProcessors[i].cam = player.cam;
+                if (i==0)
+                {
+                    customPostProcessors[i].ProcessImage(finalImage);
+                }
+                else
+                {
+                    customPostProcessors[i].ProcessImage(customPostProcessors[i-1].processedImage);
+                }
+            }
+            fxaaRenderer.Draw(true, customPostProcessors[customPostProcessors.Count-1].processedImage);
          //   sb.Begin(blendState: BlendState.Opaque);
         //    sb.Draw(finalImage, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
          //   sb.End();
