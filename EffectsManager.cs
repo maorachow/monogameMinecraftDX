@@ -7,12 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
-using Microsoft.Xna.Framework.Content.Pipeline.Builder;
+ 
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Framework.Content.Pipeline.Builder;
+ 
 using System.Diagnostics;
 using MonoGame.Extended.Content;
 namespace monogameMinecraftDX
@@ -24,7 +21,7 @@ namespace monogameMinecraftDX
         public bool isEffectsLoaded = false;
         public void LoadCustomPostProcessEffects(GraphicsDevice device,List<CustomPostProcessor> customPostProcessors ,ContentManager cm)
         {
-            ContentManager cmTemp = new ContentManager(cm.ServiceProvider, Directory.GetCurrentDirectory() + "/CustomEffects");
+            ContentManager cmTemp = new ContentManager(cm.ServiceProvider, AppDomain.CurrentDomain.BaseDirectory + "CustomEffects");
             Debug.WriteLine(cmTemp.GetGraphicsDevice().ToString());
             customPostProcessEffects.Clear();
             Effect e0;
@@ -113,7 +110,7 @@ namespace monogameMinecraftDX
         }
 
 
-        public static Effect CompileFX(GraphicsDevice gd, string sourceFilePath)
+     /*   public static Effect CompileFX(GraphicsDevice gd, string sourceFilePath)
         {
             //   string sourceFile = Directory.GetCurrentDirectory() + "/tmp.txt";
             //  File.WriteAllText(sourceFile, fxcode);
@@ -143,6 +140,6 @@ namespace monogameMinecraftDX
             return new Effect(gd, cecontent.GetEffectCode());
            
           
-        }
+        }*/
     }
 }

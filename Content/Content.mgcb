@@ -413,6 +413,12 @@
 /processorParam:DebugMode=Auto
 /build:postprocess1.fx
 
+#begin postprocess2.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:postprocess2.fx
+
 #begin randomnormal.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
