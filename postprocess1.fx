@@ -120,16 +120,27 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     }
     color /= sampleCount;*/
-     
-    float dist = distance(input.TexCoord.xy, float2(0.5, 0.5));
-    dist *= 1.5;
-    dist = clamp(dist, 0, 1);
-    float3 color = lerp(tex2D(inputTexture, input.TexCoord.xy).xyz, float3(0, 0, 0), dist);
+    float3 col = 0;
+    for (int i = -2; i <= 2; i++)
+    {
+        for (int j = -2; j <= 2; j++)
+        {
+            col += tex2D(inputTexture, input.TexCoord.xy + float2(i, j) * PixelSize).xyz;
+
+        }
+
+    }
+    col /= 25.0;
+    float centerDepth = tex2D(gProjectionDepth, float2(0.5, 0.5)).x;
+    float curDepth = tex2D(gProjectionDepth, input.TexCoord.xy).x;
+    float delta = abs(centerDepth - curDepth)/50.0;
+    delta = clamp(delta, 0, 1);
+    float3 color = lerp(tex2D(inputTexture, input.TexCoord.xy).xyz,col,delta);
     return float4(color.xyz, 1);
   
 }
 
-technique PostProcess2
+technique PostProcess1
 {
     pass P0
     {

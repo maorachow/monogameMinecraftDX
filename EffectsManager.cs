@@ -24,6 +24,14 @@ namespace monogameMinecraftDX
             ContentManager cmTemp = new ContentManager(cm.ServiceProvider, AppDomain.CurrentDomain.BaseDirectory + "CustomEffects");
             Debug.WriteLine(cmTemp.GetGraphicsDevice().ToString());
             customPostProcessEffects.Clear();
+
+            foreach (var processor in customPostProcessors)
+            {
+
+                processor.postProcessEffect = null ;
+                 
+
+            }
             Effect e0;
             Effect e1;
             Effect e2;
@@ -74,6 +82,12 @@ namespace monogameMinecraftDX
                
             }
             cmTemp.Dispose();
+            int width = device.PresentationParameters.BackBufferWidth;
+            int height = device.PresentationParameters.BackBufferHeight;
+            foreach (var processor in customPostProcessors)
+            {
+                processor.processedImage=new RenderTarget2D(device, width, height,false,SurfaceFormat.Color,DepthFormat.Depth24);
+            }
         }
         public void LoadEffects(ContentManager Content)
         {

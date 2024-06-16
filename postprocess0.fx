@@ -28,16 +28,6 @@ sampler2D motionVectorTex = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
-sampler2D gProjectionDepth = sampler_state
-{
-    Texture = <ProjectionDepthTex>;
- 
-    MipFilter = Point;
-    MagFilter = Point;
-    MinFilter = Point;
-    AddressU = Clamp;
-    AddressV = Clamp;
-};
 float2 PixelSize;
 struct VertexShaderInput
 {
@@ -120,16 +110,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     }
     color /= sampleCount;*/
-     
-    float dist = distance(input.TexCoord.xy, float2(0.5, 0.5));
-    dist *= 1.5;
-    dist = clamp(dist, 0, 1);
-    float3 color = lerp(tex2D(inputTexture, input.TexCoord.xy).xyz, float3(0, 0, 0), dist);
+    float3 colorHSB = rgb2hsb(tex2D(inputTexture, input.TexCoord.xy).xyz);
+    colorHSB.g *= 0.5;
+    float3 color = hsv2rgb(colorHSB);
     return float4(color.xyz, 1);
   
 }
 
-technique PostProcess2
+technique PostProcess0
 {
     pass P0
     {
