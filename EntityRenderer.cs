@@ -16,7 +16,7 @@ namespace monogameMinecraft
         public Effect basicShader;
         public Effect shadowMapShader;
         public GraphicsDevice device;
-        public Model zombieModel;
+        public static Model zombieModel;
         public Model zombieModelRef;
         public GamePlayer player;
         public Texture2D zombieTex;
@@ -127,7 +127,29 @@ namespace monogameMinecraft
                     switch (entity.typeID)
                     {
                         case 0:
-                            DrawZombie(entity,gBufferShader);
+                            //    DrawZombie(entity,gBufferShader);
+                            Matrix world = (Matrix.CreateTranslation(entity.position));
+                            Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                            {
+                                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
+                                {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
+                            };
+                         
+                            entity.animationState.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix,gBufferShader, optionalParams, ()=> {
+                                if (entity.isEntityHurt)
+                                {
+
+
+                                    gBufferShader.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
+
+                                }
+                                else
+                                {
+
+                                    gBufferShader.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
+
+                                }
+                            });
                             break;
                     }
                 }
@@ -255,11 +277,18 @@ namespace monogameMinecraft
         {
 
             Matrix world = (Matrix.CreateTranslation(entity.position));
-            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
-            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
-            zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
-            zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModelShadow(zombieModel, world, lightSpaceMat,shadowMapShader);
+            //   zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
+            //      zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+            //   zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+            //   zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+            //  DrawModelShadow(zombieModel, world, lightSpaceMat,shadowMapShader);
+            Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                            {
+                                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
+                                {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
+                            };
+        
+            entity.animationState.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
         public void DrawZombie(EntityBeh entity)
         {
@@ -306,7 +335,8 @@ namespace monogameMinecraft
                 }
 
                 Matrix world = (Matrix.CreateTranslation(entity.position));
-                zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
+
+                zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0)/* * zombieModelRef.Bones["head"].Transform*/;
                 zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
                 zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
                 zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
@@ -349,14 +379,15 @@ namespace monogameMinecraft
             }
             else
             {
-
+                
                 shader.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
               
             }
 
             Matrix world = (Matrix.CreateTranslation(entity.position));
-            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
-            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+          //  zombieModel.Root.Transform=world * Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(entity.rotationX), 0);
+            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), MathHelper.ToRadians(entity.rotationX), 0) * zombieModel.Bones["head"].Parent.Transform; /** zombieModelRef.Bones["head"].Transform*/;
+            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModel.Bones["body"].Parent.Transform;
             zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
             zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
             DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix,shader);

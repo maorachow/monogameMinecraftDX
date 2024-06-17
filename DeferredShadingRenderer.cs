@@ -154,7 +154,7 @@ namespace monogameMinecraft
                 customPostProcessors[i].cam = player.cam;
                 if (i==0)
                 {
-                    customPostProcessors[i].ProcessImage(finalImage);
+                    customPostProcessors[i].ProcessImage(motionBlurRenderer.processedImage);
                 }
                 else
                 {
