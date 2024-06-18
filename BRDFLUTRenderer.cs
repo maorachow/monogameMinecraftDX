@@ -20,7 +20,7 @@ namespace monogameMinecraftDX
             this.device = device;
             InitializeVertices();
             InitializeQuadBuffers(device);
-            renderTargetLUT = new RenderTarget2D(device, 512, 512, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+            renderTargetLUT = new RenderTarget2D(device, 512, 512, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.lutEffect = lutEffect;
         }
 

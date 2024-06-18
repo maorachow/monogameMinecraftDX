@@ -44,7 +44,7 @@ namespace monogameMinecraft
             this.cam = player.cam;
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
-            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, width/2, height/2, false, SurfaceFormat.Color, DepthFormat.Depth24);
       
             this.player = player;
             InitializeVertices();

@@ -42,8 +42,7 @@ sampler merSampler = sampler_state
     MagFilter = Point;
     MinFilter = Point;
     Mipfilter = Point;
-    MipLODBias = -4;
-    MaxLOD = 8;
+  
    
 };
 struct VertexShaderInput

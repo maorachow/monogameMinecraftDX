@@ -111,8 +111,8 @@ sampler2D texBRDFLUT = sampler_state
     MipFilter = Point;
     MagFilter = Point;
     MinFilter = Point;
-    AddressU = Border;
-    AddressV = Border;
+    AddressU = Clamp;
+    AddressV = Clamp;
 };
 float4x4 matInverseView;
 float4x4 matInverseProjection;
@@ -706,7 +706,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
        //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
        //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
             
-            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), mer.z)).rg;
+            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1-mer.z)).rg;
            
             float3 specular = albedo * (F * brdf.x + brdf.y);
                 return float4(lerp(specular, prevColor, clamp(1 - blendFactor, 0, 0.6)), 1);

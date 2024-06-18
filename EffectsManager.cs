@@ -119,7 +119,9 @@ namespace monogameMinecraftDX
             gameEffects.TryAdd("motionblureffect", Content.Load<Effect>("motionblureffect")) ;
             gameEffects.TryAdd("gbuffereffect", Content.Load<Effect>("gbuffereffect")) ;
             gameEffects.TryAdd("volumetricmaskblendeffect", Content.Load<Effect>("volumetricmaskblend")) ;
-
+            gameEffects.TryAdd("hdricubeeffect", Content.Load<Effect>("hdricubeeffect"));
+            gameEffects.TryAdd("hdriirradianceeffect", Content.Load<Effect>("hdriirradianceeffect")); 
+            gameEffects.TryAdd("hdriprefiltereffect", Content.Load<Effect>("hdriprefiltereffect"));
             isEffectsLoaded = true;
         }
 

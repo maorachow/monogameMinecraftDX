@@ -44,12 +44,12 @@ namespace monogameMinecraft
 
            new AnimationStep(new Dictionary<string, AnimationTransformation> {
                     
-                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -45f, 0f), new Vector3(1f, 1f, 1f)) },
-                    { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 45f, 0f), new Vector3(1f, 1f, 1f)) }
+                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                    { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
                 }, 0.5f),
                 new AnimationStep(new Dictionary<string, AnimationTransformation> {
-                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 45f, 0f),  new Vector3(1f, 1f, 1f)) },
-                    { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -45f, 0f), new Vector3(1f, 1f, 1f)) },
+                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
+                    { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
                       }, 0.5f)
         },true);
         public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt,MinecraftGame game)
@@ -149,7 +149,7 @@ namespace monogameMinecraft
             switch (typeID)
             {
             case 0:
-                    animationState.Update(deltaTime, curSpeed, out _, out _);
+                    animationState.Update(deltaTime, curSpeed/3f, out _, out _);
                 entityLifetime += deltaTime;
                     targetPos = game.gamePlayer.playerPos;
                 entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);

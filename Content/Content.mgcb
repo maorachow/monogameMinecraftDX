@@ -5,7 +5,7 @@
 /intermediateDir:obj/$(Platform)
 /platform:Windows
 /config:
-/profile:Reach
+/profile:HiDef
 /compress:False
 
 #-------------------------------- References --------------------------------#
@@ -273,6 +273,18 @@
 /processorParam:DebugMode=Auto
 /build:entityeffect.fx
 
+#begin environmenthdri.hdr
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=False
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=NoChange
+/build:environmenthdri.hdr
+
 #begin fxaaeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -290,6 +302,24 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:gbufferentityeffect.fx
+
+#begin hdricubeeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:hdricubeeffect.fx
+
+#begin hdriirradianceeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:hdriirradianceeffect.fx
+
+#begin hdriprefiltereffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:hdriprefiltereffect.fx
 
 #begin hizbuffereffect.fx
 /importer:EffectImporter

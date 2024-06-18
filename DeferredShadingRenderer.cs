@@ -26,12 +26,14 @@ namespace monogameMinecraft
         public GBufferRenderer gBufferRenderer;
         public ContactShadowRenderer contactShadowRenderer;
         public RenderTarget2D renderTargetLum;
+        public RenderTarget2D renderTargetLumSpec;
         public SkyboxRenderer skyboxRenderer;
         public RenderTarget2D finalImage;
         public FXAARenderer fxaaRenderer;
         public MotionBlurRenderer motionBlurRenderer;
         public List<CustomPostProcessor> customPostProcessors;
-        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer, MotionBlurRenderer motionBlurRenderer)
+        public HDRCubemapRenderer hdrCubemapRenderer;
+        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer, MotionBlurRenderer motionBlurRenderer, HDRCubemapRenderer hdrCubemapRenderer)
         {
             this.device = device;
             this.blockDeferredEffect = blockDeferredEffect;
@@ -45,6 +47,7 @@ namespace monogameMinecraft
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
             this.renderTargetLum = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            this.renderTargetLumSpec = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.finalImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             this.ssrRenderer = sSRRenderer;
             this.ssidRenderer = sSIDRenderer;
@@ -54,6 +57,7 @@ namespace monogameMinecraft
             InitializeQuadBuffers(device);
             this.fxaaRenderer = fxaaRenderer;
             this.motionBlurRenderer = motionBlurRenderer;
+            this.hdrCubemapRenderer = hdrCubemapRenderer;
         }
 
         public void Draw(GamePlayer player)
@@ -62,13 +66,13 @@ namespace monogameMinecraft
             SetCameraFrustum(player.cam, blockDeferredEffect);
          //   blockDeferredEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
           //  blockDeferredEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
-            blockDeferredEffect.Parameters["fogStart"].SetValue(256.0f);
-            blockDeferredEffect.Parameters["fogRange"].SetValue(1024.0f);
+            blockDeferredEffect.Parameters["fogStart"]?.SetValue(256.0f);
+            blockDeferredEffect.Parameters["fogRange"]?.SetValue(1024.0f);
             blockDeferredEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
             blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10,10, 10));
             blockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
-            blockDeferredEffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
+            blockDeferredEffect.Parameters["TextureMER"].SetValue(gBufferRenderer.renderTargetMER);
             //  basicShader.Parameters["LightPos"].SetValue(player.playerPos + new Vector3(10, 50, 30));
             blockDeferredEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             blockDeferredEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
@@ -130,7 +134,7 @@ namespace monogameMinecraft
                 blockDeferredEffect.Parameters["receiveShadow"].SetValue(true);
 
             }
-            RenderQuad(device, renderTargetLum, blockDeferredEffect,false,false) ;
+            RenderQuad(device, renderTargetLum,renderTargetLumSpec, blockDeferredEffect) ;
             
         }
 
@@ -138,11 +142,24 @@ namespace monogameMinecraft
         public void FinalBlend(SpriteBatch sb,VolumetricLightRenderer vlr,GraphicsDevice device, GamePlayer player)
         {
             skyboxRenderer.Draw(finalImage,true);
+            SetCameraFrustum(player.cam, deferredBlendEffect);
+
+        //    deferredBlendEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
+         //   deferredBlendEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
+            deferredBlendEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            deferredBlendEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
+            deferredBlendEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
+            deferredBlendEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultIrradianceCubemap);
+            deferredBlendEffect.Parameters["HDRPrefilteredTex"]?.SetValue(hdrCubemapRenderer.resultSpecularCubemapMip0);
+            deferredBlendEffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
             deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLum);
+            deferredBlendEffect.Parameters["TextureDeferredLumSpec"].SetValue(renderTargetLumSpec);
             deferredBlendEffect.Parameters["TextureAO"].SetValue(SSAORenderer.ssaoTarget);
-            deferredBlendEffect.Parameters["TextureReflection"].SetValue(ssrRenderer.renderTargetSSR);
-            deferredBlendEffect.Parameters["TextureIndirectDiffuse"].SetValue(ssidRenderer.renderTargetSSID);
+            deferredBlendEffect.Parameters["TextureReflection"]?.SetValue(ssrRenderer.renderTargetSSR);
+            deferredBlendEffect.Parameters["TextureIndirectDiffuse"]?.SetValue(ssidRenderer.renderTargetSSID);
+            deferredBlendEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
+            deferredBlendEffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
             RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor:false) ;
            
             motionBlurRenderer.ProcessImage(finalImage);

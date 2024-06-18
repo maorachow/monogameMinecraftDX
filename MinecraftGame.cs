@@ -82,6 +82,13 @@ namespace monogameMinecraft
         public MotionBlurRenderer motionBlurRenderer;
         public EffectsManager effectsManager = new EffectsManager();
         public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
+        HDRCubemapRenderer hdrCubemapRenderer;
+        Texture2D terrainTex;
+        Texture2D terrainTexNoMip;
+        Texture2D terrainNormal;
+        Texture2D terrainDepth;
+        Texture2D terrainMER;
+        Texture2D environmentHDRITex;
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -139,7 +146,7 @@ namespace monogameMinecraft
               
                        
 
-                           ssaoRenderer.ssaoTarget = new RenderTarget2D(ssaoRenderer.graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
+                           ssaoRenderer.ssaoTarget = new RenderTarget2D(ssaoRenderer.graphicsDevice, width / 2, height / 2, false, SurfaceFormat.Color, DepthFormat.Depth24);
                            volumetricLightRenderer.blendVolumetricMap = new RenderTarget2D(volumetricLightRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                            volumetricLightRenderer.renderTargetLum = new RenderTarget2D(volumetricLightRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                      //      ssrRenderer.renderTargetSSR=new RenderTarget2D(ssrRenderer.graphicsDevice, width,height,false,SurfaceFormat.Vector4, DepthFormat.Depth24);
@@ -149,7 +156,7 @@ namespace monogameMinecraft
                     motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.renderTargetLum = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     deferredShadingRenderer.finalImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
-                    
+                    deferredShadingRenderer.renderTargetLumSpec = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
                     motionBlurRenderer.processedImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
                     hiZBufferRenderer.ResizeTarget();
                     ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
@@ -225,9 +232,12 @@ namespace monogameMinecraft
          //   chunkSolidEffect = Content.Load<Effect>("blockeffect");
             terrainDepth = Content.Load<Texture2D>("terrainheight");
             terrainMER = Content.Load<Texture2D>("terrainmer");
+            environmentHDRITex = Content.Load<Texture2D>("environmenthdri");
             terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, effectsManager.gameEffects["texturecopyeffect"]);
             brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, effectsManager.gameEffects["brdfluteffect"]);
             brdfLUTRenderer.CalculateLUT();
+            hdrCubemapRenderer = new HDRCubemapRenderer(GraphicsDevice, effectsManager.gameEffects["hdricubeeffect"], environmentHDRITex, effectsManager.gameEffects["hdriirradianceeffect"], effectsManager.gameEffects["hdriprefiltereffect"]);
+            hdrCubemapRenderer.Render();
             gameTimeManager = new GameTimeManager(gamePlayer);
             chunkRenderer = new ChunkRenderer(this, GraphicsDevice, effectsManager.gameEffects["blockforwardeffect"],null, gameTimeManager);
             pointLightUpdater = new PointLightUpdater(gamePlayer);
@@ -239,14 +249,14 @@ namespace monogameMinecraft
             skyboxRenderer = new SkyboxRenderer(GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, gamePlayer, Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
                Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightup"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightdown"), Content.Load<Texture2D>("skybox/skyboxnight"), gameTimeManager
                );
-
+            skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultSpecularCubemapMip0 ;
             contactShadowRenderer = new ContactShadowRenderer(GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, gameTimeManager, gamePlayer);
             shadowRenderer = new ShadowRenderer(this, GraphicsDevice,effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer,gameTimeManager);
             motionVectorRenderer=new MotionVectorRenderer(this.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"],gBufferRenderer, gamePlayer);
                  ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
             motionBlurRenderer = new MotionBlurRenderer(GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);
-            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer,fxaaRenderer, motionBlurRenderer);
+            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer,null,null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer,fxaaRenderer, motionBlurRenderer,hdrCubemapRenderer);
 
 
             customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess0"));
@@ -365,11 +375,7 @@ namespace monogameMinecraft
 
             base.Initialize();
         }
-        Texture2D terrainTex;
-        Texture2D terrainTexNoMip;
-        Texture2D terrainNormal;
-        Texture2D terrainDepth;
-        Texture2D terrainMER;
+        
         protected override void LoadContent()
         {
            

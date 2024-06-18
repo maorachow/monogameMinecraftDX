@@ -75,7 +75,7 @@ namespace monogameMinecraftDX
             var a = stepProgress;
             var fromBone = curStep.GetBoneLocal(bone);
             var toBone = nextStep.GetBoneLocal(bone);
-
+            a=MathHelper.Clamp(a, 0f, 1f);
             AnimationTransformation ret=AnimationTransformation.Lerp(fromBone, toBone, a);
             return ret;
         }
@@ -211,9 +211,12 @@ namespace monogameMinecraftDX
             void Draw(Matrix world, Matrix view, Matrix projection)
             {
                 int count = model.Bones.Count;
-              
+
+                if (sharedDrawBoneMatrices == null || sharedDrawBoneMatrices.Length < count)
+                {
                     sharedDrawBoneMatrices = new Matrix[count];
-                
+                }
+
                 CopyAbsoluteBoneTransformsTo(sharedDrawBoneMatrices);
                 foreach (ModelMesh mesh in model.Meshes)
                 {

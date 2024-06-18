@@ -156,6 +156,41 @@ namespace monogameMinecraft
             }
            
         }
+
+
+        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, RenderTarget2D target2, Effect quadEffect,bool clearColor=true)
+        {
+
+          
+                device.SetRenderTargets(target,target2);
+                if (clearColor == true)
+                {
+                    device.Clear(Color.Transparent);
+                }
+
+          
+
+       
+           
+
+            device.SetVertexBuffer(quadVertexBuffer);
+            device.Indices = quadIndexBuffer;
+            RasterizerState rasterizerState = new RasterizerState();
+            rasterizerState.CullMode = CullMode.None;
+            device.RasterizerState = rasterizerState;
+            device.BlendState = BlendState.AlphaBlend;
+            foreach (var pass in quadEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
+            }
+            //    graphicsDevice.Clear(Color.White);
+          
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+          
+
+        }
         public void RenderQuadPureColor(GraphicsDevice device, RenderTarget2D target,Color color)
         {
             
