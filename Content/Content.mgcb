@@ -273,17 +273,17 @@
 /processorParam:DebugMode=Auto
 /build:entityeffect.fx
 
-#begin environmenthdri.hdr
+#begin environmenthdri.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
+/processorParam:ColorKeyEnabled=True
 /processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=False
+/processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=NoChange
-/build:environmenthdri.hdr
+/processorParam:TextureFormat=Color
+/build:environmenthdri.png
 
 #begin fxaaeffect.fx
 /importer:EffectImporter
@@ -550,6 +550,54 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:skyboxeffect.fx
+
+#begin sounds/dirtdig.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/dirtdig.wav
+
+#begin sounds/grassdig.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/grassdig.wav
+
+#begin sounds/stonedig.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/stonedig.wav
+
+#begin sounds/uiclick.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/uiclick.wav
+
+#begin sounds/waterdig.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/waterdig.ogg
+
+#begin sounds/wooddig.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/wooddig.wav
+
+#begin sounds/zombiehurt.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/zombiehurt.wav
+
+#begin sounds/zombiesay.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/zombiesay.wav
 
 #begin ssaoeffect.fx
 /importer:EffectImporter

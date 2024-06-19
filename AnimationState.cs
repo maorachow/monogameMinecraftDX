@@ -14,10 +14,10 @@ namespace monogameMinecraftDX
     {
 
         Animation animation;
-        Dictionary<string, Matrix> _cachedTransforms;
+    //    Dictionary<string, Matrix> _cachedTransforms;
       
         public AnimationStep curStep;
-        AnimationStep nextStep;
+        public AnimationStep nextStep;
 
         public float stepDuration => curStep.Duration;
         public float stepProgress => elapsedTimeInStep / stepDuration;
@@ -39,7 +39,7 @@ namespace monogameMinecraftDX
             stepIndex = 0;
             curStep = nextStep = null;
             repeats = animation.repeats;
-            _cachedTransforms = new Dictionary<string, Matrix>();
+       //     _cachedTransforms = new Dictionary<string, Matrix>();
             this.model = model;
             Reset();
         }
@@ -53,13 +53,13 @@ namespace monogameMinecraftDX
                 curStep = animation.GetStep(stepIndex);
                 nextStep = animation.GetStep(stepIndex + 1, repeats);
             }
-            _cachedTransforms.Clear();
+      //      _cachedTransforms.Clear();
         }
 
         public AnimationTransformation GetBoneTransformLocal(string bone, bool useAliases = true)
         {
             var a = stepProgress;
-        //    Debug.WriteLine(bone);
+       //     Debug.WriteLine(elapsedTimeInStep);
             var fromBone = curStep.GetBoneLocal(bone);
             var toBone = nextStep.GetBoneLocal(bone);
  
@@ -70,7 +70,7 @@ namespace monogameMinecraftDX
         }
      
 
-        public AnimationTransformation GetAnimationBoneTransformation(string bone)
+  /*      public AnimationTransformation GetAnimationBoneTransformation(string bone)
         {
             var a = stepProgress;
             var fromBone = curStep.GetBoneLocal(bone);
@@ -79,7 +79,7 @@ namespace monogameMinecraftDX
             AnimationTransformation ret=AnimationTransformation.Lerp(fromBone, toBone, a);
             return ret;
         }
-
+  */
 
         public void DrawAnimatedModel(Matrix world, Matrix view, Matrix projection)
         {
@@ -310,9 +310,10 @@ namespace monogameMinecraftDX
                 return;
             }
 
-          
-            _cachedTransforms.Clear();
 
+            //      _cachedTransforms.Clear();
+           
+            
            
             stepsFinished = 0;
             didFinish = false;

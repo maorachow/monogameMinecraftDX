@@ -136,7 +136,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     [unroll(8)]
     for (int i = 0; i < 8; i++)
     {
-        float3 marchPos = rayOrigin + marchDir * (0.08 * (i+0.5 + noiseValue) );
+        float3 marchPos = rayOrigin + marchDir * (0.16 * (i+0.5 + noiseValue) );
        
         float2 uv = GetScreenCoordFromWorldPos(marchPos);
     //    return float4(uv.xy,1, 1);
@@ -151,7 +151,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
             break; // return float4(1, 1, 1, 1);
         }
-       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.12)
+       if (sampleViewDepth < testDepth && abs(sampleViewDepth-testDepth)<0.2)
         {
             isHit = true;
            

@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftDX;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 
 namespace monogameMinecraft
 {
@@ -39,7 +41,10 @@ namespace monogameMinecraft
         public float entityGravity;
         public float entityLifetime;
         public float curSpeed;
-        public AnimationState animationState;
+        public bool isEntityDying = false;
+        public float entityDyingTime = 0f;
+       // public AnimationState animationState;
+        public AnimationBlend animationBlend;
         public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
            new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -52,6 +57,25 @@ namespace monogameMinecraft
                     { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
                       }, 0.5f)
         },true);
+        public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
+
+           new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                    { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
+                    
+                }, 0.4f),
+                new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                    { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
+                      }, 0.1f)
+        }, false);
+        public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
+
+
+        public static void LoadEntitySounds(ContentManager cm)
+        {
+            entitySounds.TryAdd("0hurt",cm.Load<SoundEffect>("sounds/zombiehurt"));
+            entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
+        }
         public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt,MinecraftGame game)
         {
             this.position = position;
@@ -63,10 +87,11 @@ namespace monogameMinecraft
             this.entityHealth = entityHealth;
             this.isEntityHurt = isEntityHurt;
             this.game = game;
+            isEntityDying = false;
             switch(typeID)
             {
                 case 0:
-                    animationState = new AnimationState(zombieAnim, EntityRenderer.zombieModel);
+                    animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(zombieAnim, EntityRenderer.zombieModel), new AnimationState(entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
                     break;
                 default:
                     break;
@@ -149,7 +174,20 @@ namespace monogameMinecraft
             switch (typeID)
             {
             case 0:
-                    animationState.Update(deltaTime, curSpeed/3f, out _, out _);
+                    if (isEntityDying == true)
+                    {
+                        entityDyingTime += deltaTime;
+                        isEntityHurt = true;
+                        animationBlend.Update(deltaTime, 0f, 1f);
+
+                        if (entityDyingTime >= 1f && isEntityDying)
+                        {
+                            worldEntities.Remove(this);
+
+                        }
+                        return;
+                    }
+                    animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed/3f,0f,1f), 0f);
                 entityLifetime += deltaTime;
                     targetPos = game.gamePlayer.playerPos;
                 entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
@@ -215,21 +253,21 @@ namespace monogameMinecraft
 
             }
 
- 
-         
-           
-            //  Debug.WriteLine(curSpeed);
 
-            //     }
 
-            //   EntityMove(entityVec.X, entityVec.Y, entityVec.Z);
 
-            //     Debug.WriteLine(position.X + " " + position.Y + " " + position.Z);
-            if (entityHealth <= 0f)
-            {
-                worldEntities.Remove(this);
+                    //  Debug.WriteLine(curSpeed);
 
-            }
+                    //     }
+
+                    //   EntityMove(entityVec.X, entityVec.Y, entityVec.Z);
+
+                    //     Debug.WriteLine(position.X + " " + position.Y + " " + position.Z);
+                    if (entityHealth <= 0f)
+                    {
+                        isEntityDying = true;
+                    }
+            
                     if (entityHurtCD >= 0f)
                     {
                         entityHurtCD -= (1f *deltaTime);
@@ -304,6 +342,11 @@ namespace monogameMinecraft
             {
                 return;
             }
+            if (entitySounds.ContainsKey(entityBeh.typeID + "hurt"))
+            {
+                SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
+            }
+            
             entityBeh.entityHealth -= hurtValue;
             entityBeh.entityHurtCD = 0.2f;
             entityBeh.entityMotionVec = Vector3.Normalize(entityBeh.position - sourcePos)*15f;

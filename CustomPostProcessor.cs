@@ -33,7 +33,7 @@ namespace monogameMinecraftDX
         }
         public void LoadEffect(Effect effect)
         {
-            this.postProcessEffect =effect.Clone();
+            this.postProcessEffect =effect;
         }
         public void ProcessImage(in RenderTarget2D rt)
         {

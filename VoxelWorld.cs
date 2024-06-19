@@ -77,14 +77,16 @@ namespace monogameMinecraftDX
                         {
                             Debug.WriteLine("world changed");
                             return;
-                        }
+                        } 
+                        Thread.Sleep(500);
                    //     Debug.WriteLine("update world ID:" + worldID);
-                        if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
+                        if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
                         {
+                            Debug.WriteLine("quit updateworld thread");
                             return;
                         }
 
-                        Thread.Sleep(500);
+                      
                         if (chunks == null)
                         {
                             return;
@@ -138,7 +140,7 @@ namespace monogameMinecraftDX
         {
             while (true)
             {
-                Thread.Sleep(500);
+                
                 lock (deleteChunkThreadLock)
                 {
                     if(VoxelWorld.currentWorld.worldID!=worldID)
@@ -148,11 +150,13 @@ namespace monogameMinecraftDX
                         return;
                     }
                   //  Debug.WriteLine("delete chunks ID:" + worldID);
-                    if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu)
+                    Thread.Sleep(500);
+                    if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu||isThreadsStopping==true)
                     {
+                        Debug.WriteLine("quit delchunk thread");
                         return;
                     }
-
+                  
                     if (ChunkRenderer.isBusy == true)
                     {
                         continue;
@@ -304,7 +308,7 @@ namespace monogameMinecraftDX
             //   t3.Start();
             //    tryUpdateChunksThread = Task.Run(() => VoxelWorld.currentWorld.TryUpdateChunkThread());
 
-
+            isThreadsStopping = false;
             updateWorldThread = new Thread(() => UpdateWorldThread(game.gamePlayer, game));
             updateWorldThread.IsBackground = true;
             updateWorldThread.Start();
@@ -324,8 +328,9 @@ namespace monogameMinecraftDX
        
         public void DestroyAllChunks()
         {
-           
             lock (updateWorldThreadLock)
+            {
+            lock (deleteChunkThreadLock)
             {
                 foreach (var c in chunks)
                 {
@@ -339,7 +344,16 @@ namespace monogameMinecraftDX
             chunkDataReadFromDisk.Clear();
            
             }
+            }
+            
            
+        }
+        public bool isThreadsStopping = false;
+        public void StopAllThreads()
+        {
+            isThreadsStopping = true;
+            tryRemoveChunksThread.Join();
+            updateWorldThread.Join();
         }
 
 
@@ -404,7 +418,10 @@ namespace monogameMinecraftDX
           GamePlayer.SavePlayerData(game.gamePlayer,false);
 
             EntityManager.SaveWorldEntityData();
-      
+
+
+
+            StopAllThreads();
             SaveWorldData();
 
             DestroyAllChunks();

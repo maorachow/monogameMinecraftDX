@@ -392,7 +392,11 @@ namespace monogameMinecraft
                 chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockID;
                 chunkNeededUpdate.BuildChunk();
                 chunkNeededUpdate.isModifiedInGame = true;
-                if (chunkSpacePos.x == 0)
+            if (Chunk.blockSoundInfo.ContainsKey(blockID))
+            {
+                SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, pos, Chunk.blockSoundInfo[blockID], 20f);
+            }
+            if (chunkSpacePos.x == 0)
                 {
                
                     GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x - Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunk();
@@ -427,6 +431,15 @@ namespace monogameMinecraft
                 //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
                 //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
             }
+        public static void BreakBlock(Vector3 pos)
+        {
+            short blockID=GetBlock(pos);
+            if (Chunk.blockSoundInfo.ContainsKey((int)blockID))
+            {
+            SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, pos, Chunk.blockSoundInfo[blockID], 20f);
+            }
+            SetBlockWithUpdate(pos, 0);
+        }
     /*    public static void ReadJson()
         {
             chunkDataReadFromDisk.Clear();

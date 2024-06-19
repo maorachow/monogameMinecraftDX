@@ -16,6 +16,8 @@ using System.Net.Security;
 using Microsoft.Xna.Framework.Content;
 using monogameMinecraftDX;
 using System.Linq;
+using System.IO;
+using Microsoft.Xna.Framework.Audio;
 
 
 namespace monogameMinecraft
@@ -53,6 +55,7 @@ namespace monogameMinecraft
         public Effect motionBlurEffect;*/
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
+        public static Vector3 gamePlayerPos;
         public ChunkRenderer chunkRenderer;
         public Thread updateWorldThread;
         public Thread tryRemoveChunksThread;
@@ -181,14 +184,24 @@ namespace monogameMinecraft
         }
         public void InitGameplay(object obj)
         {
+      
+          
             GraphicsDevice.PresentationParameters.MultiSampleCount =0;
             
             IsMouseVisible = false;
          //   ChunkManager.chunks = new System.Collections.Concurrent.ConcurrentDictionary<Vector2Int, Chunk>();
           //  ChunkManager.chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
             Chunk.biomeNoiseGenerator.SetFrequency(0.002f);
+        
          //   ChunkManager.ReadJson();
             GameOptions.ReadOptionsJson();
+
+            //     BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory()+"/blockinfodata.json");
+
+            //    BlockResourcesManager.WriteDefaultBlockSoundInfo(Directory.GetCurrentDirectory() + "/blocksoundinfodata.json");
+            BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",Content,GraphicsDevice);
+
+           
             status = GameStatus.Started;
             gamePlayer = new GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
@@ -241,7 +254,7 @@ namespace monogameMinecraft
             gameTimeManager = new GameTimeManager(gamePlayer);
             chunkRenderer = new ChunkRenderer(this, GraphicsDevice, effectsManager.gameEffects["blockforwardeffect"],null, gameTimeManager);
             pointLightUpdater = new PointLightUpdater(gamePlayer);
-            chunkRenderer.SetTexture(terrainTex,terrainNormal, terrainDepth,terrainTexNoMip,terrainMER);
+            chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
            /* gBufferEffect = Content.Load<Effect>("gbuffereffect");
             gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");*/
             entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, effectsManager.gameEffects["entityeffect"], Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, gameTimeManager);
@@ -284,9 +297,10 @@ namespace monogameMinecraft
 
            
             EntityBeh.InitEntityList();
+            EntityBeh.LoadEntitySounds(Content);
           //  rasterizerState.CullMode = CullMode.None;
-         //   rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
-            // EntityBeh.SpawnNewEntity(new Vector3(0, 100, 0), 0f, 0f, 0f, 0, this);
+          //   rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
+          // EntityBeh.SpawnNewEntity(new Vector3(0, 100, 0), 0f, 0f, 0f, 0, this);
             EntityManager.ReadEntityData();
             Debug.WriteLine(EntityBeh.entityDataReadFromDisk.Count);
             EntityBeh.SpawnEntityFromData(this);
@@ -474,7 +488,7 @@ namespace monogameMinecraft
                     EntityManager.UpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
                     EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
-
+                    gamePlayerPos=gamePlayer.playerPos;
 
                     break;
             }

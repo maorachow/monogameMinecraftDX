@@ -135,7 +135,7 @@ namespace monogameMinecraft
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
                          
-                            entity.animationState.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix,gBufferShader, optionalParams, ()=> {
+                            entity.animationBlend.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix,gBufferShader, optionalParams, ()=> {
                                 if (entity.isEntityHurt)
                                 {
 
@@ -288,7 +288,7 @@ namespace monogameMinecraft
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
         
-            entity.animationState.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
+            entity.animationBlend.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
         public void DrawZombie(EntityBeh entity)
         {

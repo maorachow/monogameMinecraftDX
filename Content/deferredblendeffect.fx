@@ -255,7 +255,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 prefilteredColor = texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb;
     float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
     float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
-    float3 ambient = (indirectDiffuse+ambientEnv + specularEnv + reflection) * tex2D(aoSampler, input.TexCoords).x;
+    float3 ambient = (indirectDiffuse + ambientEnv * 0.3 + specularEnv * 0.3 + reflection) * tex2D(aoSampler, input.TexCoords).x;
     float3 final = color + ambient ;
     final = final / (final + float3(1.0, 1.0, 1.0));
     final = pow(final, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));

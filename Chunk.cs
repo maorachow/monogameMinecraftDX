@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Net.Http.Headers;
 using System.Threading;
 using monogameMinecraftDX;
+using Microsoft.Xna.Framework.Audio;
 
 [MessagePackObject]
     public struct Vector2Int : IEquatable<Vector2Int>
@@ -240,6 +241,7 @@ public struct RandomGenerator3D
       
         }
     public bool isMapGenCompleted=false;
+    public static Dictionary<int, SoundEffect> blockSoundInfo=new Dictionary<int, SoundEffect>();
     public static Dictionary<int, List<Vector2>> blockInfo = new Dictionary<int, List<Vector2>> {
         { 1,new List<Vector2>{new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f)} },
      {2,new List<Vector2>{new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f)}},

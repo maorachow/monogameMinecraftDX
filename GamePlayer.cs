@@ -179,13 +179,27 @@ namespace monogameMinecraft
         public bool TryHitEntity()
         {
             Microsoft.Xna.Framework.Ray ray = new Microsoft.Xna.Framework.Ray(cam.position, cam.front);
-            foreach(var entity in EntityBeh.worldEntities)
+            float rayHitDis = 10000f;
+            int finalIndex = -1;
+            for(int i=0;i<EntityBeh.worldEntities.Count;i++)
             {
+                EntityBeh entity = EntityBeh.worldEntities[i];
                 if(ray.Intersects(entity.entityBounds)<=4f) {
-                    EntityBeh.HurtEntity(entity.entityID, 4f, cam.position);
+                    if(rayHitDis> (float)ray.Intersects(entity.entityBounds))
+                    {
+                        finalIndex = i;
+                    }
+                    rayHitDis = MathF.Min(rayHitDis, (float)ray.Intersects(entity.entityBounds));
 
-                    return true;
+               //     EntityBeh.HurtEntity(entity.entityID, 4f, cam.position);
+
+                  //  return true;
                 }
+            }
+            if( finalIndex >= 0 )
+            {
+                EntityBeh.HurtEntity(EntityBeh.worldEntities[finalIndex].entityID, 4f, cam.position);
+                return true;
             }
             return false;
         }
@@ -194,7 +208,7 @@ namespace monogameMinecraft
             Ray ray = new Ray(cam.position, cam.front);
             Vector3 blockPoint = ChunkManager.RaycastFirstPosition(ray, 5f);
           
-            ChunkManager.SetBlockWithUpdate(blockPoint,0);
+            ChunkManager.BreakBlock(blockPoint);
             GetBlocksAround(playerBounds);
             if ((blockPoint - cam.position).Length() <= 4.8f)
             {

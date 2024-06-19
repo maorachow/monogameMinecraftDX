@@ -19,10 +19,15 @@ namespace monogameMinecraftDX
         public Dictionary<string,Effect> gameEffects = new Dictionary<string,Effect>();
         public Dictionary<string, Effect> customPostProcessEffects = new Dictionary<string, Effect>();
         public bool isEffectsLoaded = false;
+        public ContentManager contentManager;
         public void LoadCustomPostProcessEffects(GraphicsDevice device,List<CustomPostProcessor> customPostProcessors ,ContentManager cm)
         {
-            ContentManager cmTemp = new ContentManager(cm.ServiceProvider, AppDomain.CurrentDomain.BaseDirectory + "CustomEffects");
-            Debug.WriteLine(cmTemp.GetGraphicsDevice().ToString());
+            if (contentManager != null)
+            {
+                contentManager.Dispose();
+            }
+            contentManager = new ContentManager(cm.ServiceProvider, AppDomain.CurrentDomain.BaseDirectory + "CustomEffects");
+            Debug.WriteLine(contentManager.GetGraphicsDevice().ToString());
             customPostProcessEffects.Clear();
 
             foreach (var processor in customPostProcessors)
@@ -38,7 +43,7 @@ namespace monogameMinecraftDX
             Effect e3;
             try
             {
-            e0 = cmTemp.Load<Effect>("postprocess0");
+            e0 = contentManager.Load<Effect>("postprocess0");
                 
             }
             catch
@@ -47,7 +52,7 @@ namespace monogameMinecraftDX
             }
             try
             {
-                e1 = cmTemp.Load<Effect>("postprocess1");
+                e1 = contentManager.Load<Effect>("postprocess1");
             }
             catch
             {
@@ -55,7 +60,7 @@ namespace monogameMinecraftDX
             }
             try
             {
-                e2 = cmTemp.Load<Effect>("postprocess2");
+                e2 = contentManager.Load<Effect>("postprocess2");
             }
             catch
             {
@@ -63,7 +68,7 @@ namespace monogameMinecraftDX
             }
             try
             {
-                e3 = cmTemp.Load<Effect>("postprocess3");
+                e3 = contentManager.Load<Effect>("postprocess3");
             }
             catch
             {
@@ -81,7 +86,7 @@ namespace monogameMinecraftDX
                 }
                
             }
-            cmTemp.Dispose();
+            
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
             foreach (var processor in customPostProcessors)
