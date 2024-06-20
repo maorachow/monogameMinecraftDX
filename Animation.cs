@@ -1,15 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace monogameMinecraftDX
 {
     public class Animation
     {
-       
+
 
         public List<AnimationStep> steps = new List<AnimationStep>();
         public string name { get; private set; }
@@ -18,9 +13,9 @@ namespace monogameMinecraftDX
         public bool repeats = true;
 
 
-        public Animation(List<AnimationStep> steps,bool repeat)
+        public Animation(List<AnimationStep> steps, bool repeat)
         {
-            
+
             this.steps = steps;
             this.repeats = repeat;
         }

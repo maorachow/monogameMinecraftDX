@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics;
-using monogameMinecraftDX;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
+using monogameMinecraftDX;
+using System;
+using System.Collections.Generic;
 
 namespace monogameMinecraft
 {
     public class EntityBeh
     {
-        public static List<EntityData> entityDataReadFromDisk=new List<EntityData> ();
+        public static List<EntityData> entityDataReadFromDisk = new List<EntityData>();
         public static List<EntityBeh> worldEntities = new List<EntityBeh>();
         public Vector3 position;
         public float rotationX;
@@ -25,7 +20,7 @@ namespace monogameMinecraft
         public int typeID;
         public string entityID;
         public BoundingBox entityBounds;
-        public List< BoundingBox> blocksAround;
+        public List<BoundingBox> blocksAround;
         public static float gravity = -9.8f;
         public Vector3 entityVec;
         public Vector3 entitySize;
@@ -43,12 +38,12 @@ namespace monogameMinecraft
         public float curSpeed;
         public bool isEntityDying = false;
         public float entityDyingTime = 0f;
-       // public AnimationState animationState;
+        // public AnimationState animationState;
         public AnimationBlend animationBlend;
         public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
            new AnimationStep(new Dictionary<string, AnimationTransformation> {
-                    
+
                     { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
                     { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
                 }, 0.5f),
@@ -56,13 +51,13 @@ namespace monogameMinecraft
                     { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
                     { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
                       }, 0.5f)
-        },true);
+        }, true);
         public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
 
            new AnimationStep(new Dictionary<string, AnimationTransformation> {
 
                     { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
-                    
+
                 }, 0.4f),
                 new AnimationStep(new Dictionary<string, AnimationTransformation> {
                     { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
@@ -73,10 +68,10 @@ namespace monogameMinecraft
 
         public static void LoadEntitySounds(ContentManager cm)
         {
-            entitySounds.TryAdd("0hurt",cm.Load<SoundEffect>("sounds/zombiehurt"));
+            entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
             entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
         }
-        public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt,MinecraftGame game)
+        public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt, MinecraftGame game)
         {
             this.position = position;
             this.rotationX = rotationX;
@@ -88,7 +83,7 @@ namespace monogameMinecraft
             this.isEntityHurt = isEntityHurt;
             this.game = game;
             isEntityDying = false;
-            switch(typeID)
+            switch (typeID)
             {
                 case 0:
                     animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(zombieAnim, EntityRenderer.zombieModel), new AnimationState(entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
@@ -103,43 +98,43 @@ namespace monogameMinecraft
         }
         public void SaveSingleEntity()
         {
-      
-            EntityData tmpData = new EntityData(this.typeID,position.X,position.Y+entitySize.Y/2f,position.Z,this.rotationX, this.rotationY, this.rotationZ, this.entityID,this.entityHealth,VoxelWorld.currentWorld.worldID);
- 
+
+            EntityData tmpData = new EntityData(this.typeID, position.X, position.Y + entitySize.Y / 2f, position.Z, this.rotationX, this.rotationY, this.rotationZ, this.entityID, this.entityHealth, VoxelWorld.currentWorld.worldID);
+
             foreach (EntityData ed in entityDataReadFromDisk)
             {
                 if (ed.entityID == this.entityID)
                 {
-                     
+
                     entityDataReadFromDisk.Remove(ed);
                     break;
                 }
             }
- 
+
             entityDataReadFromDisk.Add(tmpData);
         }
         public static void SpawnEntityFromData(MinecraftGame game)
         {
-            foreach(var etd in entityDataReadFromDisk)
+            foreach (var etd in entityDataReadFromDisk)
             {
                 if (etd.entityInWorldID == VoxelWorld.currentWorld.worldID)
                 {
-                EntityBeh tmp = new EntityBeh(new Vector3(etd.posX,etd.posY,etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.typeid,etd.entityID, etd.entityHealth, false, game);
-                tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
-                tmp.InitBounds();
-                worldEntities.Add(tmp);
+                    EntityBeh tmp = new EntityBeh(new Vector3(etd.posX, etd.posY, etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.typeid, etd.entityID, etd.entityHealth, false, game);
+                    tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
+                    tmp.InitBounds();
+                    worldEntities.Add(tmp);
                 }
-            
+
             }
         }
-        public static void SpawnNewEntity(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID,MinecraftGame game)
+        public static void SpawnNewEntity(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, MinecraftGame game)
         {
-            EntityBeh tmp = new EntityBeh(position, rotationX, rotationY, rotationZ, typeID, System.Guid.NewGuid().ToString("N"), 20f, false,game);
+            EntityBeh tmp = new EntityBeh(position, rotationX, rotationY, rotationZ, typeID, System.Guid.NewGuid().ToString("N"), 20f, false, game);
             tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
             tmp.InitBounds();
             worldEntities.Add(tmp);
         }
-      
+
         public void InitBounds()
         {
             entityBounds = new BoundingBox(position - entitySize / 2f, position + entitySize / 2f);
@@ -148,7 +143,7 @@ namespace monogameMinecraft
         {
             Vector3 pos = new Vector3((entityBounds.Min.X + entityBounds.Max.X) / 2f, entityBounds.Min.Y - 0.1f, (entityBounds.Min.Z + entityBounds.Max.Z) / 2f);
 
-            int blockID = ChunkManager.GetBlock(pos);
+            int blockID = ChunkHelper.GetBlock(pos);
 
             if (blockID > 0 && blockID < 100)
             {
@@ -170,10 +165,10 @@ namespace monogameMinecraft
         public void OnUpdate(float deltaTime)
         {
 
-           
+
             switch (typeID)
             {
-            case 0:
+                case 0:
                     if (isEntityDying == true)
                     {
                         entityDyingTime += deltaTime;
@@ -187,71 +182,71 @@ namespace monogameMinecraft
                         }
                         return;
                     }
-                    animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed/3f,0f,1f), 0f);
-                entityLifetime += deltaTime;
+                    animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
+                    entityLifetime += deltaTime;
                     targetPos = game.gamePlayer.playerPos;
-                entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
+                    entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
 
-             curSpeed =  MathHelper.Lerp(curSpeed,(new Vector2(position.X,position.Z) - new Vector2(lastPos.X, lastPos.Z)).Length()/deltaTime,5f*deltaTime);
-            //        Debug.WriteLine(curSpeed);
-            lastPos = position;
+                    curSpeed = MathHelper.Lerp(curSpeed, (new Vector2(position.X, position.Z) - new Vector2(lastPos.X, lastPos.Z)).Length() / deltaTime, 5f * deltaTime);
+                    //        Debug.WriteLine(curSpeed);
+                    lastPos = position;
                     Vector3Int intPos = Vector3Int.FloorToIntVec3(position);
-                    
-                    curChunk = ChunkManager.GetChunk(ChunkManager.Vec3ToChunkPos(position));
-                    
-                    
-                    if(curChunk != null)
+
+                    curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
+
+
+                    if (curChunk != null)
                     {
-                        if ( lastChunkIsReadyToRender!=curChunk.isReadyToRender&&(lastChunkIsReadyToRender==false&&curChunk.isReadyToRender==true))
+                        if (lastChunkIsReadyToRender != curChunk.isReadyToRender && (lastChunkIsReadyToRender == false && curChunk.isReadyToRender == true))
+                        {
+                            //  Debug.WriteLine("update");
+                            isNeededUpdateBlock = true;
+                            //      GetBlocksAround(entityBounds);
+                        }
+                    }
+
+                    if (curChunk != null)
                     {
-                      //  Debug.WriteLine("update");
-                        isNeededUpdateBlock = true;
-                  //      GetBlocksAround(entityBounds);
+                        lastChunkIsReadyToRender = curChunk.isReadyToRender;
                     }
-                    }
-                   
-                    if(curChunk!=null)
-                    {
-                    lastChunkIsReadyToRender = curChunk.isReadyToRender;
-                    }
-                    
 
 
 
 
-                    if (lastIntPos!=intPos)
+
+                    if (lastIntPos != intPos)
                     {
                         isNeededUpdateBlock = true;
                     }
                     lastIntPos = intPos;
-                    if(isNeededUpdateBlock)
+                    if (isNeededUpdateBlock)
                     {
                         GetBlocksAround(entityBounds);
-                        isNeededUpdateBlock= false;
+                        isNeededUpdateBlock = false;
                     }
                     GetEntitiesAround();
 
 
-            if (Vector3.Distance(position, targetPos) > 1f)
-            {
-                Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
-                        if(movePos.X== 0 && movePos.Y == 0 && movePos.Z == 0)
+                    if (Vector3.Distance(position, targetPos) > 1f)
+                    {
+                        Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
+                        if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
                         {
                             movePos = new Vector3(0.001f, 0.001f, 0.001f);
                         }
-                     Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f, targetPos.Z - position.Z);
-                    Vector3 movePosN = Vector3.Normalize(movePos) * 5f*deltaTime;
-                    entityVec = movePosN;
-          //              Debug.WriteLine(movePos);
-                    Vector3 entityRot = LookRotation(lookPos);
-                    rotationX = entityRot.X; rotationY = entityRot.Y; rotationZ = entityRot.Z;
-                        Quaternion headQuat=Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(rotationY),0,0);
-                        bodyQuat = Quaternion.Lerp(bodyQuat, headQuat,10f * deltaTime) ;
-
-                       
+                        Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f, targetPos.Z - position.Z);
+                        Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
+                        entityVec = movePosN;
+                        //              Debug.WriteLine(movePos);
+                        Vector3 entityRot = LookRotation(lookPos);
+                        rotationX = entityRot.X; rotationY = entityRot.Y; rotationZ = entityRot.Z;
+                        Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(rotationY), 0, 0);
+                        bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
 
 
-            }
+
+
+                    }
 
 
 
@@ -267,25 +262,25 @@ namespace monogameMinecraft
                     {
                         isEntityDying = true;
                     }
-            
+
                     if (entityHurtCD >= 0f)
                     {
-                        entityHurtCD -= (1f *deltaTime);
+                        entityHurtCD -= (1f * deltaTime);
                         isEntityHurt = true;
                     }
                     else
                     {
                         isEntityHurt = false;
                     }
-                    
+
 
                     Vector3 movePos1 = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
 
-                    if (Vector3.Distance(position,targetPos)>2f)
+                    if (Vector3.Distance(position, targetPos) > 2f)
                     {
-                      
+
                         if (isGround && curSpeed <= 0.1f && Vec3Magnitude(movePos1) > 2f)
-                        {  
+                        {
 
                             entityGravity = 5f;
                         }
@@ -295,30 +290,30 @@ namespace monogameMinecraft
                         {
                             EntityMove(entityVec.X, 0, entityVec.Z);
                         }
-                   
+
 
 
 
 
                     }
-                    entityVec.Y  = entityGravity * deltaTime;
+                    entityVec.Y = entityGravity * deltaTime;
 
 
 
 
                     Vector3 entityMotionVecN = entityMotionVec * deltaTime;
-                 
-                    
+
+
                     EntityMove(entityMotionVecN.X, entityMotionVecN.Y, entityMotionVecN.Z);
                     EntityMove(0, entityVec.Y, 0);
                     if (isGround)
                     {
-                   
+
                         entityGravity = 0f;
                     }
                     else
                     {
-                       
+
                         entityGravity += -9.8f * deltaTime;
                     }
 
@@ -346,10 +341,10 @@ namespace monogameMinecraft
             {
                 SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
             }
-            
+
             entityBeh.entityHealth -= hurtValue;
             entityBeh.entityHurtCD = 0.2f;
-            entityBeh.entityMotionVec = Vector3.Normalize(entityBeh.position - sourcePos)*15f;
+            entityBeh.entityMotionVec = Vector3.Normalize(entityBeh.position - sourcePos) * 15f;
         }
         Vector3 ToEulerAngles(Quaternion q)
         {
@@ -362,8 +357,8 @@ namespace monogameMinecraft
 
             // pitch (y-axis rotation)
             float sinp = 2 * (q.W * q.Y - q.Z * q.X);
-           
-                angles.X = MathF.Asin(sinp);
+
+            angles.X = MathF.Asin(sinp);
 
             // yaw (z-axis rotation)
             float siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
@@ -372,7 +367,7 @@ namespace monogameMinecraft
 
             return angles;
         }
- 
+
         public Vector3 LookRotation(Vector3 fromDir)
         {
             Vector3 eulerAngles = new Vector3();
@@ -407,10 +402,10 @@ namespace monogameMinecraft
 
             foreach (var bb in allBounds)
             {
-                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb,entityBounds, dy);
+                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb, entityBounds, dy);
             }
 
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds,0, dy, 0);
+            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, 0, dy, 0);
 
             if (movY != dy && movY < 0)
             {
@@ -422,26 +417,26 @@ namespace monogameMinecraft
                 isGround = false;
             }
 
-          
-            foreach (var bb in allBounds)
-            {
-                dx =  BlockCollidingBoundingBoxHelper.calculateXOffset(bb,entityBounds, dx);
-            }
-
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds,dx, 0, 0);
 
             foreach (var bb in allBounds)
             {
-                dz =  BlockCollidingBoundingBoxHelper.calculateZOffset(bb,entityBounds, dz);
+                dx = BlockCollidingBoundingBoxHelper.calculateXOffset(bb, entityBounds, dx);
             }
 
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds,0, 0, dz);
+            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, dx, 0, 0);
+
+            foreach (var bb in allBounds)
+            {
+                dz = BlockCollidingBoundingBoxHelper.calculateZOffset(bb, entityBounds, dz);
+            }
+
+            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, 0, 0, dz);
             position = new Vector3((entityBounds.Min.X + entityBounds.Max.X) / 2f, entityBounds.Min.Y, (entityBounds.Min.Z + entityBounds.Max.Z) / 2f);
         }
         public List<BoundingBox> entitiyBoundsAround;
         public void GetEntitiesAround()
         {
-            entitiyBoundsAround=new List<BoundingBox>();
+            entitiyBoundsAround = new List<BoundingBox>();
             foreach (var entity in EntityBeh.worldEntities)
             {
                 if (entity != this)
@@ -453,17 +448,17 @@ namespace monogameMinecraft
                 }
             }
         }
-        public List< BoundingBox> GetBlocksAround(BoundingBox aabb)
+        public List<BoundingBox> GetBlocksAround(BoundingBox aabb)
         {
-         
-            int minX =ChunkManager.FloorFloat(aabb.Min.X- 0.1f);
-            int minY =ChunkManager.FloorFloat(aabb.Min.Y - 0.1f);
-            int minZ =ChunkManager.FloorFloat(aabb.Min.Z - 0.1f);
-            int maxX = ChunkManager.CeilFloat(aabb.Max.X + 0.1f);
-            int maxY = ChunkManager.CeilFloat(aabb.Max.Y + 0.1f);
-            int maxZ =ChunkManager.FloorFloat(aabb.Max.Z + 0.1f);
 
-            this.blocksAround = new List< BoundingBox>();
+            int minX = ChunkHelper.FloorFloat(aabb.Min.X - 0.1f);
+            int minY = ChunkHelper.FloorFloat(aabb.Min.Y - 0.1f);
+            int minZ = ChunkHelper.FloorFloat(aabb.Min.Z - 0.1f);
+            int maxX = ChunkHelper.CeilFloat(aabb.Max.X + 0.1f);
+            int maxY = ChunkHelper.CeilFloat(aabb.Max.Y + 0.1f);
+            int maxZ = ChunkHelper.FloorFloat(aabb.Max.Z + 0.1f);
+
+            this.blocksAround = new List<BoundingBox>();
 
             for (int z = minZ - 1; z <= maxZ + 1; z++)
             {
@@ -471,15 +466,15 @@ namespace monogameMinecraft
                 {
                     for (int y = minY - 1; y <= maxY + 1; y++)
                     {
-                        int blockID = ChunkManager.GetBlock(new Vector3(x, y, z));
+                        int blockID = ChunkHelper.GetBlock(new Vector3(x, y, z));
                         if (blockID > 0 && blockID < 100)
                         {
-                            this.blocksAround.Add( new BoundingBox(new Vector3(x, y, z),new Vector3( x + 1, y + 1, z + 1)));
+                            this.blocksAround.Add(new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1)));
                         }
                     }
                 }
             }
-          
+
 
             return this.blocksAround;
 

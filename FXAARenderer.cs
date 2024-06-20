@@ -1,14 +1,9 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraft;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
 namespace monogameMinecraftDX
 {
-    public class FXAARenderer:FullScreenQuadRenderer
+    public class FXAARenderer : FullScreenQuadRenderer
     {
         public GraphicsDevice device;
         public Effect fxaaEffect;
@@ -20,20 +15,20 @@ namespace monogameMinecraftDX
 
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            
-            
+
+
             this.renderTargetProcessed = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             InitializeVertices();
             InitializeQuadBuffers(device);
         }
 
-        public void Draw(bool isFinalProcess,RenderTarget2D inputImage)
+        public void Draw(bool isFinalProcess, RenderTarget2D inputImage)
         {
 
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
             fxaaEffect.Parameters["InputTexture"].SetValue(inputImage);
-            Vector2 pixelSize=new Vector2(1f/(float)width, 1f/ (float)height);
+            Vector2 pixelSize = new Vector2(1f / (float)width, 1f / (float)height);
 
             fxaaEffect.Parameters["PixelSize"]?.SetValue(pixelSize);
             if (isFinalProcess)
@@ -44,7 +39,7 @@ namespace monogameMinecraftDX
             {
                 RenderQuad(device, renderTargetProcessed, fxaaEffect);
             }
-           
+
         }
     }
 }

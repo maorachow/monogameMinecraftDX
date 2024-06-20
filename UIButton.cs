@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-//using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Diagnostics;
 
 namespace monogameMinecraft
 {
@@ -21,7 +17,7 @@ namespace monogameMinecraft
 
     0,1                1,1
      */
-    public class UIButton:UIElement
+    public class UIButton : UIElement
     {
         public Rectangle ButtonRect;
         public Action<UIButton> ButtonAction;
@@ -35,13 +31,13 @@ namespace monogameMinecraft
         public Vector2 element01Pos;
         public Vector2 element11Pos;
         public Vector2 element10Pos;
-       // public string text="123";
+        // public string text="123";
         SpriteBatch spriteBatch;
         public Texture2D texture;
         public SpriteFont font;
         public GameWindow window;
-        public string text { get;set; }
-        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos , SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction,float textScale)
+        public string text { get; set; }
+        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos, SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction, float textScale)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -60,7 +56,7 @@ namespace monogameMinecraft
             OnResize();
             ButtonUpdateAction = buttonUpdateAction;
         }
-        public void  Draw()
+        public void Draw()
         {
             DrawString(null);
         }
@@ -68,74 +64,82 @@ namespace monogameMinecraft
         public void DrawString(string text)
         {
             this.text = text;
-            text=text==null?" " : text;
-           // ButtonRect.Center;
-            
+            text = text == null ? " " : text;
+            // ButtonRect.Center;
+
             spriteBatch.Draw(texture, ButtonRect, Color.White);
             textHeight = (element01Pos - element00Pos).Y;
-           
-            this.textPixelPos =new Vector2Int( ButtonRect.Center.X, ButtonRect.Center.Y);
-            Vector2 textSize = font.MeasureString(text) / 2f ;
-           float textSizeScaling=((float)UIElement.ScreenRect.Height/ (float)UIElement.ScreenRectInital.Height)*2f*textScale;
-            textSize*=textSizeScaling;
-            
-         //   Debug.WriteLine(textSize/2f);
-         // textSize.Y = 0;
-         // spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x,textPixelPos.y), Color.White);
-            spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x-textSize.X , textPixelPos.y-textSize.Y ), Color.White, 0f,new Vector2(0f,0f), textSizeScaling, SpriteEffects.None, 1);
+
+            this.textPixelPos = new Vector2Int(ButtonRect.Center.X, ButtonRect.Center.Y);
+            Vector2 textSize = font.MeasureString(text) / 2f;
+            float textSizeScaling = ((float)UIElement.ScreenRect.Height / (float)UIElement.ScreenRectInital.Height) * 2f * textScale;
+            textSize *= textSizeScaling;
+
+            //   Debug.WriteLine(textSize/2f);
+            // textSize.Y = 0;
+            // spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x,textPixelPos.y), Color.White);
+            spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x - textSize.X, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
         }
 
-        public void  OnResize()
+        public void OnResize()
         {
-            this.GetScreenSpaceRect( );
+            this.GetScreenSpaceRect();
         }
         MouseState mouseState;
         MouseState lastMouseState;
         public bool isHovered
         {
-            get{
-           //     Debug.WriteLine(ButtonRect.X+" "+ ButtonRect.Y + " "+ ButtonRect.Width + " "+ ButtonRect.Height);
-           //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
-                if (this.ButtonRect.Contains(new Vector2(mouseState.X,mouseState.Y) ))
+            get
             {
-                return true;
+                //     Debug.WriteLine(ButtonRect.X+" "+ ButtonRect.Y + " "+ ButtonRect.Width + " "+ ButtonRect.Height);
+                //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
+                if (this.ButtonRect.Contains(new Vector2(mouseState.X, mouseState.Y)))
+                {
+                    return true;
 
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
-            {
-                return false; 
-            }}
-            
+
         }
         public UIButton() { }
-        public void  Update()
+        public void Update()
         {
             mouseState = Mouse.GetState();
-            if (isHovered && mouseState.LeftButton==ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)
+            if (isHovered && mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)
             {
-             //   Debug.WriteLine("pressed");
+                //   Debug.WriteLine("pressed");
+
+
+                if (UIElement.uiSounds.ContainsKey("uiclick"))
+                {
+                    UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
+                }
                 ButtonAction(this);
             }
 
-                lastMouseState = mouseState;
+            lastMouseState = mouseState;
         }
         public void GetScreenSpaceRect()
         {
             Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
-            Vector2 transformedP00 = new Vector2((element00Pos.X * UIElement.ScreenRect.Width) , (element00Pos.Y * UIElement.ScreenRect.Height));
-            float width=(element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
-            float height=(element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
+            Vector2 transformedP00 = new Vector2((element00Pos.X * UIElement.ScreenRect.Width), (element00Pos.Y * UIElement.ScreenRect.Height));
+            float width = (element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
+            float height = (element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
             this.ButtonRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
             Debug.WriteLine(ButtonRect.X + " " + ButtonRect.Y + " " + ButtonRect.Width + " " + ButtonRect.Height);
 
-      //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));
-            Debug.WriteLine(this.textPixelPos.x+" "+this.textPixelPos.y);
+            //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));
+            Debug.WriteLine(this.textPixelPos.x + " " + this.textPixelPos.y);
         }
 
         public void Initialize()
         {
-            if (ButtonUpdateAction != null) {  ButtonUpdateAction(this); }
-          
+            if (ButtonUpdateAction != null) { ButtonUpdateAction(this); }
+
         }
     }
 }

@@ -1,13 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.Timers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
- 
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraft
 {
@@ -23,7 +17,7 @@ namespace monogameMinecraft
         public static MinecraftGame game;
         public ShadowRenderer shadowRenderer;
         public GameTimeManager gameTimeManager;
-        public EntityRenderer(MinecraftGame game, GraphicsDevice device, GamePlayer player, Effect shader, Model model, Texture2D zombieTex, Model zombieModelRef, Effect shadowmapShader, ShadowRenderer sr,GameTimeManager gameTimeManager)
+        public EntityRenderer(MinecraftGame game, GraphicsDevice device, GamePlayer player, Effect shader, Model model, Texture2D zombieTex, Model zombieModelRef, Effect shadowmapShader, ShadowRenderer sr, GameTimeManager gameTimeManager)
         {
             this.device = device;
             basicShader = shader;
@@ -35,44 +29,44 @@ namespace monogameMinecraft
             this.shadowRenderer = sr;
             EntityRenderer.game = game;
             this.gameTimeManager = gameTimeManager;
-         /*  foreach(var modelMesh in zombieModel.Meshes)
-            {
-                foreach(var modelMeshPart in modelMesh.MeshParts)
-                {
-                   
-                    VertexPositionTexture[] vertices = new VertexPositionTexture[modelMeshPart.VertexBuffer.VertexCount];
-                    ushort[] indices=new ushort[modelMeshPart.IndexBuffer.IndexCount];
-                    modelMeshPart.IndexBuffer.GetData <ushort>(indices);
-                    modelMeshPart.VertexBuffer.GetData<VertexPositionTexture>(vertices);
-                    VertexPositionNormalTexture[] verticesNew = new VertexPositionNormalTexture[modelMeshPart.VertexBuffer.VertexCount];
-                    for(int j = 0; j < vertices.Length; j++)
-                    {
-                        verticesNew[j]=new VertexPositionNormalTexture(vertices[j].Position,new Vector3(0, 0, 0), vertices[j].TextureCoordinate);
-                    }
-                    for(int i=0;i<indices.Length; i+=3)
-                    {
-                        Vector3 pos1 = verticesNew[indices[i]].Position;
-                        Vector3 pos2 = verticesNew[indices[i +1]].Position;
-                        Vector3 pos3 = verticesNew[indices[i +2]].Position;
-                        Vector3 normal = Vector3.Normalize(Vector3.Cross(pos3 - pos2, pos2 - pos1)); 
-                    
-                        verticesNew[indices[i]].Normal = normal;
-                        verticesNew[indices[i + 1]].Normal = normal;
-                        verticesNew[indices[i + 2]].Normal = normal;
-                    }
-                    VertexBuffer vertexBufferNew = new VertexBuffer(device, typeof(VertexPositionNormalTexture), verticesNew.Length, BufferUsage.WriteOnly);
-                    modelMeshPart.VertexBuffer=vertexBufferNew;
-                    modelMeshPart.VertexBuffer.SetData(verticesNew);
-                   foreach(var vertex in verticesNew)
-                    {
-                        Debug.WriteLine(vertex.ToString()); 
-                    }
-                    foreach (var index in indices)
-                    {
-                        Debug.WriteLine(index);
-                    }
-                }
-            }*/
+            /*  foreach(var modelMesh in zombieModel.Meshes)
+               {
+                   foreach(var modelMeshPart in modelMesh.MeshParts)
+                   {
+
+                       VertexPositionTexture[] vertices = new VertexPositionTexture[modelMeshPart.VertexBuffer.VertexCount];
+                       ushort[] indices=new ushort[modelMeshPart.IndexBuffer.IndexCount];
+                       modelMeshPart.IndexBuffer.GetData <ushort>(indices);
+                       modelMeshPart.VertexBuffer.GetData<VertexPositionTexture>(vertices);
+                       VertexPositionNormalTexture[] verticesNew = new VertexPositionNormalTexture[modelMeshPart.VertexBuffer.VertexCount];
+                       for(int j = 0; j < vertices.Length; j++)
+                       {
+                           verticesNew[j]=new VertexPositionNormalTexture(vertices[j].Position,new Vector3(0, 0, 0), vertices[j].TextureCoordinate);
+                       }
+                       for(int i=0;i<indices.Length; i+=3)
+                       {
+                           Vector3 pos1 = verticesNew[indices[i]].Position;
+                           Vector3 pos2 = verticesNew[indices[i +1]].Position;
+                           Vector3 pos3 = verticesNew[indices[i +2]].Position;
+                           Vector3 normal = Vector3.Normalize(Vector3.Cross(pos3 - pos2, pos2 - pos1)); 
+
+                           verticesNew[indices[i]].Normal = normal;
+                           verticesNew[indices[i + 1]].Normal = normal;
+                           verticesNew[indices[i + 2]].Normal = normal;
+                       }
+                       VertexBuffer vertexBufferNew = new VertexBuffer(device, typeof(VertexPositionNormalTexture), verticesNew.Length, BufferUsage.WriteOnly);
+                       modelMeshPart.VertexBuffer=vertexBufferNew;
+                       modelMeshPart.VertexBuffer.SetData(verticesNew);
+                      foreach(var vertex in verticesNew)
+                       {
+                           Debug.WriteLine(vertex.ToString()); 
+                       }
+                       foreach (var index in indices)
+                       {
+                           Debug.WriteLine(index);
+                       }
+                   }
+               }*/
         }
 
         public void Draw()
@@ -94,21 +88,21 @@ namespace monogameMinecraft
             {
                 basicShader.Parameters["receiveShadow"].SetValue(true);
             }
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);  
+            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityBeh.worldEntities)
             {
-                if(frustum.Intersects(entity.entityBounds))
+                if (frustum.Intersects(entity.entityBounds))
                 {
-                switch (entity.typeID)
-                {
-                    case 0:
-                        DrawZombie(entity);
-                        break;
+                    switch (entity.typeID)
+                    {
+                        case 0:
+                            DrawZombie(entity);
+                            break;
+                    }
                 }
-                }
-                
+
             }
-           
+
 
         }
 
@@ -134,8 +128,9 @@ namespace monogameMinecraft
                                 {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
-                         
-                            entity.animationBlend.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix,gBufferShader, optionalParams, ()=> {
+
+                            entity.animationBlend.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix, gBufferShader, optionalParams, () =>
+                            {
                                 if (entity.isEntityHurt)
                                 {
 
@@ -196,7 +191,7 @@ namespace monogameMinecraft
                 mesh.Draw();
             }
         }
-        public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection,Effect shader)
+        public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection, Effect shader)
         {
             foreach (var bone in model.Bones)
             {
@@ -224,7 +219,7 @@ namespace monogameMinecraft
                 foreach (Effect effect in mesh.Effects)
                 {
                     Matrix normalMat = sharedDrawBoneMatrices[mesh.ParentBone.Index] * world;
-                    normalMat.Translation=new Vector3(0,0,0);
+                    normalMat.Translation = new Vector3(0, 0, 0);
                     effect.Parameters["NormalMat"]?.SetValue(normalMat);
                     effect.Parameters["World"].SetValue(sharedDrawBoneMatrices[mesh.ParentBone.Index] * world);
                     effect.Parameters["View"].SetValue(view);
@@ -267,13 +262,13 @@ namespace monogameMinecraft
                     effect.Parameters["World"].SetValue(sharedDrawBoneMatrices[mesh.ParentBone.Index] * world);
 
                     effect.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);
-                  
+
                 }
 
                 mesh.Draw();
             }
         }
-        public void DrawZombieShadow(EntityBeh entity,Matrix lightSpaceMat,Effect shadowMapShader)
+        public void DrawZombieShadow(EntityBeh entity, Matrix lightSpaceMat, Effect shadowMapShader)
         {
 
             Matrix world = (Matrix.CreateTranslation(entity.position));
@@ -287,7 +282,7 @@ namespace monogameMinecraft
                                 {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
-        
+
             entity.animationBlend.DrawAnimatedModel(world, player.cam.viewMatrix, player.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
         public void DrawZombie(EntityBeh entity)
@@ -310,47 +305,47 @@ namespace monogameMinecraft
                 }
             }
 
-                if (entity.isEntityHurt)
+            if (entity.isEntityHurt)
+            {
+                foreach (ModelMesh mesh in zombieModel.Meshes)
                 {
-                    foreach (ModelMesh mesh in zombieModel.Meshes)
+                    foreach (Effect effect in mesh.Effects)
                     {
-                        foreach (Effect effect in mesh.Effects)
-                        {
 
-                            effect.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
-                        }
-
+                        effect.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
                     }
+
                 }
-                else
+            }
+            else
+            {
+                foreach (ModelMesh mesh in zombieModel.Meshes)
                 {
-                    foreach (ModelMesh mesh in zombieModel.Meshes)
+                    foreach (Effect effect in mesh.Effects)
                     {
-                        foreach (Effect effect in mesh.Effects)
-                        {
-                            effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
-                        }
-
+                        effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
                     }
+
                 }
-
-                Matrix world = (Matrix.CreateTranslation(entity.position));
-
-                zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0)/* * zombieModelRef.Bones["head"].Transform*/;
-                zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
-                zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
-                zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-                DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix);
-
             }
 
+            Matrix world = (Matrix.CreateTranslation(entity.position));
+
+            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0)/* * zombieModelRef.Bones["head"].Transform*/;
+            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+            zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+            zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+            DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix);
+
+        }
 
 
 
 
 
 
-        public void DrawZombie(EntityBeh entity,Effect shader)
+
+        public void DrawZombie(EntityBeh entity, Effect shader)
         {
             // Debug.WriteLine(zombieModelRef.Equals(zombieModel));
 
@@ -375,22 +370,22 @@ namespace monogameMinecraft
 
 
                 shader.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
-              
+
             }
             else
             {
-                
+
                 shader.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
-              
+
             }
 
             Matrix world = (Matrix.CreateTranslation(entity.position));
-          //  zombieModel.Root.Transform=world * Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(entity.rotationX), 0);
+            //  zombieModel.Root.Transform=world * Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(entity.rotationX), 0);
             zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), MathHelper.ToRadians(entity.rotationX), 0) * zombieModel.Bones["head"].Parent.Transform; /** zombieModelRef.Bones["head"].Transform*/;
             zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModel.Bones["body"].Parent.Transform;
             zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
             zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix,shader);
+            DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix, shader);
 
         }
         //      basicShader.Parameters["World"].SetValue(world * bone.Transform);

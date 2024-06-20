@@ -1,17 +1,10 @@
-﻿using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
 
 namespace monogameMinecraftDX
 {
     public class GlobalMaterialParamsManager
     {
-        public static GlobalMaterialParamsManager instance ;
+        public static GlobalMaterialParamsManager instance;
         public float metallic = 0f;
         public float roughness = 0f;
         public GlobalMaterialParamsManager() { instance = this; }
@@ -35,7 +28,7 @@ namespace monogameMinecraftDX
                   }*/
             metallic = 0.1f;
             roughness = 0.1f;
-        //    Debug.WriteLine("metallic: "+metallic.ToString()+ "roughness: " + roughness.ToString());
+            //    Debug.WriteLine("metallic: "+metallic.ToString()+ "roughness: " + roughness.ToString());
         }
     }
 }

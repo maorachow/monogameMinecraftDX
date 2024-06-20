@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MessagePack;
+﻿using MessagePack;
 namespace monogameMinecraft
 {
     [MessagePackObject]
@@ -19,7 +14,7 @@ namespace monogameMinecraft
         public short[] inventoryData;
         [Key(4)]
         public int playerInWorldID;
-        public PlayerData(float posX, float posY, float posZ, short[] inventoryData,int playerInWorldID)
+        public PlayerData(float posX, float posY, float posZ, short[] inventoryData, int playerInWorldID)
         {
             this.posX = posX;
             this.posY = posY;

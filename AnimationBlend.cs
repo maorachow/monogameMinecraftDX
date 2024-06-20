@@ -2,9 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraftDX
 {
@@ -12,7 +9,7 @@ namespace monogameMinecraftDX
     {
         public AnimationState[] animationStates;
         public Model model;
-        public AnimationTransformation GetAnimationBoneTransformation(AnimationState animState,string bone)
+        public AnimationTransformation GetAnimationBoneTransformation(AnimationState animState, string bone)
         {
             var a = animState.stepProgress;
             var fromBone = animState.curStep.GetBoneLocal(bone);
@@ -22,8 +19,9 @@ namespace monogameMinecraftDX
             return ret;
         }
 
-        public AnimationBlend(AnimationState[] animationStates,Model model) { 
-        this.model = model;
+        public AnimationBlend(AnimationState[] animationStates, Model model)
+        {
+            this.model = model;
             this.animationStates = animationStates;
         }
 
@@ -130,24 +128,24 @@ namespace monogameMinecraftDX
                 for (int i = 0; i < count; i++)
                 {
                     ModelBone modelBone = model.Bones[i];
-                   Matrix localTransSum= Matrix.Identity;   
-                    foreach(var animState in animationStates)
+                    Matrix localTransSum = Matrix.Identity;
+                    foreach (var animState in animationStates)
                     {
-                    Matrix localTrans;
-                    if (GetAnimationBoneTransformation(animState,modelBone.Name) != null)
-                    {
-                        localTrans = GetAnimationBoneTransformation(animState,modelBone.Name).ToMatrix();
-                    }
-                    else
-                    {
-                        
+                        Matrix localTrans;
+                        if (GetAnimationBoneTransformation(animState, modelBone.Name) != null)
+                        {
+                            localTrans = GetAnimationBoneTransformation(animState, modelBone.Name).ToMatrix();
+                        }
+                        else
+                        {
+
                             localTrans = AnimationTransformation.Identity.ToMatrix();
-                     
-                    }
+
+                        }
                         // MultiplyMatrix(localTrans, localTransSum, out localTransSum);
-                        localTransSum = localTrans *localTransSum;
+                        localTransSum = localTrans * localTransSum;
                     }
-                
+
                     if (optionalParams != null)
                     {
                         //    Debug.WriteLine("optional params not null");
@@ -156,7 +154,7 @@ namespace monogameMinecraftDX
                             //     Debug.WriteLine("optional params loaded");
                             localTransSum = optionalParams[modelBone.Name];
                         }
-                        
+
                     }
 
                     if (modelBone.Parent == null)
@@ -177,19 +175,19 @@ namespace monogameMinecraftDX
 
 
 
-        public void Update(float deltaTime,params float[] animationSpeeds)
+        public void Update(float deltaTime, params float[] animationSpeeds)
         {
-            for(int i=0;i<animationStates.Length;i++)
+            for (int i = 0; i < animationStates.Length; i++)
             {
-                if(i<animationSpeeds.Length)
+                if (i < animationSpeeds.Length)
                 {
-                animationStates[i].Update(deltaTime, animationSpeeds[i],out _,out _);
+                    animationStates[i].Update(deltaTime, animationSpeeds[i], out _, out _);
                 }
                 else
                 {
-                    animationStates[i].Update(deltaTime,1, out _, out _);
+                    animationStates[i].Update(deltaTime, 1, out _, out _);
                 }
-              
+
             }
         }
     }

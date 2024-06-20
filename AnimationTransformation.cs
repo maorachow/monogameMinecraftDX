@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 namespace monogameMinecraftDX
 {
     public class AnimationTransformation
     {
 
-       
+
         public Vector3 Offset;
 
-         
+
         public Vector3 Rotation;
 
-       
+
         public Vector3 Scale;
 
-       
+
         static float ToRads = (System.MathF.PI / 180f);
 
-      
+
         public Matrix ToMatrix()
         {
             var scale = Matrix.CreateScale(Scale);
@@ -30,12 +25,12 @@ namespace monogameMinecraftDX
             return scale * rotateMatrix * translation;
         }
 
-        
+
         public static AnimationTransformation Lerp(AnimationTransformation first, AnimationTransformation second, float amount)
         {
             if (first == null)
             {
-                if(second == null)
+                if (second == null)
                 {
                     return null;
                 }
@@ -66,7 +61,7 @@ namespace monogameMinecraftDX
 
         public static readonly AnimationTransformation Identity = new AnimationTransformation() { Offset = Vector3.Zero, Rotation = Vector3.Zero, Scale = Vector3.One };
 
-       
+
         public static readonly AnimationTransformation Empty = new AnimationTransformation();
     }
 }

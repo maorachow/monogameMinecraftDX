@@ -20,7 +20,7 @@ float3 viewPos;
 float Alpha;
 float fogStart = 256;
 float fogRange = 512;
-float3 LightPositions[4];
+
 float3 LightPosition1;
 float3 LightPosition2;
 float3 LightPosition3;
@@ -486,7 +486,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
     return viewPos;
 }
 
-
+float3 LightPositions[4];
 PixelShaderOutput MainPS(VertexShaderOutput input)
 {
     if (any(tex2D(AlbedoSampler, input.TexCoords).xyz) < 0.01)
@@ -541,19 +541,26 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     float roughness = mer.z;
     LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true, mer.x);
     
-    
-    Lo += CalculateLightDiffuseP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false, mer.x);
+    for (int i = 0; i < 4; i++)
+    {
+        Lo += CalculateLightDiffuseP(worldPos, LightPositions[i], N, V, albedo, roughness, F0, false, mer.x);
+    }
+  /*      Lo += CalculateLightDiffuseP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false, mer.x);
     Lo += CalculateLightDiffuseP(worldPos, LightPosition2, N, V, albedo, roughness, F0, false, mer.x);
     Lo += CalculateLightDiffuseP(worldPos, LightPosition3, N, V, albedo, roughness, F0, false, mer.x);
-    Lo += CalculateLightDiffuseP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false, mer.x);
+    Lo += CalculateLightDiffuseP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false, mer.x);*/
    
     LoDirLightSpec += CalculateLightSpecularP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
     
     
-    LoSpec += CalculateLightSpecularP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false);
+    for (int j= 0; j < 4; j++)
+    {
+        LoSpec += CalculateLightSpecularP(worldPos, LightPositions[j], N, V, albedo, roughness, F0, false);
+    }
+ /*   LoSpec += CalculateLightSpecularP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false);
     LoSpec += CalculateLightSpecularP(worldPos, LightPosition2, N, V, albedo, roughness, F0, false);
     LoSpec += CalculateLightSpecularP(worldPos, LightPosition3, N, V, albedo, roughness, F0, false);
-    LoSpec += CalculateLightSpecularP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false);
+    LoSpec += CalculateLightSpecularP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false);*/
     float3 ambient = float3(0.01, 0.01, 0.01) * albedo * tex2D(AOSampler, input.TexCoords.xy).r;
     
     

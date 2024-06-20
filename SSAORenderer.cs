@@ -1,21 +1,12 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-
-
-using Microsoft.Xna.Framework.Input;
 
 
 namespace monogameMinecraft
 {
-    public class SSAORenderer:FullScreenQuadRenderer
+    public class SSAORenderer : FullScreenQuadRenderer
 
     {
         public Effect ssaoEffect;
@@ -28,10 +19,10 @@ namespace monogameMinecraft
         public GBufferRenderer gBufferRenderer;
         public GraphicsDevice graphicsDevice;
         public GamePlayer player;
-        public List<Vector3> ssaoKernel=new List<Vector3>();
-        public List<Color> ssaoNoise =new List<Color>();
+        public List<Vector3> ssaoKernel = new List<Vector3>();
+        public List<Color> ssaoNoise = new List<Color>();
         public Texture2D ssaoNoiseTexture;
-      
+
         public RenderTarget2D ssaoTarget;
 
         public Texture2D randNormal;
@@ -44,8 +35,8 @@ namespace monogameMinecraft
             this.cam = player.cam;
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
-            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, width/2, height/2, false, SurfaceFormat.Color, DepthFormat.Depth24);
-      
+            this.ssaoTarget = new RenderTarget2D(this.graphicsDevice, width / 2, height / 2, false, SurfaceFormat.Color, DepthFormat.Depth24);
+
             this.player = player;
             InitializeVertices();
             InitializeQuadBuffers(graphicsDevice);
@@ -57,26 +48,26 @@ namespace monogameMinecraft
                 sample.Normalize();
                 sample *= random.NextSingle();
 
-            /*    float scale = (float)i /32f;
-                scale = MathHelper.Lerp(0.1f,1f, scale * scale);
-                sample *= scale;*/
+                /*    float scale = (float)i /32f;
+                    scale = MathHelper.Lerp(0.1f,1f, scale * scale);
+                    sample *= scale;*/
                 ssaoKernel.Add(sample);
             }
             for (int i = 0; i < 16; i++)
             {
-               Vector3 noise=new Vector3 (
-        random.NextSingle() * 2.0f - 1.0f,
-        random.NextSingle() * 2.0f - 1.0f, 
-        0.0f);
-            ssaoNoise.Add(new Color(noise));
+                Vector3 noise = new Vector3(
+         random.NextSingle() * 2.0f - 1.0f,
+         random.NextSingle() * 2.0f - 1.0f,
+         0.0f);
+                ssaoNoise.Add(new Color(noise));
             }
-            ssaoNoiseTexture = new Texture2D(graphicsDevice, 4, 4,false,SurfaceFormat.Color);
+            ssaoNoiseTexture = new Texture2D(graphicsDevice, 4, 4, false, SurfaceFormat.Color);
             ssaoNoiseTexture.SetData<Color>(ssaoNoise.ToArray());
         }
         Random random = new Random();
 
 
-    
+
         public void Draw()
         {
 
@@ -85,19 +76,19 @@ namespace monogameMinecraft
                 RenderQuad(this.graphicsDevice, ssaoTarget, this.ssaoEffect, true);
                 return;
             }
-          
-          /*  ssaoKernel.Clear();
-            for (int i = 0; i < 32; ++i)
-            {
-                Vector3 sample = new Vector3(random.NextSingle() * 2f - 1f, random.NextSingle() * 2f - 1f, random.NextSingle());
-                sample.Normalize();
-                sample *= random.NextSingle();
 
-                float scale = (float)i / 32f;
-                scale = MathHelper.Lerp(0.1f, 1.0f, scale * scale);
-                sample *= scale;
-                ssaoKernel.Add(sample);
-            }*/
+            /*  ssaoKernel.Clear();
+              for (int i = 0; i < 32; ++i)
+              {
+                  Vector3 sample = new Vector3(random.NextSingle() * 2f - 1f, random.NextSingle() * 2f - 1f, random.NextSingle());
+                  sample.Normalize();
+                  sample *= random.NextSingle();
+
+                  float scale = (float)i / 32f;
+                  scale = MathHelper.Lerp(0.1f, 1.0f, scale * scale);
+                  sample *= scale;
+                  ssaoKernel.Add(sample);
+              }*/
             SetCameraFrustum(cam, this.ssaoEffect);
             /*  graphicsDevice.SetRenderTargets(renderTargetPositionDepth,renderTargetProjectionDepth,renderTargetNormal);
 
@@ -116,7 +107,7 @@ namespace monogameMinecraft
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             if (ssaoEffect.Parameters["PixelSize"] != null) { ssaoEffect.Parameters["PixelSize"].SetValue(new Vector2(1f / width, 1f / height)); }
             if (ssaoEffect.Parameters["NormalTex"] != null) { ssaoEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
-         //   if (ssaoEffect.Parameters["samples"] != null) {ssaoEffect.Parameters["samples"].SetValue(ssaoKernel.ToArray());}
+            //   if (ssaoEffect.Parameters["samples"] != null) {ssaoEffect.Parameters["samples"].SetValue(ssaoKernel.ToArray());}
             if (ssaoEffect.Parameters["NoiseTex"] != null) { ssaoEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             if (ssaoEffect.Parameters["ProjectionDepthTex"] != null) { ssaoEffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth); }
             if (ssaoEffect.Parameters["AlbedoTex"] != null) { ssaoEffect.Parameters["AlbedoTex"].SetValue(gBufferRenderer.renderTargetAlbedo); }
@@ -124,7 +115,7 @@ namespace monogameMinecraft
             if (ssaoEffect.Parameters["View"] != null) { ssaoEffect.Parameters["View"].SetValue(cam.viewMatrix); }
             if (ssaoEffect.Parameters["NormalView"] != null) { ssaoEffect.Parameters["NormalView"].SetValue(cam.viewMatrixOrigin); }
             if (ssaoEffect.Parameters["CameraPos"] != null) { ssaoEffect.Parameters["CameraPos"].SetValue(cam.position); }
-            if (ssaoEffect.Parameters["ViewProjection"] != null) { ssaoEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix);}
+            if (ssaoEffect.Parameters["ViewProjection"] != null) { ssaoEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix); }
             /*        
                            ssaoEffect.Parameters["param_normalMap"].SetValue(gBufferRenderer.renderTargetNormalWS);
                    ssaoEffect.Parameters["transposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(player.cam.viewMatrix)));
@@ -137,8 +128,8 @@ namespace monogameMinecraft
                    ssaoEffect.Parameters["param_screenSize"].SetValue(30f);
                    ssaoEffect.Parameters["g_matInvProjection"].SetValue(Matrix.Invert(player.cam.projectionMatrix ));*/
 
-            RenderQuad(this.graphicsDevice,ssaoTarget, this.ssaoEffect);
+            RenderQuad(this.graphicsDevice, ssaoTarget, this.ssaoEffect);
         }
-         
+
     }
 }

@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.Sprites;
+using System;
+using System.Collections.Generic;
 namespace monogameMinecraftDX
 {
     public class AnimationState
     {
 
         Animation animation;
-    //    Dictionary<string, Matrix> _cachedTransforms;
-      
+        //    Dictionary<string, Matrix> _cachedTransforms;
+
         public AnimationStep curStep;
         public AnimationStep nextStep;
 
         public float stepDuration => curStep.Duration;
         public float stepProgress => elapsedTimeInStep / stepDuration;
 
-      
+
         public float elapsedTimeInStep { get; private set; }
 
         public int stepsCount => animation.StepsCount;
@@ -31,19 +25,19 @@ namespace monogameMinecraftDX
         public int stepIndex;
         public bool repeats;
         public Model model;
-        public AnimationState(Animation animation,Model model)
+        public AnimationState(Animation animation, Model model)
         {
-          
+
             this.animation = animation;
             elapsedTimeInStep = 0f;
             stepIndex = 0;
             curStep = nextStep = null;
             repeats = animation.repeats;
-       //     _cachedTransforms = new Dictionary<string, Matrix>();
+            //     _cachedTransforms = new Dictionary<string, Matrix>();
             this.model = model;
             Reset();
         }
- 
+
         public void Reset(int step = 0)
         {
             stepIndex = step;
@@ -53,37 +47,37 @@ namespace monogameMinecraftDX
                 curStep = animation.GetStep(stepIndex);
                 nextStep = animation.GetStep(stepIndex + 1, repeats);
             }
-      //      _cachedTransforms.Clear();
+            //      _cachedTransforms.Clear();
         }
 
         public AnimationTransformation GetBoneTransformLocal(string bone, bool useAliases = true)
         {
             var a = stepProgress;
-       //     Debug.WriteLine(elapsedTimeInStep);
+            //     Debug.WriteLine(elapsedTimeInStep);
             var fromBone = curStep.GetBoneLocal(bone);
             var toBone = nextStep.GetBoneLocal(bone);
- 
+
             AnimationTransformation interpolated = AnimationTransformation.Lerp(fromBone, toBone, a);
-         
+
             var ret = interpolated;
             return ret;
         }
-     
 
-  /*      public AnimationTransformation GetAnimationBoneTransformation(string bone)
-        {
-            var a = stepProgress;
-            var fromBone = curStep.GetBoneLocal(bone);
-            var toBone = nextStep.GetBoneLocal(bone);
-            a=MathHelper.Clamp(a, 0f, 1f);
-            AnimationTransformation ret=AnimationTransformation.Lerp(fromBone, toBone, a);
-            return ret;
-        }
-  */
+
+        /*      public AnimationTransformation GetAnimationBoneTransformation(string bone)
+              {
+                  var a = stepProgress;
+                  var fromBone = curStep.GetBoneLocal(bone);
+                  var toBone = nextStep.GetBoneLocal(bone);
+                  a=MathHelper.Clamp(a, 0f, 1f);
+                  AnimationTransformation ret=AnimationTransformation.Lerp(fromBone, toBone, a);
+                  return ret;
+              }
+        */
 
         public void DrawAnimatedModel(Matrix world, Matrix view, Matrix projection)
         {
-         
+
             Draw(world, view, projection);
             void Draw(Matrix world, Matrix view, Matrix projection)
             {
@@ -148,7 +142,7 @@ namespace monogameMinecraftDX
 
         }
 
-        public static void MultiplyMatrix( Matrix matrix1,  Matrix matrix2, out Matrix result)
+        public static void MultiplyMatrix(Matrix matrix1, Matrix matrix2, out Matrix result)
         {
             float m = matrix1.M11 * matrix2.M11 + matrix1.M12 * matrix2.M21 + matrix1.M13 * matrix2.M31 + matrix1.M14 * matrix2.M41;
             float m2 = matrix1.M11 * matrix2.M12 + matrix1.M12 * matrix2.M22 + matrix1.M13 * matrix2.M32 + matrix1.M14 * matrix2.M42;
@@ -203,7 +197,7 @@ namespace monogameMinecraftDX
                 }
             }
 
-            if(optionalAction != null)
+            if (optionalAction != null)
             {
                 optionalAction();
             }
@@ -259,9 +253,10 @@ namespace monogameMinecraftDX
                     {
                         if (optionalParams != null)
                         {
-                        //    Debug.WriteLine("optional params not null");
-                            if (optionalParams.ContainsKey(modelBone.Name)){
-                           //     Debug.WriteLine("optional params loaded");
+                            //    Debug.WriteLine("optional params not null");
+                            if (optionalParams.ContainsKey(modelBone.Name))
+                            {
+                                //     Debug.WriteLine("optional params loaded");
                                 localTrans = optionalParams[modelBone.Name];
                             }
                             else
@@ -273,7 +268,7 @@ namespace monogameMinecraftDX
                         {
                             localTrans = AnimationTransformation.Identity.ToMatrix();
                         }
-                      //  localTrans = AnimationTransformation.Identity.ToMatrix();
+                        //  localTrans = AnimationTransformation.Identity.ToMatrix();
                     }
 
 
@@ -285,16 +280,16 @@ namespace monogameMinecraftDX
 
                     int index = modelBone.Parent.Index;
                     Matrix transformedMat;
-                    MultiplyMatrix(localTrans,modelBone.Transform , out transformedMat);
-                     MultiplyMatrix(transformedMat, destinationBoneTransforms[index],out destinationBoneTransforms[i]);
+                    MultiplyMatrix(localTrans, modelBone.Transform, out transformedMat);
+                    MultiplyMatrix(transformedMat, destinationBoneTransforms[index], out destinationBoneTransforms[i]);
                 }
             }
 
         }
 
-        public void Update(float deltaTime,float animSpeed, out bool didFinish, out int stepsFinished)
+        public void Update(float deltaTime, float animSpeed, out bool didFinish, out int stepsFinished)
         {
-         
+
             if (animation.StepsCount == 0)
             {
                 didFinish = true;
@@ -302,7 +297,7 @@ namespace monogameMinecraftDX
                 return;
             }
 
-        
+
             if (!repeats && (stepIndex >= animation.StepsCount))
             {
                 didFinish = true;
@@ -312,14 +307,14 @@ namespace monogameMinecraftDX
 
 
             //      _cachedTransforms.Clear();
-           
-            
-           
+
+
+
             stepsFinished = 0;
             didFinish = false;
 
             // advance current step
-            elapsedTimeInStep += deltaTime* animSpeed;
+            elapsedTimeInStep += deltaTime * animSpeed;
 
             // check if finish current step
             while (elapsedTimeInStep >= stepDuration)

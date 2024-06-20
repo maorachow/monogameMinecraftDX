@@ -1,16 +1,12 @@
-﻿using monogameMinecraft;
+﻿using MessagePack;
+using Microsoft.Xna.Framework;
+using monogameMinecraft;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using MessagePack;
-using System.IO;
 using System.Diagnostics;
-using SharpDX.MediaFoundation.DirectX;
+using System.IO;
+using System.Threading;
 namespace monogameMinecraftDX
 {
     public class VoxelWorld
@@ -18,7 +14,7 @@ namespace monogameMinecraftDX
         public int worldGenType = 0;
         public int worldID = 0;
         public string curWorldSaveName = "default.bin";
-        public static List<VoxelWorld> voxelWorlds = new List<VoxelWorld>{ 
+        public static List<VoxelWorld> voxelWorlds = new List<VoxelWorld>{
             new VoxelWorld("world.bin",0,0),
             new VoxelWorld("worldender.bin",2,1)};
         public static bool isWorldChanged;
@@ -27,14 +23,14 @@ namespace monogameMinecraftDX
         public FastNoise biomeNoiseGenerator = new FastNoise();
         public FastNoise frequentNoiseGenerator = new FastNoise();
 
-        public ConcurrentDictionary<Vector2Int,Chunk> chunks=new ConcurrentDictionary<Vector2Int,Chunk>();  
-        public Dictionary<Vector2Int,ChunkData> chunkDataReadFromDisk=new Dictionary<Vector2Int,ChunkData>();
+        public ConcurrentDictionary<Vector2Int, Chunk> chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
+        public Dictionary<Vector2Int, ChunkData> chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
 
 
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
-       
-        public VoxelWorld(string curWorldSaveName,int worldGenType, int worldID)
+
+        public VoxelWorld(string curWorldSaveName, int worldGenType, int worldID)
         {
             this.worldGenType = worldGenType;
             this.worldID = worldID;
@@ -72,21 +68,21 @@ namespace monogameMinecraftDX
                 {
                     lock (deleteChunkThreadLock)
                     {
-                     
+
                         if (VoxelWorld.currentWorld.worldID != worldID)
                         {
                             Debug.WriteLine("world changed");
                             return;
-                        } 
+                        }
                         Thread.Sleep(500);
-                   //     Debug.WriteLine("update world ID:" + worldID);
+                        //     Debug.WriteLine("update world ID:" + worldID);
                         if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
                         {
                             Debug.WriteLine("quit updateworld thread");
                             return;
                         }
 
-                      
+
                         if (chunks == null)
                         {
                             return;
@@ -102,14 +98,14 @@ namespace monogameMinecraftDX
                                 for (float z = player.playerPos.Z - GameOptions.renderDistance; z < player.playerPos.Z + GameOptions.renderDistance; z += Chunk.chunkWidth)
                                 {
                                     //   Thread.Sleep(1);
-                                    Vector2Int chunkPos = ChunkManager.Vec3ToChunkPos(new Vector3(x, 0, z));
+                                    Vector2Int chunkPos = ChunkHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
 
                                     if (GetChunk(chunkPos) == null && !chunks.ContainsKey(chunkPos))
                                     {
                                         BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
                                         if (frustum.Intersects(chunkBoundingBox))
                                         {
-                                            Chunk c = new Chunk(chunkPos, game.GraphicsDevice,this);
+                                            Chunk c = new Chunk(chunkPos, game.GraphicsDevice, this);
                                             // goto endUpdateWorld;
                                             //    break;
                                         }
@@ -140,23 +136,23 @@ namespace monogameMinecraftDX
         {
             while (true)
             {
-                
+
                 lock (deleteChunkThreadLock)
                 {
-                    if(VoxelWorld.currentWorld.worldID!=worldID)
+                    if (VoxelWorld.currentWorld.worldID != worldID)
                     {
 
                         Debug.WriteLine("world changed delchunk thread");
                         return;
                     }
-                  //  Debug.WriteLine("delete chunks ID:" + worldID);
+                    //  Debug.WriteLine("delete chunks ID:" + worldID);
                     Thread.Sleep(500);
-                    if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu||isThreadsStopping==true)
+                    if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
                     {
                         Debug.WriteLine("quit delchunk thread");
                         return;
                     }
-                  
+
                     if (ChunkRenderer.isBusy == true)
                     {
                         continue;
@@ -232,7 +228,7 @@ namespace monogameMinecraftDX
         {
             Debug.WriteLine(curWorldSaveName);
             FileStream fs;
-            if (File.Exists(gameWorldDataPath + "unityMinecraftServerData/GameData/"+curWorldSaveName))
+            if (File.Exists(gameWorldDataPath + "unityMinecraftServerData/GameData/" + curWorldSaveName))
             {
                 fs = new FileStream(gameWorldDataPath + "unityMinecraftServerData/GameData/" + curWorldSaveName, FileMode.Truncate, FileAccess.Write);//Truncate模式打开文件可以清空。
             }
@@ -271,11 +267,11 @@ namespace monogameMinecraftDX
         {
             Debug.WriteLine("current world ID:" + worldID);
 
-            
+
             int playerInWorldID = 0;
             if (isWorldChanged == true)
             {
-                playerInWorldID =GamePlayer.ReadPlayerData(game.gamePlayer,game,true);
+                playerInWorldID = GamePlayer.ReadPlayerData(game.gamePlayer, game, true);
             }
             else
             {
@@ -283,8 +279,8 @@ namespace monogameMinecraftDX
 
                 if (playerInWorldID != worldID)
                 {
-                    SwitchToWorldWithoutSaving(playerInWorldID,game);
-                   // return;
+                    SwitchToWorldWithoutSaving(playerInWorldID, game);
+                    // return;
                 }
             }
 
@@ -293,9 +289,9 @@ namespace monogameMinecraftDX
             // InitChunkPool();
 
             chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
-           
+
             ReadJson();
-           
+
 
             EntityManager.ReadEntityData();
             EntityBeh.SpawnEntityFromData(game);
@@ -315,7 +311,7 @@ namespace monogameMinecraftDX
             tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(game.gamePlayer, game));
             tryRemoveChunksThread.IsBackground = true;
             tryRemoveChunksThread.Start();
-            game.gamePlayer.curChunk= null; 
+            game.gamePlayer.curChunk = null;
 
             if (actionOnSwitchedWorld != null)
             {
@@ -325,28 +321,29 @@ namespace monogameMinecraftDX
 
 
         }
-       
+
         public void DestroyAllChunks()
         {
             lock (updateWorldThreadLock)
             {
-            lock (deleteChunkThreadLock)
-            {
-                foreach (var c in chunks)
+                lock (deleteChunkThreadLock)
                 {
+                    foreach (var c in chunks)
+                    {
 
-                    c.Value.Dispose();
-                   Chunk _;
-                    chunks.Remove<Vector2Int, Chunk>(c.Key,out _ );
+                        c.Value.Dispose();
+                        Chunk _;
+                        chunks.Remove<Vector2Int, Chunk>(c.Key, out _);
 
-                } 
-                chunks.Clear();
-            chunkDataReadFromDisk.Clear();
-           
+                    }
+                    chunks.Clear();
+                    chunkDataReadFromDisk.Clear();
+
+                }
             }
-            }
-            
-           
+            GC.Collect();
+
+
         }
         public bool isThreadsStopping = false;
         public void StopAllThreads()
@@ -359,9 +356,9 @@ namespace monogameMinecraftDX
 
         public void ReadJson()
         {
-            chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData>();
+            chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
-            Debug.WriteLine("read:"+curWorldSaveName);
+            Debug.WriteLine("read:" + curWorldSaveName);
             if (!Directory.Exists(gameWorldDataPath + "unityMinecraftServerData"))
             {
                 Directory.CreateDirectory(gameWorldDataPath + "unityMinecraftServerData");
@@ -372,7 +369,7 @@ namespace monogameMinecraftDX
                 Directory.CreateDirectory(gameWorldDataPath + "unityMinecraftServerData/GameData");
             }
 
-            if (!File.Exists(gameWorldDataPath + "unityMinecraftServerData" + "/GameData/"+curWorldSaveName))
+            if (!File.Exists(gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + curWorldSaveName))
             {
                 FileStream fs = File.Create(gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + curWorldSaveName);
                 fs.Close();
@@ -397,7 +394,7 @@ namespace monogameMinecraftDX
             isJsonReadFromDisk = true;
         }
 
-        public static void SwitchToWorldWithoutSaving(int worldIndex,MinecraftGame game)
+        public static void SwitchToWorldWithoutSaving(int worldIndex, MinecraftGame game)
         {
             if (worldIndex >= voxelWorlds.Count)
             {
@@ -415,7 +412,7 @@ namespace monogameMinecraftDX
         {
 
             // PlayerMove player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMove>();
-          GamePlayer.SavePlayerData(game.gamePlayer,false);
+            GamePlayer.SavePlayerData(game.gamePlayer, false);
 
             EntityManager.SaveWorldEntityData();
 
@@ -429,7 +426,7 @@ namespace monogameMinecraftDX
             //    isGoingToQuitWorld = true;
 
         }
-        public static void SwitchToWorld(int worldIndex,MinecraftGame game)
+        public static void SwitchToWorld(int worldIndex, MinecraftGame game)
         {
             if (worldIndex >= voxelWorlds.Count)
             {

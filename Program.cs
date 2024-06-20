@@ -1,13 +1,16 @@
-﻿using Microsoft.Xna.Framework;
-using monogameMinecraft;
-using System.Threading.Tasks;
+﻿using monogameMinecraft;
 
 class Program
 {
-   static void Main(string[] args)
+    static void Main(string[] args)
     {
-       
+
         var game = new MinecraftGame();
+
         game.Run();
+
+
+
+
     }
 }

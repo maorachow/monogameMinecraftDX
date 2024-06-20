@@ -1,18 +1,14 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
-using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
     public class ShadowRenderer
     {
-        
+
         public MinecraftGame game;
         public GraphicsDevice device;
         public RenderTarget2D shadowMapTarget;
@@ -30,10 +26,11 @@ namespace monogameMinecraft
         public Matrix lightProjectionFar = Matrix.CreateOrthographic(400, 400, 0.1f, 250f);
         public Matrix lightSpaceMat;
         public Matrix lightSpaceMatFar;
-     
+
         public RenderTargetBinding[] shadowMapBinding;
         public float shadowBias;
-        public ShadowRenderer(MinecraftGame game, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, EntityRenderer er,GameTimeManager gtr) {
+        public ShadowRenderer(MinecraftGame game, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, EntityRenderer er, GameTimeManager gtr)
+        {
             this.game = game;
             this.device = device;
             this.shadowMapShader = shadowMapShader;
@@ -45,40 +42,40 @@ namespace monogameMinecraft
             shadowMapBinding[0] = new RenderTargetBinding(shadowMapTarget);
 
             shadowMapBinding[1] = new RenderTargetBinding(shadowMapTargetFar);
-             this.gameTimeManager = gtr;
+            this.gameTimeManager = gtr;
         }
         public void UpdateLightMatrices(GamePlayer player)
         {
             Vector3 lightDir = gameTimeManager.sunDir;
-            Vector3 lightDirFar =gameTimeManager.sunDir*2f;
-                                                          //   lightView = GetLightSpaceMatrix(0.1f, 50f, player, lightDir);//Matrix.CreateLookAt(player.playerPos+ lightDir, player.playerPos, Vector3.UnitY);
-                                                          //    lightViewFar = GetLightSpaceMatrix(50f, 300f, player, lightDir);// Matrix.CreateLookAt(player.playerPos + lightDirFar, player.playerPos, Vector3.UnitY);
-                                                          //    lightSpaceMat = lightView  *lightProjection;
+            Vector3 lightDirFar = gameTimeManager.sunDir * 2f;
+            //   lightView = GetLightSpaceMatrix(0.1f, 50f, player, lightDir);//Matrix.CreateLookAt(player.playerPos+ lightDir, player.playerPos, Vector3.UnitY);
+            //    lightViewFar = GetLightSpaceMatrix(50f, 300f, player, lightDir);// Matrix.CreateLookAt(player.playerPos + lightDirFar, player.playerPos, Vector3.UnitY);
+            //    lightSpaceMat = lightView  *lightProjection;
 
-            lightSpaceMat =  GetLightSpaceMatrix(0.1f, 30f, player, lightDir);//lightView*lightProjection;
+            lightSpaceMat = GetLightSpaceMatrix(0.1f, 30f, player, lightDir);//lightView*lightProjection;
             lightSpaceMatFar = GetLightSpaceMatrix(30f, 100f, player, lightDirFar); ;// GetLightSpaceMatrix(30f, 300f, player, lightDir);//lightViewFar * lightProjectionFar;
 
         }
 
-        List<Vector4> GetFrustumCornersWorldSpace( Matrix proj, Matrix view)
+        List<Vector4> GetFrustumCornersWorldSpace(Matrix proj, Matrix view)
         {
-           Matrix inv = (Matrix.Multiply(Matrix.Invert(proj), Matrix.Invert(view)));
+            Matrix inv = (Matrix.Multiply(Matrix.Invert(proj), Matrix.Invert(view)));
 
-            List<Vector4> frustumCorners=new List<Vector4>();
-        for ( int x = 0; x< 2; ++x)
+            List<Vector4> frustumCorners = new List<Vector4>();
+            for (int x = 0; x < 2; ++x)
             {
-            for ( int y = 0; y< 2; ++y)
+                for (int y = 0; y < 2; ++y)
                 {
-                    for ( int z = 0; z< 2; ++z)
-                         {
-                    Vector4 pt =Vector4.Transform(new Vector4( 2.0f * x - 1.0f,2.0f * y - 1.0f,2.0f * z - 1.0f,1.0f),inv );
-                    frustumCorners.Add(pt/pt.W);
-                    
-                            }
+                    for (int z = 0; z < 2; ++z)
+                    {
+                        Vector4 pt = Vector4.Transform(new Vector4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f), inv);
+                        frustumCorners.Add(pt / pt.W);
+
+                    }
                 }
             }
-        
-       //     Debug.WriteLine(frustumCorners[7]);
+
+            //     Debug.WriteLine(frustumCorners[7]);
             return frustumCorners;
         }
 
@@ -87,70 +84,70 @@ namespace monogameMinecraft
 
             BoundingFrustum frustum = new BoundingFrustum(view * proj);
             Vector3[] frustumCorners = frustum.GetCorners();
-            
+
 
             //     Debug.WriteLine(frustumCorners[7]);
             return frustumCorners;
         }
-        Matrix GetLightSpaceMatrix(  float nearPlane,   float farPlane,GamePlayer player,Vector3 lightDir)
-    {
-            Matrix proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f),player.cam.aspectRatio, nearPlane, farPlane); ;
-       var corners = GetFrustumCornersWorldSpaceBoundingFrustum(proj, player.cam.viewMatrix);
-
-        Vector3 center =new Vector3(0, 0, 0);
-        foreach (var v in corners)
+        Matrix GetLightSpaceMatrix(float nearPlane, float farPlane, GamePlayer player, Vector3 lightDir)
         {
-            center +=new Vector3(v.X,v.Y,v.Z);
-        }
-        center /= corners.Length;
+            Matrix proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), player.cam.aspectRatio, nearPlane, farPlane); ;
+            var corners = GetFrustumCornersWorldSpaceBoundingFrustum(proj, player.cam.viewMatrix);
+
+            Vector3 center = new Vector3(0, 0, 0);
+            foreach (var v in corners)
+            {
+                center += new Vector3(v.X, v.Y, v.Z);
+            }
+            center /= corners.Length;
             //   zombieModel.Draw(Matrix.CreateTranslation(center.X,center.Y,center.Z),player.cam.viewMatrix, player.cam.projectionMatrix);
             //         Debug.WriteLine(center);
-           Matrix lightView1 = Matrix.CreateLookAt(center+Vector3.Normalize( lightDir), center, Vector3.UnitY);
-     //       Debug.WriteLine(center.ToString());
-        float minX = float.MaxValue;
-        float maxX = float.MinValue;
-        float minY = float.MaxValue;
-        float maxY = float.MinValue;
-        float minZ = float.MaxValue;
-        float maxZ = float.MinValue;
-        foreach (var v in corners)
-        {
-           Vector3 trf = Vector3.Transform(new Vector3(v.X,v.Y,v.Z),lightView1);
-            minX = MathF.Min(minX, trf.X);
-            maxX = MathF.Max(maxX, trf.X);
-            minY = MathF.Min(minY, trf.Y);
-            maxY = MathF.Max(maxY, trf.Y);
-            minZ = MathF.Min(minZ, trf.Z);
-            maxZ = MathF.Max(maxZ, trf.Z);
-        }
+            Matrix lightView1 = Matrix.CreateLookAt(center + Vector3.Normalize(lightDir), center, Vector3.UnitY);
+            //       Debug.WriteLine(center.ToString());
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+            float minZ = float.MaxValue;
+            float maxZ = float.MinValue;
+            foreach (var v in corners)
+            {
+                Vector3 trf = Vector3.Transform(new Vector3(v.X, v.Y, v.Z), lightView1);
+                minX = MathF.Min(minX, trf.X);
+                maxX = MathF.Max(maxX, trf.X);
+                minY = MathF.Min(minY, trf.Y);
+                maxY = MathF.Max(maxY, trf.Y);
+                minZ = MathF.Min(minZ, trf.Z);
+                maxZ = MathF.Max(maxZ, trf.Z);
+            }
 
             // Tune this parameter according to the scene
-                 float zMult = 3.0f;
-               if (minZ < 0)
-               {
-                   minZ *= zMult;
-               }
-               else
-                {
-               minZ /= zMult;
-               }
-                   if (maxZ < 0)
-                   {
-                       maxZ /= zMult;
-                   }
-                   else
-                   {
-                       maxZ *= zMult;
-                   }
+            float zMult = 3.0f;
+            if (minZ < 0)
+            {
+                minZ *= zMult;
+            }
+            else
+            {
+                minZ /= zMult;
+            }
+            if (maxZ < 0)
+            {
+                maxZ /= zMult;
+            }
+            else
+            {
+                maxZ *= zMult;
+            }
             //   Debug.WriteLine(MathF.Abs(minX - maxX));
-             //   Debug.WriteLine("max:"+(-minZ));
+            //   Debug.WriteLine("max:"+(-minZ));
             //    Debug.WriteLine("min:"+(-maxZ));
-            Matrix lightProjection1 = Matrix.CreateOrthographicOffCenter(minX , maxX, minY , maxY, -maxZ, -minZ);
-       //     Debug.WriteLine(MathF.Abs(minX - maxX)+"  "+MathF.Abs(minY - maxY));
+            Matrix lightProjection1 = Matrix.CreateOrthographicOffCenter(minX, maxX, minY, maxY, -maxZ, -minZ);
+            //     Debug.WriteLine(MathF.Abs(minX - maxX)+"  "+MathF.Abs(minY - maxY));
             return lightView1 * lightProjection1;
         }
         public bool isRenderingFarShadow = true;
-        public void  RenderShadow(GamePlayer player)
+        public void RenderShadow(GamePlayer player)
         {
             //   UpdateLightMatrices(player);
             if (gameTimeManager.sunX >= 180f)
@@ -165,61 +162,61 @@ namespace monogameMinecraft
             BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
             if (GameOptions.renderShadow)
             {
-            device.SetRenderTarget(shadowMapTarget);
-            UpdateLightMatrices(player);
-        //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader,64);
-           
+                device.SetRenderTarget(shadowMapTarget);
+                UpdateLightMatrices(player);
+                //    Debug.WriteLine(lightSpaceMat.ToString());
+                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 64);
 
-            foreach (var entity in EntityBeh.worldEntities)
-            {
-                switch (entity.typeID)
+
+                foreach (var entity in EntityBeh.worldEntities)
                 {
-                    case 0:
-                        if(frustum.Intersects(entity.entityBounds))
-                        {
-                        entityRenderer.DrawZombieShadow(entity, lightSpaceMat, shadowMapShader);
-                        }
-                       
-                        break;
+                    switch (entity.typeID)
+                    {
+                        case 0:
+                            if (frustum.Intersects(entity.entityBounds))
+                            {
+                                entityRenderer.DrawZombieShadow(entity, lightSpaceMat, shadowMapShader);
+                            }
+
+                            break;
+                    }
+                    //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
+
+
                 }
-             //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
-                
-                    
             }
-            }
-            
+
             if (GameOptions.renderFarShadow)
             {
-         device.SetRenderTarget(shadowMapTargetFar);
-            UpdateLightMatrices(player);
-            //    Debug.WriteLine(lightSpaceMat.ToString());
-            chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader,256);
-          
+                device.SetRenderTarget(shadowMapTargetFar);
+                UpdateLightMatrices(player);
+                //    Debug.WriteLine(lightSpaceMat.ToString());
+                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256);
 
-            foreach (var entity in EntityBeh.worldEntities)
-            {
-                switch (entity.typeID)
+
+                foreach (var entity in EntityBeh.worldEntities)
                 {
-                    case 0:
-                        if (frustum.Intersects(entity.entityBounds))
-                        {
-                            entityRenderer.DrawZombieShadow(entity, lightSpaceMatFar, shadowMapShader);
-                        }
+                    switch (entity.typeID)
+                    {
+                        case 0:
+                            if (frustum.Intersects(entity.entityBounds))
+                            {
+                                entityRenderer.DrawZombieShadow(entity, lightSpaceMatFar, shadowMapShader);
+                            }
 
-                        break;
+                            break;
+                    }
+                    //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
+
+
                 }
-                //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
-
-
             }
-            }
-           
+
             device.SetRenderTarget(null);
             device.Clear(Color.CornflowerBlue);
         }
 
-         
+
 
     }
 }

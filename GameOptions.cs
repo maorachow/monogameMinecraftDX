@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.IO;
-using System.Runtime.CompilerServices;
- 
 using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace monogameMinecraft
@@ -18,7 +12,7 @@ namespace monogameMinecraft
         public static int renderDistance = 512;
         public static bool renderShadow = false;
         public static bool renderFarShadow = false;
-        public static bool renderSSAO=false;
+        public static bool renderSSAO = false;
         public static bool renderSSR = false;
         public static bool renderSSID = false;
         public static bool renderLightShaft = false;
@@ -32,37 +26,38 @@ namespace monogameMinecraft
                 Directory.CreateDirectory(path + "unityMinecraftServerData");
 
             }
-           
+
 
             if (!File.Exists(path + "unityMinecraftServerData" + "/options.json"))
             {
                 FileStream fs = File.Create(path + "unityMinecraftServerData" + "/options.json");
                 fs.Close();
             }
-           
+
             string data = File.ReadAllText(path + "unityMinecraftServerData/options.json");
-            if(data.Length> 0)
+            if (data.Length > 0)
             {
-                try{
-             GameOptionsData dataOptions=JsonSerializer.Deserialize<GameOptionsData>(data);
-            renderDistance = dataOptions.renderDistance;
-            renderShadow = dataOptions.renderShadow;
-            renderFarShadow = dataOptions.renderFarShadow;
-                    renderSSAO= dataOptions.renderSSAO;
-                    renderLightShaft= dataOptions.renderLightShaft;
+                try
+                {
+                    GameOptionsData dataOptions = JsonSerializer.Deserialize<GameOptionsData>(data);
+                    renderDistance = dataOptions.renderDistance;
+                    renderShadow = dataOptions.renderShadow;
+                    renderFarShadow = dataOptions.renderFarShadow;
+                    renderSSAO = dataOptions.renderSSAO;
+                    renderLightShaft = dataOptions.renderLightShaft;
                     renderSSR = dataOptions.renderSSR;
                     renderSSID = dataOptions.renderSSID;
                     renderContactShadow = dataOptions.renderContactShadow;
                     showGraphicsDebug = dataOptions.showGraphicsDebug;
                     renderMotionBlur = dataOptions.renderMotionBlur;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
                 }
-           
+
             }
-            
+
         }
 
         public static void SaveOptions(object obj)
@@ -78,13 +73,13 @@ namespace monogameMinecraft
                 fs = new FileStream(path + "unityMinecraftServerData/options.json", FileMode.Create, FileAccess.Write);
             }
             fs.Close();
-            
 
-          
-            GameOptionsData data=new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow,GameOptions.renderSSAO,GameOptions.renderLightShaft,GameOptions.renderSSR,GameOptions.renderSSID,GameOptions.renderContactShadow,GameOptions.showGraphicsDebug, GameOptions.renderMotionBlur);
+
+
+            GameOptionsData data = new GameOptionsData(GameOptions.renderDistance, GameOptions.renderShadow, GameOptions.renderFarShadow, GameOptions.renderSSAO, GameOptions.renderLightShaft, GameOptions.renderSSR, GameOptions.renderSSID, GameOptions.renderContactShadow, GameOptions.showGraphicsDebug, GameOptions.renderMotionBlur);
             string dataSerialized = JsonSerializer.Serialize<GameOptionsData>(data);
             File.WriteAllText(path + "unityMinecraftServerData/options.json", dataSerialized);
-            
+
         }
         public static void ChangeRenderDistance(UIButton obj)
         {
@@ -94,24 +89,24 @@ namespace monogameMinecraft
             {
                 renderDistance = 64;
             }
-            obj.text = "Render Distance : "+renderDistance;
+            obj.text = "Render Distance : " + renderDistance;
         }
 
         public static void UpdateRenderDistanceUIText(UIButton obj)
         {
             obj.text = "Render Distance : " + renderDistance;
-           
+
         }
         public static void ChangeRenderShadow(UIButton obj)
         {
             obj.text = "Render Shadow : " + renderShadow.ToString();
             renderShadow = !renderShadow;
-            obj.text="Render Shadow : "+renderShadow.ToString();
+            obj.text = "Render Shadow : " + renderShadow.ToString();
         }
         public static void UpdateRenderShadowUIText(UIButton obj)
         {
             obj.text = "Render Shadow : " + renderShadow.ToString();
-           
+
         }
         public static void ChangeRenderFarShadow(UIButton obj)
         {
@@ -125,7 +120,7 @@ namespace monogameMinecraft
         {
 
             obj.text = "Render Far Shadow : " + renderFarShadow.ToString();
-          
+
         }
         public static void ChangeRenderSSAO(UIButton obj)
         {
@@ -138,7 +133,7 @@ namespace monogameMinecraft
         {
 
             obj.text = "Render SSAO : " + renderSSAO.ToString();
-        
+
         }
         public static void ChangeRenderSSR(UIButton obj)
         {
@@ -151,7 +146,7 @@ namespace monogameMinecraft
         {
 
             obj.text = "Render SSR : " + renderSSR.ToString();
-           
+
         }
 
 
@@ -181,7 +176,7 @@ namespace monogameMinecraft
         {
 
             obj.text = "Render SSID : " + renderSSID.ToString();
-           
+
         }
         public static void ChangeRenderLightShaft(UIButton obj)
         {
@@ -195,7 +190,7 @@ namespace monogameMinecraft
         {
 
             obj.text = "Render Light Shaft : " + renderLightShaft.ToString();
-           
+
         }
 
 
@@ -254,12 +249,12 @@ namespace monogameMinecraft
         public bool showGraphicsDebug;
         [JsonInclude]
         public bool renderMotionBlur;
-        public GameOptionsData(int renderDistance,bool renderShadow,bool renderFarShadow,bool renderSSAO,bool renderLightShaft, bool renderSSR,bool renderSSID,bool renderContactShadow,bool showGraphicsDebug,bool renderMotionBlur)
+        public GameOptionsData(int renderDistance, bool renderShadow, bool renderFarShadow, bool renderSSAO, bool renderLightShaft, bool renderSSR, bool renderSSID, bool renderContactShadow, bool showGraphicsDebug, bool renderMotionBlur)
         {
             this.renderDistance = renderDistance;
             this.renderShadow = renderShadow;
             this.renderFarShadow = renderFarShadow;
-            this.renderSSAO= renderSSAO;
+            this.renderSSAO = renderSSAO;
             this.renderLightShaft = renderLightShaft;
             this.renderSSR = renderSSR;
             this.renderSSID = renderSSID;

@@ -1,12 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraft;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
 namespace monogameMinecraftDX
 {
@@ -21,7 +15,7 @@ namespace monogameMinecraftDX
         bool isValid { get { return postProcessEffect != null; } }
         public string effectNameInDic = "";
         public Camera cam;
-        public CustomPostProcessor(GraphicsDevice device,MotionVectorRenderer motionVectorRenderer,GBufferRenderer gBufferRenderer,string effectNameInDic)
+        public CustomPostProcessor(GraphicsDevice device, MotionVectorRenderer motionVectorRenderer, GBufferRenderer gBufferRenderer, string effectNameInDic)
         {
             this.device = device;
             int width = device.PresentationParameters.BackBufferWidth;
@@ -33,7 +27,7 @@ namespace monogameMinecraftDX
         }
         public void LoadEffect(Effect effect)
         {
-            this.postProcessEffect =effect;
+            this.postProcessEffect = effect;
         }
         public void ProcessImage(in RenderTarget2D rt)
         {
@@ -43,7 +37,7 @@ namespace monogameMinecraftDX
                 return;
             }
             SetCameraFrustum(cam, postProcessEffect);
-         //   Debug.WriteLine(postProcessEffect.GraphicsDevice.ToString());
+            //   Debug.WriteLine(postProcessEffect.GraphicsDevice.ToString());
             postProcessEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             postProcessEffect.Parameters["InputTexture"]?.SetValue(rt);
             postProcessEffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f / rt.Width, 1f / rt.Height));

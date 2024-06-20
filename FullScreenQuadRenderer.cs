@@ -1,16 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 namespace monogameMinecraft
 {
     public class FullScreenQuadRenderer
     {
-        
+
         public static VertexPositionTexture[] quadVertices =
         {
 
@@ -32,8 +26,8 @@ namespace monogameMinecraft
 
         
         };
-        public static bool isVertsInited=false;
-        public static bool isQuadBuffersInited=false;  
+        public static bool isVertsInited = false;
+        public static bool isQuadBuffersInited = false;
 
         public ushort[] quadIndices =
         {
@@ -64,7 +58,7 @@ namespace monogameMinecraft
         }
         public void InitializeQuadBuffers(GraphicsDevice device)
         {
-            if(isQuadBuffersInited == true)
+            if (isQuadBuffersInited == true)
             {
                 return;
             }
@@ -76,13 +70,13 @@ namespace monogameMinecraft
             isQuadBuffersInited = true;
         }
 
-
+        static BoundingFrustum playerViewProjFrustum = new BoundingFrustum(Matrix.Identity*Matrix.Identity);
         public void SetCameraFrustum(Camera camera, Effect effect)
         {
 
 
 
-            Matrix view = camera.viewMatrixOrigin;
+      /*      Matrix view = camera.viewMatrixOrigin;
             Matrix proj = camera.projectionMatrix;
             Matrix vp = view * proj;
 
@@ -93,40 +87,41 @@ namespace monogameMinecraft
 
             // 计算viewProj逆矩阵，即从裁剪空间变换到世界空间  
             Matrix cviewProjInv = Matrix.Invert(cviewProj);
+           */ 
             var near = 0.1f;
-            BoundingFrustum frustum = new BoundingFrustum(camera.viewMatrixOrigin*camera.projectionMatrix);
-            Vector3[] corners = frustum.GetCorners();
+            playerViewProjFrustum.Matrix=(camera.viewMatrixOrigin * camera.projectionMatrix);
+            Vector3[] corners = playerViewProjFrustum.GetCorners();
             Vector3 topLeftCorner = corners[0];
             Vector3 topRightCorner = corners[1];
-            Vector3 bottomLeftCorner = corners[3] ;
+            Vector3 bottomLeftCorner = corners[3];
             Vector3 cameraXExtent = topRightCorner - topLeftCorner;
             Vector3 cameraYExtent = bottomLeftCorner - topLeftCorner;
 
-            Vector4 topLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, 1.0f, -1,1f),cviewProjInv);
-            Vector4 topRightCorner1 = Vector4.Transform(new Vector4(1.0f, 1.0f,-1, 1f),cviewProjInv) ;
-            Vector4 bottomLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, -1.0f,-1, 1f), cviewProjInv);
+          //  Vector4 topLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, 1.0f, -1, 1f), cviewProjInv);
+           // Vector4 topRightCorner1 = Vector4.Transform(new Vector4(1.0f, 1.0f, -1, 1f), cviewProjInv);
+          //  Vector4 bottomLeftCorner1 = Vector4.Transform(new Vector4(-1.0f, -1.0f, -1, 1f), cviewProjInv);
 
             // 计算相机近平面上方向向量
-            Vector4 cameraXExtent1 = topRightCorner1 - topLeftCorner1;
-            Vector4 cameraYExtent1 = bottomLeftCorner1 - topLeftCorner1;
-        //      Debug.WriteLine("corners:"+(corners[0] - camera.position)+" "+ (corners[1] - camera.position) + " " + (corners[2] - camera.position) + " " + (corners[3] - camera.position));
-      //      Debug.WriteLine("corners1:" + (topLeftCorner1) + " " + (topRightCorner1) + " " + (corners[2] - camera.position) + " " + (bottomLeftCorner1));
-            if (effect.Parameters["ProjectionParams2"] != null) effect.Parameters["ProjectionParams2"].SetValue(new Vector4(1.0f / near, camera.position.X, camera.position.Y, camera.position.Z));
-            if (effect.Parameters["CameraViewTopLeftCorner"] != null) effect.Parameters["CameraViewTopLeftCorner"].SetValue(topLeftCorner);
-            if (effect.Parameters["CameraViewXExtent"] != null) effect.Parameters["CameraViewXExtent"].SetValue(cameraXExtent);
-            if (effect.Parameters["CameraViewYExtent"] != null) effect.Parameters["CameraViewYExtent"].SetValue(cameraYExtent);
-                effect.Parameters["CameraPos"]?.SetValue(camera.position);
+         //   Vector4 cameraXExtent1 = topRightCorner1 - topLeftCorner1;
+         //   Vector4 cameraYExtent1 = bottomLeftCorner1 - topLeftCorner1;
+            //      Debug.WriteLine("corners:"+(corners[0] - camera.position)+" "+ (corners[1] - camera.position) + " " + (corners[2] - camera.position) + " " + (corners[3] - camera.position));
+            //      Debug.WriteLine("corners1:" + (topLeftCorner1) + " " + (topRightCorner1) + " " + (corners[2] - camera.position) + " " + (bottomLeftCorner1));
+            effect.Parameters["ProjectionParams2"]?.SetValue(new Vector4(1.0f / near, camera.position.X, camera.position.Y, camera.position.Z));
+         effect.Parameters["CameraViewTopLeftCorner"]?.SetValue(topLeftCorner);
+       effect.Parameters["CameraViewXExtent"]?.SetValue(cameraXExtent);
+         effect.Parameters["CameraViewYExtent"]?.SetValue(cameraYExtent);
+            effect.Parameters["CameraPos"]?.SetValue(camera.position);
         }
-        public void RenderQuad(GraphicsDevice device,RenderTarget2D target, Effect quadEffect, bool isPureWhite = false,bool isRenderingOnDcreen=false,bool clearColor=true)
+        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, Effect quadEffect, bool isPureWhite = false, bool isRenderingOnDcreen = false, bool clearColor = true)
         {
             if (isRenderingOnDcreen == false)
             {
                 device.SetRenderTarget(target);
-                if(clearColor == true)
+                if (clearColor == true)
                 {
-                device.Clear(Color.Transparent);
+                    device.Clear(Color.Transparent);
                 }
-                
+
             }
             if (isPureWhite)
             {
@@ -139,44 +134,8 @@ namespace monogameMinecraft
 
             device.SetVertexBuffer(quadVertexBuffer);
             device.Indices = quadIndexBuffer;
-            RasterizerState rasterizerState = new RasterizerState();
-            rasterizerState.CullMode = CullMode.None;
-            device.RasterizerState = rasterizerState;
-            device.BlendState=BlendState.AlphaBlend;
-            foreach (var pass in quadEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
-            }
-            //    graphicsDevice.Clear(Color.White);
-            if (isRenderingOnDcreen == false)
-            {
-            device.SetRenderTarget(null);
-            device.Clear(Color.CornflowerBlue);
-            }
-           
-        }
-
-
-        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, RenderTarget2D target2, Effect quadEffect,bool clearColor=true)
-        {
-
-          
-                device.SetRenderTargets(target,target2);
-                if (clearColor == true)
-                {
-                    device.Clear(Color.Transparent);
-                }
-
-          
-
-       
-           
-
-            device.SetVertexBuffer(quadVertexBuffer);
-            device.Indices = quadIndexBuffer;
-            RasterizerState rasterizerState = new RasterizerState();
-            rasterizerState.CullMode = CullMode.None;
+       //     RasterizerState rasterizerState = new RasterizerState();
+          //  rasterizerState.CullMode = CullMode.None;
             device.RasterizerState = rasterizerState;
             device.BlendState = BlendState.AlphaBlend;
             foreach (var pass in quadEffect.CurrentTechnique.Passes)
@@ -185,26 +144,61 @@ namespace monogameMinecraft
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
             }
             //    graphicsDevice.Clear(Color.White);
-          
+            if (isRenderingOnDcreen == false)
+            {
                 device.SetRenderTarget(null);
                 device.Clear(Color.CornflowerBlue);
-          
+            }
 
         }
-        public void RenderQuadPureColor(GraphicsDevice device, RenderTarget2D target,Color color)
-        {
-            
-                device.SetRenderTarget(target);
-                device.Clear(color);
-             
-            
-              
-                device.SetRenderTarget(null);
-                device.Clear(Color.CornflowerBlue);
-                return;
-             
+        public static RasterizerState rasterizerState=new RasterizerState { CullMode=CullMode.None };
 
-           
+        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, RenderTarget2D target2, Effect quadEffect, bool clearColor = true)
+        {
+
+
+            device.SetRenderTargets(target, target2);
+            if (clearColor == true)
+            {
+                device.Clear(Color.Transparent);
+            }
+
+
+
+
+
+
+            device.SetVertexBuffer(quadVertexBuffer);
+            device.Indices = quadIndexBuffer;
+            
+            device.RasterizerState = rasterizerState;
+            device.BlendState = BlendState.AlphaBlend;
+            foreach (var pass in quadEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
+            }
+            //    graphicsDevice.Clear(Color.White);
+
+            device.SetRenderTarget(null);
+            device.Clear(Color.CornflowerBlue);
+
+
+        }
+        public void RenderQuadPureColor(GraphicsDevice device, RenderTarget2D target, Color color)
+        {
+
+            device.SetRenderTarget(target);
+            device.Clear(color);
+
+
+
+            device.SetRenderTarget(null);
+            device.Clear(Color.CornflowerBlue);
+            return;
+
+
+
 
         }
     }

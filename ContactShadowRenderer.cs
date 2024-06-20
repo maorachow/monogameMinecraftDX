@@ -1,14 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraft
 {
-    public class ContactShadowRenderer:FullScreenQuadRenderer
+    public class ContactShadowRenderer : FullScreenQuadRenderer
     {
 
         public GraphicsDevice device;
@@ -36,7 +30,7 @@ namespace monogameMinecraft
         {
             if (GameOptions.renderContactShadow == false)
             {
-                RenderQuad(device, contactShadowRenderTarget, null,true,false);
+                RenderQuad(device, contactShadowRenderTarget, null, true, false);
                 return;
             }
             SetCameraFrustum(player.cam, contactShadowEffect);
@@ -44,7 +38,7 @@ namespace monogameMinecraft
             if (contactShadowEffect.Parameters["ProjectionDepthTex"] != null) { contactShadowEffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth); }
             if (contactShadowEffect.Parameters["NoiseTex"] != null) { contactShadowEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             if (contactShadowEffect.Parameters["NormalTex"] != null) { contactShadowEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
-         //   if (contactShadowEffect.Parameters["PositionWSTex"] != null) { contactShadowEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
+            //   if (contactShadowEffect.Parameters["PositionWSTex"] != null) { contactShadowEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             if (contactShadowEffect.Parameters["View"] != null) { contactShadowEffect.Parameters["View"].SetValue(cam.viewMatrix); }
             if (contactShadowEffect.Parameters["CameraPos"] != null) { contactShadowEffect.Parameters["CameraPos"].SetValue(cam.position); }
             if (contactShadowEffect.Parameters["ViewProjection"] != null) { contactShadowEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix); }

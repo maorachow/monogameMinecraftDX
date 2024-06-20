@@ -1,10 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraft
 {
@@ -101,11 +95,11 @@ namespace monogameMinecraft
         }
         public static BoundingBox offset(BoundingBox bb, float x, float y, float z)
         {
-            bb.Min.X=(bb.Min.X + x);
-            bb.Min.Y=(bb.Min.Y + y);
-            bb.Min.Z=(bb.Min.Z + z);
-            bb.Max.X=(bb.Max.X + x);
-            bb.Max.Y=(bb.Max.Y + y);
+            bb.Min.X = (bb.Min.X + x);
+            bb.Min.Y = (bb.Min.Y + y);
+            bb.Min.Z = (bb.Min.Z + z);
+            bb.Max.X = (bb.Max.X + x);
+            bb.Max.Y = (bb.Max.Y + y);
             bb.Max.Z = (bb.Max.Z + z);
             //  Debug.Log("move" + x + " " + y + " " + z + " ");
             return bb;

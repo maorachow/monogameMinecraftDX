@@ -1,16 +1,9 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftDX;
 namespace monogameMinecraft
 {
-    public class SSRRenderer:FullScreenQuadRenderer
+    public class SSRRenderer : FullScreenQuadRenderer
     {
 
         public GraphicsDevice graphicsDevice;
@@ -41,7 +34,7 @@ namespace monogameMinecraft
             InitializeQuadBuffers(graphicsDevice);
             this.textureCopyEffect = textureCopyEffect;
             this.motionVectorRenderer = motionVectorRenderer;
-          
+
         }
         public bool preIsKeyDown;
         public void Draw(GameTime gameTime)
@@ -65,10 +58,10 @@ namespace monogameMinecraft
             SSREffect.Parameters["GameTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
             SSREffect.Parameters["PrevSSRTexture"]?.SetValue(renderTargetSSRPrev);
             SSREffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
-     //       SSREffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
+            //       SSREffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
             SSREffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSREffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
-            SSREffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f/width,1f/height));
+            SSREffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f / width, 1f / height));
             SSREffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
             SSREffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
             SSREffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);
@@ -79,8 +72,8 @@ namespace monogameMinecraft
             SSREffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);
             SSREffect.Parameters["NormalTex"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
 
-           SSREffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
-             SSREffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
+            SSREffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
+            SSREffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
             SSREffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSREffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             SSREffect.Parameters["binarySearch"]?.SetValue(binarySearch);
@@ -93,41 +86,41 @@ namespace monogameMinecraft
             //  SSREffect.Parameters["matProjection"].SetValue((player.cam.projectionMatrix));
             SSREffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             SSREffect.Parameters["CameraPos"]?.SetValue(player.cam.position);
-         //   SSREffect.Parameters["RoughnessMap"].SetValue(gBufferRenderer.renderTargetPositionWS);
-            RenderQuad(graphicsDevice,renderTargetSSR, SSREffect);
+            //   SSREffect.Parameters["RoughnessMap"].SetValue(gBufferRenderer.renderTargetPositionWS);
+            RenderQuad(graphicsDevice, renderTargetSSR, SSREffect);
             textureCopyEffect.Parameters["useBkgColor"]?.SetValue(false);
-            textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f,0f,0f));
+            textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f, 0f, 0f));
             textureCopyEffect.Parameters["TextureCopy"]?.SetValue(renderTargetSSR);
             RenderQuad(graphicsDevice, renderTargetSSRPrev, textureCopyEffect);
-           // sw.Stop();
+            // sw.Stop();
             //Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
         }
 
-  /*      public void RenderQuad(RenderTarget2D target, Effect quadEffect, bool isPureWhite = false)
-        {
-            graphicsDevice.SetRenderTarget(target);
+        /*      public void RenderQuad(RenderTarget2D target, Effect quadEffect, bool isPureWhite = false)
+              {
+                  graphicsDevice.SetRenderTarget(target);
 
-            if (isPureWhite)
-            {
-                graphicsDevice.Clear(Color.White);
-                graphicsDevice.SetRenderTarget(null);
-                graphicsDevice.Clear(Color.CornflowerBlue);
-                return;
-            }
-            graphicsDevice.Clear(new Color(0,0,0,0));
-            graphicsDevice.SetVertexBuffer(gBufferRenderer.quadVertexBuffer);
-            graphicsDevice.Indices = gBufferRenderer.quadIndexBuffer;
-            RasterizerState rasterizerState = new RasterizerState();
-            rasterizerState.CullMode = CullMode.None;
-            graphicsDevice.RasterizerState = rasterizerState;
-            foreach (var pass in quadEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
-            }
-            //    graphicsDevice.Clear(Color.White);
-            graphicsDevice.SetRenderTarget(null);
-            graphicsDevice.Clear(Color.CornflowerBlue);
-        }*/
+                  if (isPureWhite)
+                  {
+                      graphicsDevice.Clear(Color.White);
+                      graphicsDevice.SetRenderTarget(null);
+                      graphicsDevice.Clear(Color.CornflowerBlue);
+                      return;
+                  }
+                  graphicsDevice.Clear(new Color(0,0,0,0));
+                  graphicsDevice.SetVertexBuffer(gBufferRenderer.quadVertexBuffer);
+                  graphicsDevice.Indices = gBufferRenderer.quadIndexBuffer;
+                  RasterizerState rasterizerState = new RasterizerState();
+                  rasterizerState.CullMode = CullMode.None;
+                  graphicsDevice.RasterizerState = rasterizerState;
+                  foreach (var pass in quadEffect.CurrentTechnique.Passes)
+                  {
+                      pass.Apply();
+                      graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
+                  }
+                  //    graphicsDevice.Clear(Color.White);
+                  graphicsDevice.SetRenderTarget(null);
+                  graphicsDevice.Clear(Color.CornflowerBlue);
+              }*/
     }
 }

@@ -1,16 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraft;
- 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraftDX
 {
-    public class SSIDRenderer: FullScreenQuadRenderer
+    public class SSIDRenderer : FullScreenQuadRenderer
     {
 
 
@@ -43,7 +37,7 @@ namespace monogameMinecraftDX
         }
 
 
-        public void Draw(GameTime gameTime,SpriteBatch sb)
+        public void Draw(GameTime gameTime, SpriteBatch sb)
         {
             if (GameOptions.renderSSID == false)
             {
@@ -70,15 +64,15 @@ namespace monogameMinecraftDX
             SSIDEffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
             SSIDEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
             SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
-            if (SSIDEffect.Parameters["NoiseTex"]  != null) { SSIDEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
+            if (SSIDEffect.Parameters["NoiseTex"] != null) { SSIDEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
 
             SSIDEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
             SSIDEffect.Parameters["CameraPos"].SetValue(player.cam.position);
-            RenderQuad(device,renderTargetSSID, SSIDEffect,false,false);
+            RenderQuad(device, renderTargetSSID, SSIDEffect, false, false);
             textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f, 0f, 0f));
             textureCopyEffect.Parameters["useBkgColor"]?.SetValue(false);
             textureCopyEffect.Parameters["TextureCopy"].SetValue(renderTargetSSID);
-            
+
             RenderQuad(device, renderTargetSSIDPrev, textureCopyEffect, false, false);
             //  CopyQuad(device, renderTargetSSID, renderTargetSSIDPrev,sb);
 

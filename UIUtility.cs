@@ -1,11 +1,9 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.Content;
-using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+using System.IO;
 namespace monogameMinecraft
 {
     public static class UIUtility
@@ -15,7 +13,7 @@ namespace monogameMinecraft
 
             SpriteFont sf;
             sf = game.Content.Load<SpriteFont>("defaultfont");
-            Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground"); 
+            Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground");
             Texture2D menubkgrdTransparent = game.Content.Load<Texture2D>("menubackgroundtransparent");
             Texture2D buttonTex = game.Content.Load<Texture2D>("buttontexture");
             Texture2D hotbarTex = game.Content.Load<Texture2D>("hotbar");
@@ -24,7 +22,7 @@ namespace monogameMinecraft
             Texture2D blockTex1 = game.Content.Load<Texture2D>("blocksprites/stone");
             Texture2D blockTex2 = game.Content.Load<Texture2D>("blocksprites/grass_side_carried");
             Texture2D blockTex3 = game.Content.Load<Texture2D>("blocksprites/dirt");
-            Texture2D blockTex4= game.Content.Load<Texture2D>("blocksprites/grass_side_carried");
+            Texture2D blockTex4 = game.Content.Load<Texture2D>("blocksprites/grass_side_carried");
             Texture2D blockTex5 = game.Content.Load<Texture2D>("blocksprites/bedrock");
             Texture2D blockTex6 = game.Content.Load<Texture2D>("blocksprites/log_oak");
             Texture2D blockTex7 = game.Content.Load<Texture2D>("blocksprites/log_oak");
@@ -34,6 +32,9 @@ namespace monogameMinecraft
             Texture2D blockTex13 = game.Content.Load<Texture2D>("blocksprites/endframe_top");
             Texture2D blockTex14 = game.Content.Load<Texture2D>("blocksprites/sea_lantern");
             Texture2D blockTex102 = game.Content.Load<Texture2D>("blocksprites/torch_on");
+            UIElement.uiSounds.Clear();
+
+            UIElement.uiSounds.TryAdd("uiclick", game.Content.Load<SoundEffect>("sounds/uiclick"));
             UIElement.UITextures = new Dictionary<string, Texture2D> {
                     { "menubackground" ,menubkgrd},
                     { "menubackgroundtransparent" ,menubkgrdTransparent},
@@ -55,7 +56,7 @@ namespace monogameMinecraft
                 { "blocktexture102",blockTex102}
             };
             UIElement.menuUIs = new List<UIElement> {
-                
+
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
                 new UIButton(new Vector2(0.3f, 0.3f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.InitGameplay ,"Start Game",null,1),
                 new UIButton(new Vector2(0.3f, 0.6f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.GoToSettings ,"Game Settings",null,1)
@@ -95,12 +96,13 @@ namespace monogameMinecraft
             {
                // new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"])
                new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackgroundtransparent"],game._spriteBatch),
-                 new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.ResumeGame() ,"Resume Game",null,1),
-                  new UIButton(new Vector2(0.25f, 0.35f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.QuitGameplay() ,"Quit Game",null,1),
-                    new UIButton(new Vector2(0.25f, 0.6f), 0.5f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
+                 new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.ResumeGame() ,"Resume Game",null,1),
+                  new UIButton(new Vector2(0.25f, 0.3f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.QuitGameplay() ,"Quit Game",null,1),
+                    new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
+               new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.chunkRenderer) ,"Reload Custom Resource Packs",null,0.6f)
             };
             game.status = GameStatus.Menu;
         }
-        
+
     }
 }

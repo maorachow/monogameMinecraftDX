@@ -1,20 +1,14 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftDX;
 namespace monogameMinecraft
 {
     public class GBufferRenderer
     {
-        
-       // public RenderTarget2D renderTargetPositionDepth;
+
+        // public RenderTarget2D renderTargetPositionDepth;
         public RenderTarget2D renderTargetProjectionDepth;
-    //    public RenderTarget2D renderTargetNormal;
+        //    public RenderTarget2D renderTargetNormal;
         public RenderTarget2D renderTargetNormalWS;
         public RenderTarget2D renderTargetAlbedo;
         public RenderTarget2D renderTargetMER;
@@ -71,11 +65,11 @@ namespace monogameMinecraft
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
         }
         public IndexBuffer quadIndexBuffer;
-        public GBufferRenderer(GraphicsDevice device,Effect gBufferEffect,Effect gBufferEntityEffect,GamePlayer player,ChunkRenderer cr,EntityRenderer er)
+        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, GamePlayer player, ChunkRenderer cr, EntityRenderer er)
         {
             this.graphicsDevice = device;
-            this.gBufferEffect= gBufferEffect;
-            this.gBufferEntityEffect= gBufferEntityEffect;
+            this.gBufferEffect = gBufferEffect;
+            this.gBufferEntityEffect = gBufferEntityEffect;
             this.player = player;
             this.chunkRenderer = cr;
             this.entityRenderer = er;
@@ -87,7 +81,7 @@ namespace monogameMinecraft
             this.renderTargetAlbedo = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.renderTargetNormalWS = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             this.binding = new RenderTargetBinding[4];
-         
+
             this.binding[0] = new RenderTargetBinding(this.renderTargetProjectionDepth);
             this.binding[1] = new RenderTargetBinding(this.renderTargetNormalWS);
             this.binding[2] = new RenderTargetBinding(this.renderTargetAlbedo);
@@ -96,10 +90,10 @@ namespace monogameMinecraft
 
             quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);
             quadIndexBuffer.SetData(this.quadIndices);
-            quadVertexBuffer=new VertexBuffer(device,typeof(VertexPositionTexture),4,BufferUsage.None);
+            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 4, BufferUsage.None);
             quadVertexBuffer.SetData(this.quadVertices);
         }
-        public void Resize(int width,int height,GraphicsDevice device)
+        public void Resize(int width, int height, GraphicsDevice device)
         {
             this.renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
             this.renderTargetMER = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
@@ -114,14 +108,14 @@ namespace monogameMinecraft
         }
         public void Draw()
         {
-            
+
             graphicsDevice.SetRenderTargets(binding);
-           
+
             chunkRenderer.RenderAllChunksGBuffer(VoxelWorld.currentWorld.chunks, player, this.gBufferEffect);
             entityRenderer.DrawGBuffer(gBufferEntityEffect);
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);
-          
+
 
         }
     }

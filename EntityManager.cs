@@ -1,36 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MessagePack;
+﻿using MessagePack;
 using Microsoft.Xna.Framework;
 using monogameMinecraftDX;
+using System;
+using System.Collections.Generic;
+using System.IO;
 namespace monogameMinecraft
 {
     public class EntityManager
     {
         public static string gameWorldEntityDataPath = AppDomain.CurrentDomain.BaseDirectory;
-        public static Random randomGenerator= new Random();
+        public static Random randomGenerator = new Random();
         public static void UpdateAllEntity(float deltaTime)
         {
-            for(int i=0;i<EntityBeh.worldEntities.Count;i++)
+            for (int i = 0; i < EntityBeh.worldEntities.Count; i++)
             {
                 EntityBeh.worldEntities[i].OnUpdate(deltaTime);
             }
         }
-        public static void TrySpawnNewZombie(MinecraftGame game,float deltaTime)
+        public static void TrySpawnNewZombie(MinecraftGame game, float deltaTime)
         {
-            if (randomGenerator.NextSingle() >= 1-deltaTime/**0.1f*/ && EntityBeh.worldEntities.Count < 70&&VoxelWorld.currentWorld.worldID==0)
+            if (randomGenerator.NextSingle() >= 1 - deltaTime/**0.1f*/ && EntityBeh.worldEntities.Count < 70 && VoxelWorld.currentWorld.worldID == 0)
             {
-                Vector2 randSpawnPos = new Vector2(game.gamePlayer.playerPos.X+(randomGenerator.NextSingle() - 0.5f) * 80f, game.gamePlayer.playerPos.Z + (randomGenerator.NextSingle() - 0.5f) * 80f);
-                Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkManager.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
+                Vector2 randSpawnPos = new Vector2(game.gamePlayer.playerPos.X + (randomGenerator.NextSingle() - 0.5f) * 80f, game.gamePlayer.playerPos.Z + (randomGenerator.NextSingle() - 0.5f) * 80f);
+                Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
                 EntityBeh.SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game);
 
             }
         }
-   
+
         public static void ReadEntityData()
         {
             EntityBeh.worldEntities.Clear();
@@ -65,10 +62,10 @@ namespace monogameMinecraft
               }*/
             if (worldData.Length > 0)
             {
-               EntityBeh. entityDataReadFromDisk = MessagePackSerializer.Deserialize<List<EntityData>>(worldData);
+                EntityBeh.entityDataReadFromDisk = MessagePackSerializer.Deserialize<List<EntityData>>(worldData);
             }
 
-           
+
         }
         public static void SaveWorldEntityData()
         {
@@ -76,7 +73,7 @@ namespace monogameMinecraft
             FileStream fs;
             if (File.Exists(gameWorldEntityDataPath + "unityMinecraftServerData/GameData/worldentities.json"))
             {
-                fs = new FileStream(gameWorldEntityDataPath + "unityMinecraftServerData/GameData/worldentities.json", FileMode.Truncate, FileAccess.Write); 
+                fs = new FileStream(gameWorldEntityDataPath + "unityMinecraftServerData/GameData/worldentities.json", FileMode.Truncate, FileAccess.Write);
             }
             else
             {
@@ -95,7 +92,7 @@ namespace monogameMinecraft
               }*/
             byte[] tmpData = MessagePackSerializer.Serialize(EntityBeh.entityDataReadFromDisk);
             File.WriteAllBytes(gameWorldEntityDataPath + "unityMinecraftServerData/GameData/worldentities.json", tmpData);
-            
+
         }
     }
 
@@ -124,7 +121,7 @@ namespace monogameMinecraft
         [Key(9)]
         public int entityInWorldID;
 
-        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth,int entityInWorldID )
+        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth, int entityInWorldID)
         {
             this.typeid = typeid;
             this.posX = posX;
@@ -135,7 +132,7 @@ namespace monogameMinecraft
             this.rotZ = rotZ;
             this.entityID = entityID;
             this.entityHealth = entityHealth;
-           this.entityInWorldID = entityInWorldID;
+            this.entityInWorldID = entityInWorldID;
         }
     }
 }

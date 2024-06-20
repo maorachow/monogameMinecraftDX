@@ -1,15 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraft;
-using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraftDX
 {
-    public class MotionVectorRenderer:FullScreenQuadRenderer
+    public class MotionVectorRenderer : FullScreenQuadRenderer
     {
         public GraphicsDevice device;
         public Effect motionVectorEffect;
@@ -18,8 +13,8 @@ namespace monogameMinecraftDX
         public GamePlayer player;
         public Matrix playerPrevProjectionMat;
         public Matrix playerPrevViewMat;
-     
-        public MotionVectorRenderer(GraphicsDevice device, Effect motionVectorEffect, GBufferRenderer gBufferRenderer,GamePlayer player)
+
+        public MotionVectorRenderer(GraphicsDevice device, Effect motionVectorEffect, GBufferRenderer gBufferRenderer, GamePlayer player)
         {
             this.device = device;
             this.motionVectorEffect = motionVectorEffect;
@@ -35,15 +30,15 @@ namespace monogameMinecraftDX
         public void Draw()
         {
             SetCameraFrustum(player.cam, motionVectorEffect);
-         //   motionVectorEffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
+            //   motionVectorEffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
             motionVectorEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             motionVectorEffect.Parameters["prevView"]?.SetValue(playerPrevViewMat);
             motionVectorEffect.Parameters["prevProjection"]?.SetValue(playerPrevProjectionMat);
             motionVectorEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             motionVectorEffect.Parameters["Projection"]?.SetValue(player.cam.projectionMatrix);
             RenderQuad(device, renderTargetMotionVector, motionVectorEffect, false, false);
-            playerPrevViewMat=player.cam.viewMatrix;
-            playerPrevProjectionMat=player.cam.projectionMatrix;    
+            playerPrevViewMat = player.cam.viewMatrix;
+            playerPrevProjectionMat = player.cam.projectionMatrix;
         }
 
     }

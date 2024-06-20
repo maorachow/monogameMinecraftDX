@@ -1,19 +1,15 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftDX;
- 
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace monogameMinecraft
 {
-    public class DeferredShadingRenderer:FullScreenQuadRenderer
+    public class DeferredShadingRenderer : FullScreenQuadRenderer
     {
         public MinecraftGame game;
-      
+
         public GraphicsDevice device;
         public Effect blockDeferredEffect;
         public Effect deferredBlendEffect;
@@ -33,7 +29,7 @@ namespace monogameMinecraft
         public MotionBlurRenderer motionBlurRenderer;
         public List<CustomPostProcessor> customPostProcessors;
         public HDRCubemapRenderer hdrCubemapRenderer;
-        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer,ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer, MotionBlurRenderer motionBlurRenderer, HDRCubemapRenderer hdrCubemapRenderer)
+        public DeferredShadingRenderer(GraphicsDevice device, Effect blockDeferredEffect, ShadowRenderer shadowRenderer, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, PointLightUpdater lightUpdater, GBufferRenderer gBufferRenderer, ContactShadowRenderer contactShadowRenderer, SSRRenderer sSRRenderer, SSIDRenderer sSIDRenderer, Effect deferredBlendEffect, SkyboxRenderer skyboxRenderer, FXAARenderer fxaaRenderer, MotionBlurRenderer motionBlurRenderer, HDRCubemapRenderer hdrCubemapRenderer)
         {
             this.device = device;
             this.blockDeferredEffect = blockDeferredEffect;
@@ -62,37 +58,38 @@ namespace monogameMinecraft
 
         public void Draw(GamePlayer player)
         {
-           
+
             SetCameraFrustum(player.cam, blockDeferredEffect);
-         //   blockDeferredEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
-          //  blockDeferredEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
+            //   blockDeferredEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
+            //  blockDeferredEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             blockDeferredEffect.Parameters["fogStart"]?.SetValue(256.0f);
             blockDeferredEffect.Parameters["fogRange"]?.SetValue(1024.0f);
             blockDeferredEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
             blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
-            blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10,10, 10));
+            blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
             blockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             blockDeferredEffect.Parameters["TextureMER"].SetValue(gBufferRenderer.renderTargetMER);
             //  basicShader.Parameters["LightPos"].SetValue(player.playerPos + new Vector3(10, 50, 30));
             blockDeferredEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
             blockDeferredEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
-         //   if (blockDeferredEffect.Parameters["PositionWSTex"] != null) { blockDeferredEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
+            //   if (blockDeferredEffect.Parameters["PositionWSTex"] != null) { blockDeferredEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             // shadowmapShader.Parameters["LightSpaceMat"].SetValue(shadowRenderer.lightSpaceMat);
             //     RenderShadow(RenderingChunks, player,lightSpaceMat);
             if (blockDeferredEffect.Parameters["NoiseTex"] != null) { blockDeferredEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             blockDeferredEffect.Parameters["TextureAO"]?.SetValue(SSAORenderer.ssaoTarget);
             blockDeferredEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
             blockDeferredEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
-             blockDeferredEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            blockDeferredEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             blockDeferredEffect.Parameters["TextureContactShadow"]?.SetValue(contactShadowRenderer.contactShadowRenderTarget);
-           
+
             //    blockDeferredEffect.Parameters["receiveAO"].SetValue(true);
             blockDeferredEffect.Parameters["LightSpaceMat"]?.SetValue(shadowRenderer.lightSpaceMat);
             blockDeferredEffect.Parameters["LightSpaceMatFar"]?.SetValue(shadowRenderer.lightSpaceMatFar);
             blockDeferredEffect.Parameters["ShadowMap"]?.SetValue(shadowRenderer.shadowMapTarget);
             blockDeferredEffect.Parameters["ShadowMapFar"]?.SetValue(shadowRenderer.shadowMapTargetFar);
             blockDeferredEffect.Parameters["shadowBias"]?.SetValue(shadowRenderer.shadowBias);
-            for (int i = 0; i < lightUpdater.lights.Count; i++)
+            blockDeferredEffect.Parameters["LightPositions"].SetValue(lightUpdater.lights.ToArray());
+ /*           for (int i = 0; i < lightUpdater.lights.Count; i++)
             {
                 blockDeferredEffect.Parameters["LightPosition" + (i + 1).ToString()].SetValue(lightUpdater.lights[i]);
             }
@@ -122,8 +119,8 @@ namespace monogameMinecraft
                     blockDeferredEffect.Parameters["LightPosition4"].SetValue(new Vector3(0, 0, 0));
                 }
             }
-        //    blockDeferredEffect.Parameters["receiveReflection"].SetValue(false);
-        //    blockDeferredEffect.Parameters["receiveBackLight"].SetValue(false);
+            //    blockDeferredEffect.Parameters["receiveReflection"].SetValue(false);
+            //    blockDeferredEffect.Parameters["receiveBackLight"].SetValue(false);*/
             if (gameTimeManager.sunX > 160f || gameTimeManager.sunX <= 20f)
             {
                 blockDeferredEffect.Parameters["receiveShadow"].SetValue(false);
@@ -134,18 +131,18 @@ namespace monogameMinecraft
                 blockDeferredEffect.Parameters["receiveShadow"].SetValue(true);
 
             }
-            RenderQuad(device, renderTargetLum,renderTargetLumSpec, blockDeferredEffect) ;
-            
+            RenderQuad(device, renderTargetLum, renderTargetLumSpec, blockDeferredEffect);
+
         }
 
 
-        public void FinalBlend(SpriteBatch sb,VolumetricLightRenderer vlr,GraphicsDevice device, GamePlayer player)
+        public void FinalBlend(SpriteBatch sb, VolumetricLightRenderer vlr, GraphicsDevice device, GamePlayer player)
         {
-            skyboxRenderer.Draw(finalImage,true);
+            skyboxRenderer.Draw(finalImage, true);
             SetCameraFrustum(player.cam, deferredBlendEffect);
 
-        //    deferredBlendEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
-         //   deferredBlendEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
+            //    deferredBlendEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
+            //   deferredBlendEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             deferredBlendEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             deferredBlendEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
             deferredBlendEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
@@ -160,30 +157,30 @@ namespace monogameMinecraft
             deferredBlendEffect.Parameters["TextureIndirectDiffuse"]?.SetValue(ssidRenderer.renderTargetSSID);
             deferredBlendEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             deferredBlendEffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
-            RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor:false) ;
-           
+            RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor: false);
+
             motionBlurRenderer.ProcessImage(finalImage);
-           // motionBlurRenderer.renderTargetMotionBlur;
+            // motionBlurRenderer.renderTargetMotionBlur;
 
 
-            for(int i=0;i<customPostProcessors.Count;i++)
+            for (int i = 0; i < customPostProcessors.Count; i++)
             {
                 customPostProcessors[i].cam = player.cam;
-                if (i==0)
+                if (i == 0)
                 {
                     customPostProcessors[i].ProcessImage(motionBlurRenderer.processedImage);
                 }
                 else
                 {
-                    customPostProcessors[i].ProcessImage(customPostProcessors[i-1].processedImage);
+                    customPostProcessors[i].ProcessImage(customPostProcessors[i - 1].processedImage);
                 }
             }
             fxaaRenderer.Draw(true, customPostProcessors[customPostProcessors.Count-1].processedImage);
-         //   sb.Begin(blendState: BlendState.Opaque);
-        //    sb.Draw(finalImage, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
-         //   sb.End();
-            sb.Begin(blendState:BlendState.Additive);
-            sb.Draw(vlr.lightShaftTarget, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth , device.PresentationParameters.BackBufferHeight), Color.White);
+            //   sb.Begin(blendState: BlendState.Opaque);
+            //    sb.Draw(finalImage, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
+            //   sb.End();
+            sb.Begin(blendState: BlendState.Additive);
+            sb.Draw(vlr.lightShaftTarget, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
             sb.End();
         }
     }

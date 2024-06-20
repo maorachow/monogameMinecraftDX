@@ -1,14 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using System.ComponentModel.DataAnnotations;
-using monogameMinecraft;
-using System.IO;
-using StbImageSharp;
 
 namespace monogameMinecraftDX
 {
@@ -28,18 +20,18 @@ namespace monogameMinecraftDX
         public RenderTargetCube resultSpecularCubemapMip2;
         public RenderTargetCube resultSpecularCubemapMip3;
         public RenderTargetCube resultSpecularCubemapMip4;
-        public HDRCubemapRenderer(GraphicsDevice device,Effect cubemapEffect, Texture2D hdriTex, Effect cubemapIrradianceEffect,Effect cubemapPrefilterEffect)
+        public HDRCubemapRenderer(GraphicsDevice device, Effect cubemapEffect, Texture2D hdriTex, Effect cubemapIrradianceEffect, Effect cubemapPrefilterEffect)
         {
             this.device = device;
             this.cubemapEffect = cubemapEffect;
-               this.hdriTex = hdriTex;
-     /*       this.hdriTex = new Texture2D(device, 1024, 512, false, SurfaceFormat.Single);
-            using (var stream = File.OpenRead(Directory.GetCurrentDirectory() + "/environmenthdri.hdr"))
-            {
-                ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-                this.hdriTex.SetData(image.Data);
-            }*/
-         
+            this.hdriTex = hdriTex;
+            /*       this.hdriTex = new Texture2D(device, 1024, 512, false, SurfaceFormat.Single);
+                   using (var stream = File.OpenRead(Directory.GetCurrentDirectory() + "/environmenthdri.hdr"))
+                   {
+                       ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+                       this.hdriTex.SetData(image.Data);
+                   }*/
+
             InitializeVertices();
             InitializeCubeBuffers(device);
             resultCubemap = new RenderTargetCube(device, 512, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
@@ -109,7 +101,7 @@ namespace monogameMinecraftDX
         public void Render()
         {
             Matrix captureProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), 1.0f, 0.1f, 10.0f);
-            Matrix[] captureViews= new Matrix[6] { Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f)),
+            Matrix[] captureViews = new Matrix[6] { Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f)),
              Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(-1.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f)),
             Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, 0.0f, -1.0f)),
             Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 1.0f, 0.0f), new Vector3(0.0f, 0.0f, 1.0f)),
@@ -119,22 +111,22 @@ namespace monogameMinecraftDX
             rasterizerState.CullMode = CullMode.None;
             device.RasterizerState = rasterizerState;
             device.DepthStencilState = DepthStencilState.None;
-            for(int i = 0; i < 6; i++)
+            for (int i = 0; i < 6; i++)
             {
-            device.SetRenderTarget(resultCubemap,CubeMapFace.PositiveX+i);
+                device.SetRenderTarget(resultCubemap, CubeMapFace.PositiveX + i);
                 cubemapEffect.Parameters["View"].SetValue(captureViews[i]);
-            cubemapEffect.Parameters["Projection"].SetValue(captureProjection);
+                cubemapEffect.Parameters["Projection"].SetValue(captureProjection);
                 cubemapEffect.Parameters["HDRImageTex"].SetValue(hdriTex);
-             device.SetVertexBuffer(skyboxVertexBuffer);
-            foreach (var pass in cubemapEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                device.DrawPrimitives(PrimitiveType.TriangleList, 0, 36);
-            }
+                device.SetVertexBuffer(skyboxVertexBuffer);
+                foreach (var pass in cubemapEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    device.DrawPrimitives(PrimitiveType.TriangleList, 0, 36);
+                }
             }
 
 
-           // device.SetRenderTarget(null);
+            // device.SetRenderTarget(null);
 
             for (int i = 0; i < 6; i++)
             {
@@ -257,7 +249,7 @@ namespace monogameMinecraftDX
             resultSpecularCubemapMip2.GetData(CubeMapFace.NegativeY, data1);
             resultSpecularCubemapMip0.SetData(CubeMapFace.NegativeY, 2, null, data1, 0, width1 * width1);
             resultSpecularCubemapMip2.GetData(CubeMapFace.NegativeZ, data1);
-            resultSpecularCubemapMip0.SetData(CubeMapFace.NegativeZ,2, null, data1, 0, width1 * width1);
+            resultSpecularCubemapMip0.SetData(CubeMapFace.NegativeZ, 2, null, data1, 0, width1 * width1);
 
 
             int width2 = resultSpecularCubemapMip3.Size;
@@ -297,7 +289,7 @@ namespace monogameMinecraftDX
             RasterizerState rasterizerState1 = new RasterizerState();
             rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
             device.RasterizerState = rasterizerState1;
-            
+
         }
     }
 }

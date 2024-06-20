@@ -1,14 +1,9 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraft;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace monogameMinecraftDX
 {
-    public class BRDFLUTRenderer:FullScreenQuadRenderer
+    public class BRDFLUTRenderer : FullScreenQuadRenderer
     {
         public static BRDFLUTRenderer instance;
         public GraphicsDevice device;
@@ -27,7 +22,7 @@ namespace monogameMinecraftDX
         public void CalculateLUT()
         {
             lutEffect.Parameters["PI"]?.SetValue(3.14159265359f);
-            RenderQuad(device,renderTargetLUT,lutEffect,false,false);
+            RenderQuad(device, renderTargetLUT, lutEffect, false, false);
 
         }
 
