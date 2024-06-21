@@ -238,6 +238,7 @@ public class Chunk : IDisposable
  {4, new List<Vector2> { new Vector2(0.1875f, 0f), new Vector2(0.1875f, 0f), new Vector2(0.125f, 0f), new Vector2(0.0625f, 0f), new Vector2(0.1875f, 0f), new Vector2(0.1875f, 0f) }},
  {100, new List<Vector2> { new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f) }},
  {101, new List<Vector2> { new Vector2(0.0625f, 0.0625f) } },
+ 
  {5, new List<Vector2> { new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f) }},
  {6, new List<Vector2> { new Vector2(0.25f, 0f), new Vector2(0.25f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f) }},
  {7, new List<Vector2> { new Vector2(0.3125f, 0f), new Vector2(0.3125f, 0f), new Vector2(0.25f, 0f), new Vector2(0.25f, 0f), new Vector2(0.3125f, 0f), new Vector2(0.3125f, 0f) }},
@@ -251,8 +252,11 @@ public class Chunk : IDisposable
     {13, new List<Vector2> { new Vector2(0.75f, 0f), new Vector2(0.75f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.8125f, 0f), new Vector2(0.75f, 0f), new Vector2(0.75f, 0f) }},
 
           {14, new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) }},
+          {15, new List<Vector2> { new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f) }},
+        {16, new List<Vector2> { new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f) }},
+        {17, new List<Vector2> { new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f) }},
     };
-    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 14Sea Lantern
+    //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 12End Stone 13End Portal 14Sea Lantern 15Iron Block 16Cobblestone 17Wood Planks
     //100Water 101Grass
     //102torch
     //200Leaves
@@ -578,7 +582,8 @@ public class Chunk : IDisposable
         indicesOpq = new List<ushort>();
         indicesNS = new List<ushort>();
         indicesWT = new List<ushort>();
-
+          verticesOpqLOD = new List<VertexPositionNormalTangentTexture>();
+        indicesOpqLOD = new List<ushort>();
         frontLeftChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y + chunkWidth));
         frontRightChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x + chunkWidth, chunkPos.y + chunkWidth));
         backLeftChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y - chunkWidth));
@@ -1382,6 +1387,8 @@ public class Chunk : IDisposable
     public bool isReadyToRender = false;
     public List<VertexPositionNormalTangentTexture> verticesOpq;//= new List<VertexPositionNormalTexture>();
     public List<ushort> indicesOpq;
+    public List<VertexPositionNormalTangentTexture> verticesOpqLOD;//= new List<VertexPositionNormalTexture>();
+    public List<ushort> indicesOpqLOD;
     public List<VertexPositionNormalTangentTexture> verticesNS; //= new List<VertexPositionNormalTexture>();
     public List<ushort> indicesNS;
     public List<VertexPositionNormalTangentTexture> verticesWT;// = new List<VertexPositionNormalTexture>();
@@ -1395,9 +1402,116 @@ public class Chunk : IDisposable
         return new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + chunkWidth, GetHighestPoint(), chunkPos.y + chunkWidth));
     }
 
+    public void GenerateMeshOpqLOD(List<VertexPositionNormalTangentTexture> verts, List<ushort> indices,  ref  VertexPositionNormalTangentTexture[] vertsArray, ref ushort[] indicesArray,ref VertexBuffer vb, ref IndexBuffer ib,  int lodBlockSkipCount = 2)
+    {
+
+        //   System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        //  sw.Start();
+
+     //   int[] typeIDs = new int[lodBlockSkipCount * 1 * lodBlockSkipCount];
+      //  int[] typeIDWeights = new int[lodBlockSkipCount * 1 * lodBlockSkipCount];
 
 
-    public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices)
+        for (int x = 0; x < chunkWidth; x += lodBlockSkipCount)
+        {
+            for (int y = 0; y < chunkHeight; y += 1)
+            {
+                for (int z = 0; z < chunkWidth; z += lodBlockSkipCount)
+                {//new int[chunkwidth,chunkheiight,chunkwidth]
+                 //     BuildBlock(x, y, z, verts, uvs, tris, vertsNS, uvsNS, trisNS);
+
+
+                    int typeid = this.map[x, y, z];
+                //    Array.Clear(typeIDs, 0, lodBlockSkipCount * 1 * lodBlockSkipCount);
+                //    Array.Clear(typeIDWeights, 0, lodBlockSkipCount * 1 * lodBlockSkipCount);
+                    Vector3Int blockCheckPos = new Vector3Int(x, y, z);
+                    /*     if (lodBlockSkipCount > 1)
+                         {
+                             int indx = 0;
+                             for (int x1 = 0; x1 < lodBlockSkipCount; x1++)
+                             {
+
+                                     for (int z1 = 0; z1 < lodBlockSkipCount; z1++)
+                                     {
+
+
+                                         typeIDs[indx] = (this.map[x + x1, y , z + z1]);
+
+                                          if (blockIDWeightDic.ContainsKey((this.map[x + x1, y , z + z1])))
+                                         {
+                                             typeIDWeights[indx] = (blockIDWeightDic[(this.map[x + x1, y, z + z1])]);
+                                         }
+                                         else
+                                         {
+                                             typeIDWeights[indx] = 1;
+                                         } ;
+                                         indx++;
+                                     }
+
+                             }
+
+                             int maxIndex = MaxIndex(typeIDWeights);
+                             typeid = typeIDs[maxIndex];
+
+                         }*/
+
+                    if (typeid == 0) continue;
+                    if (0 < typeid && typeid < 100)
+                    {
+
+                        //Left
+                        if (CheckNeedBuildFace((blockCheckPos.x - lodBlockSkipCount), blockCheckPos.y, blockCheckPos.z, lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x, y, z),  new Vector3(0, 1, 0) * 1,  new Vector3(0, 0, 1) * lodBlockSkipCount, false, verts, 0, indices);
+                        //Right
+                        if (CheckNeedBuildFace((blockCheckPos.x + lodBlockSkipCount), blockCheckPos.y, blockCheckPos.z, lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x + lodBlockSkipCount, y, z),  new Vector3(0, 1, 0) * 1,  new Vector3(0, 0, 1) * lodBlockSkipCount, true, verts, 1, indices);
+
+                        //Bottom
+                        if (CheckNeedBuildFace(blockCheckPos.x, blockCheckPos.y - 1, blockCheckPos.z, lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x, y, z),  new Vector3(0, 0, 1) * lodBlockSkipCount,  new Vector3(1, 0, 0) * lodBlockSkipCount, false, verts, 2, indices);
+                        //Top
+                        if (CheckNeedBuildFace(blockCheckPos.x, blockCheckPos.y + 1, blockCheckPos.z, lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x, y + 1, z),  new Vector3(0, 0, 1) * lodBlockSkipCount,  new Vector3(1, 0, 0) * lodBlockSkipCount, true, verts, 3, indices);
+
+                        //Back
+                        if (CheckNeedBuildFace(blockCheckPos.x, blockCheckPos.y, (blockCheckPos.z - lodBlockSkipCount), lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x, y, z),  new Vector3(0, 1, 0) * 1,  new Vector3(1, 0, 0) * lodBlockSkipCount, true, verts, 4, indices);
+                        //Front
+                        if (CheckNeedBuildFace(blockCheckPos.x, blockCheckPos.y, (blockCheckPos.z + lodBlockSkipCount), lodBlockSkipCount))
+                            BuildFace(typeid, new Vector3(x, y, z + lodBlockSkipCount),  new Vector3(0, 1, 0) * 1,  new Vector3(1, 0, 0) * lodBlockSkipCount, false, verts, 5, indices);
+
+
+
+
+
+                    }
+                }
+            }
+        }
+
+        vertsArray = verts.ToArray();
+        indicesArray = indices.ToArray();
+        vb?.Dispose();
+
+        if (vertsArray.Length > 0)
+        {
+            vb = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), vertsArray.Length + 1, BufferUsage.WriteOnly);
+            //   }
+
+            vb.SetData(vertsArray);
+        }
+
+        //  if(IBOpq == null)
+        //  {
+        ib?.Dispose();
+        if (indicesArray.Length > 0)
+        {
+            ib = new IndexBuffer(this.device, IndexElementSize.SixteenBits, indicesArray.Length, BufferUsage.WriteOnly);
+            ib.SetData(indicesArray);
+        }
+    }
+
+        public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices)
     {
         lightPoints = new List<Vector3>();
 
@@ -1652,9 +1766,10 @@ public class Chunk : IDisposable
                 }
             }
         }
-        verticesOpqArray = verticesOpq.ToArray();
+        GenerateMeshOpqLOD(verticesOpqLOD, indicesOpqLOD, ref verticesOpqLOD1Array, ref indicesOpqLOD1Array,ref VBOpqLOD1,ref IBOpqLOD1, 2);
         verticesNSArray = verticesNS.ToArray();
-        verticesWTArray = verticesWT.ToArray();
+        verticesWTArray = verticesWT.ToArray(); 
+        verticesOpqArray = verticesOpq.ToArray();
         indicesOpqArray = indicesOpq.ToArray();
         indicesNSArray = indicesNS.ToArray();
         indicesWTArray = indicesWT.ToArray();
@@ -1721,6 +1836,8 @@ public class Chunk : IDisposable
             IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
             IBNS.SetData(indicesNSArray);
         }
+
+       
         /*  this.verticesOpq = null;
           this.verticesNS = null;
           this.verticesWT = null;
@@ -1936,6 +2053,34 @@ public class Chunk : IDisposable
 
     }
 
+    bool CheckNeedBuildFace(int x, int y, int z, int LODSkipBlockCount)
+    {
+        if (y < 0) return false;
+        var type = GetChunkBlockTypeLOD(x, y, z,LODSkipBlockCount);
+        bool isNonSolid = false;
+        if (type < 200 && type >= 100)
+        {
+            isNonSolid = true;
+        }
+        switch (isNonSolid)
+        {
+            case true: return true;
+            case false: break;
+        }
+        switch (type)
+        {
+
+
+            case 0:
+                return true;
+            case 9:
+                return !(LODSkipBlockCount > 1);
+            default:
+                return false;
+        }
+    }
+
+
     bool CheckNeedBuildFace(int x, int y, int z, bool isThisNS)
     {
         // return true;
@@ -2013,7 +2158,103 @@ public class Chunk : IDisposable
         }
         // return 0;
     }
+    public static int PredictBlockType3DLOD(int x, int y, int z, int LODBlockSkipCount = 4)
+    {
+        float yLerpValue = MathHelper.Lerp(-1, 1, (MathF.Abs(y - chunkSeaLevel)) / 40f);
+        float xzLerpValue = MathHelper.Lerp(-1, 1, (new Vector3(x, 0, z).Length() / 384f));
+        float xyzLerpValue = MathF.Max(xzLerpValue, yLerpValue);
+        float noiseValue = frequentNoiseGenerator.GetSimplex((int)(x / LODBlockSkipCount) * LODBlockSkipCount, y, (int)(z / LODBlockSkipCount) * LODBlockSkipCount);
+        if (noiseValue > xyzLerpValue)
+        {
+            return 1;
+        }
+        else
+        {
 
+            return 0;
+        }
+        // return 0;
+    }
+    public int GetChunkBlockTypeLOD(int x, int y, int z, int LODSkipBlockCount = 2)
+    {
+        if (y < 0 || y > chunkHeight - 1)
+        {
+            return 0;
+        }
+
+        if ((x < 0) || (z < 0) || (x >= chunkWidth) || (z >= chunkWidth))
+        {
+            if (VoxelWorld.currentWorld.worldGenType == 0)
+            {
+                if (x >= chunkWidth)
+                {
+                    return PredictBlockType(thisHeightMap[x - chunkWidth + 25, z + 8], y);
+
+                }
+                else if (z >= chunkWidth)
+                {
+                    return PredictBlockType(thisHeightMap[x + 8, z - chunkWidth + 25], y);
+                }
+                else if (x < 0)
+                {
+                    return PredictBlockType(thisHeightMap[8 + x, z + 8], y);
+                }
+                else if (z < 0)
+                {
+                    return PredictBlockType(thisHeightMap[x + 8, 8 + z], y);
+                }
+            }
+            else if (VoxelWorld.currentWorld.worldGenType == 2)
+            {
+                if (x >= chunkWidth)
+                {
+                    if (rightChunk != null && rightChunk.isMapGenCompleted == true && rightChunk.disposed == false)
+                    {
+                        return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+
+                    }
+                    else return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+
+                }
+                else if (z >= chunkWidth)
+                {
+                    if (frontChunk != null && frontChunk.isMapGenCompleted == true && frontChunk.disposed == false)
+                    {
+                        return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+
+
+
+                    }
+                    else return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+                }
+                else if (x < 0)
+                {
+                    if (leftChunk != null && leftChunk.isMapGenCompleted == true && leftChunk.disposed == false)
+                    {
+                        return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+
+                    }
+                    else return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+                }
+                else if (z < 0)
+                {
+                    if (backChunk != null && backChunk.isMapGenCompleted == true && backChunk.disposed == false)
+                    {
+                        return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+
+                    }
+                    else return PredictBlockType3DLOD(chunkPos.x + x, y, chunkPos.y + z, LODSkipBlockCount);
+                }
+            }
+            else
+            {
+                return 1;
+            }
+
+
+        }
+        return map[x, y, z];
+    }
     public int GetChunkBlockType(int x, int y, int z)
     {
         if (y < 0 || y > chunkHeight - 1)
@@ -2130,13 +2371,17 @@ public class Chunk : IDisposable
     }
 
     public VertexPositionNormalTangentTexture[] verticesOpqArray;
+    public VertexPositionNormalTangentTexture[] verticesOpqLOD1Array;
     public VertexPositionNormalTangentTexture[] verticesNSArray;
     public VertexPositionNormalTangentTexture[] verticesWTArray;
     public ushort[] indicesOpqArray;
+    public ushort[] indicesOpqLOD1Array;
     public ushort[] indicesNSArray;
     public ushort[] indicesWTArray;
     public IndexBuffer IBOpq;
     public VertexBuffer VBOpq;
+    public IndexBuffer IBOpqLOD1;
+    public VertexBuffer VBOpqLOD1;
     public IndexBuffer IBWT;
     public VertexBuffer VBWT;
     public IndexBuffer IBNS;
@@ -2249,9 +2494,18 @@ public class Chunk : IDisposable
             this.indicesWT = null;
             this.verticesNSArray = null;
             this.indicesOpqArray = null;
+            this.verticesOpqLOD1Array = null;
+            this.indicesOpqLOD1Array = null;
             this.indicesNSArray = null;
             this.indicesWTArray = null;
-
+            if (this.VBOpqLOD1 != null)
+            {
+                this.VBOpqLOD1.Dispose();
+            }
+            if (this.IBOpqLOD1 != null)
+            {
+                this.IBOpqLOD1.Dispose();
+            }
             if (this.VBOpq != null)
             {
                 this.VBOpq.Dispose();
@@ -2283,6 +2537,8 @@ public class Chunk : IDisposable
 
             this.VBOpq = null;
             this.IBOpq = null;
+            this.VBOpqLOD1 = null;
+            this.IBOpqLOD1 = null;
             this.VBWT = null;
             this.IBWT = null;
             this.VBNS = null;

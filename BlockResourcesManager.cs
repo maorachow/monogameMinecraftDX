@@ -83,7 +83,7 @@ namespace monogameMinecraftDX
 
             Debug.WriteLine(blockInfoDataString);
         }
-        //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 14Sea Lantern
+        //0None 1Stone 2Grass 3Dirt 4Side grass block 5Bedrock 6WoodX 7WoodY 8WoodZ 9Leaves 10Diamond Ore 11Sand 12End Stone 13End Portal 14Sea Lantern 15Iron Block 16Cobblestone 17Wood Planks
         //100Water 101Grass
         //102torch
         //200Leaves
@@ -109,9 +109,54 @@ namespace monogameMinecraftDX
                 {12,"stonedig" },
                 {13,"stonedig" },
                 {14,"stonedig" },
+                  {15,"stonedig" },
+                {16,"stonedig" },
+                {17,"wooddig" },
                  {100,"waterdig" },
                 {101,"grassdig" },
                 {102,"wooddig" }
+
+            };
+            string blockInfoDataString = JsonSerializer.Serialize(blockInfoData);
+
+            FileStream fs;
+            if (File.Exists(path))
+            {
+                fs = new FileStream(path, FileMode.Truncate, FileAccess.Write);
+            }
+            else
+            {
+                fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+            }
+            fs.Close();
+            File.WriteAllText(path, blockInfoDataString);
+        }
+
+        public static void WriteDefaultBlockSpritesInfo(string path)
+        {
+     
+            Dictionary<int, string> blockInfoData = new Dictionary<int, string>{
+
+                   {1,"blocksprites/stone" },
+               {2,"blocksprites/grass_side_carried" },
+                   {3,"blocksprites/dirt" },
+                   {4,"blocksprites/grass_side_carried" },
+                   {5,"blocksprites/bedrock" },
+                   {6,"blocksprites/log_oak" },
+                   {7,"blocksprites/log_oak" },
+                   {8,"blocksprites/log_oak" },
+                   {9,"blocksprites/leaves_oak_carried" },
+                   {10,"blocksprites/diamond_ore" },
+                {11,"blocksprites/sand" },
+                {12,"blocksprites/end_stone" },
+                {13,"blocksprites/endframe_top" },
+                {14,"blocksprites/sea_lantern" },
+                 {15,"blocksprites/iron_block" },
+                  {16,"blocksprites/cobblestone" },
+                   {17,"blocksprites/planks_oak" },
+                 {100,"blocksprites/water" },
+                {101,"blocksprites/grass" },
+                {102,"blocksprites/torch_on" }
 
             };
             string blockInfoDataString = JsonSerializer.Serialize(blockInfoData);
@@ -190,6 +235,9 @@ namespace monogameMinecraftDX
                 {12,"stonedig" },
                 {13,"stonedig" },
                 {14,"stonedig" },
+                 {15,"stonedig" },
+                   {16,"stonedig" },
+                     {17,"wooddig" },
                  {100,"waterdig" },
                 {101,"grassdig" },
                 {102,"wooddig" }
@@ -217,14 +265,70 @@ namespace monogameMinecraftDX
             Chunk.blockSoundInfo = blockSoundInfo;
             cr.SetTexture(atlasNormal, null, atlas, atlasMER);
         }
-        public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr)
+        public static void LoadDefaultUIResources(ContentManager content,MinecraftGame game)
+        {
+            Dictionary<int, string> blockSpriteInfoData = new Dictionary<int, string>{
+
+                {1,"blocksprites/stone" },
+               {2,"blocksprites/grass_side_carried" },
+                   {3,"blocksprites/dirt" },
+                   {4,"blocksprites/grass_side_carried" },
+                   {5,"blocksprites/bedrock" },
+                   {6,"blocksprites/log_oak" },
+                   {7,"blocksprites/log_oak" },
+                   {8,"blocksprites/log_oak" },
+                   {9,"blocksprites/leaves_oak_carried" },
+                   {10,"blocksprites/diamond_ore" },
+                {11,"blocksprites/sand" },
+                {12,"blocksprites/end_stone" },
+                {13,"blocksprites/endframe_top" },
+                {14,"blocksprites/sea_lantern" },
+                 {15,"blocksprites/iron_block" },
+                  {16,"blocksprites/cobblestone" },
+                   {17,"blocksprites/planks_oak" },
+                 {100,"blocksprites/water" },
+                {101,"blocksprites/grass" },
+                {102,"blocksprites/torch_on" }
+
+            };
+            foreach (var item in blockSpriteInfoData)
+            {
+                try
+                {
+
+                    Texture2D sprite = content.Load<Texture2D>(item.Value);
+
+                    //    se.Play(1, 0, 0);
+                    if (!UIElement.UITextures.ContainsKey("blocktexture" + item.Key))
+                    {
+                        UIElement.UITextures.Add("blocktexture" + item.Key, sprite);
+                    }
+                    else
+                    {
+                        UIElement.UITextures["blocktexture" + item.Key] = sprite;
+                    }
+
+
+                }
+                catch
+                {
+                    UIElement.UITextures["blocktexture" + item.Key] = null;
+                }
+            }
+
+            UIUtility.InitInventoryUI(game, UIUtility.sf);
+        }
+        public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr,MinecraftGame game)
         {
             string blockInfoDataString;
             string blockSoundInfoDataString;
+            string blockSpriteInfoDataString;
             try
             {
                 blockInfoDataString = File.ReadAllText(path + "/blockinfodata.json");
                 blockSoundInfoDataString = File.ReadAllText(path + "/blocksoundinfodata.json");
+              
+                blockSpriteInfoDataString   = File.ReadAllText(path + "/blockspriteinfodata.json");
             }
             catch (Exception e)
             {
@@ -240,6 +344,7 @@ namespace monogameMinecraftDX
             blockInfo = new Dictionary<int, List<Vector2>>();
             Dictionary<int, List<Vector2Data>> blockInfoData = JsonSerializer.Deserialize<Dictionary<int, List<Vector2Data>>>(blockInfoDataString);
             Dictionary<int, string> blockSoundInfoData = JsonSerializer.Deserialize<Dictionary<int, string>>(blockSoundInfoDataString);
+            Dictionary<int, string> blockSpriteInfoData = JsonSerializer.Deserialize<Dictionary<int, string>>(blockSpriteInfoDataString);
             blockSoundInfo = new Dictionary<int, SoundEffect>();
             foreach (var item in blockInfoData)
             {
@@ -308,8 +413,34 @@ namespace monogameMinecraftDX
                 }
 
             }
+            foreach(var item in blockSpriteInfoData)
+            {
+                try
+                {
+
+                    Texture2D sprite = contentManager.Load<Texture2D>(item.Value);
+
+                    //    se.Play(1, 0, 0);
+                    if (!UIElement.UITextures.ContainsKey("blocktexture" + item.Key))
+                    {
+                    UIElement.UITextures.Add("blocktexture" + item.Key, sprite);
+                    }
+                    else
+                    {
+                        UIElement.UITextures["blocktexture" + item.Key]= sprite;
+                    }
+
+               
+                }
+                catch
+                {
+                    UIElement.UITextures["blocktexture" + item.Key] = null;
+                }
+            }
+         
             Chunk.blockSoundInfo = blockSoundInfo;
             Chunk.blockInfo = blockInfo;
+            UIUtility.InitInventoryUI(game, UIUtility.sf);
             //   cmTemp.Dispose();
             cr.SetTexture(atlasNormal, null, atlas, atlasMER);
             ChunkHelper.RebuildAllChunks();

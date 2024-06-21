@@ -419,20 +419,24 @@ namespace monogameMinecraft
                 Jump();
                 isJumping = false;
             }
+            float finalY = 0f;
+            if (isPlayerFlying == true)
+            {
+                finalY=finalMoveVec.Y;
+            }
+            else
+            {
+                finalY=curGravity* deltaTime;
+            }
             if (finalMoveVec.X != 0.0f)
                 Move(new Vector3(((cam.horizontalRight * finalMoveVec.X).X), 0f, (cam.horizontalRight * finalMoveVec.X).Z), false);
 
 
             if (finalMoveVec.Z != 0.0f)
                 Move(new Vector3((cam.horizontalFront * finalMoveVec.Z).X, 0f, (cam.horizontalFront * finalMoveVec.Z).Z), false);
-            if (isPlayerFlying == true)
-            {
-                Move(new Vector3(0f, finalMoveVec.Y, 0f), false);
-            }
-            else
-            {
-                Move(new Vector3(0f, curGravity * deltaTime, 0f), false);
-            }
+
+
+            Move(new Vector3(0f, finalY, 0f), false);
             if (breakBlockCD <= 0f && isLeftMouseButtonDown == true)
             {
                 bool isEntityHit = TryHitEntity();
@@ -440,12 +444,12 @@ namespace monogameMinecraft
                 {
                     BreakBlock();
                 }
-                breakBlockCD = 0.3f;
+                breakBlockCD = 0.15f;
             }
             if (breakBlockCD <= 0f && isRightMouseButtonDown == true)
             {
                 PlaceBlock();
-                breakBlockCD = 0.3f;
+                breakBlockCD = 0.15f;
             }
 
         }
@@ -491,6 +495,7 @@ namespace monogameMinecraft
             {
                 moveVelocity = slowPlayerSpeed;
             }
+
             if (dir.Y > 0f)
             {
                 //  Debug.WriteLine("dir up");
@@ -499,12 +504,11 @@ namespace monogameMinecraft
                     //        Debug.WriteLine("jump");
                     //Jump();
                     isJumping = true;
-                    jumpCD = 0.01f;
+                  //  jumpCD = 0.01f;
                 }
 
             }
-
-
+          
             if (mState.LeftButton == ButtonState.Pressed)
             {
                 isLeftMouseButtonDown = true;

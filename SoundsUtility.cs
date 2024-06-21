@@ -15,7 +15,7 @@ namespace monogameMinecraftDX
             volume = 1 - volume;
             volume = MathHelper.Clamp(volume, 0, 1);
             volume = volume * volume;
-            Debug.WriteLine("play sound" + volume);
+       //     Debug.WriteLine("play sound" + volume);
 
             effect.Play(volume, 0f, 0f);
         }

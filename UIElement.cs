@@ -23,6 +23,7 @@ namespace monogameMinecraft
         public static int settingsUIsPageID;
         public static List<UIElement> inGameUIs = new List<UIElement>();
         public static List<UIElement> pauseMenuUIs = new List<UIElement>();
+        public static List<UIElement> inventoryUIs = new List<UIElement>();
         public static Dictionary<string, SoundEffect> uiSounds = new Dictionary<string, SoundEffect>();
     }
 }

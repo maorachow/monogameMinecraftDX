@@ -8,10 +8,12 @@ namespace monogameMinecraft
 {
     public static class UIUtility
     {
+        public static SpriteFont sf;
+      
         public static void InitGameUI(MinecraftGame game)
         {
 
-            SpriteFont sf;
+            
             sf = game.Content.Load<SpriteFont>("defaultfont");
             Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground");
             Texture2D menubkgrdTransparent = game.Content.Load<Texture2D>("menubackgroundtransparent");
@@ -46,6 +48,7 @@ namespace monogameMinecraft
                     { "blocktexture3",blockTex3},
                     { "blocktexture4",blockTex4},
                     { "blocktexture5",blockTex5},
+                      { "blocktexture-1",menubkgrdTransparent},
                     {"blocktexture6" ,blockTex6},
                     {"blocktexture7" ,blockTex7},
                     {"blocktexture8" ,blockTex8},
@@ -55,6 +58,8 @@ namespace monogameMinecraft
                     { "blocktexture14",blockTex14},
                 { "blocktexture102",blockTex102}
             };
+            BlockResourcesManager.LoadDefaultUIResources(game.Content, game);
+
             UIElement.menuUIs = new List<UIElement> {
 
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
@@ -99,9 +104,29 @@ namespace monogameMinecraft
                  new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.ResumeGame() ,"Resume Game",null,1),
                   new UIButton(new Vector2(0.25f, 0.3f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.QuitGameplay() ,"Quit Game",null,1),
                     new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
-               new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.chunkRenderer) ,"Reload Custom Resource Packs",null,0.6f)
+               new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.chunkRenderer,game) ,"Reload Custom Resource Packs",null,0.6f)
             };
+            InitInventoryUI(game,sf);
             game.status = GameStatus.Menu;
+        }
+
+        public static void InitInventoryUI(MinecraftGame game,SpriteFont sf)
+        {
+            UIElement.inventoryUIs = new List<UIElement> { new UIImage(new Vector2(0.1f, 0.1f), 0.8f, 0.8f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),
+             new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (UIButton ub)=>{} ,"Inventory",null,1,false,false),
+            };
+            int elementCount = 0;
+            foreach(var element in Chunk.blockInfo)
+            {
+                UIElement.inventoryUIs.Add(new UIButton(new Vector2((float)(elementCount % 10) * 0.05f+0.25f, (float)(elementCount / 10) * 0.05f + 0.25f), 0.05f, 0.05f, UIElement.UITextures.ContainsKey("blocktexture" + element.Key)&& UIElement.UITextures["blocktexture" + element.Key]!=null ? UIElement.UITextures["blocktexture" + element.Key] : UIElement.UITextures["blocktexture-1"],
+                    new Vector2(0f, 0f), null, game._spriteBatch, game.Window, (UIButton ub) => game.gamePlayer.inventoryData[game.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f,true
+                    ));
+               elementCount++; 
+            }
+            foreach(var element in UIElement.inventoryUIs)
+            {
+                element.OnResize();
+            }
         }
 
     }

@@ -6,6 +6,7 @@ using monogameMinecraftDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
 
@@ -125,6 +126,10 @@ namespace monogameMinecraft
             {
                 element1.OnResize();
             }
+            foreach (UIElement element1 in UIElement.inventoryUIs)
+            {
+                element1.OnResize();
+            }
             switch (status)
             {
                 case GameStatus.Started:
@@ -132,7 +137,10 @@ namespace monogameMinecraft
                     {
                         element1.OnResize();
                     }
-
+                    foreach (UIElement element1 in UIElement.inventoryUIs)
+                    {
+                        element1.OnResize();
+                    }
                     int width = GraphicsDevice.PresentationParameters.BackBufferWidth;
                     int height = GraphicsDevice.PresentationParameters.BackBufferHeight;
                     Debug.WriteLine(width);
@@ -188,9 +196,9 @@ namespace monogameMinecraft
             //   ChunkManager.ReadJson();
             GameOptions.ReadOptionsJson();
 
-            //     BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory()+"/blockinfodata.json");
-
-            //    BlockResourcesManager.WriteDefaultBlockSoundInfo(Directory.GetCurrentDirectory() + "/blocksoundinfodata.json");
+        /*         BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory()+"/blockinfodata.json");
+            BlockResourcesManager.WriteDefaultBlockSoundInfo(Directory.GetCurrentDirectory() + "/blocksoundinfodata.json");
+                BlockResourcesManager.WriteDefaultBlockSpritesInfo(Directory.GetCurrentDirectory() + "/blockspritesinfodata.json");*/
             //    BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",Content,GraphicsDevice);
 
 
@@ -399,6 +407,7 @@ namespace monogameMinecraft
         int lastMouseX;
         int lastMouseY;
         public bool isGamePaused = false;
+        public bool isInventoryOpen = false;
         public void ResumeGame()
         {
             isGamePaused = false;
@@ -406,6 +415,7 @@ namespace monogameMinecraft
         }
 
         float prevFPS = 0f;
+        public KeyboardState lastKeyState1;
         protected override void Update(GameTime gameTime)
         {
             if (!IsActive) return;
@@ -455,7 +465,34 @@ namespace monogameMinecraft
                         }
                         break;
                     }
-
+                    if (Keyboard.GetState().IsKeyUp(Keys.E)&&!lastKeyState1.IsKeyUp(Keys.E))
+                    {
+                        //     status = GameStatus.Quiting;
+                        //  QuitGameplay();
+                        //  Exit();
+                        //   Environment.Exit(0);
+                       
+                        isInventoryOpen=!isInventoryOpen;
+                        if (isInventoryOpen == true)
+                        {
+                            IsMouseVisible = true;
+                        }
+                        else
+                        {
+                            IsMouseVisible = false;
+                        }
+                      
+                    }
+                    lastKeyState1 = Keyboard.GetState();
+             //       Debug.WriteLine(isInventoryOpen);
+                    if (isInventoryOpen)
+                    {
+                        foreach (var el in UIElement.inventoryUIs)
+                        {
+                            el.Update();
+                        }
+                        break;
+                    }
                     if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                     {
                         //     status = GameStatus.Quiting;
@@ -466,7 +503,8 @@ namespace monogameMinecraft
                         IsMouseVisible = true;
                     }
                     ProcessPlayerKeyboardInput(gameTime);
-
+                
+                 
                     ProcessPlayerMouseInput();
 
 
@@ -487,11 +525,12 @@ namespace monogameMinecraft
                     gamePlayerPos = gamePlayer.playerPos;
 
 
-              /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    float deltaFps = Math.Abs(curFps - prevFPS);
-                    Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
-                    prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;*/
-
+                    /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
+                          float deltaFps = Math.Abs(curFps - prevFPS);
+                          Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
+                          prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;*/
+                 
+                
                     break;
             }
 
@@ -551,11 +590,11 @@ namespace monogameMinecraft
             {
                 playerVec.Y = -1f;
             }
+
             gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState, mState, lastMouseState);
 
-            lastMouseState = mState;
             lastKeyboardState = kState;
-
+            lastMouseState = mState;
 
         }
         RasterizerState rasterizerState = new RasterizerState();
@@ -648,6 +687,16 @@ namespace monogameMinecraft
 
 
                     _spriteBatch.End();
+                    if (isInventoryOpen)
+                    {
+                        _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
+
+                        foreach (var el in UIElement.inventoryUIs)
+                        {
+                            el.DrawString(el.text);
+                        }
+                        _spriteBatch.End();
+                    }
                     if (isGamePaused)
                     {
                         _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);

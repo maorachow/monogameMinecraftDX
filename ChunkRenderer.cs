@@ -95,12 +95,23 @@ namespace monogameMinecraft
 
                 if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
                 {
-
                     if (frustum.Intersects(c.chunkBounds))
                     {
-                        RenderSingleChunkGBuffer(c, player, gBufferEffect);
-
+                        if ((MathF.Abs(c.chunkPos.x - player.playerPos.X) < (384) && MathF.Abs(c.chunkPos.y - player.playerPos.Z) < (384)))
+                    {
+                            RenderSingleChunkGBuffer(c, player, gBufferEffect,false);
+                        }
+                    else
+                    {
+                            RenderSingleChunkGBuffer(c, player, gBufferEffect, true);
+                        }
                     }
+                  
+                  
+                    
+                       
+
+                     
 
 
 
@@ -114,15 +125,18 @@ namespace monogameMinecraft
                 {
                     continue;
                 }
-
+               
                 if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
                 {
-
+                    if((MathF.Abs(c.chunkPos.x - player.playerPos.X) < (256) && MathF.Abs(c.chunkPos.y - player.playerPos.Z) < (256)))
+                    {
                     if (frustum.Intersects(c.chunkBounds))
                     {
                         RenderSingleChunkGBufferAlphaTest(c, player, gBufferEffect);
 
                     }
+                    }
+                  
 
 
 
@@ -154,8 +168,32 @@ namespace monogameMinecraft
 
 
         }
-        public void RenderSingleChunkGBuffer(Chunk c, GamePlayer player, Effect gBufferEffect)
+        public void RenderSingleChunkGBuffer(Chunk c, GamePlayer player, Effect gBufferEffect,bool isLOD=false)
         {
+            if (isLOD)
+            {
+                if (c.indicesOpqLOD1Array.Length <= 0)
+                {
+                    return;
+                }
+                Matrix world = (Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y)));
+                gBufferEffect.Parameters["World"].SetValue(world);
+                //   gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world*player.cam.viewMatrix)));
+                //  gBufferEffect.Parameters["roughness"].SetValue(0.0f);
+
+                device.SetVertexBuffer(c.VBOpqLOD1);
+
+                device.Indices = c.IBOpqLOD1;
+
+                foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqLOD1Array.Length / 3);
+
+                }
+            }
+            else
+            {
             if (c.indicesOpqArray.Length <= 0)
             {
                 return;
@@ -175,6 +213,8 @@ namespace monogameMinecraft
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
 
             }
+            }
+         
         }
 
         public void RenderSingleChunkGBufferWater(Chunk c, GamePlayer player, Effect gBufferEffect)

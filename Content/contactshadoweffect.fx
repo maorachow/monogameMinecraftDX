@@ -145,7 +145,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float sampleViewDepth = tex2D(gProjectionDepth, uv).x;
         //GetViewDepthFromWorldPos(sampleWorldPos); 
         float testDepth = GetViewDepthFromWorldPos(marchPos);
-       if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
+       if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1||sampleViewDepth<0.01)
         {
             isHit = false;
            

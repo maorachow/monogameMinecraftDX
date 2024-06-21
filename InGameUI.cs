@@ -75,7 +75,8 @@ namespace monogameMinecraft
         void DrawBlockSpriteAtPoint(short blockID, Vector2 position)
         {
             if (blockID == 0) { return; }
-            spriteBatch.Draw(UIElement.UITextures["blocktexture" + blockID], new Rectangle((int)position.X, (int)position.Y, (int)hotbarItemWidth, (int)hotbarItemWidth), Color.White);
+
+            spriteBatch.Draw(UIElement.UITextures.ContainsKey("blocktexture" + blockID)&&UIElement.UITextures["blocktexture" + blockID]!=null?UIElement.UITextures["blocktexture" + blockID]: UIElement.UITextures["blocktexture-1"], new Rectangle((int)position.X, (int)position.Y, (int)hotbarItemWidth, (int)hotbarItemWidth), Color.White);
         }
         void DrawSelectedHotbar(Rectangle hotbarRect)
         {
