@@ -224,6 +224,37 @@ namespace monogameMinecraft
                 return;
             }
             Vector3 setBlockPoint = Vector3.Lerp(cam.position, blockPoint, 0.95f);
+
+            if (inventoryData[currentSelectedHotbar] == 102)
+            {
+                Vector3Int blockPointInt=ChunkHelper.Vec3ToBlockPos(blockPoint);
+                Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
+                Debug.WriteLine((setBlockPointInt - blockPointInt));
+                if ((setBlockPointInt - blockPointInt).x < -0.5f)
+                {
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint,new BlockData( inventoryData[currentSelectedHotbar],1));
+                    GetBlocksAround(playerBounds);
+                    return;
+                }
+                if ((setBlockPointInt - blockPointInt).x >0.5f)
+                {
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 2));
+                    GetBlocksAround(playerBounds);
+                    return;
+                }
+                if ((setBlockPointInt - blockPointInt).z < -0.5f)
+                {
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 3));
+                    GetBlocksAround(playerBounds);
+                    return;
+                }
+                if ((setBlockPointInt - blockPointInt).z >0.5f)
+                {
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 4));
+                    GetBlocksAround(playerBounds);
+                    return;
+                }
+            }
             ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
             GetBlocksAround(playerBounds);
         }

@@ -46,6 +46,28 @@ namespace monogameMinecraftDX
             return ret;
         }
     }
+
+    public struct BlockInfoJsonData
+    {
+        [JsonInclude]
+        public List<Vector2Data> uvCorners;
+        [JsonInclude]
+        public List<Vector2Data> uvSizes;
+        [JsonInclude]
+        public BlockShape shape;
+        public BlockInfoJsonData(List<Vector2Data> uvCorners,List<Vector2Data> uvSizes,BlockShape bs)
+        {
+            this.shape = bs;
+            this.uvCorners = uvCorners;
+            this.uvSizes=uvSizes;
+        }
+        public static BlockInfoJsonData FromBlockInfo(BlockInfo info)
+        {
+            BlockInfoJsonData ret = new BlockInfoJsonData(Vector2Data.FromVector2List(info.uvCorners), Vector2Data.FromVector2List(info.uvSizes), info.shape);
+            return ret; 
+
+        }
+    }
     public class BlockResourcesManager
     {
 
@@ -60,10 +82,10 @@ namespace monogameMinecraftDX
         public static void WriteDefaultBlockInfo(string path)
         {
 
-            Dictionary<int, List<Vector2Data>> blockInfoData = new Dictionary<int, List<Vector2Data>>();
-            foreach (var item in Chunk.blockInfo)
+            Dictionary<int, BlockInfoJsonData> blockInfoData = new Dictionary<int, BlockInfoJsonData>();
+            foreach (var item in Chunk.blockInfosNew)
             {
-                blockInfoData.Add(item.Key, Vector2Data.FromVector2List(item.Value));
+                blockInfoData.Add(item.Key, BlockInfoJsonData.FromBlockInfo(item.Value));
             }
 
             string blockInfoDataString = JsonSerializer.Serialize(blockInfoData);

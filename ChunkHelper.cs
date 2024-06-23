@@ -360,7 +360,7 @@ namespace monogameMinecraft
 
 
 
-            SetBlockWithUpdate(blockPoint, 0);
+            SetBlockWithUpdate(blockPoint, (short)0);
 
         }
 
@@ -444,6 +444,63 @@ namespace monogameMinecraft
             //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
             //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
         }
+
+        public static void SetBlockWithUpdate(Vector3 pos, BlockData blockData)
+        {
+
+            Vector3Int intPos = new Vector3Int(ChunkHelper.FloatToInt(pos.X), ChunkHelper.FloatToInt(pos.Y), ChunkHelper.FloatToInt(pos.Z));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(pos));
+            if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+            {
+                return;
+            }
+            Vector3Int chunkSpacePos = intPos - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+            if (chunkSpacePos.y < 0 || chunkSpacePos.y >= Chunk.chunkHeight)
+            {
+                return;
+            }
+            chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockData;
+            chunkNeededUpdate.BuildChunk();
+            chunkNeededUpdate.isModifiedInGame = true;
+            if (Chunk.blockSoundInfo.ContainsKey((int)blockData.blockID))
+            {
+                SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, pos, Chunk.blockSoundInfo[blockData.blockID], 20f);
+            }
+            if (chunkSpacePos.x == 0)
+            {
+
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x - Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunk();
+
+            }
+            if (chunkSpacePos.x == Chunk.chunkWidth - 1)
+            {
+                // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
+
+                //  chunkNeededUpdate.rightChunk.BuildChunk();
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x + Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunk();
+            }
+            if (chunkSpacePos.z == 0)
+            {
+                //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
+                //       {
+                //         chunkNeededUpdate.backChunk.BuildChunk();
+                //     }
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y - Chunk.chunkWidth))?.BuildChunk();
+            }
+            if (chunkSpacePos.z == Chunk.chunkWidth - 1)
+            {
+                //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
+                //     {
+                //      chunkNeededUpdate.frontChunk.BuildChunk();
+                //     }
+
+                GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunk();
+            }
+
+
+            //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
+            //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
+        }
         public static void BreakBlock(Vector3 pos)
         {
             short blockID = GetBlock(pos);
@@ -451,7 +508,7 @@ namespace monogameMinecraft
             {
                 SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, pos, Chunk.blockSoundInfo[+blockID], 20f);
             }
-            SetBlockWithUpdate(pos, 0);
+            SetBlockWithUpdate(pos, (short)0);
         }
         /*    public static void ReadJson()
             {

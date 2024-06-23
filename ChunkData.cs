@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using monogameMinecraftDX;
 
 namespace monogameMinecraft
 {
@@ -6,11 +7,11 @@ namespace monogameMinecraft
     public class ChunkData
     {
         [Key(0)]
-        public short[,,] map;
+        public BlockData[,,] map;
         [Key(1)]
         public Vector2Int chunkPos = new Vector2Int(0, 0);
 
-        public ChunkData(short[,,] map, Vector2Int chunkPos)
+        public ChunkData(BlockData[,,] map, Vector2Int chunkPos)
         {
             this.map = map;
             this.chunkPos = chunkPos;

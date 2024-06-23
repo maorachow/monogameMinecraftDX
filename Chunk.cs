@@ -162,6 +162,9 @@ public struct Vector3Int : IEquatable<Vector3Int>
     {
         return this == other;
     }
+    public override string ToString() {
+    return "X:"+x+"  Y:"+y+"  Z:"+z;    
+    }
 
 }
 public struct RandomGenerator3D
@@ -204,9 +207,9 @@ public class Chunk : IDisposable
     [IgnoreMember]
     public static int chunkHeight = 256;
     [Key(0)]
-    public short[,,] map;
-    [IgnoreMember]
-    public short[,,] additiveMap = new short[chunkWidth, chunkHeight, chunkWidth];
+    public BlockData[,,] map;
+  //  [IgnoreMember]
+ // public short[,,] additiveMap = new short[chunkWidth, chunkHeight, chunkWidth];
     [Key(1)]
     public Vector2Int chunkPos = new Vector2Int(0, 0);
     [IgnoreMember]
@@ -231,6 +234,44 @@ public class Chunk : IDisposable
     }
     public bool isMapGenCompleted = false;
     public static Dictionary<int, SoundEffect> blockSoundInfo = new Dictionary<int, SoundEffect>();
+    public static Dictionary<int,BlockInfo> blockInfosNew=new Dictionary<int,BlockInfo>{
+            {1,new BlockInfo(new List<Vector2>{new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f)},new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {2,new BlockInfo(new List<Vector2>{new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f)},new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {3,new BlockInfo(new List<Vector2> { new Vector2(0.125f, 0f), new Vector2(0.125f, 0f), new Vector2(0.125f, 0f), new Vector2(0.125f, 0f), new Vector2(0.125f, 0f), new Vector2(0.125f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {4,new BlockInfo( new List<Vector2> { new Vector2(0.1875f, 0f), new Vector2(0.1875f, 0f), new Vector2(0.125f, 0f), new Vector2(0.0625f, 0f), new Vector2(0.1875f, 0f), new Vector2(0.1875f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {5,new BlockInfo( new List<Vector2> { new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f), new Vector2(0.375f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {6,new BlockInfo(new List<Vector2> { new Vector2(0.25f, 0f), new Vector2(0.25f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {7,new BlockInfo(new List<Vector2> { new Vector2(0.3125f, 0f), new Vector2(0.3125f, 0f), new Vector2(0.25f, 0f), new Vector2(0.25f, 0f), new Vector2(0.3125f, 0f), new Vector2(0.3125f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {8,new BlockInfo(new List<Vector2> { new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.25f, 0f), new Vector2(0.25f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {9,new BlockInfo( new List<Vector2> { new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f), new Vector2(0.4375f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Slabs) },
+            {10,new BlockInfo(new List<Vector2> { new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f), new Vector2(0.5625f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+
+
+            {11,new BlockInfo( new List<Vector2> { new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {12,new BlockInfo(new List<Vector2> { new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {13,new BlockInfo( new List<Vector2> { new Vector2(0.75f, 0f), new Vector2(0.75f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.8125f, 0f), new Vector2(0.75f, 0f), new Vector2(0.75f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {14,new BlockInfo( new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {15,new BlockInfo(new List<Vector2> { new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {16,new BlockInfo( new List<Vector2> { new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {17,new BlockInfo(new List<Vector2> { new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+           {100,new BlockInfo( new List<Vector2> { new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Water) },
+
+         {101,new BlockInfo(new List<Vector2> { new Vector2(0.0625f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.CrossModel) },
+          {102,new BlockInfo(new List<Vector2>{ new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0f) + new Vector2(0.0625f, 0f),
+              new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0f) + new Vector2(0.0625f, 0f),
+              new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0f) + new Vector2(0.0625f, 0f),
+              new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0.03125f) + new Vector2(0.0625f, 0f),
+              new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0f) + new Vector2(0.0625f, 0f),
+              new Vector2(0.0625f, 0.0625f) + new Vector2(0.02734375f, 0f) + new Vector2(0.0625f, 0f)},
+              new List<Vector2>{  new Vector2(0.0078125f, 0.0390625f),
+                   new Vector2(0.0078125f, 0.0390625f),
+                  new Vector2(0.0078125f, 0.0078125f),
+                  new Vector2(0.0078125f, 0.0078125f),
+                  new Vector2(0.0078125f, 0.0390625f),
+                  new Vector2(0.0078125f, 0.0390625f) },BlockShape.Torch) }
+
+
+    };
     public static Dictionary<int, List<Vector2>> blockInfo = new Dictionary<int, List<Vector2>> {
         { 1,new List<Vector2>{new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f),new Vector2(0f,0f)} },
      {2,new List<Vector2>{new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f),new Vector2(0.0625f,0f)}},
@@ -465,7 +506,7 @@ public class Chunk : IDisposable
         if (VoxelWorld.currentWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
         {
             VoxelWorld.currentWorld.chunkDataReadFromDisk.Remove(chunkPos);
-            short[,,] worldDataMap = map;
+            BlockData[,,] worldDataMap = map;
             ChunkData wd = new ChunkData(chunkPos);
             wd.map = worldDataMap;
 
@@ -473,7 +514,7 @@ public class Chunk : IDisposable
         }
         else
         {
-            short[,,] worldDataMap = map;
+            BlockData[,,] worldDataMap = map;
             ChunkData wd = new ChunkData(chunkPos);
             wd.map = worldDataMap;
 
@@ -575,7 +616,7 @@ public class Chunk : IDisposable
         this.chunkPos = chunkPos;
         thisHeightMap = GenerateChunkHeightmap(chunkPos);
 
-        //    map = additiveMap;
+        //    map = new BlockData[chunkWidth,chunkHeight,chunkWidth];
         verticesOpq = new List<VertexPositionNormalTangentTexture>();
         verticesNS = new List<VertexPositionNormalTangentTexture>();
         verticesWT = new List<VertexPositionNormalTangentTexture>();
@@ -681,7 +722,7 @@ public class Chunk : IDisposable
         if (VoxelWorld.currentWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
         {
             isChunkDataSavedInDisk = true;
-            map = (short[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
+            map = (BlockData[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
             GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
             isMapGenCompleted = true;
             ReleaseChunkUsage();
@@ -785,7 +826,7 @@ public class Chunk : IDisposable
         void FreshGenMap(Vector2Int pos)
         {
 
-            map = additiveMap;
+            map = new BlockData[chunkWidth,chunkHeight,chunkWidth];
             if (VoxelWorld.currentWorld.worldGenType == 0)
             {
                 bool isFrontLeftChunkUpdated = false;
@@ -1528,7 +1569,10 @@ public class Chunk : IDisposable
                     {
                         return;
                     }
+                    BlockMeshBuildingHelper.BuildSingleBlock(this, x, y, z, this.map[x, y, z], ref OpqVerts, ref NSVerts, ref WTVerts, ref OpqIndices, ref NSIndices, ref WTIndices);
+                    continue;
                     int typeid = this.map[x, y, z];
+                //    Debug.WriteLine(typeid);
                     if (typeid == 0) continue;
 
 
@@ -2058,7 +2102,7 @@ public class Chunk : IDisposable
         if (y < 0) return false;
         var type = GetChunkBlockTypeLOD(x, y, z,LODSkipBlockCount);
         bool isNonSolid = false;
-        if (type < 200 && type >= 100)
+        if (type != 0 && blockInfosNew[type].shape!=BlockShape.Solid)
         {
             isNonSolid = true;
         }
@@ -2081,7 +2125,7 @@ public class Chunk : IDisposable
     }
 
 
-    bool CheckNeedBuildFace(int x, int y, int z, bool isThisNS)
+   public bool CheckNeedBuildFace(int x, int y, int z, bool isThisNS)
     {
         // return true;
         if (y < 0) return false;
@@ -2101,7 +2145,7 @@ public class Chunk : IDisposable
         }
         else
         {
-            if (type < 200 && type >= 100)
+            if (type!=0&&blockInfosNew[type].shape != BlockShape.Solid)
             {
                 isNonSolid = true;
             }
@@ -2483,7 +2527,7 @@ public class Chunk : IDisposable
             this.thisHeightMap = null;
 
             this.verticesNSArray = null;
-            this.additiveMap = null;
+          //  this.additiveMap = null;
             this.verticesWTArray = null;
             this.verticesOpqArray = null;
             this.verticesOpq = null;
