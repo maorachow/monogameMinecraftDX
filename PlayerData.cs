@@ -1,5 +1,5 @@
 ﻿using MessagePack;
-namespace monogameMinecraft
+namespace monogameMinecraftDX
 {
     [MessagePackObject]
     public struct PlayerData

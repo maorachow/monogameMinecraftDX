@@ -26,11 +26,11 @@
 // off every 'zix'.)
 //
 
-// Uncomment the line below to swap all the inputs/outputs/calculations of FastNoise to doubles instead of floats
-//#define FN_USE_DOUBLES
+// Uncomment the line below to swap all the inputs/outputs/calculations of FastNoise to floats instead of floats
+//#define FN_USE_floatS
 
-#if FN_USE_DOUBLES
-using FN_DECIMAL = System.Double;
+#if FN_USE_floatS
+using FN_DECIMAL = System.float;
 #else
 using FN_DECIMAL = System.Single;
 #endif
@@ -76,7 +76,7 @@ public class FastNoise
         CalculateFractalBounding();
     }
 
-    // Returns a 0 float/double
+    // Returns a 0 float/float
     public static FN_DECIMAL GetDecimalType() { return 0; }
 
     // Returns the seed used by this object
@@ -596,7 +596,7 @@ public class FastNoise
     [MethodImplAttribute(FN_INLINE)]
     private int FloatCast2Int(FN_DECIMAL f)
     {
-        var i = BitConverter.DoubleToInt64Bits(f);
+        var i = BitConverter.SingleToInt32Bits(f);
 
         return (int)(i ^ (i >> 32));
     }

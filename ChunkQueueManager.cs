@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-namespace monogameMinecraft
+namespace monogameMinecraftDX
 {
+  /*  [Obsolete]
     public class ChunkQueueManager
     {
         //  public static Queue<Vector2Int> chunkLoadingQueue = new Queue<Vector2Int>();
@@ -28,5 +30,5 @@ namespace monogameMinecraft
 
         }
 
-    }
+    }*/
 }

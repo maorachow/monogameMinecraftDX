@@ -1,19 +1,22 @@
 ﻿using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using monogameMinecraftDX;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
-namespace monogameMinecraft
+using monogameMinecraftDX.World;
+using monogameMinecraftDX.Physics;
+using monogameMinecraftDX.Core;
+using Microsoft.Xna.Framework.Graphics;
+namespace monogameMinecraftDX
 {
-    public class GamePlayer
+    public class GamePlayer:IMovableCollider
     {
         public Camera cam;
-        BoundingBox playerBounds;
-        public Vector3 playerPos;
+        public BoundingBox bounds { get; set; }
+        public Vector3 position { get; set; }
         public float moveVelocity = 5f;
         float fastPlayerSpeed = 20f;
         float slowPlayerSpeed = 5f;
@@ -24,6 +27,7 @@ namespace monogameMinecraft
         public bool isChunkNeededUpdate = false;
         public Chunk curChunk;
         public int playerInWorldID;
+        public GraphicsDevice graphicsDevice;
         public static int ReadPlayerData(GamePlayer player, Game game, bool ExludePlayerInWorldIDData = false)
         {
 
@@ -64,7 +68,7 @@ namespace monogameMinecraft
                 player.SetBoundPosition(new Vector3(playerData.posX, playerData.posY, playerData.posZ) + new Vector3(0f, 0.3f, 0f));
                 player.inventoryData = (short[])playerData.inventoryData.Clone();
 
-                player.GetBlocksAround(player.playerBounds);
+                player.GetBlocksAround(player.bounds);
                 player.playerInWorldID = playerData.playerInWorldID;
                 if (!ExludePlayerInWorldIDData)
                 {
@@ -82,8 +86,8 @@ namespace monogameMinecraft
         }
         void SetBoundPosition(Vector3 pos)
         {
-            playerBounds.Max = pos + new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f);
-            playerBounds.Min = pos - new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f);
+            bounds = new BoundingBox(pos - new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f), pos + new Vector3(playerWidth / 2f, playerHeight / 2f, playerWidth / 2f));
+            
         }
         public static void SavePlayerData(GamePlayer player, bool savePlayerInWorldID = true)
         {
@@ -106,7 +110,7 @@ namespace monogameMinecraft
                 fs.Close();
             }
 
-            byte[] playerDataBytes = MessagePackSerializer.Serialize(new PlayerData(player.playerPos.X, player.playerPos.Y, player.playerPos.Z, player.inventoryData, savePlayerInWorldID == true ? VoxelWorld.currentWorld.worldID : player.playerInWorldID));
+            byte[] playerDataBytes = MessagePackSerializer.Serialize(new PlayerData(player.position.X, player.position.Y, player.position.Z, player.inventoryData, savePlayerInWorldID == true ? VoxelWorld.currentWorld.worldID : player.playerInWorldID));
             Debug.WriteLine(playerDataBytes.Length);
             File.WriteAllBytes(ChunkHelper.gameWorldDataPath + "unityMinecraftServerData/GameData/player.json", playerDataBytes);
             isPlayerDataSaved = true;
@@ -132,13 +136,13 @@ namespace monogameMinecraft
         }
         public GamePlayer(Vector3 min, Vector3 max, Game game)
         {
-            playerBounds = new BoundingBox(min, max);
-            playerPos = GetBoundingBoxCenter(playerBounds);
-            cam = new Camera(playerPos, new Vector3(0.0f, 0f, 1.0f), new Vector3(1.0f, 0f, 0.0f), Vector3.UnitY, game);
-            GetBlocksAround(playerBounds);
+            bounds = new BoundingBox(min, max);
+            position = GetBoundingBoxCenter(bounds);
+            cam = new Camera(position, new Vector3(0.0f, 0f, 1.0f), new Vector3(1.0f, 0f, 0.0f), Vector3.UnitY, game);
+            GetBlocksAround(bounds);
         }
-        public Dictionary<Vector3Int, BoundingBox> blocksAround = new Dictionary<Vector3Int, BoundingBox>();
-        public void GetBlocksAround(BoundingBox aabb)
+        public List< BoundingBox> blocksAround = new List< BoundingBox>();
+        public List<BoundingBox> GetBlocksAround(BoundingBox aabb)
         {
 
             int minX = ChunkHelper.FloorFloat(aabb.Min.X - 0.1f);
@@ -148,7 +152,7 @@ namespace monogameMinecraft
             int maxY = ChunkHelper.CeilFloat(aabb.Max.Y + 0.1f);
             int maxZ = ChunkHelper.CeilFloat(aabb.Max.Z + 0.1f);
 
-            this.blocksAround = new Dictionary<Vector3Int, BoundingBox>();
+            this.blocksAround = new List< BoundingBox>();
 
             for (int z = minZ - 1; z <= maxZ + 1; z++)
             {
@@ -156,17 +160,16 @@ namespace monogameMinecraft
                 {
                     for (int y = minY - 1; y <= maxY + 1; y++)
                     {
-                        int blockID = ChunkHelper.GetBlock(new Vector3(x, y, z));
-                        if (blockID > 0 && blockID < 100)
-                        {
-                            this.blocksAround.Add(new Vector3Int(x, y, z), new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1)));
-                        }
+                        BlockData blockID = ChunkHelper.GetBlockData(new Vector3(x, y, z));
+                       
+                            this.blocksAround.Add(BlockBoundingBoxUtility.GetBoundingBox(x,y,z,blockID));
+                        
                     }
                 }
             }
 
 
-            //  return this.blocksAround;
+              return this.blocksAround;
 
 
         }
@@ -178,13 +181,13 @@ namespace monogameMinecraft
             for (int i = 0; i < EntityBeh.worldEntities.Count; i++)
             {
                 EntityBeh entity = EntityBeh.worldEntities[i];
-                if (ray.Intersects(entity.entityBounds) <= 4f)
+                if (ray.Intersects(entity.bounds) <= 4f)
                 {
-                    if (rayHitDis > (float)ray.Intersects(entity.entityBounds))
+                    if (rayHitDis > (float)ray.Intersects(entity.bounds))
                     {
                         finalIndex = i;
                     }
-                    rayHitDis = MathF.Min(rayHitDis, (float)ray.Intersects(entity.entityBounds));
+                    rayHitDis = MathF.Min(rayHitDis, (float)ray.Intersects(entity.bounds));
 
                     //     EntityBeh.HurtEntity(entity.entityID, 4f, cam.position);
 
@@ -200,16 +203,17 @@ namespace monogameMinecraft
         }
         public bool BreakBlock()
         {
-            Ray ray = new Ray(cam.position, cam.front);
-            Vector3 blockPoint = ChunkHelper.RaycastFirstPosition(ray, 5f);
+            monogameMinecraftDX.Physics. Ray ray = new monogameMinecraftDX.Physics.Ray(cam.position, cam.front);
+            Vector3Int blockPoint =new Vector3Int(-1,-1,-1);
+            BlockFaces blockFaces = BlockFaces.PositiveY;
+           VoxelCast.Cast(ray,3,out blockPoint, out blockFaces,this, graphicsDevice);
+           
 
             ChunkHelper.BreakBlock(blockPoint);
-            GetBlocksAround(playerBounds);
-            if ((blockPoint - cam.position).Length() <= 4.8f)
-            {
+            GetBlocksAround(bounds);
+        
                 return true;
-            }
-            return false;
+           
         }
         public void PlaceBlock()
         {
@@ -217,46 +221,148 @@ namespace monogameMinecraft
             {
                 return;
             }
-            Ray ray = new Ray(cam.position, cam.front);
-            Vector3 blockPoint = ChunkHelper.RaycastFirstPosition(ray, 5f);
-            if ((blockPoint - cam.position).Length() > 4.8f)
+           Physics. Ray ray = new Physics.Ray(cam.position, cam.front);
+            Vector3Int blockPoint = new Vector3Int(-1,-1,-1);
+           
+            BlockFaces blockFaces = BlockFaces.PositiveY;
+            VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces,this, graphicsDevice);
+            if(blockPoint.y < 0)
             {
-                return;
+                return ;
             }
-            Vector3 setBlockPoint = Vector3.Lerp(cam.position, blockPoint, 0.95f);
+            Vector3 setBlockPoint = new Vector3(blockPoint.x+0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f);
+            switch (blockFaces)
+            {
+                case BlockFaces.PositiveX:
+                    setBlockPoint.X += 0.6f;
+                    break;
+                case BlockFaces.PositiveY:
+                    setBlockPoint.Y += 0.6f;
+                    break;
+                case BlockFaces.PositiveZ:
+                    setBlockPoint.Z += 0.6f;
+                    break;
+                case BlockFaces.NegativeX:
+                    setBlockPoint.X += -0.6f;
+                    break;
+                case BlockFaces.NegativeY:
+                    setBlockPoint.Y +=  -0.6f;
+                    break;
+                case BlockFaces.NegativeZ:
+                    setBlockPoint.Z += -0.6f;
+                    break;
+            }
+            
+            Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
+            switch (Chunk.blockInfosNew[inventoryData[currentSelectedHotbar]].shape)
+            {
+                case BlockShape.Solid:
 
-            if (inventoryData[currentSelectedHotbar] == 102)
-            {
-                Vector3Int blockPointInt=ChunkHelper.Vec3ToBlockPos(blockPoint);
-                Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
-                Debug.WriteLine((setBlockPointInt - blockPointInt));
-                if ((setBlockPointInt - blockPointInt).x < -0.5f)
-                {
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint,new BlockData( inventoryData[currentSelectedHotbar],1));
-                    GetBlocksAround(playerBounds);
-                    return;
-                }
-                if ((setBlockPointInt - blockPointInt).x >0.5f)
-                {
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 2));
-                    GetBlocksAround(playerBounds);
-                    return;
-                }
-                if ((setBlockPointInt - blockPointInt).z < -0.5f)
-                {
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 3));
-                    GetBlocksAround(playerBounds);
-                    return;
-                }
-                if ((setBlockPointInt - blockPointInt).z >0.5f)
-                {
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 4));
-                    GetBlocksAround(playerBounds);
-                    return;
-                }
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
+                    break;
+                    case BlockShape.Torch:
+
+
+                    /*  if ((setBlockPointInt - blockPointInt).x < -0.5f)
+                      {
+                          ChunkHelper.SetBlockWithUpdate(setBlockPoint,new BlockData( inventoryData[currentSelectedHotbar],1));
+                          GetBlocksAround(bounds);
+                          return;
+                      }
+                      if ((setBlockPointInt - blockPointInt).x >0.5f)
+                      {
+                          ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 2));
+                          GetBlocksAround(bounds);
+                          return;
+                      }
+                      if ((setBlockPointInt - blockPointInt).z < -0.5f)
+                      {
+                          ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 3));
+                          GetBlocksAround(bounds);
+                          return;
+                      }
+                      if ((setBlockPointInt - blockPointInt).z >0.5f)
+                      {
+                          ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 4));
+                          GetBlocksAround(bounds);
+                          return;
+                      }*/
+                    switch (blockFaces)
+                    {
+                        case BlockFaces.PositiveX:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 2));
+                            GetBlocksAround(bounds);
+                            return;
+                         
+                        case BlockFaces.PositiveY:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+
+                        case BlockFaces.PositiveZ:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 4));
+                            GetBlocksAround(bounds);
+                            return;
+                            
+                        case BlockFaces.NegativeX:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 1));
+                            GetBlocksAround(bounds);
+                            return;
+                          
+                        case BlockFaces.NegativeY:
+                            return;
+                            
+                        case BlockFaces.NegativeZ:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 3));
+                            GetBlocksAround(bounds);
+                            return;
+                         
+                    }
+                    break;
+                case BlockShape.Slabs:
+                    switch (blockFaces)
+                    {
+                        case BlockFaces.PositiveX:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+                        case BlockFaces.PositiveY:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+
+                        case BlockFaces.PositiveZ:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+                        case BlockFaces.NegativeX:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+                        case BlockFaces.NegativeY:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 1));
+                            GetBlocksAround(bounds);
+                            return;
+
+                        case BlockFaces.NegativeZ:
+                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            GetBlocksAround(bounds);
+                            return;
+
+                    }
+                    break;
+                default:
+                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
+                    break;
             }
-            ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
-            GetBlocksAround(playerBounds);
+           
+            
+            GetBlocksAround(bounds);
         }
         public void Move(Vector3 moveVec, bool isClipable)
         {
@@ -270,21 +376,21 @@ namespace monogameMinecraft
             float movZ = dz;
             if (isClipable)
             {
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, dy, 0);
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, dx, 0, 0);
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, 0, dz);
-                playerPos = GetBoundingBoxCenter(playerBounds);
-                cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, dy, 0);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, dx, 0, 0);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, 0, dz);
+                position = GetBoundingBoxCenter(bounds);
+                cam.position = position + new Vector3(0f, 0.6f, 0f);
 
                 return;
             }
             if (blocksAround.Count == 0)
             {
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, dy, 0);
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, dx, 0, 0);
-                playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, 0, dz);
-                playerPos = GetBoundingBoxCenter(playerBounds);
-                cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, dy, 0);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, dx, 0, 0);
+                bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, 0, dz);
+                position = GetBoundingBoxCenter(bounds);
+                cam.position = position + new Vector3(0f, 0.6f, 0f);
 
                 return;
             }
@@ -295,10 +401,10 @@ namespace monogameMinecraft
 
             foreach (var bb in blocksAround)
             {
-                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb.Value, playerBounds, dy);
+                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb, bounds, dy);
             }
 
-            playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, dy, 0);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, dy, 0);
 
             if (movY != dy && movY < 0)
             {
@@ -314,26 +420,26 @@ namespace monogameMinecraft
 
             foreach (var bb in blocksAround)
             {
-                dx = BlockCollidingBoundingBoxHelper.calculateXOffset(bb.Value, playerBounds, dx);
+                dx = BlockCollidingBoundingBoxHelper.calculateXOffset(bb, bounds, dx);
             }
 
-            playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, dx, 0, 0);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, dx, 0, 0);
 
             foreach (var bb in blocksAround)
             {
-                dz = BlockCollidingBoundingBoxHelper.calculateZOffset(bb.Value, playerBounds, dz);
+                dz = BlockCollidingBoundingBoxHelper.calculateZOffset(bb, bounds, dz);
             }
             //    Debug.WriteLine(dx + " " + movX + " " + dy + " " + movY + " " + dz + " " + movZ) ;
-            playerBounds = BlockCollidingBoundingBoxHelper.offset(playerBounds, 0, 0, dz);
-            playerPos = GetBoundingBoxCenter(playerBounds);
-            cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, 0, dz);
+            position = GetBoundingBoxCenter(bounds);
+            cam.position = position + new Vector3(0f, 0.6f, 0f);
 
         }
         public void MoveToPosition(Vector3 pos)
         {
-            playerBounds = new BoundingBox(pos - new Vector3(0.3f, 0.9f, 0.3f), pos + new Vector3(0.3f, 0.9f, 0.3f));
-            playerPos = GetBoundingBoxCenter(playerBounds);
-            cam.position = playerPos + new Vector3(0f, 0.6f, 0f);
+            bounds = new BoundingBox(pos - new Vector3(0.3f, 0.9f, 0.3f), pos + new Vector3(0.3f, 0.9f, 0.3f));
+            position = GetBoundingBoxCenter(bounds);
+            cam.position = position + new Vector3(0f, 0.6f, 0f);
         }
         public Vector3Int playerCurIntPos;
         public Vector3Int playerLastIntPos;
@@ -373,11 +479,11 @@ namespace monogameMinecraft
 
         void UpdatePlayerChunk()
         {
-            //    Debug.WriteLine(ChunkManager.CheckIsPosInChunkBorder(playerPos, curChunk));
-        /*    if (ChunkHelper.CheckIsPosInChunkBorder(playerPos, curChunk) || !ChunkHelper.CheckIsPosInChunk(playerPos, curChunk))
+            //    Debug.WriteLine(ChunkManager.CheckIsPosInChunkBorder(position, curChunk));
+        /*    if (ChunkHelper.CheckIsPosInChunkBorder(position, curChunk) || !ChunkHelper.CheckIsPosInChunk(position, curChunk))
             {
                 isChunkNeededUpdate = true;
-                curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(playerPos));
+                curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
             }*/
         isChunkNeededUpdate = true;
         }
@@ -497,17 +603,17 @@ namespace monogameMinecraft
         }
         public void GetBlockOnFoot(MinecraftGame game, float deltaTime)
         {
-            blockOnFootID = ChunkHelper.GetBlock(new Vector3((playerBounds.Min.X + playerBounds.Max.X) / 2f, playerBounds.Min.Y - 0.1f, (playerBounds.Min.Z + playerBounds.Max.Z) / 2f));
+            blockOnFootID = ChunkHelper.GetBlock(new Vector3((bounds.Min.X + bounds.Max.X) / 2f, bounds.Min.Y - 0.1f, (bounds.Min.Z + bounds.Max.Z) / 2f));
             PlayerBlockOnFootChanged(game, deltaTime);
             prevBlockOnFootID = blockOnFootID;
         }
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState)
         {
 
-            playerCurIntPos = new Vector3Int((int)playerPos.X, (int)playerPos.Y, (int)playerPos.Z);
+            playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
             if (playerCurIntPos != playerLastIntPos)
             {
-                GetBlocksAround(playerBounds);
+                GetBlocksAround(bounds);
             }
             playerLastIntPos = playerCurIntPos;
 

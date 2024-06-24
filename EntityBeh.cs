@@ -1,17 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
-using monogameMinecraftDX;
+using monogameMinecraftDX.World;
 using System;
 using System.Collections.Generic;
-
-namespace monogameMinecraft
+using monogameMinecraftDX.Animations;
+using monogameMinecraftDX.Physics;
+using monogameMinecraftDX.Core;
+using monogameMinecraftDX.Rendering;
+using monogameMinecraftDX.Utility;
+namespace monogameMinecraftDX
 {
-    public class EntityBeh
+    public class EntityBeh:IMovableCollider
     {
         public static List<EntityData> entityDataReadFromDisk = new List<EntityData>();
         public static List<EntityBeh> worldEntities = new List<EntityBeh>();
-        public Vector3 position;
+        public Vector3 position { get; set; }
         public float rotationX;
         public float rotationY;
         public float bodyRotationY;
@@ -19,7 +23,7 @@ namespace monogameMinecraft
         public float rotationZ;
         public int typeID;
         public string entityID;
-        public BoundingBox entityBounds;
+        public BoundingBox bounds { get; set; }
         public List<BoundingBox> blocksAround;
         public static float gravity = -9.8f;
         public Vector3 entityVec;
@@ -137,11 +141,11 @@ namespace monogameMinecraft
 
         public void InitBounds()
         {
-            entityBounds = new BoundingBox(position - entitySize / 2f, position + entitySize / 2f);
+            bounds = new BoundingBox(position - entitySize / 2f, position + entitySize / 2f);
         }
         public bool CheckIsGround()
         {
-            Vector3 pos = new Vector3((entityBounds.Min.X + entityBounds.Max.X) / 2f, entityBounds.Min.Y - 0.1f, (entityBounds.Min.Z + entityBounds.Max.Z) / 2f);
+            Vector3 pos = new Vector3((bounds.Min.X + bounds.Max.X) / 2f, bounds.Min.Y - 0.1f, (bounds.Min.Z + bounds.Max.Z) / 2f);
 
             int blockID = ChunkHelper.GetBlock(pos);
 
@@ -184,7 +188,7 @@ namespace monogameMinecraft
                     }
                     animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
                     entityLifetime += deltaTime;
-                    targetPos = game.gamePlayer.playerPos;
+                    targetPos = game.gamePlayer.position;
                     entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
 
                     curSpeed = MathHelper.Lerp(curSpeed, (new Vector2(position.X, position.Z) - new Vector2(lastPos.X, lastPos.Z)).Length() / deltaTime, 5f * deltaTime);
@@ -201,7 +205,7 @@ namespace monogameMinecraft
                         {
                             //  Debug.WriteLine("update");
                             isNeededUpdateBlock = true;
-                            //      GetBlocksAround(entityBounds);
+                            //      GetBlocksAround(bounds);
                         }
                     }
 
@@ -221,7 +225,7 @@ namespace monogameMinecraft
                     lastIntPos = intPos;
                     if (isNeededUpdateBlock)
                     {
-                        GetBlocksAround(entityBounds);
+                        GetBlocksAround(bounds);
                         isNeededUpdateBlock = false;
                     }
                     GetEntitiesAround();
@@ -339,7 +343,7 @@ namespace monogameMinecraft
             }
             if (entitySounds.ContainsKey(entityBeh.typeID + "hurt"))
             {
-                SoundsUtility.PlaySound(MinecraftGame.gamePlayerPos, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
+                SoundsUtility.PlaySound(MinecraftGame.gameposition, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
             }
 
             entityBeh.entityHealth -= hurtValue;
@@ -402,10 +406,10 @@ namespace monogameMinecraft
 
             foreach (var bb in allBounds)
             {
-                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb, entityBounds, dy);
+                dy = BlockCollidingBoundingBoxHelper.calculateYOffset(bb, bounds, dy);
             }
 
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, 0, dy, 0);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, dy, 0);
 
             if (movY != dy && movY < 0)
             {
@@ -420,18 +424,18 @@ namespace monogameMinecraft
 
             foreach (var bb in allBounds)
             {
-                dx = BlockCollidingBoundingBoxHelper.calculateXOffset(bb, entityBounds, dx);
+                dx = BlockCollidingBoundingBoxHelper.calculateXOffset(bb, bounds, dx);
             }
 
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, dx, 0, 0);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, dx, 0, 0);
 
             foreach (var bb in allBounds)
             {
-                dz = BlockCollidingBoundingBoxHelper.calculateZOffset(bb, entityBounds, dz);
+                dz = BlockCollidingBoundingBoxHelper.calculateZOffset(bb, bounds, dz);
             }
 
-            entityBounds = BlockCollidingBoundingBoxHelper.offset(entityBounds, 0, 0, dz);
-            position = new Vector3((entityBounds.Min.X + entityBounds.Max.X) / 2f, entityBounds.Min.Y, (entityBounds.Min.Z + entityBounds.Max.Z) / 2f);
+            bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, 0, dz);
+            position = new Vector3((bounds.Min.X + bounds.Max.X) / 2f, bounds.Min.Y, (bounds.Min.Z + bounds.Max.Z) / 2f);
         }
         public List<BoundingBox> entitiyBoundsAround;
         public void GetEntitiesAround()
@@ -443,7 +447,7 @@ namespace monogameMinecraft
                 {
                     if (MathF.Abs(entity.position.X - position.X) < 10f && MathF.Abs(entity.position.Y - position.Y) < 10f && MathF.Abs(entity.position.Z - position.Z) < 10f)
                     {
-                        this.entitiyBoundsAround.Add(new BoundingBox(entity.entityBounds.Min, entity.entityBounds.Max));
+                        this.entitiyBoundsAround.Add(new BoundingBox(entity.bounds.Min, entity.bounds.Max));
                     }
                 }
             }
@@ -466,11 +470,10 @@ namespace monogameMinecraft
                 {
                     for (int y = minY - 1; y <= maxY + 1; y++)
                     {
-                        int blockID = ChunkHelper.GetBlock(new Vector3(x, y, z));
-                        if (blockID > 0 && blockID < 100)
-                        {
-                            this.blocksAround.Add(new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1)));
-                        }
+                        BlockData blockID = ChunkHelper.GetBlockData(new Vector3(x, y, z));
+                       
+                            this.blocksAround.Add(BlockBoundingBoxUtility.GetBoundingBox(x, y, z, blockID));
+                       
                     }
                 }
             }

@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using monogameMinecraftDX;
+ 
 using System;
 using System.Diagnostics;
-namespace monogameMinecraft
+using monogameMinecraftDX.Animations;
+namespace monogameMinecraftDX
 {
     public class Game1 : Game
     {
@@ -138,7 +139,7 @@ namespace monogameMinecraft
             float deltaFps = Math.Abs(curFps - prevFPS);
             Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
             prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
-            //     Debug.WriteLine(gamePlayer.playerPos);
+            //     Debug.WriteLine(gamePlayer.position);
             //     Debug.WriteLine(gamePlayer.cam.Pitch+" "+ gamePlayer.cam.Yaw);
             //    Debug.WriteLine(gamePlayer.cam.position + " " + gamePlayer.cam.front+" "+gamePlayer.cam.up);
             base.Update(gameTime);

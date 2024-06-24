@@ -2,15 +2,20 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 //using System.Numerics;
-using monogameMinecraftDX;
+using monogameMinecraftDX.World;
+using monogameMinecraftDX.Rendering;
+using monogameMinecraftDX.Asset;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.UI;
 
+using monogameMinecraftDX.Physics;
 
-namespace monogameMinecraft
+namespace monogameMinecraftDX
 {
     public enum GameStatus
     {
@@ -45,7 +50,7 @@ namespace monogameMinecraft
             public Effect motionBlurEffect;*/
         public AlphaTestEffect chunkNSEffect;
         public GamePlayer gamePlayer;
-        public static Vector3 gamePlayerPos;
+        public static Vector3 gameposition;
         public ChunkRenderer chunkRenderer;
         public Thread updateWorldThread;
         public Thread tryRemoveChunksThread;
@@ -204,6 +209,7 @@ namespace monogameMinecraft
 
             status = GameStatus.Started;
             gamePlayer = new GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
             /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
@@ -522,7 +528,7 @@ namespace monogameMinecraft
                     EntityManager.UpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
-                    gamePlayerPos = gamePlayer.playerPos;
+                    gameposition = gamePlayer.position;
 
 
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -535,7 +541,7 @@ namespace monogameMinecraft
             }
 
 
-            //     Debug.WriteLine(gamePlayer.playerPos);
+            //     Debug.WriteLine(gamePlayer.position);
             //     Debug.WriteLine(gamePlayer.cam.Pitch+" "+ gamePlayer.cam.Yaw);
             //    Debug.WriteLine(gamePlayer.cam.position + " " + gamePlayer.cam.front+" "+gamePlayer.cam.up);
             base.Update(gameTime);
@@ -598,7 +604,8 @@ namespace monogameMinecraft
 
         }
         RasterizerState rasterizerState = new RasterizerState();
-        RasterizerState rasterizerState1 = new RasterizerState();
+        RasterizerState rasterizerState1 = new RasterizerState{DepthClipEnable=false};
+        
         public void RenderWorld(GameTime gameTime, SpriteBatch sb)
         {
             shadowRenderer.UpdateLightMatrices(gamePlayer);
@@ -632,6 +639,8 @@ namespace monogameMinecraft
 
             deferredShadingRenderer.FinalBlend(_spriteBatch, volumetricLightRenderer, GraphicsDevice, gamePlayer);
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
+          
+           
 
         }
         protected override void Draw(GameTime gameTime)
@@ -660,7 +669,24 @@ namespace monogameMinecraft
                         el.DrawString(el.text);
                     }
                     _spriteBatch.End();
+                    GraphicsDevice.RasterizerState = rasterizerState1;
+            /*        foreach (var block in VoxelCast.blocksTmp)
+                    {
+                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
+                        VoxelCast.line.ReCreateVisualLine(null, block.Min, block.Max, 0.01f, new Color(1f, 1f, 1f));
+                        VoxelCast.line.Draw(GraphicsDevice);
+                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
+                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Min.X, block.Max.Y, block.Min.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
+                        VoxelCast.line.Draw(GraphicsDevice);
+                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
+                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Min.X, block.Min.Y, block.Max.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
+                        VoxelCast.line.Draw(GraphicsDevice);
+                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
+                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Max.X, block.Min.Y, block.Min.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
+                        VoxelCast.line.Draw(GraphicsDevice);
+                    }*/
                     _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
+
                     if (GameOptions.showGraphicsDebug)
                     {
                         _spriteBatch.Draw(shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);

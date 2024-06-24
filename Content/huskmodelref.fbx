@@ -64,14 +64,14 @@ GlobalSettings:  {
 		P: "CoordAxisSign", "int", "Integer", "",1
 		P: "OriginalUpAxis", "int", "Integer", "",-1
 		P: "OriginalUpAxisSign", "int", "Integer", "",1
-		P: "UnitScaleFactor", "double", "Number", "",1
-		P: "OriginalUnitScaleFactor", "double", "Number", "",1
+		P: "UnitScaleFactor", "float", "Number", "",1
+		P: "OriginalUnitScaleFactor", "float", "Number", "",1
 		P: "AmbientColor", "ColorRGB", "Color", "",0,0,0
 		P: "DefaultCamera", "KString", "", "", "Producer Perspective"
 		P: "TimeMode", "enum", "", "",0
 		P: "TimeSpanStart", "KTime", "Time", "",0
 		P: "TimeSpanStop", "KTime", "Time", "",46186158000
-		P: "CustomFrameRate", "double", "Number", "",24
+		P: "CustomFrameRate", "float", "Number", "",24
 	}
 }
 
@@ -104,10 +104,10 @@ Definitions:  {
 				P: "TranslationMaxZ", "bool", "", "",0
 				P: "RotationOrder", "enum", "", "",5
 				P: "RotationSpaceForLimitOnly", "bool", "", "",0
-				P: "RotationStiffnessX", "double", "Number", "",0
-				P: "RotationStiffnessY", "double", "Number", "",0
-				P: "RotationStiffnessZ", "double", "Number", "",0
-				P: "AxisLen", "double", "Number", "",10
+				P: "RotationStiffnessX", "float", "Number", "",0
+				P: "RotationStiffnessY", "float", "Number", "",0
+				P: "RotationStiffnessZ", "float", "Number", "",0
+				P: "AxisLen", "float", "Number", "",10
 				P: "PreRotation", "Vector3D", "Vector", "",0,0,0
 				P: "PostRotation", "Vector3D", "Vector", "",0,0,0
 				P: "RotationActive", "bool", "", "",0
@@ -132,21 +132,21 @@ Definitions:  {
 				P: "GeometricTranslation", "Vector3D", "Vector", "",0,0,0
 				P: "GeometricRotation", "Vector3D", "Vector", "",0,0,0
 				P: "GeometricScaling", "Vector3D", "Vector", "",1,1,1
-				P: "MinDampRangeX", "double", "Number", "",0
-				P: "MinDampRangeY", "double", "Number", "",0
-				P: "MinDampRangeZ", "double", "Number", "",0
-				P: "MaxDampRangeX", "double", "Number", "",0
-				P: "MaxDampRangeY", "double", "Number", "",0
-				P: "MaxDampRangeZ", "double", "Number", "",0
-				P: "MinDampStrengthX", "double", "Number", "",0
-				P: "MinDampStrengthY", "double", "Number", "",0
-				P: "MinDampStrengthZ", "double", "Number", "",0
-				P: "MaxDampStrengthX", "double", "Number", "",0
-				P: "MaxDampStrengthY", "double", "Number", "",0
-				P: "MaxDampStrengthZ", "double", "Number", "",0
-				P: "PreferedAngleX", "double", "Number", "",0
-				P: "PreferedAngleY", "double", "Number", "",0
-				P: "PreferedAngleZ", "double", "Number", "",0
+				P: "MinDampRangeX", "float", "Number", "",0
+				P: "MinDampRangeY", "float", "Number", "",0
+				P: "MinDampRangeZ", "float", "Number", "",0
+				P: "MaxDampRangeX", "float", "Number", "",0
+				P: "MaxDampRangeY", "float", "Number", "",0
+				P: "MaxDampRangeZ", "float", "Number", "",0
+				P: "MinDampStrengthX", "float", "Number", "",0
+				P: "MinDampStrengthY", "float", "Number", "",0
+				P: "MinDampStrengthZ", "float", "Number", "",0
+				P: "MaxDampStrengthX", "float", "Number", "",0
+				P: "MaxDampStrengthY", "float", "Number", "",0
+				P: "MaxDampStrengthZ", "float", "Number", "",0
+				P: "PreferedAngleX", "float", "Number", "",0
+				P: "PreferedAngleY", "float", "Number", "",0
+				P: "PreferedAngleZ", "float", "Number", "",0
 				P: "LookAtProperty", "object", "", ""
 				P: "UpVectorProperty", "object", "", ""
 				P: "Show", "bool", "", "",1
@@ -189,13 +189,13 @@ Definitions:  {
 				P: "DiffuseFactor", "Number", "", "A",1
 				P: "Bump", "Vector3D", "Vector", "",0,0,0
 				P: "NormalMap", "Vector3D", "Vector", "",0,0,0
-				P: "BumpFactor", "double", "Number", "",1
+				P: "BumpFactor", "float", "Number", "",1
 				P: "TransparentColor", "Color", "", "A",0,0,0
 				P: "TransparencyFactor", "Number", "", "A",0
 				P: "DisplacementColor", "ColorRGB", "Color", "",0,0,0
-				P: "DisplacementFactor", "double", "Number", "",1
+				P: "DisplacementFactor", "float", "Number", "",1
 				P: "VectorDisplacementColor", "ColorRGB", "Color", "",0,0,0
-				P: "VectorDisplacementFactor", "double", "Number", "",1
+				P: "VectorDisplacementFactor", "float", "Number", "",1
 			}
 		}
 	}
@@ -228,14 +228,14 @@ Definitions:  {
 			Properties70:  {
 				P: "ImageSequence", "bool", "", "",0
 				P: "ImageSequenceOffset", "int", "Integer", "",0
-				P: "FrameRate", "double", "Number", "",0
+				P: "FrameRate", "float", "Number", "",0
 				P: "LastFrame", "int", "Integer", "",0
 				P: "Width", "int", "Integer", "",0
 				P: "Height", "int", "Integer", "",0
 				P: "Path", "KString", "XRefUrl", "", ""
 				P: "StartFrame", "int", "Integer", "",0
 				P: "StopFrame", "int", "Integer", "",0
-				P: "PlaySpeed", "double", "Number", "",0
+				P: "PlaySpeed", "float", "Number", "",0
 				P: "Offset", "KTime", "Time", "",0
 				P: "InterlaceMode", "enum", "", "",0
 				P: "FreeRunning", "bool", "", "",0
@@ -780,7 +780,7 @@ Objects:  {
 			P: "Emissive", "Vector3D", "Vector", "",0,0,0
 			P: "Ambient", "Vector3D", "Vector", "",0.2,0.2,0.2
 			P: "Diffuse", "Vector3D", "Vector", "",0.8,0.8,0.8
-			P: "Opacity", "double", "Number", "",1
+			P: "Opacity", "float", "Number", "",1
 		}
 	}
 	Texture: 55109565, "Texture::husk.png", "" {
