@@ -6,8 +6,12 @@
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
     </PropertyGroup>
-
-    <ItemGroup>
+	<PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+	</PropertyGroup>
+ 
+	<ItemGroup>
       <ProjectReference Include="..\monogameMinecraftDX.csproj" />
     </ItemGroup>
 
