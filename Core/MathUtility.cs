@@ -166,6 +166,8 @@ namespace monogameMinecraftDX.Core
             return "X:" + x + "  Y:" + y + "  Z:" + z;
         }
 
+        public static explicit operator Vector3(Vector3Int v) { return new Vector3(v.x, v.y, v.z); }
+        public static explicit operator Vector3Int(Vector3 v) { return new Vector3Int((int)v.X, (int)v.Y, (int)v.Z); }
     }
     public struct RandomGenerator3D
     {
