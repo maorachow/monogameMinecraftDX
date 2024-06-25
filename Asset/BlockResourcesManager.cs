@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using monogameMinecraftDX.World;
 using monogameMinecraftDX.Rendering;
 using monogameMinecraftDX.UI;
+// ReSharper disable All
 
 namespace monogameMinecraftDX
 {

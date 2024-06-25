@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using monogameMinecraftDX.Core;
 using monogameMinecraftDX.Utility;
 using monogameMinecraftDX.UI;
 
@@ -488,6 +489,17 @@ namespace monogameMinecraftDX
                             IsMouseVisible = false;
                         }
                       
+                    }
+
+                    if (Keyboard.GetState().IsKeyUp(Keys.J) && !lastKeyState1.IsKeyUp(Keys.J))
+                    {
+                      //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
+                      StructureManager.SaveStructureData((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),new Vector3Int(10,10,10),Directory.GetCurrentDirectory()+"/defaultstructure.bin");
+                    }
+                    if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
+                    {
+                        //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
+                        ChunkHelper.FillBlocks(StructureManager.LoadStructure(Directory.GetCurrentDirectory() + "/defaultstructure.bin"), (Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),BlockFillMode.ReplaceAir); ;
                     }
                     lastKeyState1 = Keyboard.GetState();
              //       Debug.WriteLine(isInventoryOpen);

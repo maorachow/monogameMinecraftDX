@@ -7,7 +7,7 @@ namespace monogameMinecraftDX
 {
     namespace World
     {
-        public class ChunkHelper
+        public partial class ChunkHelper
     {
         //   public static Dictionary<Vector2Int, ChunkData> chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
         //    public static ConcurrentDictionary<Vector2Int, Chunk> chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
@@ -630,6 +630,7 @@ namespace monogameMinecraftDX
             //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
             //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
         }
+
         public static void BreakBlock(Vector3 pos)
         {
             short blockID = GetBlock(pos);
