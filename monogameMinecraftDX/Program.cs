@@ -8,7 +8,7 @@ class Program
         
         var game = new MinecraftGame();
         game.Run();
-        var game2 = new MCDXGame();
-        game2.Run();
+       // var game2 = new MCDXGame();
+       // game2.Run();
     }
 }

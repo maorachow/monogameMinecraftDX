@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
 
-namespace monogameMinecraftDX;
+namespace MCDXEditor;
 
 /// <summary>
 /// MCDX Game 新的游戏入口
@@ -22,6 +22,7 @@ public class MCDXGame: Game
             PreferredBackBufferWidth = 1920,
         };
         IsMouseVisible = true;
+        Content.RootDirectory = "Content";
     }
 
     protected override void LoadContent()

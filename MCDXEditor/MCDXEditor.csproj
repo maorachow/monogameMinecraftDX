@@ -12,20 +12,9 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="MGui\**" />
-    <EmbeddedResource Remove="MGui\**" />
-    <None Remove="MGui\**" />
-  </ItemGroup>
-
- 
-
-	<ItemGroup>
-    <PackageReference Include="MessagePack" Version="2.5.168" />
-    <PackageReference Include="MonoGame.Extended" Version="3.8.0" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
     <PackageReference Include="Myra" Version="1.5.5" />
-    <PackageReference Include="StbImageSharp" Version="2.27.14" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
