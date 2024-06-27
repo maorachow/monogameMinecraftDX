@@ -1,8 +1,9 @@
+using System.IO;
 using MCDX.Editor;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
-
+ 
 namespace MCDXEditor;
 
 /// <summary>
@@ -10,6 +11,7 @@ namespace MCDXEditor;
 /// </summary>
 public class MCDXGame: Game
 {
+    
     private RootNode rootNode;
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
@@ -32,6 +34,7 @@ public class MCDXGame: Game
         rootNode = new RootNode(this);
         spriteBatch = new SpriteBatch(GraphicsDevice);
         awesomeface = Content.Load<Texture2D>("awesomeface");
+        MGCBInvoker.BuildContent("C:/unityMinecraftData/testcontentpack/Content.mgcb", "C:/unityMinecraftData/testcontentpack/bin/foo", "C:/unityMinecraftData/testcontentpack/obj/foo", "C:/unityMinecraftData/testcontentpack/");
     }
 
 

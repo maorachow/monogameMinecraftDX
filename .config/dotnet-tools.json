@@ -2,12 +2,6 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "dotnet-mgcb": {
-      "version": "3.8.1.303",
-      "commands": [
-        "mgcb"
-      ]
-    },
     "dotnet-mgcb-editor": {
       "version": "3.8.1.303",
       "commands": [
@@ -30,6 +24,12 @@
       "version": "3.8.1.303",
       "commands": [
         "mgcb-editor-mac"
+      ]
+    },
+    "dotnet-mgcb": {
+      "version": "3.8.1.303",
+      "commands": [
+        "mgcb"
       ]
     }
   }

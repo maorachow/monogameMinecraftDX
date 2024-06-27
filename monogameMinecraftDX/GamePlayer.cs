@@ -480,12 +480,12 @@ namespace monogameMinecraftDX
         void UpdatePlayerChunk()
         {
             //    Debug.WriteLine(ChunkManager.CheckIsPosInChunkBorder(position, curChunk));
-        /*    if (ChunkHelper.CheckIsPosInChunkBorder(position, curChunk) || !ChunkHelper.CheckIsPosInChunk(position, curChunk))
+             if (ChunkHelper.CheckIsPosInChunkBorder(position, curChunk) || !ChunkHelper.CheckIsPosInChunk(position, curChunk))
             {
                 isChunkNeededUpdate = true;
                 curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
-            }*/
-        isChunkNeededUpdate = true;
+            }
+      //  isChunkNeededUpdate = true;
         }
 
         float playerTeleportingCD = 0f;

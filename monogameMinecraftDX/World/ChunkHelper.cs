@@ -460,6 +460,29 @@ namespace monogameMinecraftDX
             return 100;
 
         }
+
+        public static int PredictChunkLandingPoint(float x, float y)
+        {
+            if (VoxelWorld.currentWorld.worldGenType == 0)
+            {
+                int biome =  (int)(1f +Chunk. biomeNoiseGenerator.GetSimplex(x, y) * 3f);
+               return (int)(Chunk.chunkSeaLevel + Chunk.noiseGenerator.GetSimplex(x, y) * 20f + biome * 25f);
+            }else if (VoxelWorld.currentWorld.worldGenType == 2)
+            {
+                for (int i = 200; i > 0; i--)
+                {
+                    if (Chunk.PredictBlockType3D((int)x, i, (int)y) > 0)
+                    {
+                        return i;
+                    }
+                }
+                return -100;
+            }
+            else
+            {
+                return -100;
+            }
+        }
         public static void SetBlockWithUpdate(Vector3 pos, short blockID)
         {
 
@@ -569,6 +592,29 @@ namespace monogameMinecraftDX
 
                     GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunk();
                 }
+
+
+                //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
+                //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
+            }
+
+            public static void SetBlockWithoutUpdate(Vector3Int pos, short blockID)
+            {
+
+                Vector3Int intPos = pos;
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = intPos - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (chunkSpacePos.y < 0 || chunkSpacePos.y >= Chunk.chunkHeight)
+                {
+                    return;
+                }
+                chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockID;
+               
+               
 
 
                 //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);

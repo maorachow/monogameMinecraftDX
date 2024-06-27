@@ -156,7 +156,7 @@ namespace monogameMinecraftDX
         }
         public int updateCount = 0;
         public bool BFSIsWorking = false;
-        public bool[,,] mapIsSearched;
+     //   public bool[,,] mapIsSearched;
 
         public bool isModifiedInGame;
         /* public void BFSInit(int x, int y, int z, int ignoreSide, int GainedUpdateCount)
@@ -539,7 +539,9 @@ namespace monogameMinecraftDX
             }
             if (isMapGenCompleted == true)
             {
-                GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
+
+                this.chunkBounds = this.CalculateBounds();
+                    GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
                 ReleaseChunkUsage();
 
                 //     semaphore.Release();
@@ -550,7 +552,8 @@ namespace monogameMinecraftDX
             {
                 isChunkDataSavedInDisk = true;
                 map = (BlockData[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
-                GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
+                this.chunkBounds = this.CalculateBounds();
+                    GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
                 isMapGenCompleted = true;
                 ReleaseChunkUsage();
 
@@ -1247,8 +1250,60 @@ namespace monogameMinecraftDX
                         }
                     }
                 }
+                this.chunkBounds = this.CalculateBounds();
+                    generatedStructure.Clear();
+                for(int i=0;i<VoxelWorld.currentWorld.worldStructures.Count;i++)
+                {
+                    for (int x = -1; x < 2;x++)
+                    {
+                        for (int z = -1; z < 2; z++)
+                        {
+                            CalculateChunkStructurePoint(this, i, VoxelWorld.currentWorld.worldStructures[i].genParams, chunkPos+new Vector2Int(x*Chunk.chunkWidth, z * Chunk.chunkWidth));
+                        }
+                    }
+                   
+                }
 
-                isMapGenCompleted = true;
+                foreach (var item in generatedStructure)
+                {
+                    if (VoxelWorld.currentWorld.worldStructures.Count <= item.Item1)
+                    {
+                        continue;
+                    }
+
+                    Vector3Int testPoint = item.Item2;
+                    BlockData data = ChunkHelper.GetBlockData(testPoint+new Vector3Int(0,-1,0));
+                    if (testPoint.y < 0)
+                    {
+                        continue;
+                    }
+                    bool isIgnored = false;
+                    foreach (short ig in VoxelWorld.currentWorld.worldStructures[item.Item1].genParams
+                                 .ignorePlacingBlockTypes)
+                    {
+                        if (data.blockID == ig)
+                        {
+                            isIgnored = true;
+                            break;
+                        }
+                    }
+
+                    if (isIgnored)
+                    {
+                        continue;
+                    }
+                    ChunkHelper.FillBlocksSingleChunk(
+                        VoxelWorld.currentWorld.worldStructures[item.Item1].data,
+                        item.Item2 -
+                        new Vector3Int(
+                            VoxelWorld.currentWorld.worldStructures[item.Item1].data.GetLength(0) / 2, 0,
+                            VoxelWorld.currentWorld.worldStructures[item.Item1].data.GetLength(2) / 2),
+                        this, BlockFillMode.DontReplaceCustomTypes,false,100,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
+                    ChunkHelper.SetBlockWithoutUpdate(testPoint, 9);
+                    }
+            
+                this.chunkBounds = this.CalculateBounds();
+                    isMapGenCompleted = true;
             }
         }
 
@@ -1270,6 +1325,28 @@ namespace monogameMinecraftDX
             return new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + chunkWidth, GetHighestPoint(), chunkPos.y + chunkWidth));
         }
 
+
+        public List<(int,Vector3Int)> generatedStructure=new List<(int,Vector3Int)> (); 
+       
+        public static void CalculateChunkStructurePoint(Chunk c,int structureID,StructureGeneratingParam param,Vector2Int chunkPos)
+        {
+            
+            switch (param.type)
+            {
+                    case StructureGeneratingType.Random:
+                        if (RandomGenerator3D.GenerateIntFromVec3(new Vector3Int(chunkPos.x,0,
+                                chunkPos.y)) > 100 - param.additionalParam1)
+                        {
+
+                            c.generatedStructure.Add(
+                                new(structureID, new Vector3Int(chunkPos.x + 8, ChunkHelper.PredictChunkLandingPoint(chunkPos.x + 8, chunkPos.y + 8), chunkPos.y + 8)));
+                        }
+                        break;
+                    case StructureGeneratingType.FixedSpacing:
+                        break;
+            }
+        }
+        
         public void GenerateMeshOpqLOD(List<VertexPositionNormalTangentTexture> verts, List<ushort> indices, ref VertexPositionNormalTangentTexture[] vertsArray, ref ushort[] indicesArray, ref VertexBuffer vb, ref IndexBuffer ib, int lodBlockSkipCount = 2)
         {
 
@@ -1645,7 +1722,7 @@ namespace monogameMinecraftDX
             indicesOpqArray = indicesOpq.ToArray();
             indicesNSArray = indicesNS.ToArray();
             indicesWTArray = indicesWT.ToArray();
-            this.chunkBounds = this.CalculateBounds();
+         
             isReadyToRender = false;
             isVertexBufferDirty = true;
             //   if (VBOpq == null)

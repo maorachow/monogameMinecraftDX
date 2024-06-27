@@ -10,6 +10,7 @@ using System.Threading;
 using monogameMinecraftDX.Core;
 using monogameMinecraftDX.Rendering;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.Asset;
 namespace monogameMinecraftDX
 {
     namespace World
@@ -31,6 +32,7 @@ namespace monogameMinecraftDX
         public ConcurrentDictionary<Vector2Int, Chunk> chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
         public Dictionary<Vector2Int, ChunkData> chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
 
+        public List<GeneratingStructureData> worldStructures= new List<GeneratingStructureData>();
 
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
@@ -361,7 +363,8 @@ namespace monogameMinecraftDX
 
         public void ReadJson()
         {
-            chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
+            worldStructures.Clear();
+                chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
             Debug.WriteLine("read:" + curWorldSaveName);
             if (!Directory.Exists(gameWorldDataPath + "unityMinecraftServerData"))
@@ -395,8 +398,19 @@ namespace monogameMinecraftDX
             {
                 chunkDataReadFromDisk = MessagePackSerializer.Deserialize<Dictionary<Vector2Int, ChunkData>>(worldData);
             }
-
-            isJsonReadFromDisk = true;
+                isJsonReadFromDisk = true;
+                if (worldGenType == 0)
+                {
+                    GeneratingStructureData? structureData =
+                        StructureManager.LoadGeneratingStructure(Directory.GetCurrentDirectory() +
+                                                                 "/customstructures/defaultstructure.bin");
+                    if (structureData.HasValue == true)
+                    {
+                        worldStructures.Add(structureData.Value);
+                    }
+                }
+         
+           
         }
 
         public static void SwitchToWorldWithoutSaving(int worldIndex, MinecraftGame game)

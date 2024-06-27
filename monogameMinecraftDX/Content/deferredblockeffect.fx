@@ -486,7 +486,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
     return viewPos;
 }
 
-float3 LightPositions[4];
+float3 LightPositions[16];
 PixelShaderOutput MainPS(VertexShaderOutput input)
 {
     if (any(tex2D(AlbedoSampler, input.TexCoords).xyz) < 0.01)
@@ -553,7 +553,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     LoDirLightSpec += CalculateLightSpecularP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
     
     
-    for (int j= 0; j < 4; j++)
+    for (int j= 0; j < 16; j++)
     {
         LoSpec += CalculateLightSpecularP(worldPos, LightPositions[j], N, V, albedo, roughness, F0, false);
     }

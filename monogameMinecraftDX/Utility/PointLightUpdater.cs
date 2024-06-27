@@ -33,7 +33,7 @@ namespace monogameMinecraftDX.Utility
                     {
                         foreach (var position in c.lightPoints)
                         {
-                            if (lights.Count >= 4)
+                            if (lights.Count >= 16)
                             {
                                 break;
                             }
@@ -44,7 +44,7 @@ namespace monogameMinecraftDX.Utility
                 }
 
             }
-            while (lights.Count < 4)
+            while (lights.Count < 16)
             {
                 lights.Add(new Vector3(0, 0, 0));
             }

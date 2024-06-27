@@ -14,12 +14,14 @@ namespace monogameMinecraftDX.World
     public enum BlockFillMode
     {
         Default=0,
-        ReplaceAir=1
+        ReplaceAir=1,
+        ReplaceNonSolid=2,
+        DontReplaceCustomTypes=3
     }
     public partial class ChunkHelper
     {
         static Dictionary<Vector2Int,Chunk> tempFillChunks=new Dictionary<Vector2Int,Chunk>();
-        public static void FillBlocks(BlockData[,,] blockData, Vector3Int origin,BlockFillMode fillmode=BlockFillMode.Default)
+        public static void FillBlocks(BlockData[,,] blockData, Vector3Int origin,BlockFillMode fillmode=BlockFillMode.Default,bool rebuildChunk=true,bool saveChunks=false)
         {
             tempFillChunks.Clear();
             for (int x = origin.x; x < origin.x + blockData.GetLength(0); x++)
@@ -40,8 +42,8 @@ namespace monogameMinecraftDX.World
 
             foreach (var c in tempFillChunks)
             {
-                FillBlocksSingleChunk(blockData,origin,c.Value,fillmode);
-                if (c.Value.isReadyToRender == true)
+                FillBlocksSingleChunk(blockData,origin,c.Value,fillmode,saveChunks);
+                if (c.Value.isReadyToRender == true&&rebuildChunk)
                 {
                     c.Value.BuildChunk();
                 }
@@ -49,7 +51,7 @@ namespace monogameMinecraftDX.World
 
         }
 
-        public static void FillBlocksSingleChunk(BlockData[,,] blockData, Vector3Int origin,Chunk c, BlockFillMode fillmode)
+        public static void FillBlocksSingleChunk(BlockData[,,] blockData, Vector3Int origin,Chunk c, BlockFillMode fillmode, bool isSavingChunk = false, params short[] optionalVal)
         {
             Vector3Int chunkOffset= new Vector3Int(c.chunkPos.x, 0, c.chunkPos.y)-origin;
             for (int i = 0; i <Chunk.chunkWidth; i++)
@@ -79,13 +81,41 @@ namespace monogameMinecraftDX.World
                             case BlockFillMode.ReplaceAir:
                                 c.map[i, j, k] = c.map[i, j, k]==0?blockData[posInData.x, j - origin.y, posInData.y] : c.map[i, j, k];
                                 break;
+                            case BlockFillMode.ReplaceNonSolid:
+                                c.map[i, j, k] = c.map[i, j, k]==0||( c.map[i, j, k] != 0&& Chunk.blockInfosNew[c.map[i, j, k]].shape != BlockShape.Solid )? blockData[posInData.x, j - origin.y, posInData.y] : c.map[i, j, k];
+                                break;
+                            case BlockFillMode.DontReplaceCustomTypes:
+                                if (optionalVal == null||optionalVal.Length==0)
+                                {
+                                    c.map[i, j, k] = blockData[posInData.x, j - origin.y, posInData.y];
+                                }
+
+                                bool isPlacing = true;
+                                foreach (var v in optionalVal)
+                                {
+                                    if (c.map[i, j, k] == v)
+                                    {
+                                        isPlacing = false;
+                                    }
+                                }
+
+                                if (isPlacing)
+                                {
+                                    c.map[i, j, k] = blockData[posInData.x, j - origin.y, posInData.y];
+                                }
+                                break;
                         }
                           
                         }
                     }
                 
             }
-            c.isModifiedInGame=true;    
+
+            if (isSavingChunk == true)
+            {
+                c.isModifiedInGame = true;
+            }
+           
         }
         static Dictionary<Vector2Int, Chunk> tempReadChunks = new Dictionary<Vector2Int, Chunk>();
         public static BlockData[,,] GetBlocks(Vector3Int origin, int lengthX,int lengthY,int lengthZ)
