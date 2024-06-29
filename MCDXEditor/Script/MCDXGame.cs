@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Myra;
  
-namespace MCDXEditor;
+namespace MCDX.Editor;
 
 /// <summary>
 /// MCDX Game 新的游戏入口
@@ -33,8 +33,7 @@ public class MCDXGame: Game
         MyraEnvironment.Game = this;
         rootNode = new RootNode(this);
         spriteBatch = new SpriteBatch(GraphicsDevice);
-        awesomeface = Content.Load<Texture2D>("awesomeface");
-        MGCBInvoker.BuildContent("C:/unityMinecraftData/testcontentpack/Content.mgcb", "C:/unityMinecraftData/testcontentpack/bin/foo", "C:/unityMinecraftData/testcontentpack/obj/foo", "C:/unityMinecraftData/testcontentpack/");
+        awesomeface = Content.Load<Texture2D>("awesomeface"); 
     }
 
 

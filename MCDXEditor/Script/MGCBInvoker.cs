@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MCDXEditor
+namespace MCDX.Editor
 {
     public class MGCBInvoker
     {
@@ -42,25 +42,20 @@ namespace MCDXEditor
 
         }
 
+        public static void BuildContent(string dicrectory)
+        {
+            string cmd = $"dotnet mgcb /@: {dicrectory}";
+            Console.WriteLine($"Executing command {cmd}");
+            string result = ExecuteInCmd(cmd);
+            Console.WriteLine($"Result {result}");
+        }
         public static void BuildContent(string contentCommandDirectory,string outputDir,string intermediateDir,string workingDir)
         {
-
-             
-                string contentCommand = File.ReadAllText(contentCommandDirectory);
-                var fn = mgcbBuilderPath;
-            //     System.Diagnostics.Process.Start("explorer.exe", "D:\\");
-            //  var result = WinExec(mgcbBuilderPath, 1/*" /@:" + "\"" + contentCommandDirectory + "\"" + " /platform:Windows /outputDir:" + "\"" + outputDir + "\"" + " /intermediateDir:" + "\"" + intermediateDir + "\"" + " /workingDir:" + "\"" + workingDir + "\""*/);
+            //remark: 天哪!你疯了吗? 居然用File.ReadAllText对一个文件夹
+            //remark: 超级不建议加这个的, 因为每一个人的项目路径都不一样
             string result = ExecuteInCmd("dotnet mgcb"+" /@:" + "\"" + contentCommandDirectory + "\"" + " /platform:Windows /outputDir:" + "\"" + outputDir + "\"" + " /intermediateDir:" + "\"" + intermediateDir + "\"" + " /workingDir:" + "\"" + workingDir + "\"");
 
             Debug.WriteLine(result);
-
-
-
-            //    process.WaitForExit();
-            //        Debug.WriteLine("exitcode:"+process.ExitCode);
-            //  
-
-
         }
     }
 }

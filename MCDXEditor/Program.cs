@@ -1,3 +1,3 @@
 ﻿
-using var game = new MCDXEditor.MCDXGame();
+using var game = new MCDX.Editor.MCDXGame();
 game.Run();

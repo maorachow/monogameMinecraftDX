@@ -1,1 +1,22 @@
-{"1":"blocksprites/stone","2":"blocksprites/grass_side_carried","3":"blocksprites/dirt","4":"blocksprites/grass_side_carried","5":"blocksprites/bedrock","6":"blocksprites/log_oak","7":"blocksprites/log_oak","8":"blocksprites/log_oak","9":"blocksprites/leaves_oak_carried","10":"blocksprites/diamond_ore","11":"blocksprites/sand","12":"blocksprites/end_stone","13":"blocksprites/endframe_top","14":"blocksprites/sea_lantern","15":"blocksprites/iron_block","16":"blocksprites/cobblestone","17":"blocksprites/planks_oak","100":"blocksprites/water","101":"blocksprites/grass","102":"blocksprites/torch_on"}
+{
+  "1": "blocksprites/stone",
+  "2": "blocksprites/grass_side_carried",
+  "3": "blocksprites/dirt",
+  "4": "blocksprites/grass_side_carried",
+  "5": "blocksprites/bedrock",
+  "6": "blocksprites/log_oak",
+  "7": "blocksprites/log_oak",
+  "8": "blocksprites/log_oak",
+  "9": "blocksprites/leaves_oak_carried",
+  "10": "blocksprites/diamond_ore",
+  "11": "blocksprites/sand",
+  "12": "blocksprites/end_stone",
+  "13": "blocksprites/endframe_top",
+  "14": "blocksprites/sea_lantern",
+  "15": "blocksprites/iron_block",
+  "16": "blocksprites/cobblestone",
+  "17": "blocksprites/planks_oak",
+  "100": "blocksprites/water",
+  "101": "blocksprites/grass",
+  "102": "blocksprites/torch_on"
+}
