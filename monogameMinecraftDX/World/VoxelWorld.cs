@@ -37,11 +37,13 @@ namespace monogameMinecraftDX
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
 
+        public WorldUpdater worldUpdater;
         public VoxelWorld(string curWorldSaveName, int worldGenType, int worldID)
         {
             this.worldGenType = worldGenType;
             this.worldID = worldID;
             this.curWorldSaveName = curWorldSaveName;
+            worldUpdater = new WorldUpdater(this);
         }
 
 
@@ -65,13 +67,15 @@ namespace monogameMinecraftDX
         }
 
 
+        private PriorityQueue<Vector2Int, int> tempChunkUpdatingQueue=new PriorityQueue<Vector2Int, int>();
 
         public void UpdateWorldThread(GamePlayer player, MinecraftGame game)
         {
             BoundingFrustum frustum;
             while (true)
             {
-                lock (updateWorldThreadLock)
+                Thread.Sleep(500);
+                    lock (updateWorldThreadLock)
                 {
                     lock (deleteChunkThreadLock)
                     {
@@ -81,7 +85,7 @@ namespace monogameMinecraftDX
                             Debug.WriteLine("world changed");
                             return;
                         }
-                        Thread.Sleep(500);
+                       
                         //     Debug.WriteLine("update world ID:" + worldID);
                         if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
                         {
@@ -94,7 +98,8 @@ namespace monogameMinecraftDX
                         {
                             return;
                         }
-                        //         Debug.WriteLine("building chunks count:"+buildingChunksCount);
+                            //         Debug.WriteLine("building chunks count:"+buildingChunksCount);
+                            tempChunkUpdatingQueue.Clear();
                         if (player.isChunkNeededUpdate == true)
                         {
                             //    Debug.WriteLine("update");
@@ -112,7 +117,8 @@ namespace monogameMinecraftDX
                                         BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
                                         if (frustum.Intersects(chunkBoundingBox))
                                         {
-                                            Chunk c = new Chunk(chunkPos, game.GraphicsDevice, this);
+                                                //         Chunk c = new Chunk(chunkPos, game.GraphicsDevice, this);
+                                                tempChunkUpdatingQueue.Enqueue(chunkPos,Math.Abs(chunkPos.x-(int)player.position.X)+Math.Abs(chunkPos.y-(int)player.position.Z));
                                             // goto endUpdateWorld;
                                             //    break;
                                         }
@@ -123,6 +129,11 @@ namespace monogameMinecraftDX
                                     else continue;
 
                                 }
+                            }
+
+                            while (tempChunkUpdatingQueue.Count > 0)
+                            {
+                                Chunk c = new Chunk(tempChunkUpdatingQueue.Dequeue(), game.GraphicsDevice, this);
                             }
 
                             // endUpdateWorld:;
@@ -301,7 +312,7 @@ namespace monogameMinecraftDX
 
 
             EntityManager.ReadEntityData();
-            EntityBeh.SpawnEntityFromData(game);
+            EntityManager.SpawnEntityFromData(game);
 
             //     isGoingToQuitWorld = false;
             //       updateAllChunkLoadersThread = Task.Run(() => VoxelWorld.currentWorld.TryUpdateAllChunkLoadersThread());
@@ -319,7 +330,7 @@ namespace monogameMinecraftDX
             tryRemoveChunksThread.IsBackground = true;
             tryRemoveChunksThread.Start();
             game.gamePlayer.curChunk = null;
-
+            worldUpdater.Init();
             if (actionOnSwitchedWorld != null)
             {
                 actionOnSwitchedWorld();
@@ -329,6 +340,10 @@ namespace monogameMinecraftDX
 
         }
 
+        public void FrameUpdate(float deltaTime)
+        {
+            worldUpdater.MainThreadUpdate(deltaTime);
+        }
         public void DestroyAllChunks()
         {
             lock (updateWorldThreadLock)

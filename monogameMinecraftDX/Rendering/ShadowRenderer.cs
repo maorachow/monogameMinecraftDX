@@ -169,7 +169,7 @@ namespace monogameMinecraftDX.Rendering
                 chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 64);
 
 
-                foreach (var entity in EntityBeh.worldEntities)
+                foreach (var entity in EntityManager.worldEntities)
                 {
                     switch (entity.typeID)
                     {
@@ -195,7 +195,7 @@ namespace monogameMinecraftDX.Rendering
                 chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256);
 
 
-                foreach (var entity in EntityBeh.worldEntities)
+                foreach (var entity in EntityManager.worldEntities)
                 {
                     switch (entity.typeID)
                     {

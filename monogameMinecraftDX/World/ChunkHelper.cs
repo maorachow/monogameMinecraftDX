@@ -355,6 +355,16 @@ namespace monogameMinecraftDX
 
 
             }
+
+            public static BlockShape? GetBlockShape(short typeID)
+            {
+                if (typeID == 0||!Chunk.blockInfosNew.ContainsKey(typeID))
+                {
+                    return null;
+                }
+
+                return Chunk.blockInfosNew[typeID].shape;
+            }
             public static BlockData GetBlockData(Vector3 pos)
         {
             Vector3Int intPos = Vector3Int.FloorToIntVec3(pos);
@@ -615,6 +625,29 @@ namespace monogameMinecraftDX
                 chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockID;
                
                
+
+
+                //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
+                //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
+            }
+
+            public static void SetBlockOptionalDataWithoutUpdate(Vector3Int pos, byte optionalData)
+            {
+
+                Vector3Int intPos = pos;
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = intPos - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (chunkSpacePos.y < 0 || chunkSpacePos.y >= Chunk.chunkHeight)
+                {
+                    return;
+                }
+                chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z].optionalDataValue = optionalData;
+
+
 
 
                 //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);

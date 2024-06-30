@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using monogameMinecraftDX.World;
+using System;
 namespace monogameMinecraftDX.Utility
 {
 
@@ -29,6 +30,9 @@ namespace monogameMinecraftDX.Utility
             {
                 if (c.disposed == false && c.isReadyToRender == true)
                 {
+                    if (MathF.Abs(c.chunkPos.x - player.position.X) < 128 &&
+                        MathF.Abs(c.chunkPos.y - player.position.Z) < 128)
+                    {
                     if (playerViewProjFrustum.Intersects(c.chunkBounds))
                     {
                         foreach (var position in c.lightPoints)
@@ -41,6 +45,8 @@ namespace monogameMinecraftDX.Utility
 
                         }
                     }
+                    }
+                   
                 }
 
             }

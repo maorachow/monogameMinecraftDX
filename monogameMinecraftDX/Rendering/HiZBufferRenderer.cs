@@ -34,7 +34,7 @@ namespace monogameMinecraftDX.Rendering
             //      Debug.WriteLine("width height: "+ width + " " + height);
             for (int i = 0; i < 8; i++)
             {
-                hiZBufferTargetMips[i] = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+                hiZBufferTargetMips[i] = new RenderTarget2D(device, width, height, false, SurfaceFormat.Single, DepthFormat.Depth24);
                 // generate mipmap
                 width = Math.Max(width / 2, 1);
                 height = Math.Max(height / 2, 1);

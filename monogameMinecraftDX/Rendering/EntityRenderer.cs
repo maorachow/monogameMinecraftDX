@@ -70,7 +70,8 @@ namespace monogameMinecraftDX.Rendering
                }*/
         }
 
-        public void Draw()
+        [Obsolete]
+        public void DrawForwardRendering()
         {
             //    basicShader.Parameters["View"].SetValue(player.cam.GetViewMatrix());
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
@@ -90,7 +91,7 @@ namespace monogameMinecraftDX.Rendering
                 basicShader.Parameters["receiveShadow"].SetValue(true);
             }
             BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
-            foreach (var entity in EntityBeh.worldEntities)
+            foreach (var entity in EntityManager.worldEntities)
             {
                 if (frustum.Intersects(entity.bounds))
                 {
@@ -115,7 +116,7 @@ namespace monogameMinecraftDX.Rendering
             //      
             gBufferShader.Parameters["TextureE"].SetValue(zombieTex);
             BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
-            foreach (var entity in EntityBeh.worldEntities)
+            foreach (var entity in EntityManager.worldEntities)
             {
                 if (frustum.Intersects(entity.bounds))
                 {

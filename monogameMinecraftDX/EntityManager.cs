@@ -4,7 +4,12 @@ using monogameMinecraftDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using monogameMinecraftDX.World;
+using monogameMinecraftDX.Animations;
+using monogameMinecraftDX.Utility;
+
 namespace monogameMinecraftDX
 {
     public class EntityManager
@@ -13,25 +18,25 @@ namespace monogameMinecraftDX
         public static Random randomGenerator = new Random();
         public static void UpdateAllEntity(float deltaTime)
         {
-            for (int i = 0; i < EntityBeh.worldEntities.Count; i++)
+            for (int i = 0; i <worldEntities.Count; i++)
             {
-                EntityBeh.worldEntities[i].OnUpdate(deltaTime);
+                worldEntities[i].OnUpdate(deltaTime);
             }
         }
         public static void TrySpawnNewZombie(MinecraftGame game, float deltaTime)
         {
-            if (randomGenerator.NextSingle() >= 1 - deltaTime/**0.1f*/ && EntityBeh.worldEntities.Count < 70 && VoxelWorld.currentWorld.worldID == 0)
+            if (randomGenerator.NextSingle() >= 1 - deltaTime/**0.1f*/ && worldEntities.Count < 70 && VoxelWorld.currentWorld.worldID == 0)
             {
                 Vector2 randSpawnPos = new Vector2(game.gamePlayer.position.X + (randomGenerator.NextSingle() - 0.5f) * 80f, game.gamePlayer.position.Z + (randomGenerator.NextSingle() - 0.5f) * 80f);
                 Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
-                EntityBeh.SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game);
+                SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game);
 
             }
         }
 
         public static void ReadEntityData()
         {
-            EntityBeh.worldEntities.Clear();
+            worldEntities.Clear();
             //   gameWorldDataPath = WorldManager.gameWorldDataPath;
 
             if (!Directory.Exists(gameWorldEntityDataPath + "unityMinecraftServerData"))
@@ -63,7 +68,7 @@ namespace monogameMinecraftDX
               }*/
             if (worldData.Length > 0)
             {
-                EntityBeh.entityDataReadFromDisk = MessagePackSerializer.Deserialize<List<EntityData>>(worldData);
+                entityDataReadFromDisk = MessagePackSerializer.Deserialize<List<EntityData>>(worldData);
             }
 
 
@@ -82,7 +87,7 @@ namespace monogameMinecraftDX
             }
             fs.Close();
 
-            foreach (EntityBeh e in EntityBeh.worldEntities)
+            foreach (EntityBeh e in worldEntities)
             {
                 e.SaveSingleEntity();
             }
@@ -91,9 +96,113 @@ namespace monogameMinecraftDX
                string tmpData=JsonSerializer.ToJsonString(ed);
                File.AppendAllText(gameWorldEntityDataPath+"unityMinecraftData/GameData/worldentities.json",tmpData+"\n");
               }*/
-            byte[] tmpData = MessagePackSerializer.Serialize(EntityBeh.entityDataReadFromDisk);
+            byte[] tmpData = MessagePackSerializer.Serialize(entityDataReadFromDisk);
             File.WriteAllBytes(gameWorldEntityDataPath + "unityMinecraftServerData/GameData/worldentities.json", tmpData);
 
+        }
+
+        public static void SpawnEntityFromData(MinecraftGame game)
+        {
+            foreach (var etd in EntityManager.entityDataReadFromDisk)
+            {
+                if (etd.entityInWorldID == VoxelWorld.currentWorld.worldID)
+                {
+                    switch (etd.typeid)
+                    {
+                        case 0:
+                            ZombieEntityBeh tmp = new ZombieEntityBeh(new Vector3(etd.posX, etd.posY, etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.entityID, etd.entityHealth, false, game);
+                            
+                            break;
+                        default:
+                            break;
+                    }
+             
+                }
+
+            }
+        }
+
+        public static List<EntityData> entityDataReadFromDisk = new List<EntityData>();
+        public static List<EntityBeh> worldEntities = new List<EntityBeh>();
+
+        public static void InitEntityList()
+        {
+            worldEntities = new List<EntityBeh>();
+        }
+
+
+        public static Animation zombieAnim = new Animation(new List<AnimationStep> {
+
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
+            }, 0.5f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
+                { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+            }, 0.5f)
+        }, true);
+        public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
+
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.4f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
+            }, 0.1f)
+        }, false);
+        public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
+
+
+        public static void LoadEntitySounds(ContentManager cm)
+        {
+            entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
+            entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
+        }
+
+
+        public static void SpawnNewEntity(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, MinecraftGame game)
+        {
+            switch (typeID)
+            {
+                case 0:
+                    ZombieEntityBeh tmp = new ZombieEntityBeh(position, rotationX, rotationY, rotationZ, System.Guid.NewGuid().ToString("N"), 20f, false, game);
+                 
+                    break;
+                default:
+                    break;
+            }
+        
+        }
+
+
+        public static void HurtEntity(string entityID, float hurtValue, Vector3 sourcePos)
+        {
+            EntityBeh entityBeh;
+            int index = worldEntities.FindIndex((EntityBeh e) => { return entityID == e.entityID; });
+            if (index != -1)
+            {
+                entityBeh = worldEntities[index];
+            }
+            else
+            {
+                return;
+            }
+            if (entityBeh.isEntityHurt == true)
+            {
+                return;
+            }
+            if (entitySounds.ContainsKey(entityBeh.typeID + "hurt"))
+            {
+                SoundsUtility.PlaySound(MinecraftGame.gameposition, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
+            }
+
+            entityBeh.entityHealth -= hurtValue;
+            entityBeh.entityHurtCD = 0.2f;
+            entityBeh.entityMotionVec = Vector3.Normalize(entityBeh.position - sourcePos) * 15f;
         }
     }
 

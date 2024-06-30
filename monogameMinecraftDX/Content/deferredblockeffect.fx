@@ -541,7 +541,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     float roughness = mer.z;
     LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true, mer.x);
     
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 16; i++)
     {
         Lo += CalculateLightDiffuseP(worldPos, LightPositions[i], N, V, albedo, roughness, F0, false, mer.x);
     }

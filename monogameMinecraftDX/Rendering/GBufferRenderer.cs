@@ -76,7 +76,7 @@ namespace monogameMinecraftDX.Rendering
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector2, DepthFormat.Depth24);
+            renderTargetProjectionDepth = new RenderTarget2D(device, width, height, false, SurfaceFormat.Single, DepthFormat.Depth24);
             renderTargetMER = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             renderTargetAlbedo = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             renderTargetNormalWS = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);

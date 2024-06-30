@@ -94,8 +94,39 @@ namespace monogameMinecraftDX
                   new Vector2(0.0078125f, 0.0078125f),
                   new Vector2(0.0078125f, 0.0078125f),
                   new Vector2(0.0078125f, 0.0390625f),
-                  new Vector2(0.0078125f, 0.0390625f) },BlockShape.Torch) }
-
+                  new Vector2(0.0078125f, 0.0390625f) },BlockShape.Torch) },
+          {
+              103,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.Fence)
+          },
+          {
+              104,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
+                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.Door)
+          },
 
     };
             [Obsolete]

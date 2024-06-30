@@ -304,14 +304,14 @@ namespace monogameMinecraftDX
 
 
 
-            EntityBeh.InitEntityList();
-            EntityBeh.LoadEntitySounds(Content);
+            EntityManager.InitEntityList();
+            EntityManager.LoadEntitySounds(Content);
             //  rasterizerState.CullMode = CullMode.None;
             //   rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
             // EntityBeh.SpawnNewEntity(new Vector3(0, 100, 0), 0f, 0f, 0f, 0, this);
             EntityManager.ReadEntityData();
-            Debug.WriteLine(EntityBeh.entityDataReadFromDisk.Count);
-            EntityBeh.SpawnEntityFromData(this);
+            Debug.WriteLine(EntityManager.entityDataReadFromDisk.Count);
+            EntityManager.SpawnEntityFromData(this);
 
             isGamePaused = false;
         }
@@ -352,7 +352,7 @@ namespace monogameMinecraftDX
 
             //    ChunkManager.chunks =null;
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
-            EntityBeh.InitEntityList();
+            EntityManager.InitEntityList();
             GC.Collect();
 
 
@@ -534,6 +534,12 @@ namespace monogameMinecraftDX
                     {
                         el.Update();
                     }
+
+                    if (VoxelWorld.currentWorld.isThreadsStopping == false)
+                    {
+                        VoxelWorld.currentWorld.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+                  
                     gameTimeManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                     //    _spriteBatch.End();
                     // TODO: Add your update logic here
@@ -658,7 +664,7 @@ namespace monogameMinecraftDX
         protected override void Draw(GameTime gameTime)
         {
             //     if (!IsActive) return;
-
+        
             switch (status)
             {
                 case GameStatus.Started:

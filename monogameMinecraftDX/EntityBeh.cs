@@ -13,8 +13,7 @@ namespace monogameMinecraftDX
 {
     public class EntityBeh:IMovableCollider
     {
-        public static List<EntityData> entityDataReadFromDisk = new List<EntityData>();
-        public static List<EntityBeh> worldEntities = new List<EntityBeh>();
+      
         public Vector3 position { get; set; }
         public float rotationX;
         public float rotationY;
@@ -44,37 +43,7 @@ namespace monogameMinecraftDX
         public float entityDyingTime = 0f;
         // public AnimationState animationState;
         public AnimationBlend animationBlend;
-        public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
-           new AnimationStep(new Dictionary<string, AnimationTransformation> {
-
-                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
-                    { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
-                }, 0.5f),
-                new AnimationStep(new Dictionary<string, AnimationTransformation> {
-                    { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
-                    { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
-                      }, 0.5f)
-        }, true);
-        public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
-
-           new AnimationStep(new Dictionary<string, AnimationTransformation> {
-
-                    { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
-
-                }, 0.4f),
-                new AnimationStep(new Dictionary<string, AnimationTransformation> {
-                    { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
-                      }, 0.1f)
-        }, false);
-        public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
-
-
-        public static void LoadEntitySounds(ContentManager cm)
-        {
-            entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
-            entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
-        }
         public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt, MinecraftGame game)
         {
             this.position = position;
@@ -87,57 +56,35 @@ namespace monogameMinecraftDX
             this.isEntityHurt = isEntityHurt;
             this.game = game;
             isEntityDying = false;
-            switch (typeID)
+     /*       switch (typeID)
             {
                 case 0:
-                    animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(zombieAnim, EntityRenderer.zombieModel), new AnimationState(entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
+                    animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(EntityManager.zombieAnim, EntityRenderer.zombieModel), new AnimationState(entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
                     break;
                 default:
                     break;
-            }
+            }*/
         }
-        public static void InitEntityList()
-        {
-            worldEntities = new List<EntityBeh>();
-        }
+      
         public void SaveSingleEntity()
         {
 
             EntityData tmpData = new EntityData(this.typeID, position.X, position.Y + entitySize.Y / 2f, position.Z, this.rotationX, this.rotationY, this.rotationZ, this.entityID, this.entityHealth, VoxelWorld.currentWorld.worldID);
 
-            foreach (EntityData ed in entityDataReadFromDisk)
+            foreach (EntityData ed in EntityManager.entityDataReadFromDisk)
             {
                 if (ed.entityID == this.entityID)
                 {
 
-                    entityDataReadFromDisk.Remove(ed);
+                    EntityManager.entityDataReadFromDisk.Remove(ed);
                     break;
                 }
             }
 
-            entityDataReadFromDisk.Add(tmpData);
+            EntityManager.entityDataReadFromDisk.Add(tmpData);
         }
-        public static void SpawnEntityFromData(MinecraftGame game)
-        {
-            foreach (var etd in entityDataReadFromDisk)
-            {
-                if (etd.entityInWorldID == VoxelWorld.currentWorld.worldID)
-                {
-                    EntityBeh tmp = new EntityBeh(new Vector3(etd.posX, etd.posY, etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.typeid, etd.entityID, etd.entityHealth, false, game);
-                    tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
-                    tmp.InitBounds();
-                    worldEntities.Add(tmp);
-                }
-
-            }
-        }
-        public static void SpawnNewEntity(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, MinecraftGame game)
-        {
-            EntityBeh tmp = new EntityBeh(position, rotationX, rotationY, rotationZ, typeID, System.Guid.NewGuid().ToString("N"), 20f, false, game);
-            tmp.entitySize = new Vector3(0.6f, 1.8f, 0.6f);
-            tmp.InitBounds();
-            worldEntities.Add(tmp);
-        }
+       
+      
 
         public void InitBounds()
         {
@@ -159,18 +106,18 @@ namespace monogameMinecraftDX
             }
 
         }
-        Vector3 lastPos;
+       
         public Chunk curChunk;
         public bool lastChunkIsReadyToRender;
         public float Vec3Magnitude(Vector3 pos)
         {
             return (float)Math.Sqrt(pos.X * pos.X + pos.Y * pos.Y + pos.Z * pos.Z);
         }
-        public void OnUpdate(float deltaTime)
+        public virtual void OnUpdate(float deltaTime)
         {
 
 
-            switch (typeID)
+          /*  switch (typeID)
             {
                 case 0:
                     if (isEntityDying == true)
@@ -322,35 +269,16 @@ namespace monogameMinecraftDX
                     }
 
                     break;
-            }
+            }*/
 
         }
-        public static void HurtEntity(string entityID, float hurtValue, Vector3 sourcePos)
+
+        public void OnDraw()
         {
-            EntityBeh entityBeh;
-            int index = worldEntities.FindIndex((EntityBeh e) => { return entityID == e.entityID; });
-            if (index != -1)
-            {
-                entityBeh = worldEntities[index];
-            }
-            else
-            {
-                return;
-            }
-            if (entityBeh.isEntityHurt == true)
-            {
-                return;
-            }
-            if (entitySounds.ContainsKey(entityBeh.typeID + "hurt"))
-            {
-                SoundsUtility.PlaySound(MinecraftGame.gameposition, entityBeh.position, entitySounds[entityBeh.typeID + "hurt"], 20f);
-            }
 
-            entityBeh.entityHealth -= hurtValue;
-            entityBeh.entityHurtCD = 0.2f;
-            entityBeh.entityMotionVec = Vector3.Normalize(entityBeh.position - sourcePos) * 15f;
         }
-        Vector3 ToEulerAngles(Quaternion q)
+     
+        protected Vector3 ToEulerAngles(Quaternion q)
         {
             Vector3 angles;
 
@@ -390,7 +318,7 @@ namespace monogameMinecraftDX
         }
 
 
-        void EntityMove(float dx, float dy, float dz)
+        protected void EntityMove(float dx, float dy, float dz)
         {
 
 
@@ -441,7 +369,7 @@ namespace monogameMinecraftDX
         public void GetEntitiesAround()
         {
             entitiyBoundsAround = new List<BoundingBox>();
-            foreach (var entity in EntityBeh.worldEntities)
+            foreach (var entity in EntityManager.worldEntities)
             {
                 if (entity != this)
                 {

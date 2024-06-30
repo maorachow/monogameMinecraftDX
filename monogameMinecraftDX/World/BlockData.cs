@@ -27,7 +27,9 @@ namespace monogameMinecraftDX
         Torch=2,
         Slabs=3,
         Stairs=4,
-        Water=5
+        Water=5,
+        Fence=6,
+        Door=7
 
     }
         [MessagePackObject]

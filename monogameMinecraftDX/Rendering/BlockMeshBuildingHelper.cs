@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftDX.Core;
 using monogameMinecraftDX.World;
+using SharpDX.MediaFoundation.DirectX;
 
 namespace monogameMinecraftDX
 {
@@ -398,10 +400,301 @@ namespace monogameMinecraftDX
                         }
 
                         break;
+                    case BlockShape.Fence:
+
+
+                        if (Chunk.blockInfosNew[blockData.blockID].uvCorners.Count < 6 || Chunk.blockInfosNew[blockData.blockID].uvSizes.Count < 6)
+                        {
+                            return;
+                        }
+                        bool[] dataArray = MathUtility.GetBooleanArray(blockData.optionalDataValue);
+                        bool isLeftBuilt = dataArray[7];
+                        bool isRightBuilt = dataArray[6];
+                        bool isBackBuilt = dataArray[5];
+                        bool isFrontBuilt = dataArray[4];
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 0f, 0.375f), new Vector3(0f,1, 0f), new Vector3(0f, 0f, 0.25f), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                        //Right
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 0f, 0.375f) + new Vector3(0.25f, 0f, 0f), new Vector3(0f, 1, 0f), new Vector3(0f, 0f, 0.25f), Chunk.blockInfosNew[blockData.blockID].uvCorners[1], Chunk.blockInfosNew[blockData.blockID].uvSizes[1], true, NSVerts, NSIndices);
+
+                        //Bottom
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 0f, 0.375f), new Vector3(0f, 0f, 0.25f), new Vector3(0.25f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                        //Top
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 1f, 0.375f), new Vector3(0f, 0f, 0.25f), new Vector3(0.25f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                        //Back
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 0f, 0.375f), new Vector3(0f, 1, 0f), new Vector3(0.25f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                        //Front
+
+                        BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.375f, 0f, 0.375f) + new Vector3(0f, 0f, 0.25f), new Vector3(0f, 1, 0f), new Vector3(0.25f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+
+                        if (isLeftBuilt)
+                        {
+
+                            
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f+ 0.1875f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f, 0.4375f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f, 0.4375f+0.125f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+
+                            //Bottom
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f+0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f + 0.1875f + 0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f + 0.375f, 0.4375f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0f, 0.375f + 0.375f, 0.4375f + 0.125f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+                        }
+
+                        if (isRightBuilt)
+                        {
+
+
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f + 0.1875f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f, 0.4375f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f, 0.4375f + 0.125f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+
+                            //Bottom
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f + 0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f + 0.1875f + 0.375f, 0.4375f), new Vector3(0f, 0f, 0.125f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f + 0.375f, 0.4375f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.625f, 0.375f + 0.375f, 0.4375f + 0.125f), new Vector3(0f, 0.1875f, 0f), new Vector3(0.375f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+                        }
+
+
+
+                        if (isBackBuilt)
+                        {
+
+
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f,0f ), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], true, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.1875f,0f ), new Vector3(0.125f, 0f,0f ), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], false, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f, 0f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], false, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f + 0.125f, 0.375f,0f ), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], true, NSVerts, NSIndices);
+
+
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.375f, 0f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], true, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.1875f + 0.375f, 0f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], false, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.375f, 0f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], false, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f + 0.125f, 0.375f + 0.375f, 0f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], true, NSVerts, NSIndices);
+
+
+                        }
+
+                        if (isFrontBuilt)
+                        {
+
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f, 0.625f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], true, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.1875f, 0.625f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], false, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f, 0.625f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], false, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f + 0.125f, 0.375f, 0.625f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], true, NSVerts, NSIndices);
+
+
+                            //Bottom
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.375f, 0.625f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], true, NSVerts, NSIndices);
+                            //Top
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.1875f + 0.375f, 0.625f), new Vector3(0.125f, 0f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], false, NSVerts, NSIndices);
+
+                            //Back
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f, 0.375f + 0.375f, 0.625f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], false, NSVerts, NSIndices);
+                            //Front
+
+                            BuildFaceComplex(new Vector3(x, y, z) + new Vector3(0.4375f + 0.125f, 0.375f + 0.375f, 0.625f), new Vector3(0f, 0.1875f, 0f), new Vector3(0f, 0f, 0.375f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], true, NSVerts, NSIndices);
+
+                        }
+                        break;
+                    case BlockShape.Door:
+                        //additionaldata[6][7]
+                        //false false->left
+                        //false true->right
+                        //true false->back
+                        //true true->front
+                        //additionaldata[5]
+                        //false->bottom
+                        //true->up
+                        //[4]
+                        //false->close true->open
+
+                        if (Chunk.blockInfosNew[blockData.blockID].uvCorners.Count < 12 || Chunk.blockInfosNew[blockData.blockID].uvSizes.Count < 12)
+                        {
+                            return;
+                        }
+                        bool[] dataArray1 = MathUtility.GetBooleanArray(blockData.optionalDataValue);
+                        byte doorFaceID = 0;
+                        if (dataArray1[6] == false)
+                        {
+                            if (dataArray1[7] == false)
+                            {
+                                doorFaceID = 0;
+                            }
+                            else
+                            {
+                                doorFaceID = 1;
+                            }
+                        }
+                        else
+                        {
+                            if (dataArray1[7] == false)
+                            {
+                                doorFaceID = 2;
+                            }
+                            else
+                            {
+                                doorFaceID = 3;
+                            }
+                        }
+
+                        Matrix rotationMat=Matrix.Identity;
+                        switch (doorFaceID)
+                        {
+                            case 0:
+                                rotationMat = Matrix.CreateRotationY(MathHelper.ToRadians(0f));
+                                break;
+                            case 1:
+                                rotationMat = Matrix.CreateRotationY(MathHelper.ToRadians(-180f));
+                                break;
+                            case 2:
+                                rotationMat = Matrix.CreateRotationY(MathHelper.ToRadians(270f));
+                                break;
+                            case 3:
+                                rotationMat = Matrix.CreateRotationY(MathHelper.ToRadians(90f));
+                                break;
+                        }
+
+                        bool isOpen = dataArray1[4];
+                        bool isDown = dataArray1[5];
+                        if (isOpen)
+                        {
+                            rotationMat*= Matrix.CreateRotationY(MathHelper.ToRadians(90f));
+                        }
+                        if (isDown == true)
+                        {
+                            
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 1, 0f), new Vector3(0f, 0f, 1f), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                                //Right
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0.1875f, 0f, 0f), new Vector3(0f, 1, 0f), new Vector3(0f, 0f, 1f), Chunk.blockInfosNew[blockData.blockID].uvCorners[1], Chunk.blockInfosNew[blockData.blockID].uvSizes[1], true, NSVerts, NSIndices);
+
+                                //Bottom
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 0f, 1f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, NSVerts, NSIndices);
+                                //Top
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0f, 1f, 0f), new Vector3(0f, 0f, 1f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, NSVerts, NSIndices);
+
+                                //Back
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 1, 0f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, NSVerts, NSIndices);
+                                //Front
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0f, 0f, 1f), new Vector3(0f, 1, 0f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, NSVerts, NSIndices);
+
+                           
+
+                        }
+                        else
+                        {
+                          
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 1, 0f), new Vector3(0f, 0f, 1f), Chunk.blockInfosNew[blockData.blockID].uvCorners[6], Chunk.blockInfosNew[blockData.blockID].uvSizes[6], false, NSVerts, NSIndices);
+                                //Right
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0.1875f, 0f, 0f), new Vector3(0f, 1, 0f), new Vector3(0f, 0f, 1f), Chunk.blockInfosNew[blockData.blockID].uvCorners[7], Chunk.blockInfosNew[blockData.blockID].uvSizes[7], true, NSVerts, NSIndices);
+
+                                //Bottom
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 0f, 1f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[8], Chunk.blockInfosNew[blockData.blockID].uvSizes[8], false, NSVerts, NSIndices);
+                                //Top
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0f, 1f, 0f), new Vector3(0f, 0f, 1f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[9], Chunk.blockInfosNew[blockData.blockID].uvSizes[9], true, NSVerts, NSIndices);
+
+                                //Back
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z), new Vector3(0f, 1, 0f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[10], Chunk.blockInfosNew[blockData.blockID].uvSizes[10], true, NSVerts, NSIndices);
+                                //Front
+
+                                BuildFaceComplex(new Vector3(x, y, z), rotationMat, new Vector3(x, y, z) + new Vector3(0f, 0f, 1f), new Vector3(0f, 1, 0f), new Vector3(0.1875f, 0f, 0f), Chunk.blockInfosNew[blockData.blockID].uvCorners[11], Chunk.blockInfosNew[blockData.blockID].uvSizes[11], false, NSVerts, NSIndices);
+
+                           
+                        }
+                       
+
+
+                        break;
 
                 }
 
             }
+            
             public static void BuildSingleBlockLOD(int LODSkipBlockCount,Chunk curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> verts, ref List<ushort> indices)
             {
                 if (blockData.blockID == 0 || !Chunk.blockInfosNew.ContainsKey(blockData.blockID))

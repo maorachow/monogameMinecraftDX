@@ -81,6 +81,8 @@ namespace monogameMinecraftDX
             player.inventoryData[2] = 102;
             player.inventoryData[3] = 14;
             player.inventoryData[4] = 13;
+            player.inventoryData[5] = 103;
+            player.inventoryData[6] = 104;
             //    isJsonReadFromDisk = true;
             return playerInWorldID;
         }
@@ -178,9 +180,9 @@ namespace monogameMinecraftDX
             Microsoft.Xna.Framework.Ray ray = new Microsoft.Xna.Framework.Ray(cam.position, cam.front);
             float rayHitDis = 10000f;
             int finalIndex = -1;
-            for (int i = 0; i < EntityBeh.worldEntities.Count; i++)
+            for (int i = 0; i < EntityManager.worldEntities.Count; i++)
             {
-                EntityBeh entity = EntityBeh.worldEntities[i];
+                EntityBeh entity = EntityManager.worldEntities[i];
                 if (ray.Intersects(entity.bounds) <= 4f)
                 {
                     if (rayHitDis > (float)ray.Intersects(entity.bounds))
@@ -196,7 +198,7 @@ namespace monogameMinecraftDX
             }
             if (finalIndex >= 0)
             {
-                EntityBeh.HurtEntity(EntityBeh.worldEntities[finalIndex].entityID, 4f, cam.position);
+                EntityManager.HurtEntity(EntityManager.worldEntities[finalIndex].entityID, 4f, cam.position);
                 return true;
             }
             return false;
@@ -207,9 +209,10 @@ namespace monogameMinecraftDX
             Vector3Int blockPoint =new Vector3Int(-1,-1,-1);
             BlockFaces blockFaces = BlockFaces.PositiveY;
            VoxelCast.Cast(ray,3,out blockPoint, out blockFaces,this, graphicsDevice);
-           
 
+           VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ChunkHelper.GetBlockData(blockPoint)));
             ChunkHelper.BreakBlock(blockPoint);
+       
             GetBlocksAround(bounds);
         
                 return true;
@@ -221,7 +224,7 @@ namespace monogameMinecraftDX
             {
                 return;
             }
-           Physics. Ray ray = new Physics.Ray(cam.position, cam.front);
+            Physics. Ray ray = new Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1,-1,-1);
            
             BlockFaces blockFaces = BlockFaces.PositiveY;
@@ -231,28 +234,48 @@ namespace monogameMinecraftDX
                 return ;
             }
             Vector3 setBlockPoint = new Vector3(blockPoint.x+0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f);
+
+            Vector3 castBlockPoint = new Vector3(blockPoint.x, blockPoint.y, blockPoint.z);
+
+
+        
             switch (blockFaces)
             {
                 case BlockFaces.PositiveX:
                     setBlockPoint.X += 0.6f;
+                 
                     break;
                 case BlockFaces.PositiveY:
                     setBlockPoint.Y += 0.6f;
+                    
                     break;
                 case BlockFaces.PositiveZ:
                     setBlockPoint.Z += 0.6f;
+                   
                     break;
                 case BlockFaces.NegativeX:
                     setBlockPoint.X += -0.6f;
+                     
                     break;
                 case BlockFaces.NegativeY:
                     setBlockPoint.Y +=  -0.6f;
+                  
                     break;
                 case BlockFaces.NegativeZ:
                     setBlockPoint.Z += -0.6f;
+                   
                     break;
             }
-            
+            //interactable blocks
+
+            if (ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(castBlockPoint)) is BlockShape.Door)
+            {
+                VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorInteractingOperation((Vector3Int)castBlockPoint));
+                return;
+            }
+
+
+
             Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
             switch (Chunk.blockInfosNew[inventoryData[currentSelectedHotbar]].shape)
             {
@@ -356,12 +379,83 @@ namespace monogameMinecraftDX
 
                     }
                     break;
+                case BlockShape.Fence:
+              //      bool[] data = new bool[8] { false, false, false, false, true, true, true, true };
+              ChunkHelper.SetBlockWithUpdate(setBlockPoint,
+                  new BlockData(inventoryData[currentSelectedHotbar], 0));
+                  VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(setBlockPointInt, VoxelWorld.currentWorld.worldUpdater,new Vector3Int(0,0,0),0));
+                    GetBlocksAround(bounds);
+                    break;
+
+                    
+                case BlockShape.Door:
+
+                    bool[] dataBools = new[] { false, false, false, false, false, false, false, false };
+ 
+                    switch (blockFaces)
+                    {
+                        case BlockFaces.PositiveX:
+                          return;
+
+                        case BlockFaces.PositiveY:
+                            if (MathF.Abs(ray.direction.X) > MathF.Abs(ray.direction.Z))
+                            {
+                                if (ray.direction.X < 0)
+                                {
+                                    dataBools[6] = false;
+                                    dataBools[7] = true;
+                                }
+                                else
+                                {
+                                    dataBools[6] = false;
+                                    dataBools[7] = false;
+                                }
+                            }
+                            else
+                            {
+                                if (ray.direction.Z < 0)
+                                {
+                                    dataBools[6] = true;
+                                    dataBools[7] = true;
+                                }
+                                else
+                                {
+                                    dataBools[6] = true;
+                                    dataBools[7] = false;
+                                }
+                            }
+                            break;
+
+
+                        case BlockFaces.PositiveZ:
+                            return;
+
+                        case BlockFaces.NegativeX:
+                            return;
+
+                        case BlockFaces.NegativeY:
+                            return;
+
+                        case BlockFaces.NegativeZ:
+                            return;
+
+                    }
+
+                    byte optionalDataVal = MathUtility.GetByte(dataBools);
+                    if (ChunkHelper.GetBlock(setBlockPoint + new Vector3(0, 1, 0)) == 0)
+                    {
+                        ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal));
+                        VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorUpperPartPlacingOperation((Vector3Int)setBlockPointInt));
+                    }
+               
+                  
+                    break;
                 default:
                     ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
                     break;
             }
-           
-            
+         
+
             GetBlocksAround(bounds);
         }
         public void Move(Vector3 moveVec, bool isClipable)
