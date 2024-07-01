@@ -230,6 +230,30 @@ sampler2D gPositionWS = sampler_state
     AddressV = Clamp;
 };
 
+
+
+samplerCUBE irradianceSampler = sampler_state
+{
+    texture = <HDRIrradianceTex>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+
+
+samplerCUBE irradianceSamplerNight = sampler_state
+{
+    texture = <HDRIrradianceTexNight>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+float mixValue;
+
 float4 ProjectionParams2;
 float4 CameraViewTopLeftCorner;
 float4 CameraViewXExtent;
@@ -561,7 +585,18 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     LoSpec += CalculateLightSpecularP(worldPos, LightPosition2, N, V, albedo, roughness, F0, false);
     LoSpec += CalculateLightSpecularP(worldPos, LightPosition3, N, V, albedo, roughness, F0, false);
     LoSpec += CalculateLightSpecularP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false);*/
-    float3 ambient = float3(0.01, 0.01, 0.01) * albedo * tex2D(AOSampler, input.TexCoords.xy).r;
+    
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
+    float3 kS = F;
+    float3 kD = 1.0 - kS;
+    kD *= 1.0 - mer.x;
+    
+ 
+   
+    float3 irradiance = lerp(texCUBE(irradianceSampler, N).rgb, texCUBE(irradianceSamplerNight, N).rgb, mixValue);
+    float3 diffuse = irradiance * albedo;
+    float3 ambientEnv = (kD * diffuse);
+    float3 ambient = ambientEnv * tex2D(AOSampler, input.TexCoords.xy).r*0.6;
     
     
     float shadow;
@@ -588,13 +623,13 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     float3 colorSpec;
     if (receiveShadow == true)
     {
-        color =  0+ emission + LoDirLight * shadowFinal + Lo;
+        color = ambient+emission + LoDirLight * shadowFinal + Lo;
         colorSpec = LoDirLightSpec * shadowFinal + LoSpec;
     }
     else
     {
         colorSpec = LoSpec;
-        color = 0 + emission + Lo;
+        color = ambient + emission + Lo;
     }
     
  //color += tex2D(reflectionSampler, input.TexCoords).rgb;

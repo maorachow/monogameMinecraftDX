@@ -16,7 +16,8 @@ namespace monogameMinecraftDX.World
         Default=0,
         ReplaceAir=1,
         ReplaceNonSolid=2,
-        DontReplaceCustomTypes=3
+        DontReplaceCustomTypes=3,
+        ReplaceCustomTypes = 4
     }
     public partial class ChunkHelper
     {
@@ -85,6 +86,7 @@ namespace monogameMinecraftDX.World
                                 c.map[i, j, k] = c.map[i, j, k]==0||( c.map[i, j, k] != 0&& Chunk.blockInfosNew[c.map[i, j, k]].shape != BlockShape.Solid )? blockData[posInData.x, j - origin.y, posInData.y] : c.map[i, j, k];
                                 break;
                             case BlockFillMode.DontReplaceCustomTypes:
+                               
                                 if (optionalVal == null||optionalVal.Length==0)
                                 {
                                     c.map[i, j, k] = blockData[posInData.x, j - origin.y, posInData.y];
@@ -100,6 +102,31 @@ namespace monogameMinecraftDX.World
                                 }
 
                                 if (isPlacing)
+                                {
+                                    c.map[i, j, k] = blockData[posInData.x, j - origin.y, posInData.y];
+                                }
+                                break;
+
+                            case BlockFillMode.ReplaceCustomTypes:
+                                if (optionalVal == null || optionalVal.Length == 0)
+                                {
+                                    break;
+                                }
+                                if (blockData[posInData.x, j - origin.y, posInData.y].blockID == 0)
+                                {
+                                    break;
+                                }
+                                bool isPlacing1 = false;
+                                foreach (var v in optionalVal)
+                                {
+                                    if (c.map[i, j, k] == v)
+                                    {
+                                        isPlacing1 = true;
+                                        break;
+                                    }
+                                }
+
+                                if (isPlacing1)
                                 {
                                     c.map[i, j, k] = blockData[posInData.x, j - origin.y, posInData.y];
                                 }

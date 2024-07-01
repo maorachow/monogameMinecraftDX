@@ -74,18 +74,6 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/bedrock.png
 
-#begin blocksprites/bedrock.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/bedrock.png
-
 #begin blocksprites/cobblestone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -122,30 +110,6 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/dirt.png
 
-#begin blocksprites/dirt.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/dirt.png
-
-#begin blocksprites/end_stone.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/end_stone.png
-
 #begin blocksprites/end_stone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -170,7 +134,7 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/endframe_top.png
 
-#begin blocksprites/endframe_top.png
+#begin blocksprites/fences.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -180,19 +144,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:blocksprites/endframe_top.png
-
-#begin blocksprites/grass_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/grass_carried.png
+/build:blocksprites/fences.png
 
 #begin blocksprites/grass_carried.png
 /importer:TextureImporter
@@ -217,30 +169,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:blocksprites/grass_side_carried.png
-
-#begin blocksprites/grass_side_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/grass_side_carried.png
-
-#begin blocksprites/grass.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/grass.png
 
 #begin blocksprites/grass.png
 /importer:TextureImporter
@@ -277,30 +205,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:blocksprites/leaves_oak_carried.png
-
-#begin blocksprites/leaves_oak_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/leaves_oak_carried.png
-
-#begin blocksprites/log_oak.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/log_oak.png
 
 #begin blocksprites/log_oak.png
 /importer:TextureImporter
@@ -350,18 +254,6 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/sea_lantern.png
 
-#begin blocksprites/sea_lantern.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/sea_lantern.png
-
 #begin blocksprites/stone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -373,30 +265,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:blocksprites/stone.png
-
-#begin blocksprites/stone.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/stone.png
-
-#begin blocksprites/torch_on.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:blocksprites/torch_on.png
 
 #begin blocksprites/torch_on.png
 /importer:TextureImporter
@@ -422,7 +290,7 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/water.png
 
-#begin blocksprites/water.png
+#begin blocksprites/woodendoor.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -432,7 +300,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:blocksprites/water.png
+/build:blocksprites/woodendoor.png
 
 #begin brdfluteffect.fx
 /importer:EffectImporter
@@ -463,18 +331,6 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:createshadowmapeffect.fx
-
-#begin customresourcespack/blocksprites/bedrock.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/bedrock.png
 
 #begin customresourcespack/blocksprites/bedrock.png
 /importer:TextureImporter
@@ -524,18 +380,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/dirt.png
 
-#begin customresourcespack/blocksprites/dirt.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/dirt.png
-
 #begin customresourcespack/blocksprites/end_stone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -547,30 +391,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/end_stone.png
-
-#begin customresourcespack/blocksprites/end_stone.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/end_stone.png
-
-#begin customresourcespack/blocksprites/endframe_top.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/endframe_top.png
 
 #begin customresourcespack/blocksprites/endframe_top.png
 /importer:TextureImporter
@@ -596,18 +416,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/grass_carried.png
 
-#begin customresourcespack/blocksprites/grass_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/grass_carried.png
-
 #begin customresourcespack/blocksprites/grass_side_carried.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -619,30 +427,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/grass_side_carried.png
-
-#begin customresourcespack/blocksprites/grass_side_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/grass_side_carried.png
-
-#begin customresourcespack/blocksprites/grass.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/grass.png
 
 #begin customresourcespack/blocksprites/grass.png
 /importer:TextureImporter
@@ -668,18 +452,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/iron_block.png
 
-#begin customresourcespack/blocksprites/iron_block.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/iron_block.png
-
 #begin customresourcespack/blocksprites/leaves_oak_carried.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -691,30 +463,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/leaves_oak_carried.png
-
-#begin customresourcespack/blocksprites/leaves_oak_carried.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/leaves_oak_carried.png
-
-#begin customresourcespack/blocksprites/log_oak.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/log_oak.png
 
 #begin customresourcespack/blocksprites/log_oak.png
 /importer:TextureImporter
@@ -764,18 +512,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/sea_lantern.png
 
-#begin customresourcespack/blocksprites/sea_lantern.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/sea_lantern.png
-
 #begin customresourcespack/blocksprites/stone.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -787,30 +523,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/stone.png
-
-#begin customresourcespack/blocksprites/stone.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/stone.png
-
-#begin customresourcespack/blocksprites/torch_on.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/torch_on.png
 
 #begin customresourcespack/blocksprites/torch_on.png
 /importer:TextureImporter
@@ -836,24 +548,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/blocksprites/water.png
 
-#begin customresourcespack/blocksprites/water.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/blocksprites/water.png
-
-#begin customresourcespack/dirtdig.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/dirtdig.wav
-
 #begin customresourcespack/dirtdig.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -866,35 +560,11 @@
 /processorParam:Quality=Best
 /build:customresourcespack/grassdig.wav
 
-#begin customresourcespack/grassdig.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/grassdig.wav
-
 #begin customresourcespack/stonedig.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:customresourcespack/stonedig.wav
-
-#begin customresourcespack/stonedig.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/stonedig.wav
-
-#begin customresourcespack/terrain.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/terrain.png
 
 #begin customresourcespack/terrain.png
 /importer:TextureImporter
@@ -920,30 +590,6 @@
 /processorParam:TextureFormat=Color
 /build:customresourcespack/terrainmer.png
 
-#begin customresourcespack/terrainmer.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/terrainmer.png
-
-#begin customresourcespack/terrainnormal.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:customresourcespack/terrainnormal.png
-
 #begin customresourcespack/terrainnormal.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -961,18 +607,6 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:customresourcespack/uiclick.wav
-
-#begin customresourcespack/uiclick.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/uiclick.wav
-
-#begin customresourcespack/waterdig.ogg
-/importer:OggImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/waterdig.ogg
 
 #begin customresourcespack/waterdig.ogg
 /importer:OggImporter
@@ -986,29 +620,11 @@
 /processorParam:Quality=Best
 /build:customresourcespack/wooddig.wav
 
-#begin customresourcespack/wooddig.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/wooddig.wav
-
 #begin customresourcespack/zombiehurt.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:customresourcespack/zombiehurt.wav
-
-#begin customresourcespack/zombiehurt.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/zombiehurt.wav
-
-#begin customresourcespack/zombiesay.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:customresourcespack/zombiesay.wav
 
 #begin customresourcespack/zombiesay.wav
 /importer:WavImporter
@@ -1050,8 +666,20 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
+/processorParam:TextureFormat=NoChange
 /build:environmenthdri.png
+
+#begin environmenthdrinight.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=NoChange
+/build:environmenthdrinight.png
 
 #begin fxaaeffect.fx
 /importer:EffectImporter

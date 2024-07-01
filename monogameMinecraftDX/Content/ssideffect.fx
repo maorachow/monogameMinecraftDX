@@ -262,7 +262,7 @@ sampler gProjectionDepth = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 sampler gProjectionDepthM0 = sampler_state
 {
@@ -271,7 +271,7 @@ sampler gProjectionDepthM0 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 
 sampler gProjectionDepthM1 = sampler_state
@@ -281,7 +281,7 @@ sampler gProjectionDepthM1 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 sampler gProjectionDepthM2 = sampler_state
 {
@@ -290,7 +290,7 @@ sampler gProjectionDepthM2 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 sampler gProjectionDepthM3 = sampler_state
 {
@@ -299,7 +299,7 @@ sampler gProjectionDepthM3 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 sampler gProjectionDepthM4 = sampler_state
 {
@@ -308,7 +308,7 @@ sampler gProjectionDepthM4 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
 };
 sampler gProjectionDepthM5 = sampler_state
 {
@@ -317,7 +317,26 @@ sampler gProjectionDepthM5 = sampler_state
     AddressV = CLAMP;
     MagFilter = POINT;
     MinFilter = POINT;
-    Mipfilter = NONE;
+    Mipfilter = Point;
+};
+
+sampler gProjectionDepthM6 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip6);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = Point;
+    MinFilter = Point;
+    Mipfilter = Point;
+};
+sampler gProjectionDepthM7 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip7);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = Point;
+    MinFilter = Point;
+    Mipfilter = POINT;
 };
 sampler2D MERSampler = sampler_state
 {
@@ -346,7 +365,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(gProjectionDepth, input.TexCoords).x)+CameraPos; //tex2D(gPositionWS, input.TexCoords).xyz;
+    float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(gProjectionDepthM0, input.TexCoords).x)+CameraPos; //tex2D(gPositionWS, input.TexCoords).xyz;
     float3 normal = tex2D(gNormalWS, input.TexCoords).xyz * 2 - 1;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
     float3 randomVec = float3(tex2D(noiseTex, input.TexCoords * 5).r * 2 - 1 + 0.0001 + GameTime, tex2D(noiseTex, input.TexCoords * 5).g * 2 - 1 + 0.0001 + GameTime, 0);
@@ -358,11 +377,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 finalColor = 0;
     float2 prevTexCoord = input.TexCoords+tex2D(motionVectorTex, input.TexCoords).xy;
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSIDTex, prevTexCoord).xyz : 0;
-    float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5 + GameTime*2.5).r-0.5;
-    for (int i = 0; i <4; i++)
+     
+    for (int i = 0; i <2; i++)
     {
         float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
-        sampleDir.z = clamp(sampleDir.z, 0.2, 1);
+        sampleDir.z = clamp(sampleDir.z, 0.02, 1);
         sampleDir = normalize(sampleDir);
         sampleDir = mul(sampleDir, TBN);
         bool isHit = false;
@@ -370,12 +389,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float3 marchPos = 0;
         int mipLevel = 0;
         float strideLen = 1.0;
-        
+        float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5*i + GameTime * 2.5).r - 0.5;
         marchPos = rayOrigin + sampleDir * 0.01;
         float3 preMarchPos = marchPos;
         for (int j = 0; j < 16; j++)
         {
-            marchPos += sampleDir * 0.2 * (1 + strideNoiseVal) * strideLen;
+            marchPos += sampleDir * 0.15 * (1+strideNoiseVal) * strideLen;
              uv = GetScreenCoordFromWorldPos(marchPos);
             
             
@@ -386,8 +405,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             
             float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy).x;
 
-            float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
-
+        /*    float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
+           
             float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
 
             float sampleDepthM3 = tex2D(gProjectionDepthM3, uv.xy).x;
@@ -395,42 +414,31 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
 
             float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
-        
-            float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 }; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
-            float sampleDepth = sampleDepthArray[mipLevel];
+            float sampleDepthM6 = tex2D(gProjectionDepthM6, uv.xy).x;
+            float sampleDepthM7 = tex2D(gProjectionDepthM7, uv.xy).x;
+            float sampleDepthArray[8] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5, sampleDepthM6, sampleDepthM7 };*/ /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
+            float sampleDepth = sampleDepthM0;
             
-            
-           
-            if (sampleDepth < testDepth)
-            {
-                
-                
-                if (sampleDepth < testDepth && abs(sampleDepth - testDepth) <0.6* (1 + strideNoiseVal) * strideLen /*1.2*length(preMarchPos -marchPos)*/ && mipLevel <= 0)
-            {
-                    uv = GetScreenCoordFromWorldPos(marchPos);
-                isHit = true;
-           
-                break; //   return float4(0, 0, 0, 1);
-            }  
-                mipLevel--;
-               marchPos -= sampleDir * 0.2 * (1+strideNoiseVal)*strideLen;
-                strideLen /= 2.0;
-            }
-            else
-            {
-                if (mipLevel < 5)
-                {
-                    mipLevel++;
-                    strideLen *= 2.0;
-                }
-            }
             if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
             {
                 isHit = false;
            
                 break; // return float4(1, 1, 1, 1);
             }
-            preMarchPos = marchPos;
+           
+           
+                
+                
+            if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen && mipLevel <= 0)
+            {
+                uv = GetScreenCoordFromWorldPos(marchPos);
+                isHit = true;
+           
+                break; //   return float4(0, 0, 0, 1);
+            }  
+            
+           
+          
 
         }
         if (isHit == true)
@@ -444,10 +452,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
         }
     }      
-    finalColor /= 4;
+    finalColor /=2;
    // finalColor = finalColor*0.01+prevColor;
             float3 F0 = float3(0.04, 0.04, 0.04);
-            F0 = lerp(F0, tex2D(gAlbedo, input.TexCoords).xyz, mer.x);
+        float3 albedo = pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
+        F0 = lerp(F0, albedo, mer.x);
               float3 N = normal;
             float3 W = worldPos;
             float3 V = normalize(CameraPos - W);
@@ -459,8 +468,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             kD *= 1.0 - mer.x;
   //      finalColor = finalColor * 0.01 + prevColor;
             float3 irradiance = finalColor;
-            float3 diffuse = irradiance * pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
-    return float4(lerp(diffuse*kD, prevColor, 0.9), 1);
+        float3 diffuse = irradiance * albedo;
+        return float4(lerp(diffuse*kD, prevColor, 0.9), 1);
 }
 
 technique SSID

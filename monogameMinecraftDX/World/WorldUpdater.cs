@@ -18,8 +18,13 @@ namespace monogameMinecraftDX.World
          this.world= world;
         }
 
-        public void Init()
+        public void Init(MinecraftGame game)
         {
+            onUpdated = () =>
+            {
+                game.gamePlayer.GetBlocksAround(game.gamePlayer.bounds);
+            //    Debug.WriteLine("on updated");
+            };
             this.queuedChunkUpdatePoints = new Queue<IChunkUpdateOperation>();
             this.chunksNeededRebuild = new List<Chunk>();
             tryUpdateWorldBlocksThread = new Thread(UpdateWorldBlocksThread);
@@ -37,7 +42,7 @@ namespace monogameMinecraftDX.World
                     Debug.WriteLine("quit update world block thread");
                     return;
                 }
-                Thread.Sleep(100);
+                Thread.Sleep(25);
 
             //    Debug.WriteLine("sleep");
                 
@@ -68,8 +73,12 @@ namespace monogameMinecraftDX.World
         public List<Chunk> chunksNeededRebuild;
 
 
-        public readonly float maxDelayedTime = 0.5f;
+        public readonly float maxDelayedTime = 0.2f;
         public float delayedTime = 0f;
+
+        public delegate void OnChunkUpdated();
+
+        private OnChunkUpdated onUpdated;
         public void MainThreadUpdate(float deltaTime)
         {
             delayedTime += deltaTime;
@@ -85,11 +94,39 @@ namespace monogameMinecraftDX.World
                         {
                             if (chunk != null && chunk.isReadyToRender == true)
                             {
-                                chunk.BuildChunk();
+                                chunk.BuildChunkAsync();
+                              
+
+
+
+
+
+                                ChunkHelper. GetChunk(new Vector2Int(chunk.chunkPos.x - Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsync();
+
+
+                                // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
+
+                                //  chunkNeededUpdate.rightChunk.BuildChunk();
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x + Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsync();
+
+                                //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
+                                //       {
+                                //         chunkNeededUpdate.backChunk.BuildChunk();
+                                //     }
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y - Chunk.chunkWidth))?.BuildChunkAsync();
+
+                                //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
+                                //     {
+                                //      chunkNeededUpdate.frontChunk.BuildChunk();
+                                //     }
+
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsync();
+                               
                             }
                          
                         }
                         chunksNeededRebuild.Clear();
+                        onUpdated();
                     }
                 }
             }

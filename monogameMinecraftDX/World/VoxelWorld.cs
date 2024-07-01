@@ -330,7 +330,7 @@ namespace monogameMinecraftDX
             tryRemoveChunksThread.IsBackground = true;
             tryRemoveChunksThread.Start();
             game.gamePlayer.curChunk = null;
-            worldUpdater.Init();
+            worldUpdater.Init(game);
             if (actionOnSwitchedWorld != null)
             {
                 actionOnSwitchedWorld();
@@ -373,6 +373,7 @@ namespace monogameMinecraftDX
             isThreadsStopping = true;
             tryRemoveChunksThread.Join();
             updateWorldThread.Join();
+            worldUpdater.StopAllThreads();
         }
 
 

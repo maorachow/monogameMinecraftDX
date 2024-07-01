@@ -6,6 +6,8 @@ namespace monogameMinecraftDX.World
     {
         public GamePlayer player;
         public float dateTime;
+
+        public float skyboxMixValue = 0f;
         public Vector3 sunDir;
         public float sunX;
         public float sunY;
@@ -33,6 +35,29 @@ namespace monogameMinecraftDX.World
             if (dateTime >= 1f)
             {
                 dateTime = 0f;
+            }
+
+            float time = dateTime;
+            
+            if (0f <= time && time < 0.1f)
+            {
+                skyboxMixValue = MathHelper.Lerp(0.5f, 0f, time * 10f);
+            }
+            else if (0.1f <= time && time < 0.4f)
+            {
+                skyboxMixValue = 0;
+            }
+            else if (0.4f <= time && time < 0.6f)
+            {
+                skyboxMixValue = MathHelper.Lerp(0f, 1f, (time - 0.4f) * 5f);
+            }
+            else if (0.6f <= time && time < 0.9f)
+            {
+                skyboxMixValue = 1f;
+            }
+            else if (0.9f <= time && time < 1f)
+            {
+                skyboxMixValue = MathHelper.Lerp(1f, 0.5f, (time - 0.9f) * 10f);
             }
             sunX = dateTime * 360f;
             sunY = 20f;

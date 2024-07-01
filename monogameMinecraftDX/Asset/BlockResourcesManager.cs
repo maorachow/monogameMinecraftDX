@@ -160,7 +160,9 @@ namespace monogameMinecraftDX
                     { 17, "wooddig" },
                     { 100, "waterdig" },
                     { 101, "grassdig" },
-                    { 102, "wooddig" }
+                    { 102, "wooddig" },
+                    { 103, "wooddig" },
+                    { 104, "wooddig" }
                 };
                 string blockInfoDataString = JsonSerializer.Serialize(blockInfoData);
 
@@ -290,7 +292,10 @@ namespace monogameMinecraftDX
                     { 17, "wooddig" },
                     { 100, "waterdig" },
                     { 101, "grassdig" },
-                    { 102, "wooddig" }
+                    { 102, "wooddig" },
+                    { 103, "wooddig" },
+                    { 104, "wooddig" }
+
                 };
 
                 foreach (var item in blockSoundInfoData)
@@ -337,7 +342,9 @@ namespace monogameMinecraftDX
                     { 17, "blocksprites/planks_oak" },
                     { 100, "blocksprites/water" },
                     { 101, "blocksprites/grass" },
-                    { 102, "blocksprites/torch_on" }
+                    { 102, "blocksprites/torch_on" },
+                    { 103, "blocksprites/fences" },
+                    { 104, "blocksprites/woodendoor" }
                 };
                 foreach (var item in blockSpriteInfoData)
                 {

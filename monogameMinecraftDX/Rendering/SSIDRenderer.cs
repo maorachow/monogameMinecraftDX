@@ -53,7 +53,8 @@ namespace monogameMinecraftDX.Rendering
             SSIDEffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
             SSIDEffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
             SSIDEffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
-
+            SSIDEffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
+            SSIDEffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);
             SSIDEffect.Parameters["PrevSSIDTexture"]?.SetValue(renderTargetSSIDPrev);
             SSIDEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             SSIDEffect.Parameters["GameTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);

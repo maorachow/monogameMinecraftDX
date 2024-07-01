@@ -173,7 +173,7 @@ namespace monogameMinecraftDX.Rendering
         {
             if (isLOD)
             {
-                if (c.indicesOpqLOD1Array.Length <= 0)
+                if (c.indicesOpqLOD1Array.Length <= 0 || c.VBOpqLOD1 == null || c.IBOpqLOD1 == null)
                 {
                     return;
                 }
@@ -195,25 +195,32 @@ namespace monogameMinecraftDX.Rendering
             }
             else
             {
-                if (c.indicesOpqArray.Length <= 0)
+                if (c.indicesOpqArray.Length <= 0 || c.VBOpq == null || c.IBOpq == null)
                 {
                     return;
                 }
-                Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
-                gBufferEffect.Parameters["World"].SetValue(world);
-                //   gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world*player.cam.viewMatrix)));
-                //  gBufferEffect.Parameters["roughness"].SetValue(0.0f);
 
-                device.SetVertexBuffer(c.VBOpq);
-
-                device.Indices = c.IBOpq;
-
-                foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                lock (c.asyncTaskLock)
                 {
-                    pass.Apply();
-                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
+                    Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
+                    gBufferEffect.Parameters["World"].SetValue(world);
+                    //   gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world*player.cam.viewMatrix)));
+                    //  gBufferEffect.Parameters["roughness"].SetValue(0.0f);
 
+                    device.SetVertexBuffer(c.VBOpq);
+
+                    device.Indices = c.IBOpq;
+
+                    foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
+
+                    }
                 }
+                 
+                
+          
             }
 
         }
@@ -224,19 +231,22 @@ namespace monogameMinecraftDX.Rendering
             gBufferEffect.Parameters["World"].SetValue(world);
             //    gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world * player.cam.viewMatrix)));
             //   gBufferEffect.Parameters["roughness"].SetValue(1f);
-
-            device.SetVertexBuffer(c.VBWT);
-
-            device.Indices = c.IBWT;
-            if (c.indicesWTArray.Length > 0)
+            lock (c.asyncTaskLock)
             {
-                foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
-                {
-                    pass.Apply();
-                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesWTArray.Length / 3);
+                device.SetVertexBuffer(c.VBWT);
 
+                device.Indices = c.IBWT;
+                if (c.indicesWTArray.Length > 0)
+                {
+                    foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesWTArray.Length / 3);
+
+                    }
                 }
             }
+          
 
         }
 
@@ -247,19 +257,22 @@ namespace monogameMinecraftDX.Rendering
             gBufferEffect.Parameters["World"].SetValue(world);
             //  gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world * player.cam.viewMatrix)));
             //   gBufferEffect.Parameters["roughness"].SetValue(0f);
-
-            device.SetVertexBuffer(c.VBNS);
-
-            device.Indices = c.IBNS;
-            if (c.indicesNSArray.Length > 0)
+            lock (c.asyncTaskLock)
             {
-                foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
-                {
-                    pass.Apply();
-                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesNSArray.Length / 3);
+                device.SetVertexBuffer(c.VBNS);
 
+                device.Indices = c.IBNS;
+                if (c.indicesNSArray.Length > 0)
+                {
+                    foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesNSArray.Length / 3);
+
+                    }
                 }
             }
+         
 
         }
         public void RenderAllChunksOpq(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player)
@@ -436,29 +449,32 @@ namespace monogameMinecraftDX.Rendering
             shadowmapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);
 
             BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
-
-            foreach (var chunk in RenderingChunks)
+            lock (VoxelWorld.currentWorld.worldUpdater.chunksNeededRebuildListLock)
             {
-                Chunk c = chunk.Value;
-                if (c == null)
+                foreach (var chunk in RenderingChunks)
                 {
-                    continue;
-                }
-                if (MathF.Abs(c.chunkPos.x - player.position.X) < maxRenderDistance && MathF.Abs(c.chunkPos.y - player.position.Z) < maxRenderDistance)
-                {
-                    if (frustum.Intersects(c.chunkBounds))
+                    Chunk c = chunk.Value;
+                    if (c == null)
                     {
-                        if (c.isReadyToRender == true && c.disposed == false)
+                        continue;
+                    }
+                    if (MathF.Abs(c.chunkPos.x - player.position.X) < maxRenderDistance && MathF.Abs(c.chunkPos.y - player.position.Z) < maxRenderDistance)
+                    {
+                        if (frustum.Intersects(c.chunkBounds))
                         {
-                            RenderSingleChunkShadow(c, shadowmapShader);
+                            if (c.isReadyToRender == true && c.disposed == false)
+                            {
+                                RenderSingleChunkShadow(c, shadowmapShader);
+                            }
                         }
+
+
+
                     }
 
-
-
                 }
-
             }
+           
             /*      foreach(var entity in EntityBeh.worldEntities)
                   {
                       EntityRenderer.DrawModelShadow(EntityRenderer.zombieModel, Matrix.CreateTranslation(entity.position),lightSpaceMat);
@@ -470,23 +486,41 @@ namespace monogameMinecraftDX.Rendering
 
         void RenderSingleChunkShadow(Chunk c, Effect shadowmapShader)
         {
-            if (c.indicesOpqArray.Length <= 0)
+            if (c.isTaskCompleted == false)
             {
                 return;
             }
-            Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
-            shadowmapShader.Parameters["World"].SetValue(world);
-
-            device.SetVertexBuffer(c.VBOpq);
-
-            device.Indices = c.IBOpq;
-
-            foreach (EffectPass pass in shadowmapShader.CurrentTechnique.Passes)
+            if (c.indicesOpqArray.Length <= 0|| c.VBOpq==null|| c.IBOpq==null)
             {
-                pass.Apply();
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
-
+                return;
             }
+
+           if (c.VBOpq != null && c.VBOpq.IsDisposed == true)
+            {
+                return;
+            }
+            if (c.IBOpq != null && c.IBOpq.IsDisposed == true)
+            {
+                return;
+            }
+
+            lock (c.asyncTaskLock)
+            {
+                Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
+                shadowmapShader.Parameters["World"].SetValue(world);
+
+                device.SetVertexBuffer(c.VBOpq);
+
+                device.Indices = c.IBOpq;
+
+                foreach (EffectPass pass in shadowmapShader.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
+
+                }
+            }
+          
         }
         void RenderSingleChunkWater(Chunk c, GamePlayer player)
         {

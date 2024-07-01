@@ -106,8 +106,8 @@ namespace monogameMinecraftDX.UI
                new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackgroundtransparent"],game._spriteBatch),
                  new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>game.ResumeGame() ,"Resume Game",null,1),
                   new UIButton(new Vector2(0.25f, 0.3f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>game.QuitGameplay() ,"Quit Game",null,1),
-                    new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
-               new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.chunkRenderer,game) ,"Reload Custom Resource Packs",null,0.6f)
+                    new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>game.effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice,game.renderPipelineManager.customPostProcessors,game.Content) ,"Reload Custom Postprocessing Shaders",null,0.6f),
+               new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.renderPipelineManager.chunkRenderer,game) ,"Reload Custom Resource Packs",null,0.6f)
             };
             InitInventoryUI(game, sf);
             game.status = GameStatus.Menu;
@@ -119,7 +119,7 @@ namespace monogameMinecraftDX.UI
              new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{} ,"Inventory",null,1,false,false),
             };
             int elementCount = 0;
-            foreach (var element in Chunk.blockInfo)
+            foreach (var element in Chunk.blockInfosNew)
             {
                 UIElement.inventoryUIs.Add(new UIButton(new Vector2(elementCount % 10 * 0.05f + 0.25f, elementCount / 10 * 0.05f + 0.25f), 0.05f, 0.05f, UIElement.UITextures.ContainsKey("blocktexture" + element.Key) && UIElement.UITextures["blocktexture" + element.Key] != null ? UIElement.UITextures["blocktexture" + element.Key] : UIElement.UITextures["blocktexture-1"],
                     new Vector2(0f, 0f), null, game._spriteBatch, game.Window, (ub) => game.gamePlayer.inventoryData[game.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true

@@ -120,29 +120,8 @@ new VertexPosition(   new Vector3(   1.0f, -1.0f,  1.0f)),
             skyboxEffect.Parameters["SkyBoxTextureNight"].SetValue(skyboxTextureNight);
 
             //  Debug.WriteLine(gametimeManager.dateTime);
-            float time = (gametimeManager.dateTime - 0.25f) % 1f;
-            float mixValue = 0f;
-            if (0f <= time && time < 0.15f)
-            {
-                mixValue = 0;
-            }
-            else if (0.15f <= time && time < 0.35f)
-            {
-                mixValue = MathHelper.SmoothStep(0f, 1f, (time - 0.15f) * 5f);
-            }
-            else if (0.35f <= time && time < 0.65f)
-            {
-                mixValue = 1;
-            }
-            else if (0.65f <= time && time < 0.85f)
-            {
-                mixValue = MathHelper.SmoothStep(1f, 0f, (time - 0.65f) * 5f);
-            }
-            else if (0.85f <= time && time < 1f)
-            {
-                mixValue = 0;
-            }
-            skyboxEffect.Parameters["mixValue"].SetValue(mixValue);
+             
+            skyboxEffect.Parameters["mixValue"].SetValue(gametimeManager.skyboxMixValue);
             skyboxEffect.Parameters["CameraPosition"].SetValue(player.cam.position);
             device.SetVertexBuffer(skyboxVertexBuffer);
             foreach (var pass in skyboxEffect.CurrentTechnique.Passes)

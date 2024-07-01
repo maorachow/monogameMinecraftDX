@@ -14,6 +14,52 @@ namespace monogameMinecraftDX.World
         public void Update();
     }
 
+    public struct PlacingBlockOperation: IChunkUpdateOperation
+    {
+        public WorldUpdater worldUpdater;
+        public Vector3Int position { get; set; }
+        public BlockData placingBlockData;
+
+        public PlacingBlockOperation(Vector3Int position, WorldUpdater worldUpdater, BlockData placingBlockData)
+        {
+            this.position = position;
+            this.worldUpdater = worldUpdater;
+            this.placingBlockData=placingBlockData;
+        }
+
+        public void Update()
+        {
+            BlockShape? shapeThis =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 0)));
+           
+            BlockShape? shapeRight =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0)));
+            BlockShape? shapeLeft =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(-1, 0, 0)));
+            BlockShape? shapeFront =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 1)));
+            BlockShape? shapeBack =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1)));
+
+            ChunkHelper.SetBlockWithoutUpdateWithSaving(position, placingBlockData);
+            if (shapeLeft != null && (shapeLeft.Value == BlockShape.Fence))
+            {
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(-1, 0, 0), this.worldUpdater, new Vector3Int(1, 0, 0), 1));
+            }
+            if (shapeRight != null && (shapeRight.Value == BlockShape.Fence))
+            {
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(1, 0, 0), this.worldUpdater, new Vector3Int(-1, 0, 0), 1));
+            }
+            if (shapeFront != null && (shapeFront.Value == BlockShape.Fence))
+            {
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, 1), this.worldUpdater, new Vector3Int(0, 0, -1), 1));
+            }
+            if (shapeBack != null && (shapeBack.Value == BlockShape.Fence))
+            {
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, -1), this.worldUpdater, new Vector3Int(0, 0, 1), 1));
+            }
+        }
+    }
     public struct FenceUpdatingOperation: IChunkUpdateOperation
     {
         public WorldUpdater worldUpdater;
@@ -411,7 +457,7 @@ namespace monogameMinecraftDX.World
                 if (shapeUp is BlockShape.Door)
                 {
 
-                    ChunkHelper.SetBlockWithoutUpdate(position + new Vector3Int(0, 1, 0), 0);
+                    ChunkHelper.SetBlockWithoutUpdate(position + new Vector3Int(0, 1, 0), (short)0);
 
                     //   Debug.WriteLine(dataBinary[7]);
                 }
@@ -422,7 +468,7 @@ namespace monogameMinecraftDX.World
                     if (shapeDown is BlockShape.Door)
                     {
 
-                        ChunkHelper.SetBlockWithoutUpdate(position + new Vector3Int(0, -1, 0), 0);
+                        ChunkHelper.SetBlockWithoutUpdate(position + new Vector3Int(0, -1, 0), (short)0);
 
                         //   Debug.WriteLine(dataBinary[7]);
                     }

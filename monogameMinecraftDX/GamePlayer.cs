@@ -210,9 +210,9 @@ namespace monogameMinecraftDX
             BlockFaces blockFaces = BlockFaces.PositiveY;
            VoxelCast.Cast(ray,3,out blockPoint, out blockFaces,this, graphicsDevice);
 
-           VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ChunkHelper.GetBlockData(blockPoint)));
-            ChunkHelper.BreakBlock(blockPoint);
-       
+      //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ChunkHelper.GetBlockData(blockPoint)));
+          //  ChunkHelper.BreakBlock(blockPoint);
+            ChunkHelper.SendBreakBlockOperation(blockPoint);
             GetBlocksAround(bounds);
         
                 return true;
@@ -281,7 +281,8 @@ namespace monogameMinecraftDX
             {
                 case BlockShape.Solid:
 
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
+                   // ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
+                   ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, inventoryData[currentSelectedHotbar]);
                     break;
                     case BlockShape.Torch:
 
@@ -313,23 +314,23 @@ namespace monogameMinecraftDX
                     switch (blockFaces)
                     {
                         case BlockFaces.PositiveX:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 2));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 2));
                             GetBlocksAround(bounds);
                             return;
                          
                         case BlockFaces.PositiveY:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
 
                         case BlockFaces.PositiveZ:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 4));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 4));
                             GetBlocksAround(bounds);
                             return;
                             
                         case BlockFaces.NegativeX:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 1));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 1));
                             GetBlocksAround(bounds);
                             return;
                           
@@ -337,7 +338,7 @@ namespace monogameMinecraftDX
                             return;
                             
                         case BlockFaces.NegativeZ:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 3));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 3));
                             GetBlocksAround(bounds);
                             return;
                          
@@ -347,42 +348,42 @@ namespace monogameMinecraftDX
                     switch (blockFaces)
                     {
                         case BlockFaces.PositiveX:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
                         case BlockFaces.PositiveY:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
 
                         case BlockFaces.PositiveZ:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
                         case BlockFaces.NegativeX:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
                         case BlockFaces.NegativeY:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 1));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 1));
                             GetBlocksAround(bounds);
                             return;
 
                         case BlockFaces.NegativeZ:
-                            ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], 0));
+                            ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
                             return;
 
                     }
                     break;
                 case BlockShape.Fence:
-              //      bool[] data = new bool[8] { false, false, false, false, true, true, true, true };
-              ChunkHelper.SetBlockWithUpdate(setBlockPoint,
-                  new BlockData(inventoryData[currentSelectedHotbar], 0));
+                    //      bool[] data = new bool[8] { false, false, false, false, true, true, true, true };
+                    ChunkHelper.SendPlaceBlockOperation(setBlockPointInt,
+                         new BlockData(inventoryData[currentSelectedHotbar], 0));
                   VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(setBlockPointInt, VoxelWorld.currentWorld.worldUpdater,new Vector3Int(0,0,0),0));
                     GetBlocksAround(bounds);
                     break;
@@ -444,14 +445,14 @@ namespace monogameMinecraftDX
                     byte optionalDataVal = MathUtility.GetByte(dataBools);
                     if (ChunkHelper.GetBlock(setBlockPoint + new Vector3(0, 1, 0)) == 0)
                     {
-                        ChunkHelper.SetBlockWithUpdate(setBlockPoint, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal));
+                        ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal));
                         VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorUpperPartPlacingOperation((Vector3Int)setBlockPointInt));
                     }
                
                   
                     break;
                 default:
-                    ChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
+                    ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, inventoryData[currentSelectedHotbar]);
                     break;
             }
          

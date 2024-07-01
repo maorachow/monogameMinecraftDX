@@ -576,7 +576,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
   //  float noiseValue = worldPos.x;
     worldPos = worldPos + normal * 0.3 * length(worldPos - CameraPos) / 100;
     float3 vDir = normalize(worldPos-CameraPos);
-    float3 rDir = (reflect(vDir, (normal)));
+    float3 rDir = reflect(vDir, (normal));
     
     float3 rayOrigin = worldPos ;
     float NdotL =2- max(dot(normal, -vDir), 0.0)*1.5;
@@ -587,12 +587,24 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 preMarchPos = rayOrigin;
     bool isRayReturning = false;
     float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0+GameTime*5).g + 0.5;
+    float3 noiseValue2 = tex2D(texNoise, input.TexCoord * 3.0 + GameTime * 8).rgb*2-1;
+    float3 noiseValue4 = tex2D(texNoise, input.TexCoord * 6.0 + GameTime * 9).rgb * 2 - 1;
+    
+    float3 randomVec = float3(noiseValue2.rg, 0);
+    float3 tangent = normalize(randomVec - rDir * dot(randomVec, rDir));
+    float3 bitangent = cross(rDir, tangent);
+    float3x3 TBN = float3x3(tangent, bitangent, rDir);
+    float3 noiseValue3 = float3(noiseValue4.rg*mer.z*0.05, noiseValue2.b * 0.5 + 0.5);
+    float3 rayRoughnessAmp = mul(noiseValue3, TBN);
+    rDir = rayRoughnessAmp;
+    rDir = normalize(rDir);
+   
   //  return float4(noiseValue1.xxx, 1);
     float3 marchPos = worldPos+rDir*0.01;
     
     
     float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
-    float maxBlendDistance = length(PixelSize) * 3;
+    float maxBlendDistance = length(PixelSize) * 2;
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance,0,1);
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
@@ -602,11 +614,15 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     int miplevel = 0;
     float strideLen = 1;
   
-   
+ 
     [unroll]
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 24; i++)
     {
-        marchPos += (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
+        if (dot(normal, rDir) < 0)
+        {
+            return float4(0, 0, 0, 1);
+        }
+        marchPos += (rDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);
         offset = mul(offset, ViewProjection);
@@ -684,8 +700,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             
             
             
-         
-               
+              
                  
                
             
@@ -709,11 +724,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1-mer.z)).rg;
            
             float3 specular = albedo * (F * brdf.x + brdf.y);
-                return float4(lerp(specular, prevColor, clamp(1 - blendFactor, 0, 0.6)), 1);
+                return float4(lerp(specular, prevColor, clamp(blendFactor, 0.1, 0.9)), 1);
 
         } 
             miplevel--;
-            marchPos -= (rDir) * 0.5 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
+            marchPos -= (rDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
             strideLen /= 2.0;
          
             

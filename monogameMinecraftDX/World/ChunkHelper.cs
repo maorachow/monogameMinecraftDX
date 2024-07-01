@@ -630,7 +630,148 @@ namespace monogameMinecraftDX
                 //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
                 //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
             }
+            public static void SetBlockWithoutUpdate(Vector3Int pos, BlockData blockID)
+            {
 
+                Vector3Int intPos = pos;
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = intPos - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (chunkSpacePos.y < 0 || chunkSpacePos.y >= Chunk.chunkHeight)
+                {
+                    return;
+                }
+                chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockID;
+
+
+
+
+                //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
+                //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
+            }
+            public static void SetBlockWithoutUpdateWithSaving(Vector3Int pos, BlockData blockID)
+            {
+
+                Vector3Int intPos = pos;
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = intPos - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (chunkSpacePos.y < 0 || chunkSpacePos.y >= Chunk.chunkHeight)
+                {
+                    return;
+                }
+                chunkNeededUpdate.map[chunkSpacePos.x, chunkSpacePos.y, chunkSpacePos.z] = blockID;
+
+
+                chunkNeededUpdate.isModifiedInGame = true;
+
+                //   BlockModifyData b = new BlockModifyData(pos.X, pos.Y, pos.Z, blockID);
+                //    Program.AppendMessage(null, new MessageProtocol(133, MessagePackSerializer.Serialize(b)));
+            }
+
+            public static void SendPlaceBlockOperation(Vector3Int position, BlockData data)
+            {
+                VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(position, VoxelWorld.currentWorld.worldUpdater,data));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = position - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (Chunk.blockSoundInfo.ContainsKey((int)data.blockID))
+                {
+                    SoundsUtility.PlaySound(MinecraftGame.gameposition, new Vector3(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f), Chunk.blockSoundInfo[data.blockID], 20f);
+                }
+                if (chunkSpacePos.x == 0)
+                {
+
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x - Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunkAsync();
+
+                }
+                if (chunkSpacePos.x == Chunk.chunkWidth - 1)
+                {
+                    // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
+
+                    //  chunkNeededUpdate.rightChunk.BuildChunk();
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x + Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunkAsync();
+                }
+                if (chunkSpacePos.z == 0)
+                {
+                    //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
+                    //       {
+                    //         chunkNeededUpdate.backChunk.BuildChunk();
+                    //     }
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y - Chunk.chunkWidth))?.BuildChunkAsync();
+                }
+                if (chunkSpacePos.z == Chunk.chunkWidth - 1)
+                {
+                    //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
+                    //     {
+                    //      chunkNeededUpdate.frontChunk.BuildChunk();
+                    //     }
+
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsync();
+                }
+
+
+            }
+
+            public static void SendBreakBlockOperation(Vector3Int position)
+            {
+                BlockData prevData = ChunkHelper.GetBlockData(position);
+                VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position, VoxelWorld.currentWorld.worldUpdater, prevData));
+                VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(position, VoxelWorld.currentWorld.worldUpdater, 0));
+
+
+              
+              
+                if (Chunk.blockSoundInfo.ContainsKey((int)prevData.blockID))
+                {
+                    SoundsUtility.PlaySound(MinecraftGame.gameposition, new Vector3(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f), Chunk.blockSoundInfo[prevData.blockID], 20f);
+                }
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
+                if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
+                {
+                    return;
+                }
+                Vector3Int chunkSpacePos = position - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+                if (chunkSpacePos.x == 0)
+                {
+
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x - Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunkAsync();
+
+                }
+                if (chunkSpacePos.x == Chunk.chunkWidth - 1)
+                {
+                    // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
+
+                    //  chunkNeededUpdate.rightChunk.BuildChunk();
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x + Chunk.chunkWidth, chunkNeededUpdate.chunkPos.y))?.BuildChunkAsync();
+                }
+                if (chunkSpacePos.z == 0)
+                {
+                    //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
+                    //       {
+                    //         chunkNeededUpdate.backChunk.BuildChunk();
+                    //     }
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y - Chunk.chunkWidth))?.BuildChunkAsync();
+                }
+                if (chunkSpacePos.z == Chunk.chunkWidth - 1)
+                {
+                    //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
+                    //     {
+                    //      chunkNeededUpdate.frontChunk.BuildChunk();
+                    //     }
+
+                    GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsync();
+                }
+            }
             public static void SetBlockOptionalDataWithoutUpdate(Vector3Int pos, byte optionalData)
             {
 

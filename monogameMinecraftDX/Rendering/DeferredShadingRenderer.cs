@@ -82,7 +82,9 @@ namespace monogameMinecraftDX.Rendering
             blockDeferredEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             blockDeferredEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             blockDeferredEffect.Parameters["TextureContactShadow"]?.SetValue(contactShadowRenderer.contactShadowRenderTarget);
-
+            blockDeferredEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultIrradianceCubemap);
+            blockDeferredEffect.Parameters["HDRIrradianceTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultIrradianceCubemap);
+            blockDeferredEffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
             //    blockDeferredEffect.Parameters["receiveAO"].SetValue(true);
             blockDeferredEffect.Parameters["LightSpaceMat"]?.SetValue(shadowRenderer.lightSpaceMat);
             blockDeferredEffect.Parameters["LightSpaceMatFar"]?.SetValue(shadowRenderer.lightSpaceMatFar);
@@ -147,8 +149,11 @@ namespace monogameMinecraftDX.Rendering
             deferredBlendEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             deferredBlendEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
             deferredBlendEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
-            deferredBlendEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultIrradianceCubemap);
-            deferredBlendEffect.Parameters["HDRPrefilteredTex"]?.SetValue(hdrCubemapRenderer.resultSpecularCubemapMip0);
+            deferredBlendEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultIrradianceCubemap);
+            deferredBlendEffect.Parameters["HDRPrefilteredTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0);
+            deferredBlendEffect.Parameters["HDRPrefilteredTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0);
+
+            deferredBlendEffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
             deferredBlendEffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
             deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLum);
