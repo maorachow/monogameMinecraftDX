@@ -66,7 +66,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     ssLightPos.xy += float2(0.5, 0.5);
     float4 result = tex2D(maskSampler, input.TexCoords).rgba;
     
-    if (length(tex2D(maskSampler, input.TexCoords).rgb) < 0.000001)
+    if ((tex2D(maskSampler, input.TexCoords).a) < 0.01)
     {
         
         float insensity = 1 - length(screenSpaceLightPos.xy - input.TexCoords) * flareWeight;

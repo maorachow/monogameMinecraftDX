@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using monogameMinecraftDX.Animations;
 using monogameMinecraftDX.Core;
 using monogameMinecraftDX.Rendering;
+using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.World;
 
 namespace monogameMinecraftDX

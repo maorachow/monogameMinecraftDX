@@ -1,6 +1,5 @@
 ﻿using MessagePack;
 using Microsoft.Xna.Framework;
-using monogameMinecraftDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +9,7 @@ using monogameMinecraftDX.World;
 using monogameMinecraftDX.Animations;
 using monogameMinecraftDX.Utility;
 
-namespace monogameMinecraftDX
+namespace monogameMinecraftDX.Updateables
 {
     public class EntityManager
     {
@@ -18,7 +17,7 @@ namespace monogameMinecraftDX
         public static Random randomGenerator = new Random();
         public static void UpdateAllEntity(float deltaTime)
         {
-            for (int i = 0; i <worldEntities.Count; i++)
+            for (int i = 0; i < worldEntities.Count; i++)
             {
                 worldEntities[i].OnUpdate(deltaTime);
             }
@@ -103,7 +102,7 @@ namespace monogameMinecraftDX
 
         public static void SpawnEntityFromData(MinecraftGame game)
         {
-            foreach (var etd in EntityManager.entityDataReadFromDisk)
+            foreach (var etd in entityDataReadFromDisk)
             {
                 if (etd.entityInWorldID == VoxelWorld.currentWorld.worldID)
                 {
@@ -111,12 +110,12 @@ namespace monogameMinecraftDX
                     {
                         case 0:
                             ZombieEntityBeh tmp = new ZombieEntityBeh(new Vector3(etd.posX, etd.posY, etd.posZ), etd.rotX, etd.rotY, etd.rotZ, etd.entityID, etd.entityHealth, false, game);
-                            
+
                             break;
                         default:
                             break;
                     }
-             
+
                 }
 
             }
@@ -169,20 +168,20 @@ namespace monogameMinecraftDX
             switch (typeID)
             {
                 case 0:
-                    ZombieEntityBeh tmp = new ZombieEntityBeh(position, rotationX, rotationY, rotationZ, System.Guid.NewGuid().ToString("N"), 20f, false, game);
-                 
+                    ZombieEntityBeh tmp = new ZombieEntityBeh(position, rotationX, rotationY, rotationZ, Guid.NewGuid().ToString("N"), 20f, false, game);
+
                     break;
                 default:
                     break;
             }
-        
+
         }
 
 
         public static void HurtEntity(string entityID, float hurtValue, Vector3 sourcePos)
         {
             EntityBeh entityBeh;
-            int index = worldEntities.FindIndex((EntityBeh e) => { return entityID == e.entityID; });
+            int index = worldEntities.FindIndex((e) => { return entityID == e.entityID; });
             if (index != -1)
             {
                 entityBeh = worldEntities[index];

@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using monogameMinecraftDX.World;
 using monogameMinecraftDX.Rendering;
+using monogameMinecraftDX.Rendering.Particle;
 using monogameMinecraftDX.UI;
 // ReSharper disable All
 
@@ -93,7 +94,7 @@ namespace monogameMinecraftDX
             }
         }
 
-        public class BlockResourcesManager
+        public partial class BlockResourcesManager
         {
             public static Dictionary<int, BlockInfo> blockInfo;
             public static Dictionary<int, SoundEffect> blockSoundInfo;
@@ -228,7 +229,7 @@ namespace monogameMinecraftDX
                 blockSoundInfo = new Dictionary<int, SoundEffect>();
                 try
                 {
-                    Texture2D atlasTmp = cm.Load<Texture2D>("terrainnomipmap");
+                    Texture2D atlasTmp = cm.Load<Texture2D>("terrain");
                     Color[] tmpColor = new Color[atlasTmp.Width * atlasTmp.Height];
                     atlasTmp.GetData(tmpColor);
                     atlas = new Texture2D(device, atlasTmp.Width, atlasTmp.Height, false, SurfaceFormat.Color);
@@ -371,7 +372,7 @@ namespace monogameMinecraftDX
                 UIUtility.InitInventoryUI(game, UIUtility.sf);
             }
 
-            public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr,
+            public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr,ParticleRenderer pr,
                 MinecraftGame game)
             {
                 string blockInfoDataString;
@@ -501,8 +502,14 @@ namespace monogameMinecraftDX
                 Chunk.blockInfosNew = blockInfo;
                 UIUtility.InitInventoryUI(game, UIUtility.sf);
                 //   cmTemp.Dispose();
-                cr.SetTexture(atlasNormal, null, atlas, atlasMER);
+                if (atlasNormal != null && atlas != null && atlasMER != null)
+                {
+                    cr.SetTexture(atlasNormal, null, atlas, atlasMER);
+                }
+               
                 ChunkHelper.RebuildAllChunks();
+
+                LoadParticleResources(contentManager, device, pr);
             }
         }
     }

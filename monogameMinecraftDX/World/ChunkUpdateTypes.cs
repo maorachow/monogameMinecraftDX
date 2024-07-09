@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using monogameMinecraftDX.Core;
+using monogameMinecraftDX.Updateables;
 
 namespace monogameMinecraftDX.World
 {
@@ -164,6 +166,22 @@ namespace monogameMinecraftDX.World
         }
         public void Update()
         {
+            Vector3Int tempPos = position;
+            var key = prevBlockData;
+            if (Chunk.blockInfosNew.ContainsKey(key.blockID))
+            {
+                worldUpdater.onUpdatedOneShot += () =>
+                {
+                    ParticleEmittingHelper.EmitParticleWithParamCustomUV(
+                        new Vector3(tempPos.x + 0.5f, tempPos.y + 0.5f, tempPos.z + 0.5f),
+                        ParticleEmittingHelper.allParticles["blockbreaking"],
+                        new Vector4(Chunk.blockInfosNew[key.blockID].uvCorners[0].X,
+                            Chunk.blockInfosNew[key.blockID].uvCorners[0].Y,
+                            Chunk.blockInfosNew[key.blockID].uvSizes[0].X / 4.0f,
+                            Chunk.blockInfosNew[key.blockID].uvSizes[0].Y / 4.0f),new Vector2(Chunk.blockInfosNew[key.blockID].uvSizes[0].X * 0.75f, Chunk.blockInfosNew[key.blockID].uvSizes[0].Y * 0.75f));
+                };
+            }
+        
             BlockShape? shapeRight =
                 ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0)));
             BlockShape? shapeLeft =

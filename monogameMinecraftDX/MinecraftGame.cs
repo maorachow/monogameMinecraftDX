@@ -15,6 +15,7 @@ using monogameMinecraftDX.Utility;
 using monogameMinecraftDX.UI;
 
 using monogameMinecraftDX.Physics;
+using monogameMinecraftDX.Updateables;
 
 namespace monogameMinecraftDX
 {
@@ -63,6 +64,7 @@ namespace monogameMinecraftDX
 
         public GameTimeManager gameTimeManager;
         public RenderPipelineManager renderPipelineManager;
+        public ParticleManager particleManager;
         /*
         public EntityRenderer entityRenderer;
         public ChunkRenderer chunkRenderer;
@@ -223,6 +225,9 @@ namespace monogameMinecraftDX
             gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
+            particleManager = new ParticleManager();
+            particleManager.Initialize();
+            
             /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
                  updateWorldThread.IsBackground = true;
                  updateWorldThread.Start();
@@ -256,12 +261,12 @@ namespace monogameMinecraftDX
                  hiZBufferEffect = Content.Load<Effect>("hizbuffereffect");
                  fxaaEffect = Content.Load<Effect>("fxaaeffect");
                  motionBlurEffect = Content.Load<Effect>("motionblureffect");*/
-            terrainTex = Content.Load<Texture2D>("terrain");
+        /*    terrainTex = Content.Load<Texture2D>("terrain");
             terrainTexNoMip = Content.Load<Texture2D>("terrainnomipmap");
             terrainNormal = Content.Load<Texture2D>("terrainnormal");
             //   chunkSolidEffect = Content.Load<Effect>("blockeffect");
             terrainDepth = Content.Load<Texture2D>("terrainheight");
-            terrainMER = Content.Load<Texture2D>("terrainmer");
+            terrainMER = Content.Load<Texture2D>("terrainmer");*/
           
             gameTimeManager = new GameTimeManager(gamePlayer);
         //    BlockResourcesManager.LoadDefaultResources(Content, GraphicsDevice, chunkRenderer);
@@ -370,6 +375,7 @@ namespace monogameMinecraftDX
             //    ChunkManager.chunks =null;
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
             EntityManager.InitEntityList();
+            ParticleManager.instance.ReleaseResources();
             GC.Collect();
 
 
@@ -561,6 +567,7 @@ namespace monogameMinecraftDX
                     //    _spriteBatch.End();
                     // TODO: Add your update logic here
                     EntityManager.UpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
                     gameposition = gamePlayer.position;
@@ -720,7 +727,7 @@ namespace monogameMinecraftDX
                         VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Max.X, block.Min.Y, block.Min.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
                         VoxelCast.line.Draw(GraphicsDevice);
                     }*/
-                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
+                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap,blendState:BlendState.AlphaBlend);
 
                     if (GameOptions.showGraphicsDebug)
                     {
@@ -735,7 +742,7 @@ namespace monogameMinecraftDX
                         _spriteBatch.Draw(renderPipelineManager.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.ssidRenderer.renderTargetSSIDPrev, new Rectangle(2000, 800, 400, 400), Color.White);
+                        _spriteBatch.Draw(renderPipelineManager.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);

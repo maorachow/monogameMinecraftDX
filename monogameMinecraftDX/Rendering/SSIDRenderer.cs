@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.World;
 
 
 namespace monogameMinecraftDX.Rendering
@@ -19,14 +21,16 @@ namespace monogameMinecraftDX.Rendering
         public MotionVectorRenderer motionVectorRenderer;
         public HiZBufferRenderer hiZBufferRenderer;
         public GamePlayer player;
-        public SSIDRenderer(GraphicsDevice device, Effect sSIDEffect, GBufferRenderer gBufferRenderer, GamePlayer player, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer)
+        public HDRCubemapRenderer hdrCubemapRenderer;
+        public GameTimeManager gameTimeManager;
+        public SSIDRenderer(GraphicsDevice device, Effect sSIDEffect, GBufferRenderer gBufferRenderer, GamePlayer player, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer,GameTimeManager gtm)
         {
             this.device = device;
             SSIDEffect = sSIDEffect;
             this.gBufferRenderer = gBufferRenderer;
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            renderTargetSSID = new RenderTarget2D(device, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            renderTargetSSID = new RenderTarget2D(device, width/2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             renderTargetSSIDPrev = new RenderTarget2D(device, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.player = player;
             InitializeVertices();
@@ -35,6 +39,8 @@ namespace monogameMinecraftDX.Rendering
             this.textureCopyEffect = textureCopyEffect;
             this.motionVectorRenderer = motionVectorRenderer;
             this.hiZBufferRenderer = hiZBufferRenderer;
+            this.hdrCubemapRenderer = hdrCubemapRenderer;
+            this.gameTimeManager = gtm;
         }
 
 
@@ -48,13 +54,17 @@ namespace monogameMinecraftDX.Rendering
             SetCameraFrustum(player.cam, SSIDEffect);
             SSIDEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSIDEffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
-            SSIDEffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);
+            /*      SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);*/
+
+            SSIDEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultIrradianceCubemap);
+            SSIDEffect.Parameters["HDRIrradianceTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultIrradianceCubemap);
+            SSIDEffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
             SSIDEffect.Parameters["PrevSSIDTexture"]?.SetValue(renderTargetSSIDPrev);
             SSIDEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             SSIDEffect.Parameters["GameTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);

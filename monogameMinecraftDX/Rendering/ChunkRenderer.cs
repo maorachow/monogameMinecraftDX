@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using monogameMinecraftDX.Core;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.Updateables;
 namespace monogameMinecraftDX.Rendering
 {
     public class ChunkRenderer
@@ -173,7 +174,7 @@ namespace monogameMinecraftDX.Rendering
         {
             if (isLOD)
             {
-                if (c.indicesOpqLOD1Array.Length <= 0 || c.VBOpqLOD1 == null || c.IBOpqLOD1 == null)
+                if ((c.indicesOpqLOD1Array.Length <= 0 || c.VBOpqLOD1 == null || c.IBOpqLOD1 == null )&& c.isOpqBuffersValid == false)
                 {
                     return;
                 }
@@ -195,7 +196,7 @@ namespace monogameMinecraftDX.Rendering
             }
             else
             {
-                if (c.indicesOpqArray.Length <= 0 || c.VBOpq == null || c.IBOpq == null)
+                if ((c.indicesOpqArray.Length <= 0 || c.VBOpq == null || c.IBOpq == null)&& c.isOpqBuffersValid == false)
                 {
                     return;
                 }
@@ -227,17 +228,17 @@ namespace monogameMinecraftDX.Rendering
 
         public void RenderSingleChunkGBufferWater(Chunk c, GamePlayer player, Effect gBufferEffect)
         {
-            Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
+            if (c.indicesWTArray.Length > 0 && c.isWTBuffersValid == true)
+            {
+                Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
             gBufferEffect.Parameters["World"].SetValue(world);
             //    gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world * player.cam.viewMatrix)));
             //   gBufferEffect.Parameters["roughness"].SetValue(1f);
-            lock (c.asyncTaskLock)
-            {
+             
                 device.SetVertexBuffer(c.VBWT);
 
                 device.Indices = c.IBWT;
-                if (c.indicesWTArray.Length > 0)
-                {
+              
                     foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
                     {
                         pass.Apply();
@@ -245,7 +246,7 @@ namespace monogameMinecraftDX.Rendering
 
                     }
                 }
-            }
+            
           
 
         }
@@ -253,17 +254,17 @@ namespace monogameMinecraftDX.Rendering
 
         public void RenderSingleChunkGBufferAlphaTest(Chunk c, GamePlayer player, Effect gBufferEffect)
         {
-            Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
+            if (c.indicesNSArray.Length > 0 && c.isNSBuffersValid==true)
+            {
+                Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
             gBufferEffect.Parameters["World"].SetValue(world);
             //  gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world * player.cam.viewMatrix)));
             //   gBufferEffect.Parameters["roughness"].SetValue(0f);
-            lock (c.asyncTaskLock)
-            {
+           
                 device.SetVertexBuffer(c.VBNS);
 
                 device.Indices = c.IBNS;
-                if (c.indicesNSArray.Length > 0)
-                {
+               
                     foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
                     {
                         pass.Apply();
@@ -271,7 +272,7 @@ namespace monogameMinecraftDX.Rendering
 
                     }
                 }
-            }
+            
          
 
         }
@@ -443,7 +444,7 @@ namespace monogameMinecraftDX.Rendering
 
 
         public static bool isBusy = false;
-        public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Matrix lightSpaceMat, Effect shadowmapShader, int maxRenderDistance)
+        public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Matrix lightSpaceMat, Effect shadowmapShader, int maxRenderDistance,bool useFrustumCulling=true)
         {
 
             shadowmapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);
@@ -460,7 +461,7 @@ namespace monogameMinecraftDX.Rendering
                     }
                     if (MathF.Abs(c.chunkPos.x - player.position.X) < maxRenderDistance && MathF.Abs(c.chunkPos.y - player.position.Z) < maxRenderDistance)
                     {
-                        if (frustum.Intersects(c.chunkBounds))
+                        if (frustum.Intersects(c.chunkBounds)|| useFrustumCulling==false)
                         {
                             if (c.isReadyToRender == true && c.disposed == false)
                             {
@@ -486,7 +487,7 @@ namespace monogameMinecraftDX.Rendering
 
         void RenderSingleChunkShadow(Chunk c, Effect shadowmapShader)
         {
-            if (c.isTaskCompleted == false)
+       /*     if (c.isTaskCompleted == false)
             {
                 return;
             }
@@ -502,9 +503,9 @@ namespace monogameMinecraftDX.Rendering
             if (c.IBOpq != null && c.IBOpq.IsDisposed == true)
             {
                 return;
-            }
+            }*/
 
-            lock (c.asyncTaskLock)
+            if (c.isOpqBuffersValid)
             {
                 Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
                 shadowmapShader.Parameters["World"].SetValue(world);
@@ -520,6 +521,8 @@ namespace monogameMinecraftDX.Rendering
 
                 }
             }
+             
+           
           
         }
         void RenderSingleChunkWater(Chunk c, GamePlayer player)

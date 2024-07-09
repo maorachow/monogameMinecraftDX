@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX.Rendering.Particle;
+using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.World;
 namespace monogameMinecraftDX.Rendering
 {
@@ -18,6 +20,7 @@ namespace monogameMinecraftDX.Rendering
         public VertexBuffer quadVertexBuffer;
         public ChunkRenderer chunkRenderer;
         public EntityRenderer entityRenderer;
+        public ParticleRenderer particleRenderer;
         public Effect gBufferEffect;
         public Effect gBufferEntityEffect;
         public VertexPositionTexture[] quadVertices =
@@ -65,7 +68,7 @@ namespace monogameMinecraftDX.Rendering
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
         }
         public IndexBuffer quadIndexBuffer;
-        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, GamePlayer player, ChunkRenderer cr, EntityRenderer er)
+        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, GamePlayer player, ChunkRenderer cr, EntityRenderer er,ParticleRenderer pr)
         {
             graphicsDevice = device;
             this.gBufferEffect = gBufferEffect;
@@ -73,6 +76,7 @@ namespace monogameMinecraftDX.Rendering
             this.player = player;
             chunkRenderer = cr;
             entityRenderer = er;
+            this.particleRenderer= pr;
             int width = graphicsDevice.PresentationParameters.BackBufferWidth;
             int height = graphicsDevice.PresentationParameters.BackBufferHeight;
             //       this.renderTargetPositionDepth = new RenderTarget2D(this.graphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
@@ -110,9 +114,10 @@ namespace monogameMinecraftDX.Rendering
         {
 
             graphicsDevice.SetRenderTargets(binding);
-
+            graphicsDevice.Clear(Color.Transparent);
             chunkRenderer.RenderAllChunksGBuffer(VoxelWorld.currentWorld.chunks, player, gBufferEffect);
             entityRenderer.DrawGBuffer(gBufferEntityEffect);
+            particleRenderer.DrawGBuffer();
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);
 

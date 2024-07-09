@@ -9,6 +9,7 @@ using monogameMinecraftDX.World;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.Updateables;
 namespace monogameMinecraftDX.Physics
 {
     public static class VoxelCast

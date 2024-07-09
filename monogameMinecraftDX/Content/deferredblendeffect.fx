@@ -68,6 +68,15 @@ samplerCUBE irradianceSampler = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
+samplerCUBE irradianceSamplerNight = sampler_state
+{
+    texture = <HDRIrradianceTexNight>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 samplerCUBE preFilteredSpecularSampler = sampler_state
 {
     texture = <HDRPrefilteredTex>;
@@ -235,7 +244,7 @@ float3 fresnelSchlick(float cosTheta, float3 F0)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     
-    if (any(tex2D(albedoSampler, input.TexCoords).xyz) < 0.01)
+    if (tex2D(albedoSampler, input.TexCoords).a < 0.1)
     {
         discard;
         
@@ -244,13 +253,15 @@ float4 MainPS(VertexShaderOutput input) : COLOR
  //   mer.x = 1;
     float3 albedo = pow(tex2D(AlbedoSampler, input.TexCoords).rgb, 2.2);
     float3 normal = tex2D(gNormals, input.TexCoords).xyz * 2 - 1;
+  
+    float3 color = tex2D(deferredLumSampler, input.TexCoords).xyz + tex2D(deferredLumSpecSampler, input.TexCoords).xyz;
+    float3 reflection = tex2D(reflectionSampler, input.TexCoords).xyz;
+  
+    
     float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(DepthSampler, input.TexCoords).r) + viewPos;
     float3 V = normalize(viewPos - worldPos);
     float3 R = reflect(-V, normal);
     R = normalize(R);
-    float3 color = tex2D(deferredLumSampler, input.TexCoords).xyz + tex2D(deferredLumSpecSampler, input.TexCoords).xyz;
-    float3 reflection = tex2D(reflectionSampler, input.TexCoords).xyz;
-    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
     float3 F0 = float3(0.04,0.04,0.04);
     F0 = lerp(F0, albedo, mer.x);
     float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, mer.z);
@@ -258,16 +269,23 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 kD = 1.0 - kS;
     kD *= 1.0 - mer.x;
     
- 
+    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
    
+    float3 irradiance = lerp(texCUBE(irradianceSampler, normal).rgb, texCUBE(irradianceSamplerNight, normal).rgb, mixValue);
+    float3 diffuse = irradiance * albedo;
+    float3 ambientEnv = (kD * diffuse);
 
     
-    
-    const float MAX_REFLECTION_LOD = 4.0;
+    indirectDiffuse = lerp(ambientEnv, indirectDiffuse, tex2D(ssidSampler, input.TexCoords).a);
+
+     
+   /* const float MAX_REFLECTION_LOD = 4.0;
     float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
     float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
-    float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
-    float3 ambient = (indirectDiffuse  + specularEnv * 0.5 + reflection) * tex2D(aoSampler, input.TexCoords).x;
+    float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y) * 0.1;*/
+    
+    
+    float3 ambient = (lerp(reflection , indirectDiffuse , mer.z) /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
     float3 final = color + ambient ;
     final = final / (final + float3(1.0, 1.0, 1.0));
     final = pow(final, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));

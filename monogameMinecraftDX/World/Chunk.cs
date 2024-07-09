@@ -1755,9 +1755,8 @@ namespace monogameMinecraftDX
             indicesOpqArray = indicesOpq.ToArray();
             indicesNSArray = indicesNS.ToArray();
             indicesWTArray = indicesWT.ToArray();
-         
-            isReadyToRender = false;
-            isVertexBufferDirty = true;
+
+             
                 //   if (VBOpq == null)
                 //   {
                 /*       VBOpq?.Dispose();
@@ -1835,66 +1834,90 @@ namespace monogameMinecraftDX
 
         public void GenerateRenderBuffers()
         {
-            VBOpq?.Dispose();
+            isReadyToRender = false;
+            isVertexBufferDirty = true;
+                //      Debug.WriteLine(Thread.CurrentThread.ManagedThreadId);
+                isNSBuffersValid = false;
+                isWTBuffersValid = false;
+                isOpqBuffersValid = false;
 
-            if (verticesOpqArray.Length > 0)
-            {
-                VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
-                //   }
+                VBOpq?.Dispose();
+                IBOpq?.Dispose();
+                if (verticesOpqArray.Length > 0 || indicesOpqArray.Length > 0)
+                {
+                    
+                    if (verticesOpqArray.Length > 0)
+                    {
+                        VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
+                        //   }
 
-                VBOpq.SetData(verticesOpqArray);
-            }
+                        VBOpq.SetData(verticesOpqArray);
+                    }
+                    
+                    if (indicesOpqArray.Length > 0)
+                    {
+                        IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
+                        IBOpq.SetData(indicesOpqArray);
+                    }
+                    isOpqBuffersValid=true;
+                }
 
-            //  if(IBOpq == null)
-            //  {
-            IBOpq?.Dispose();
-            if (indicesOpqArray.Length > 0)
-            {
-                IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
-                IBOpq.SetData(indicesOpqArray);
-            }
-
-
-
-
-            VBWT?.Dispose();
-
-            if (verticesWTArray.Length > 0)
-            {
-                VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
-                VBWT.SetData(verticesWTArray);
-            }
-
-
-            IBWT?.Dispose();
-            if (indicesWTArray.Length > 0)
-            {
-                IBWT = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesWTArray.Length, BufferUsage.WriteOnly);
-                IBWT.SetData(indicesWTArray);
-            }
+                //  if(IBOpq == null)
+                //  {
 
 
+                VBWT?.Dispose();
+                IBWT?.Dispose();
+                if (verticesWTArray.Length > 0 || indicesWTArray.Length > 0)
+                {
+                   
+                    if (verticesWTArray.Length > 0)
+                    {
+                        VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
+                        VBWT.SetData(verticesWTArray);
+                    }
+
+
+                  
+                    if (indicesWTArray.Length > 0)
+                    {
+                        IBWT = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesWTArray.Length, BufferUsage.WriteOnly);
+                        IBWT.SetData(indicesWTArray);
+                    }
+                    isWTBuffersValid=true;
+                }
 
 
 
-            VBNS?.Dispose();
 
-            if (verticesNSArray.Length > 0)
-            {
-                VBNS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesNSArray.Length + 1, BufferUsage.WriteOnly);
-                VBNS.SetData(verticesNSArray);
-            }
+                VBNS?.Dispose();
+                IBNS?.Dispose();
+                if (verticesNSArray.Length > 0 || indicesNSArray.Length > 0)
+                {
+                   
 
-            IBNS?.Dispose();
+                    if (verticesNSArray.Length > 0)
+                    {
+                        VBNS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesNSArray.Length + 1, BufferUsage.WriteOnly);
+                        VBNS.SetData(verticesNSArray);
+                    }
+
+                   
 
 
-            if (indicesNSArray.Length > 0)
-            {
-                IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
-                IBNS.SetData(indicesNSArray);
-            }
+                    if (indicesNSArray.Length > 0)
+                    {
+                        IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
+                        IBNS.SetData(indicesNSArray);
+                    }
 
-            }
+                    isNSBuffersValid = true;
+                }
+
+           
+
+            isVertexBufferDirty = false;
+        }
 
             [Obsolete]
             static void BuildFace(int typeid, Vector3 corner, Vector3 up, Vector3 right, bool reversed, List<VertexPositionNormalTangentTexture> verts, int side, List<ushort> indices)
@@ -2678,7 +2701,13 @@ namespace monogameMinecraftDX
         }
         //  public bool isTaskCompleted { get { return _isTaskCompleted; } set {  _isTaskCompleted = value;if (_isTaskCompleted == false) { ChunkHelper.buildingChunksCount++; } else {  ChunkHelper.buildingChunksCount--; } } }
         public bool isTaskCompleted;
-        public void BuildChunk()
+
+        public bool isNSBuffersValid = false;
+
+        public bool isWTBuffersValid = false;
+
+        public bool isOpqBuffersValid = false;
+            public void BuildChunk()
         {
             isTaskCompleted = false;
 

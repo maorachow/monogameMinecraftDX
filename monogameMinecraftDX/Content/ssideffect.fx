@@ -274,70 +274,7 @@ sampler gProjectionDepthM0 = sampler_state
     Mipfilter = Point;
 };
 
-sampler gProjectionDepthM1 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip1);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM2 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip2);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM3 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip3);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM4 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip4);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM5 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip5);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = Point;
-};
-
-sampler gProjectionDepthM6 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip6);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM7 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip7);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = POINT;
-};
+ 
 sampler2D MERSampler = sampler_state
 {
     Texture = <TextureMER>;
@@ -348,12 +285,33 @@ sampler2D MERSampler = sampler_state
     AddressU = Border;
     AddressV = Border;
 };
+
+
+samplerCUBE irradianceSampler = sampler_state
+{
+    texture = <HDRIrradianceTex>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+samplerCUBE irradianceSamplerNight = sampler_state
+{
+    texture = <HDRIrradianceTexNight>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 float4 ProjectionParams2;
 float4 CameraViewTopLeftCorner;
 float4 CameraViewXExtent;
 float4 CameraViewYExtent;
 
 float3 CameraPos;
+float mixValue;
 float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 {
   //  uv.y = 1.0 - uv.y;
@@ -365,7 +323,13 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(gProjectionDepthM0, input.TexCoords).x)+CameraPos; //tex2D(gPositionWS, input.TexCoords).xyz;
+    float linearDepth = 0;
+    linearDepth = tex2D(gProjectionDepthM0, input.TexCoords).x;
+    if (linearDepth >= 900 || linearDepth <= 0.1)
+    {
+        discard;
+    }
+    float3 worldPos = ReconstructViewPos(input.TexCoords, linearDepth) + CameraPos; //tex2D(gPositionWS, input.TexCoords).xyz;
     float3 normal = tex2D(gNormalWS, input.TexCoords).xyz * 2 - 1;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
     float3 randomVec = float3(tex2D(noiseTex, input.TexCoords * 5).r * 2 - 1 + 0.0001 + GameTime, tex2D(noiseTex, input.TexCoords * 5).g * 2 - 1 + 0.0001 + GameTime, 0);
@@ -376,8 +340,21 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 rayOrigin = worldPos + normalize(normal) * 0.01;
     float3 finalColor = 0;
     float2 prevTexCoord = input.TexCoords+tex2D(motionVectorTex, input.TexCoords).xy;
-    float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSIDTex, prevTexCoord).xyz : 0;
-     
+    float4 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSIDTex, prevTexCoord).xyzw : 0;
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    float3 albedo = pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
+    F0 = lerp(F0, albedo, mer.x);
+    float3 N = normal;
+    float3 W = worldPos;
+    float3 V = normalize(CameraPos - W);
+            
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
+    
+    float3 kS = F;
+    float3 kD = 1.0 - kS;
+    kD *= 1.0 - mer.x;
+    
+    float finalMixVal = 0;
     for (int i = 0; i <2; i++)
     {
         float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
@@ -449,27 +426,25 @@ float4 MainPS(VertexShaderOutput input) : COLOR
       
             float3 Lo = lum1;
             finalColor += Lo;
+            finalMixVal += 1;
 
+        }
+        else
+        {
+            float3 irradiance = lerp(texCUBE(irradianceSampler, normal).rgb, texCUBE(irradianceSamplerNight, normal).rgb, mixValue);
+           
+            finalColor += 0;
+            finalMixVal += 0;
         }
     }      
     finalColor /=2;
+    finalMixVal /= 2;
    // finalColor = finalColor*0.01+prevColor;
-            float3 F0 = float3(0.04, 0.04, 0.04);
-        float3 albedo = pow(tex2D(gAlbedo, input.TexCoords).xyz, 2.2);
-        F0 = lerp(F0, albedo, mer.x);
-              float3 N = normal;
-            float3 W = worldPos;
-            float3 V = normalize(CameraPos - W);
-            
-    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
-    
-            float3 kS = F;
-            float3 kD = 1.0 - kS;
-            kD *= 1.0 - mer.x;
+           
   //      finalColor = finalColor * 0.01 + prevColor;
-            float3 irradiance = finalColor;
-        float3 diffuse = irradiance * albedo;
-        return float4(lerp(diffuse*kD, prevColor, 0.9), 1);
+            float3 irradiance1 = finalColor;
+            float3 diffuse = irradiance1 * albedo;
+    return lerp(float4(diffuse * kD, finalMixVal), prevColor, 0.9);
 }
 
 technique SSID

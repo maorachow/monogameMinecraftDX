@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using monogameMinecraftDX.World;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.Updateables;
 namespace monogameMinecraftDX.Rendering
 {
     public class ShadowRenderer
@@ -166,7 +167,7 @@ namespace monogameMinecraftDX.Rendering
                 device.SetRenderTarget(shadowMapTarget);
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
-                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 64);
+                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 96,false);
 
 
                 foreach (var entity in EntityManager.worldEntities)
@@ -192,7 +193,7 @@ namespace monogameMinecraftDX.Rendering
                 device.SetRenderTarget(shadowMapTargetFar);
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
-                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256);
+                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256, false);
 
 
                 foreach (var entity in EntityManager.worldEntities)

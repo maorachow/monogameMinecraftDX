@@ -252,6 +252,17 @@ samplerCUBE irradianceSamplerNight = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
+
+sampler2D ssidSampler = sampler_state
+{
+    Texture = <TextureIndirectDiffuse>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Wrap;
+    AddressV = Wrap;
+};
 float mixValue;
 
 float4 ProjectionParams2;
@@ -513,7 +524,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 float3 LightPositions[16];
 PixelShaderOutput MainPS(VertexShaderOutput input)
 {
-    if (any(tex2D(AlbedoSampler, input.TexCoords).xyz) < 0.01)
+    if (tex2D(AlbedoSampler, input.TexCoords).a < 0.1)
     {
         discard;
     }
@@ -542,6 +553,9 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     float3 LoSpec = float3(0.0, 0.0, 0.0);
     float3 LoDirLightSpec = float3(0.0, 0.0, 0.0);
     
+    
+    
+   
   /* 
     
     float3 H = normalize(V + L);
@@ -561,7 +575,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
-    float3 emission = albedo / PI * mer.y*4;
+    float3 emission = albedo / PI * mer.y*20;
     float roughness = mer.z;
     LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true, mer.x);
     
@@ -592,13 +606,14 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     kD *= 1.0 - mer.x;
     
  
-   
+    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
     float3 irradiance = lerp(texCUBE(irradianceSampler, N).rgb, texCUBE(irradianceSamplerNight, N).rgb, mixValue);
     float3 diffuse = irradiance * albedo;
-    float3 ambientEnv = (kD * diffuse);
-    float3 ambient = ambientEnv * tex2D(AOSampler, input.TexCoords.xy).r*0.6;
+    float3 ambientEnv = (kD * diffuse) * 0.5;
     
+  
     
+    ambientEnv.xyz *= tex2D(AOSampler, input.TexCoords).x;
     float shadow;
     float shadow1;
     if (receiveShadow == true)
@@ -623,13 +638,13 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     float3 colorSpec;
     if (receiveShadow == true)
     {
-        color = ambient+emission + LoDirLight * shadowFinal + Lo;
+        color = 0 + emission + LoDirLight * shadowFinal + Lo;
         colorSpec = LoDirLightSpec * shadowFinal + LoSpec;
     }
     else
     {
         colorSpec = LoSpec;
-        color = ambient + emission + Lo;
+        color = 0 + emission + Lo;
     }
     
  //color += tex2D(reflectionSampler, input.TexCoords).rgb;

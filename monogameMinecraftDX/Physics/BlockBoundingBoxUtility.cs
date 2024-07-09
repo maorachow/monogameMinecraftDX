@@ -12,6 +12,23 @@ namespace monogameMinecraftDX.Physics
 
     public static class BlockBoundingBoxUtility
     {
+
+        public static bool IsBlockWithBoundingBox(BlockShape shape)
+        {
+            switch (shape)
+            {
+                case BlockShape.Fence:
+                    return true;
+                case BlockShape.Door:
+                    return true;
+                case BlockShape.Solid:
+                    return true;
+                case BlockShape.Stairs:
+                    return true;
+               default:
+                    return false;
+            }
+        }
         public static BoundingBox GetBoundingBox(int x, int y, int z, BlockData blockData)
         {
             if (blockData.blockID == 0)

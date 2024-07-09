@@ -55,15 +55,7 @@ sampler2D prevSSRTex = sampler_state
     AddressU = Border;
     AddressV = Border;
 };
-sampler gPositionWS = sampler_state
-{
- //   Texture = (PositionWSTex);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = POINT;
-    MinFilter = POINT;
-    Mipfilter = NONE;
-};
+ 
 sampler gNormal = sampler_state
 {
     Texture = (NormalTex);
@@ -114,6 +106,29 @@ sampler2D texBRDFLUT = sampler_state
     AddressU = Clamp;
     AddressV = Clamp;
 };
+
+
+samplerCUBE preFilteredSpecularSampler = sampler_state
+{
+    texture = <HDRPrefilteredTex>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+
+
+samplerCUBE preFilteredSpecularSamplerNight = sampler_state
+{
+    texture = <HDRPrefilteredTexNight>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+
 float4x4 matInverseView;
 float4x4 matInverseProjection;
 float4x4 matView;
@@ -534,24 +549,7 @@ sampler gProjectionDepthM5 = sampler_state
     MinFilter = Point;
     Mipfilter = Point;
 };
-sampler gProjectionDepthM6 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip6);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM7 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip7);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = POINT;
-};
+
 sampler2D MERSampler = sampler_state
 {
     Texture = <TextureMER>;
@@ -563,18 +561,29 @@ sampler2D MERSampler = sampler_state
     AddressV = Border;
 };
 float2 PixelSize;
+float mixValue;
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     
     float linearDepth = 0;
     linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
-  
+    if (linearDepth >= 900||linearDepth<=0.1)
+    {
+        discard;
+    }
     float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
   //  return float4(worldPos.xyz, 1);
     float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
     float3 mer = tex2D(MERSampler, input.TexCoord).xyz;
+    
+    
+    
+    
+
   //  float noiseValue = worldPos.x;
     worldPos = worldPos + normal * 0.3 * length(worldPos - CameraPos) / 100;
+    
+    
     float3 vDir = normalize(worldPos-CameraPos);
     float3 rDir = reflect(vDir, (normal));
     
@@ -584,23 +593,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
      
     float rayLengthAmp = 1 + NdotL;
     float ssrThickness = 0.2;
-    float3 preMarchPos = rayOrigin;
+   
     bool isRayReturning = false;
-    float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0+GameTime*5).g + 0.5;
-    float3 noiseValue2 = tex2D(texNoise, input.TexCoord * 3.0 + GameTime * 8).rgb*2-1;
-    float3 noiseValue4 = tex2D(texNoise, input.TexCoord * 6.0 + GameTime * 9).rgb * 2 - 1;
-    
-    float3 randomVec = float3(noiseValue2.rg, 0);
-    float3 tangent = normalize(randomVec - rDir * dot(randomVec, rDir));
-    float3 bitangent = cross(rDir, tangent);
-    float3x3 TBN = float3x3(tangent, bitangent, rDir);
-    float3 noiseValue3 = float3(noiseValue4.rg*mer.z*0.05, noiseValue2.b * 0.5 + 0.5);
-    float3 rayRoughnessAmp = mul(noiseValue3, TBN);
-    rDir = rayRoughnessAmp;
-    rDir = normalize(rDir);
+
    
   //  return float4(noiseValue1.xxx, 1);
-    float3 marchPos = worldPos+rDir*0.01;
+   
     
     
     float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
@@ -611,73 +609,111 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     //float2 brdf1 = tex2D(texBRDFLUT, input.TexCoord.xy).rg;
    // return float4(brdf1, 0, 1);
     
-    int miplevel = 0;
-    float strideLen = 1;
   
- 
-    [unroll]
-    for (int i = 0; i < 24; i++)
-    {
-        if (dot(normal, rDir) < 0)
+   
+             
+
+            
+    float3 N = normal;
+    float3 V = normalize(CameraPos - worldPos);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), mer.x);
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
+       //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
+       //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
+            
+    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1 - mer.z)).rg;
+    
+    
+    
+  
+    float3 finalColor = 0;
+  
+    
+        
+        
+        float3 curRDir = rDir;
+        float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0 + GameTime * 5).g + 0.5;
+        float3 noiseValue2 = tex2D(texNoise, input.TexCoord * 3.0 * (0 + 1) + GameTime * 8).rgb * 2 - 1;
+        float3 noiseValue4 = tex2D(texNoise, input.TexCoord * 6.0*(0+1) + GameTime * 9).rgb * 2 - 1;
+    
+        float3 randomVec = float3(noiseValue2.rg, 0);
+        float3 tangent = normalize(randomVec - curRDir * dot(randomVec, curRDir));
+        float3 bitangent = cross(curRDir, tangent);
+        float3x3 TBN = float3x3(tangent, bitangent, curRDir);
+        float3 noiseValue3 = float3(noiseValue4.rg * mer.z * 0.05, noiseValue2.b * 0.5 + 0.5);
+        float3 rayRoughnessAmp = mul(noiseValue3, TBN);
+        curRDir = rayRoughnessAmp;
+        curRDir = normalize(curRDir);
+        float3 marchPos = worldPos + curRDir * 0.01;
+        float3 preMarchPos = rayOrigin;
+        int miplevel = 0;
+        float strideLen = 1;
+        float3 result = 0;
+        bool isHit = false;
+         [unroll]
+        for (int i = 0; i < 24; i++)
         {
-            return float4(0, 0, 0, 1);
-        }
-        marchPos += (rDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
+            if (dot(normal, curRDir) < 0)
+            {
+                return float4(0, 0, 0, 1);
+            }
+            marchPos += (curRDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);
         offset = mul(offset, ViewProjection);
         offset.xyz /= offset.w;
         offset.xy = offset.xy * 0.5 + 0.5 + (offset.z * 0.0000000001);
         offset.y = 1 - offset.y;*/
-        float2 uv = GetScreenCoordFromWorldPos(marchPos);
+            float2 uv = GetScreenCoordFromWorldPos(marchPos);
     /*    float4 marchDepthView = mul(float4(marchPos, 1), View);
        
         marchDepthView.z = marchDepthView.z + marchDepthView.x * 0.00001 + marchDepthView.y * 0.000001;*/
-        float testDepth = GetViewDepthFromWorldPos(marchPos);
+            float testDepth = GetViewDepthFromWorldPos(marchPos);
         
        // float3 worldPosSampled = PositionWSTex.Sample(defaultSampler, uv.xy).xyz;
      /*   float4 sampleViewPosDepth = mul(float4(worldPosSampled, 1), View);
         sampleViewPosDepth.z = sampleViewPosDepth.z + sampleViewPosDepth.x * 0.000001 + sampleViewPosDepth.y * 0.0000001;*/
         
-        float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy). x;
+            float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy).x;
 
-        float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
+            float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
 
-        float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
+            float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
 
-        float sampleDepthM3 = tex2D(gProjectionDepthM3, uv.xy).x;
+            float sampleDepthM3 = tex2D(gProjectionDepthM3, uv.xy).x;
 
-        float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
+            float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
 
-        float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
+            float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
         
-        float sampleDepthM6 = tex2D(gProjectionDepthM6, uv.xy).x;
-        float sampleDepthM7 = tex2D(gProjectionDepthM7, uv.xy).x;
         
-        float sampleDepthArray[8] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5, sampleDepthM6, sampleDepthM7 }; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
-        float sampleDepth = sampleDepthArray[miplevel];
-        if ((uv.x) < 0 || (uv.y) < 0 || (uv.x) > 1 || (uv.y) > 1)
-        {
-            return float4(0, 0, 0, 1) ;
+        
+            float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5}; /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
+            float sampleDepth = sampleDepthArray[miplevel];
+            if ((uv.x) < 0 || (uv.y) < 0 || (uv.x) > 1 || (uv.y) > 1)
+            {
+                isHit = false;
+            break;
         }
      //   if (sampleDepth <0.01||testDepth<0.01)
      //   {
      //       return float4(0, 0, 0, 1);
       //  }
-        if (testDepth > sampleDepth)
-        {
-            if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < 0.5 * noiseValue1 * rayLengthAmp /*length(preMarchPos-marchPos)*/ && miplevel <= 0)
+            if (testDepth > sampleDepth)
             {
+                if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < 0.5 * noiseValue1 * rayLengthAmp /*length(preMarchPos-marchPos)*/ && miplevel <= 0)
+                {
              //   return float4(testDepth/1000.0,0, 0, 1);
-                float3 finalPoint = preMarchPos;
-                float _sign = 1.0;
-                float3 direction = (marchPos - preMarchPos);
-                float2 uv1 = 0;
-                float3 worldPosSampled1 = 0;
+                    float3 finalPoint = preMarchPos;
+                    float _sign = 1.0;
+                    float3 direction = (marchPos - preMarchPos);
+                    float2 uv1 = 0;
+                    float3 worldPosSampled1 = 0;
 
-                float testDepth1 = 0;
+                    float testDepth1 = 0;
 
-                float sampleDepth1 = 0;
+                    float sampleDepth1 = 0;
          //   for (int j = 0; j < 2; j++)
           //  {
             
@@ -687,7 +723,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
                // worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
                     
                     direction *= 0.5;
@@ -695,7 +731,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
             
             
@@ -709,46 +745,58 @@ float4 MainPS(VertexShaderOutput input) : COLOR
       //      }
            //     uv1 = GetScreenCoordFromWorldPos(marchPos);
             
-                float3 albedo = LumTex.Sample(defaultSampler, uv1.xy).xyz;
-             
-
-            
-            float3 N = normal;
-            float3 V = normalize(CameraPos - worldPos);
-            float3 F0 = float3(0.04,0.04,0.04);
-            F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), mer.x);
-            float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
-       //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
-       //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
-            
-            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1-mer.z)).rg;
+                float3 lum = LumTex.Sample(defaultSampler, uv1.xy).xyz;
            
-            float3 specular = albedo * (F * brdf.x + brdf.y);
-                return float4(lerp(specular, prevColor, clamp(blendFactor, 0.1, 0.9)), 1);
+                    float3 specular = lum * (F * brdf.x + brdf.y);
+                    isHit = true;
+                    result = specular;
+                break;
+                //    return float4(lerp(specular, prevColor, clamp(blendFactor, 0.1, 0.9)), 1);
 
-        } 
-            miplevel--;
-            marchPos -= (rDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
-            strideLen /= 2.0;
+                }
+                miplevel--;
+                marchPos -= (curRDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
+                strideLen /= 2.0;
          
             
-        }
-        else
-        {
-            if (miplevel < 7)
-            {
-                 miplevel++;
-                strideLen *=2;
-                isRayReturning = false;
-
             }
+            else
+            {
+                if (miplevel < 5)
+                {
+                    miplevel++;
+                    strideLen *= 2;
+                    isRayReturning = false;
+
+                }
             
-        }
-        preMarchPos = marchPos;
+            }
+            preMarchPos = marchPos;
        
 
-    }
-    return float4(0, 0, 0, 1) ;
+        }
+    
+                float3 R = reflect(-V, normal);
+                R = normalize(R);
+                if (isHit == true)
+                {
+                    finalColor += result;
+
+                }
+                else
+                {
+                const float MAX_REFLECTION_LOD = 4.0;
+                float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+                float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+                float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+                finalColor = specularEnv;
+
+                }
+   
+                finalColor = lerp(finalColor, prevColor, 0.5);
+   
+                return float4(finalColor.xyz, 1);
    
 }
 technique SSR

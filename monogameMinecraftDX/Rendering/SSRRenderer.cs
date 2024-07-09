@@ -1,6 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Timers;
+using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.Utility;
+using monogameMinecraftDX.World;
 
 namespace monogameMinecraftDX.Rendering
 {
@@ -19,7 +22,9 @@ namespace monogameMinecraftDX.Rendering
         public Effect textureCopyEffect;
         public bool binarySearch = true;
         public HiZBufferRenderer hiZBufferRenderer;
-        public SSRRenderer(GraphicsDevice graphicsDevice, GamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer)
+        public HDRCubemapRenderer hdrCubemapRenderer;
+        public GameTimeManager gameTimeManager;
+        public SSRRenderer(GraphicsDevice graphicsDevice, GamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer,GameTimeManager gameTimeManager)
         {
             this.graphicsDevice = graphicsDevice;
             this.player = player;
@@ -35,7 +40,8 @@ namespace monogameMinecraftDX.Rendering
             InitializeQuadBuffers(graphicsDevice);
             this.textureCopyEffect = textureCopyEffect;
             this.motionVectorRenderer = motionVectorRenderer;
-
+            this.hdrCubemapRenderer = hdrCubemapRenderer;
+            this.gameTimeManager= gameTimeManager;
         }
         public bool preIsKeyDown;
         public void Draw(GameTime gameTime)
@@ -69,8 +75,9 @@ namespace monogameMinecraftDX.Rendering
             SSREffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
             SSREffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
             SSREffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
-            SSREffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
-            SSREffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);
+            SSREffect.Parameters["HDRPrefilteredTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0);
+            SSREffect.Parameters["HDRPrefilteredTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0);
+            SSREffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
             SSREffect.Parameters["NormalTex"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
 
             SSREffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
@@ -92,7 +99,7 @@ namespace monogameMinecraftDX.Rendering
             textureCopyEffect.Parameters["useBkgColor"]?.SetValue(false);
             textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f, 0f, 0f));
             textureCopyEffect.Parameters["TextureCopy"]?.SetValue(renderTargetSSR);
-            RenderQuad(graphicsDevice, renderTargetSSRPrev, textureCopyEffect);
+            RenderQuad(graphicsDevice, renderTargetSSRPrev, textureCopyEffect,false,false,true);
             // sw.Stop();
             //Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
         }

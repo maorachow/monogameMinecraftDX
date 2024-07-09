@@ -10,6 +10,8 @@ using monogameMinecraftDX.World;
 using monogameMinecraftDX.Physics;
 using monogameMinecraftDX.Core;
 using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftDX.Updateables;
+
 namespace monogameMinecraftDX
 {
     public class GamePlayer:IMovableCollider
@@ -203,6 +205,7 @@ namespace monogameMinecraftDX
             }
             return false;
         }
+        Random rand=new Random();
         public bool BreakBlock()
         {
             monogameMinecraftDX.Physics. Ray ray = new monogameMinecraftDX.Physics.Ray(cam.position, cam.front);
@@ -210,8 +213,14 @@ namespace monogameMinecraftDX
             BlockFaces blockFaces = BlockFaces.PositiveY;
            VoxelCast.Cast(ray,3,out blockPoint, out blockFaces,this, graphicsDevice);
 
-      //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ChunkHelper.GetBlockData(blockPoint)));
-          //  ChunkHelper.BreakBlock(blockPoint);
+       /*    for (int i = 0; i < 30; i++)
+           {
+               ParticleManager.instance.SpawnNewParticleTexturedGravity(new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f), 0.2f, new Vector2(0f, 0f), new Vector2(1f, 1f), 3f, new Vector3(rand.NextSingle()*4f-2f, rand.NextSingle() * 4f - 2f, rand.NextSingle() * 4f - 2f), 3f);
+            }*/
+           
+
+            //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ChunkHelper.GetBlockData(blockPoint)));
+            //  ChunkHelper.BreakBlock(blockPoint);
             ChunkHelper.SendBreakBlockOperation(blockPoint);
             GetBlocksAround(bounds);
         
@@ -220,6 +229,7 @@ namespace monogameMinecraftDX
         }
         public void PlaceBlock()
         {
+           
             if (inventoryData[currentSelectedHotbar] == 0)
             {
                 return;
@@ -237,8 +247,8 @@ namespace monogameMinecraftDX
 
             Vector3 castBlockPoint = new Vector3(blockPoint.x, blockPoint.y, blockPoint.z);
 
+           // ParticleManager.instance.SpawnNewParticle(setBlockPoint,1f,new Vector2(0f,0f),new Vector2(1f,1f),1f,new Vector3(1f,1f,1f),1f);
 
-        
             switch (blockFaces)
             {
                 case BlockFaces.PositiveX:

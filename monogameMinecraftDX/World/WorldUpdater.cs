@@ -72,17 +72,19 @@ namespace monogameMinecraftDX.World
 
         public List<Chunk> chunksNeededRebuild;
 
-
+        
         public readonly float maxDelayedTime = 0.2f;
         public float delayedTime = 0f;
 
         public delegate void OnChunkUpdated();
 
         private OnChunkUpdated onUpdated;
+
+        public OnChunkUpdated onUpdatedOneShot;
         public void MainThreadUpdate(float deltaTime)
         {
             delayedTime += deltaTime;
-            if (delayedTime > maxDelayedTime)
+        if (delayedTime > maxDelayedTime)
             {
                 delayedTime = 0f;
                 lock (chunksNeededRebuildListLock)
@@ -125,12 +127,27 @@ namespace monogameMinecraftDX.World
                             }
                          
                         }
-                        chunksNeededRebuild.Clear();
-                        onUpdated();
+                     
+                       
+                            onUpdated();
+
+                     
+                            
+
                     }
+
+                    chunksNeededRebuild.Clear();
                 }
             }
-           
+            if (onUpdatedOneShot != null)
+            {
+                onUpdatedOneShot();
+                Delegate[] dels = onUpdatedOneShot.GetInvocationList();
+                foreach (var del in dels)
+                {
+                    onUpdatedOneShot -= del as OnChunkUpdated;
+                }
+            }
         }
 
         public void StopAllThreads()

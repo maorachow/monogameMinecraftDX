@@ -25,6 +25,18 @@
 /processorParam:TextureFormat=Color
 /build:awesomeface.png
 
+#begin awesomeface1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:awesomeface1.png
+
 #begin BeachBall.fbx
 /importer:FbxImporter
 /processor:ModelProcessor
@@ -699,6 +711,12 @@
 /processorParam:DebugMode=Auto
 /build:gbufferentityeffect.fx
 
+#begin gbufferparticleeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:gbufferparticleeffect.fx
+
 #begin hdricubeeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -1030,11 +1048,11 @@
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
 /processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=True
-/processorParam:PremultiplyAlpha=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
+/processorParam:TextureFormat=NoChange
 /build:terrain.png
 
 #begin terrainheight.png
@@ -1061,18 +1079,6 @@
 /processorParam:TextureFormat=Color
 /build:terrainmer.png
 
-#begin terrainnomipmap.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:terrainnomipmap.png
-
 #begin terrainnormal.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1084,6 +1090,12 @@
 /processorParam:MakeSquare=True
 /processorParam:TextureFormat=Color
 /build:terrainnormal.png
+
+#begin testbillboardeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:testbillboardeffect.fx
 
 #begin texturecopyeffect.fx
 /importer:EffectImporter
