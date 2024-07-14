@@ -21,6 +21,8 @@ namespace monogameMinecraftDX.UI
             Texture2D menubkgrd = game.Content.Load<Texture2D>("menubackground");
             Texture2D menubkgrdTransparent = game.Content.Load<Texture2D>("menubackgroundtransparent");
             Texture2D buttonTex = game.Content.Load<Texture2D>("buttontexture");
+            Texture2D inputFieldTex = game.Content.Load<Texture2D>("textfield");
+            Texture2D inputFieldTexHighlighted = game.Content.Load<Texture2D>("textfieldhighlighted");
             Texture2D hotbarTex = game.Content.Load<Texture2D>("hotbar");
             Texture2D selectedHotbarTex = game.Content.Load<Texture2D>("selectedhotbar");
 
@@ -42,6 +44,8 @@ namespace monogameMinecraftDX.UI
             UIElement.uiSounds.TryAdd("uiclick", game.Content.Load<SoundEffect>("sounds/uiclick"));
             UIElement.UITextures = new Dictionary<string, Texture2D> {
                     { "menubackground" ,menubkgrd},
+                    { "inputfield" ,inputFieldTex},
+                    { "inputfieldhighlighted" ,inputFieldTexHighlighted},
                     { "menubackgroundtransparent" ,menubkgrdTransparent},
                     { "buttontexture" ,buttonTex},
                     {"hotbartexture",hotbarTex },
@@ -66,6 +70,7 @@ namespace monogameMinecraftDX.UI
             UIElement.menuUIs = new List<UIElement> {
 
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
+            //    new InputField(new Vector2(0.3f, 0.1f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, null ,"",1,10,false),
                 new UIButton(new Vector2(0.3f, 0.3f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.InitGameplay ,"Start Game",null,1),
                 new UIButton(new Vector2(0.3f, 0.6f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.GoToSettings ,"Game Settings",null,1)
 
@@ -110,9 +115,110 @@ namespace monogameMinecraftDX.UI
                new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.renderPipelineManager.chunkRenderer,game.renderPipelineManager.particleRenderer,game) ,"Reload Custom Resource Packs",null,0.6f)
             };
             InitInventoryUI(game, sf);
+            InitStructureOperationsUI(game,sf);
             game.status = GameStatus.Menu;
         }
 
+        public static void InitStructureOperationsUI(MinecraftGame game, SpriteFont sf)
+        {
+            UIElement.structureOperationsSavingUIs = new List<UIElement>()
+            {
+                new UIImage(new Vector2(0.05f, 0.05f), 0.9f, 0.9f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),
+                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{} ,"Structure Saving",null,1,false,false),
+                new InputField(new Vector2(0.3f, 0.3f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,
+                    (ub) => { VoxelWorld.currentWorld.structureOperationsManager.tmpSavingStructureName = ub.text;},"structurename",1,16,false),
+                new InputField(new Vector2(0.1f, 0.45f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureOrigin.x =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.1f, 0.55f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureOrigin.y =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.1f, 0.65f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureOrigin.z =ub.TryParseInt();} ,"0",1,16,true),
+
+                new InputField(new Vector2(0.6f, 0.45f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureSize.x =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.6f, 0.55f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureSize.y =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.6f, 0.65f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureSize.z =ub.TryParseInt();} ,"0",1,16,true),
+
+
+                new UIButton(new Vector2(0.1f, 0.8f), 0.3f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.isShowingStructureSavingBounds = !VoxelWorld
+                            .currentWorld.structureOperationsManager.isShowingStructureSavingBounds;} ,"Show Bounds",null,1,false,true),
+
+                new UIButton(new Vector2(0.6f, 0.8f), 0.3f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager. SaveNewStructure(VoxelWorld.currentWorld.structureOperationsManager.tmpSavingStructureName);} ,"Save Structure",null,1,false,true),
+
+
+                new UIButton(new Vector2(0.8f, 0.1f), 0.1f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.structureOperationsUIsPageID=1; } ,"Next Page" ,null,0.5f),
+            };
+
+
+
+            UIElement.structureOperationsPlacingUIs = new List<UIElement>()
+            {
+                new UIImage(new Vector2(0.05f, 0.05f), 0.9f, 0.9f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),
+                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{} ,"Structure Placing",null,1,false,false),
+                new InputField(new Vector2(0.3f, 0.3f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.tmpPlacingStructureName = ub.text;
+                        if (VoxelWorld.currentWorld.structureOperationsManager.allStructureDatas.ContainsKey(
+                                VoxelWorld.currentWorld.structureOperationsManager.tmpPlacingStructureName))
+                        {
+                            VoxelWorld.currentWorld.structureOperationsManager.curPlacingStructureData =
+                                VoxelWorld.currentWorld.structureOperationsManager.allStructureDatas[
+                                    VoxelWorld.currentWorld.structureOperationsManager.tmpPlacingStructureName];
+                        }
+                    
+
+                    },"structurename",1,16,false),
+                new InputField(new Vector2(0.1f, 0.45f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curPlacingStructureOrigin.x =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.1f, 0.55f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curPlacingStructureOrigin.y =ub.TryParseInt();} ,"0",1,16,true),
+                new InputField(new Vector2(0.1f, 0.65f), 0.3f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (ub) => { VoxelWorld.currentWorld.structureOperationsManager.curPlacingStructureOrigin.z =ub.TryParseInt();} ,"0",1,16,true),
+
+
+
+                new UIButton(new Vector2(0.6f, 0.45f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.isStructurePlacingInvertX = !VoxelWorld
+                            .currentWorld.structureOperationsManager.isStructurePlacingInvertX;
+                        ub.text = "Inverse X:" + VoxelWorld.currentWorld.structureOperationsManager
+                            .isStructurePlacingInvertX.ToString();
+                    } ,"Inverse X:False",null,1,false,true),
+                new UIButton(new Vector2(0.6f, 0.55f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.isStructurePlacingInvertY = !VoxelWorld
+                            .currentWorld.structureOperationsManager.isStructurePlacingInvertY;
+                        ub.text = "Inverse Y:" + VoxelWorld.currentWorld.structureOperationsManager
+                            .isStructurePlacingInvertY.ToString();
+                    } ,"Inverse Y:False",null,1,false,true),
+                new UIButton(new Vector2(0.6f, 0.65f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.isStructurePlacingInvertZ = !VoxelWorld
+                            .currentWorld.structureOperationsManager.isStructurePlacingInvertZ;
+                        ub.text = "Inverse Z:" + VoxelWorld.currentWorld.structureOperationsManager
+                            .isStructurePlacingInvertZ.ToString();
+                    } ,"Inverse Z:False",null,1,false,true),
+
+
+
+
+                new UIButton(new Vector2(0.1f, 0.8f), 0.3f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.isShowingStructurePlacingBounds = !VoxelWorld
+                            .currentWorld.structureOperationsManager.isShowingStructurePlacingBounds;} ,"Show Bounds",null,1,false,true),
+
+                new UIButton(new Vector2(0.6f, 0.8f), 0.3f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                    (ub) =>
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager. PlaceSavedStructureWithTmpParams();} ,"Place Structure",null,1,false,true),
+
+                new UIButton(new Vector2(0.1f, 0.1f), 0.1f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.structureOperationsUIsPageID=0; } ,"Previous Page" ,null,0.5f),
+            };
+        }
         public static void InitInventoryUI(MinecraftGame game, SpriteFont sf)
         {
             UIElement.inventoryUIs = new List<UIElement> { new UIImage(new Vector2(0.1f, 0.1f), 0.8f, 0.8f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),

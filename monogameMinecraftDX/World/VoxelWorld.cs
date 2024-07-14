@@ -39,12 +39,14 @@ namespace monogameMinecraftDX
         public object deleteChunkThreadLock = new object();
 
         public WorldUpdater worldUpdater;
+        public StructureOperationsManager structureOperationsManager;
         public VoxelWorld(string curWorldSaveName, int worldGenType, int worldID)
         {
             this.worldGenType = worldGenType;
             this.worldID = worldID;
             this.curWorldSaveName = curWorldSaveName;
             worldUpdater = new WorldUpdater(this);
+            structureOperationsManager= new StructureOperationsManager(this);
         }
 
 
@@ -310,7 +312,7 @@ namespace monogameMinecraftDX
             chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
 
             ReadJson();
-
+            structureOperationsManager.ReadStructureDatas();
 
             EntityManager.ReadEntityData();
             EntityManager.SpawnEntityFromData(game);
@@ -456,7 +458,7 @@ namespace monogameMinecraftDX
 
             StopAllThreads();
             SaveWorldData();
-
+            structureOperationsManager.SaveAllStructures();
             DestroyAllChunks();
             //     chunks.Clear();
             //    isGoingToQuitWorld = true;

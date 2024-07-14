@@ -147,6 +147,14 @@ namespace monogameMinecraftDX
             {
                 element1.OnResize();
             }
+            foreach (UIElement element1 in UIElement.structureOperationsSavingUIs)
+            {
+                element1.OnResize();
+            }
+            foreach (UIElement element1 in UIElement.structureOperationsPlacingUIs)
+            {
+                element1.OnResize();
+            }
             switch (status)
             {
                 case GameStatus.Started:
@@ -438,6 +446,7 @@ namespace monogameMinecraftDX
         int lastMouseY;
         public bool isGamePaused = false;
         public bool isInventoryOpen = false;
+        public bool isStructureOperationsUIOpened = false;
         public void ResumeGame()
         {
             isGamePaused = false;
@@ -495,7 +504,7 @@ namespace monogameMinecraftDX
                         }
                         break;
                     }
-                    if (Keyboard.GetState().IsKeyUp(Keys.E)&&!lastKeyState1.IsKeyUp(Keys.E))
+                    if (Keyboard.GetState().IsKeyUp(Keys.E)&&!lastKeyState1.IsKeyUp(Keys.E) && !isStructureOperationsUIOpened)
                     {
                         //     status = GameStatus.Quiting;
                         //  QuitGameplay();
@@ -513,17 +522,40 @@ namespace monogameMinecraftDX
                         }
                       
                     }
+                    if (Keyboard.GetState().IsKeyUp(Keys.H) && !lastKeyState1.IsKeyUp(Keys.H)&&!isInventoryOpen)
+                    {
+                        //     status = GameStatus.Quiting;
+                        //  QuitGameplay();
+                        //  Exit();
+                        //   Environment.Exit(0);
 
+                        isStructureOperationsUIOpened = !isStructureOperationsUIOpened;
+                        if (isStructureOperationsUIOpened == true)
+                        {
+                            IsMouseVisible = true;
+                        }
+                        else
+                        {
+                            IsMouseVisible = false;
+                        }
+
+                    }
                     if (Keyboard.GetState().IsKeyUp(Keys.J) && !lastKeyState1.IsKeyUp(Keys.J))
                     {
                       //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                      StructureManager.SaveGeneratingStructureData(new StructureGeneratingParam(StructureGeneratingType.Random,5.1f,0f,new short[]{0,100}),(Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),new Vector3Int(11,11,11),Directory.GetCurrentDirectory()+"/customstructures/defaultstructure.bin");
+                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
                     }
-              /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
+
+                    if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                     {
                         //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                        ChunkHelper.FillBlocks(StructureManager.LoadStructure(Directory.GetCurrentDirectory() + "/defaultstructure.bin"), (Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),BlockFillMode.ReplaceAir); ;
-                    }*/
+                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
+                    }
+                    /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
+                          {
+                              //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
+                              ChunkHelper.FillBlocks(StructureManager.LoadStructure(Directory.GetCurrentDirectory() + "/defaultstructure.bin"), (Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),BlockFillMode.ReplaceAir); ;
+                          }*/
                     lastKeyState1 = Keyboard.GetState();
              //       Debug.WriteLine(isInventoryOpen);
                     if (isInventoryOpen)
@@ -532,6 +564,36 @@ namespace monogameMinecraftDX
                         {
                             el.Update();
                         }
+                        break;
+                    }
+
+                    if (isStructureOperationsUIOpened)
+                    {
+                        switch (UIElement.structureOperationsUIsPageID)
+                        {
+                            case 0:
+                                foreach (var el in UIElement.structureOperationsSavingUIs)
+                                {
+                                    el.Update();
+                                }
+
+                                break;
+                            case 1:
+                                foreach (var el in UIElement.structureOperationsPlacingUIs)
+                                {
+                                    el.Update();
+                                }
+
+                                break;
+                            default:
+                                foreach (var el in UIElement.structureOperationsSavingUIs)
+                                {
+                                    el.Update();
+                                }
+
+                                break;
+                        }
+                      
                         break;
                     }
                     if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -764,6 +826,42 @@ namespace monogameMinecraftDX
                             el.DrawString(el.text);
                         }
                         _spriteBatch.End();
+                    }
+
+                    if (isStructureOperationsUIOpened)
+                    {
+                        switch (UIElement.structureOperationsUIsPageID)
+                        {
+                            case 0:
+                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
+
+                                foreach (var el in UIElement.structureOperationsSavingUIs)
+                                {
+                                    el.DrawString(el.text);
+                                }
+                                _spriteBatch.End();
+                                break;
+                            case 1:
+                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
+
+                                foreach (var el in UIElement.structureOperationsPlacingUIs)
+                                {
+                                    el.DrawString(el.text);
+                                }
+                                _spriteBatch.End();
+                                break;
+                            default:
+                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
+
+                                foreach (var el in UIElement.structureOperationsSavingUIs)
+                                {
+                                    el.DrawString(el.text);
+                                }
+                                _spriteBatch.End();
+                                break;
+                              
+                        }
+                       
                     }
                     if (isGamePaused)
                     {

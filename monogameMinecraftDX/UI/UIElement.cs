@@ -24,6 +24,9 @@ namespace monogameMinecraftDX.UI
         public static List<UIElement> inGameUIs = new List<UIElement>();
         public static List<UIElement> pauseMenuUIs = new List<UIElement>();
         public static List<UIElement> inventoryUIs = new List<UIElement>();
+        public static List<UIElement> structureOperationsSavingUIs = new List<UIElement>();
+        public static List<UIElement> structureOperationsPlacingUIs = new List<UIElement>();
+        public static int structureOperationsUIsPageID;
         public static Dictionary<string, SoundEffect> uiSounds = new Dictionary<string, SoundEffect>();
     }
 }

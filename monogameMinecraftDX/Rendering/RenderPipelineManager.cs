@@ -112,6 +112,8 @@ namespace monogameMinecraftDX.Rendering
             volumetricLightRenderer = new VolumetricLightRenderer(game.GraphicsDevice, gBufferRenderer, game._spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"], game.gamePlayer, game.gameTimeManager);
             chunkRenderer.SSRRenderer = ssrRenderer;
             volumetricLightRenderer.entityRenderer = entityRenderer;
+
+            BoundingBoxVisualizationUtility.Initialize(environmentHDRITex, game.GraphicsDevice);
         }
 
 
@@ -150,8 +152,13 @@ namespace monogameMinecraftDX.Rendering
 
             deferredShadingRenderer.FinalBlend(game._spriteBatch, volumetricLightRenderer, game.GraphicsDevice, game.gamePlayer);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            game.GraphicsDevice.BlendState=BlendState.Opaque;
 
-
+            if (VoxelWorld.currentWorld.structureOperationsManager != null)
+            {
+                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer);
+                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer);
+            }
 
         }
 

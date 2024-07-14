@@ -74,6 +74,28 @@ namespace monogameMinecraftDX.Asset
             return data.blockDatas;
         }
 
+
+        public static StructureData? LoadStructureData(string savePath)
+        {
+            byte[] dataBytes;
+            try
+            {
+                dataBytes = File.ReadAllBytes(savePath);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                return null;
+            }
+
+            if (dataBytes.Length <= 0)
+            {
+                return null;
+            }
+
+            StructureData data = MessagePackSerializer.Deserialize<StructureData>(dataBytes);
+            return data;
+        }
         public static GeneratingStructureData? LoadGeneratingStructure(string savePath)
         {
             byte[] dataBytes;

@@ -9,7 +9,7 @@ using monogameMinecraftDX.Core;
 namespace monogameMinecraftDX.World
 {
     [MessagePackObject]
-    public struct StructureData
+    public struct StructureData:ICloneable
     {
         [Key(0)]
         public BlockData[,,] blockDatas;
@@ -26,6 +26,11 @@ namespace monogameMinecraftDX.World
                 min = origin,
                 max = origin + new Vector3Int(blockDatas.GetLength(0), blockDatas.GetLength(1), blockDatas.GetLength(2))
             };
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 
