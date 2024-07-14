@@ -163,13 +163,13 @@ namespace monogameMinecraftDX.World
                 Directory.CreateDirectory(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData/GameData");
             }
 
-            if (!File.Exists(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + "savedstructures"))
+            if (!File.Exists(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName) + "/savedstructures"))
             {
-              Directory.CreateDirectory(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + "savedstructures");
+              Directory.CreateDirectory(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" +"/GameData/" + Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName) + "/savedstructures");
                 
             }
 
-            string path = VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + "savedstructures";
+            string path = VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName) + "/savedstructures";
             DirectoryInfo d = new DirectoryInfo(path);
 
             FileSystemInfo[] fsinfos = d.GetFileSystemInfos();
@@ -279,19 +279,19 @@ namespace monogameMinecraftDX.World
         public void SaveAllStructures()
         {
           
-            if (Directory.Exists(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData/GameData/" + "savedstructures"))
+            if (Directory.Exists(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData/GameData/" +Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName)+ "/savedstructures"))
             {
              
             }
             else
             {
-                Directory.CreateDirectory(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + "savedstructures");
+                Directory.CreateDirectory(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData" + "/GameData/" + Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName) + "/savedstructures");
             }
        
             foreach (var data in allStructureDatas)
             {
                 byte[] dataBytes = MessagePackSerializer.Serialize(data.Value);
-                File.WriteAllBytes(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData/GameData/" + "savedstructures/"+data.Key+".bin", dataBytes);
+                File.WriteAllBytes(VoxelWorld.gameWorldDataPath + "unityMinecraftServerData/GameData/" + Path.GetFileNameWithoutExtension(curWorld.curWorldSaveName) + "/savedstructures/"+data.Key+".bin", dataBytes);
             }
 
 

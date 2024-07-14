@@ -199,6 +199,7 @@ namespace monogameMinecraftDX.UI
                 {
                     foreach (var key in keyboardState.GetPressedKeys())
                     {
+                     //   Debug.WriteLine(key);
                         if (key == Keys.Back)
                         {
                             if (lastKeyboardState.IsKeyDown(Keys.Back) == false && text.Length > 0)
@@ -219,6 +220,12 @@ namespace monogameMinecraftDX.UI
                                     text += keyString;
                                 }
 
+                                if (key == Keys.Subtract||key==Keys.OemMinus)
+                                {
+                                    string keyString = "-";
+                                   
+                                    text += keyString;
+                                }
 
                                 if (numbersOnly == false)
                                 {
