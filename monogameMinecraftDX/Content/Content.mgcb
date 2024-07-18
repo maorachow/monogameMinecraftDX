@@ -644,6 +644,12 @@
 /processorParam:Quality=Best
 /build:customresourcespack/zombiesay.wav
 
+#begin debuglineeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:debuglineeffect.fx
+
 #begin defaultfont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

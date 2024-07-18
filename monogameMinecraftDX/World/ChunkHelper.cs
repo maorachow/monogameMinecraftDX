@@ -470,8 +470,39 @@ namespace monogameMinecraftDX
             return 100;
 
         }
+        public static int GetSingleChunkLandingPoint(Chunk c,int x, int z)
+        {
+            if (c == null)
+            {
+                return -1;
+            }
+            Vector2Int chunkSpacePos =new Vector2Int(x,z);
+            chunkSpacePos.x = MathHelper.Clamp(chunkSpacePos.x, 0, Chunk.chunkWidth - 1);
+            chunkSpacePos.y = MathHelper.Clamp(chunkSpacePos.y, 0, Chunk.chunkWidth - 1);
+            for (int i = Chunk.chunkHeight-1; i > 0; i--)
+            {
+                if (c.map[chunkSpacePos.x, i, chunkSpacePos.y] == 0)
+                {
+                    continue;
+                }
+                if (BlockBoundingBoxUtility.IsBlockWithBoundingBox(Chunk.blockInfosNew[c.map[chunkSpacePos.x, i, chunkSpacePos.y]].shape) )
+                {
+                    return i+1;
+                }
+            }
 
-        public static int PredictChunkLandingPoint(float x, float y)
+            return -1;
+
+        }
+
+        public static Vector2Int GetChunkSpacePos(Vector3 worldPos, Chunk c)
+        {
+            Vector2Int intPos = new Vector2Int(FloatToInt(worldPos.X), FloatToInt(worldPos.Z));
+         
+            Vector2Int chunkSpacePos = intPos - c.chunkPos;
+            return chunkSpacePos;
+        }
+            public static int PredictChunkLandingPoint(float x, float y)
         {
             if (VoxelWorld.currentWorld.worldGenType == 0)
             {

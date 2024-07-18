@@ -403,6 +403,7 @@ namespace monogameMinecraftDX
             return biomeMapInter;
         }
         public float[,] thisHeightMap;
+        public int[,] thisAccurateHeightMap;
         public static float[,] GenerateChunkHeightmap(Vector2Int pos)
         {
             float[,] heightMap = new float[chunkWidth / 8 + 2, chunkWidth / 8 + 2];//插值算法
@@ -467,6 +468,8 @@ namespace monogameMinecraftDX
         public int usedByOthersCount = 0;
         public bool isUnused = false;
         public float unusedSeconds = 0f;
+
+        public bool isAccurateHeightMapGenerated = false;
         public void InitMap(Vector2Int chunkPos,bool generateRenderBuffers=true)
         {
 
@@ -574,6 +577,7 @@ namespace monogameMinecraftDX
             {
 
                 this.chunkBounds = this.CalculateBounds();
+                GenerateHeightMap();
                     GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT,generateRenderBuffers);
                 ReleaseChunkUsage();
 
@@ -586,6 +590,7 @@ namespace monogameMinecraftDX
                 isChunkDataSavedInDisk = true;
                 map = (BlockData[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
                 this.chunkBounds = this.CalculateBounds();
+                GenerateHeightMap();
                     GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT, generateRenderBuffers);
                 isMapGenCompleted = true;
                 ReleaseChunkUsage();
@@ -599,7 +604,8 @@ namespace monogameMinecraftDX
 
 
             FreshGenMap(chunkPos);
-            isMapGenCompleted = true;
+            GenerateHeightMap();
+                isMapGenCompleted = true;
             GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
             ReleaseChunkUsage();
 
@@ -686,6 +692,20 @@ namespace monogameMinecraftDX
                     this.frontRightChunk = null;
                 }
             }
+
+            void GenerateHeightMap()
+            {
+              
+                    thisAccurateHeightMap = new int[chunkWidth, chunkWidth];
+                for (int x = 0; x < chunkWidth; x++)
+                {
+                    for (int z = 0; z < chunkWidth; z++)
+                    {
+                        thisAccurateHeightMap[x, z] = ChunkHelper.GetSingleChunkLandingPoint(this, x, z);
+                    }
+                }
+                isAccurateHeightMapGenerated = true;
+                }
             void FreshGenMap(Vector2Int pos)
             {
 

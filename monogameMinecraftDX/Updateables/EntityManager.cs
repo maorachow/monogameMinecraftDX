@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using monogameMinecraftDX.World;
 using monogameMinecraftDX.Animations;
+using monogameMinecraftDX.Pathfinding;
 using monogameMinecraftDX.Utility;
 
 namespace monogameMinecraftDX.Updateables
@@ -15,6 +16,7 @@ namespace monogameMinecraftDX.Updateables
     {
         public static string gameWorldEntityDataPath = AppDomain.CurrentDomain.BaseDirectory;
         public static Random randomGenerator = new Random();
+        public static PathfindingManager pathfindingManager;
         public static void UpdateAllEntity(float deltaTime)
         {
             for (int i = 0; i < worldEntities.Count; i++)
@@ -22,11 +24,31 @@ namespace monogameMinecraftDX.Updateables
                 worldEntities[i].OnUpdate(deltaTime);
             }
         }
+        public static readonly float maxDelayedTime = 0.2f;
+        public static  float delayedTime = 0f;
+        public static void FixedUpdateAllEntity(float deltaTime)
+        {
+            delayedTime += deltaTime;
+            if (delayedTime > maxDelayedTime)
+            {
+                delayedTime = 0f;
+                for (int i = 0; i < worldEntities.Count; i++)
+                {
+                    
+                    worldEntities[i].OnFixedUpdate(maxDelayedTime);
+                }
+
+                if (worldEntities.Count > 0)
+                {
+                    pathfindingManager.curDebuggingPath = ((ZombieEntityBeh)worldEntities[0])?.entityPath;
+                }
+            }
+        }
         public static void TrySpawnNewZombie(MinecraftGame game, float deltaTime)
         {
-            if (randomGenerator.NextSingle() >= 1 - deltaTime/**0.1f*/ && worldEntities.Count < 70 && VoxelWorld.currentWorld.worldID == 0)
+            if (randomGenerator.NextSingle() >= 1 - deltaTime*0.15f && worldEntities.Count < 35 && VoxelWorld.currentWorld.worldID == 0)
             {
-                Vector2 randSpawnPos = new Vector2(game.gamePlayer.position.X + (randomGenerator.NextSingle() - 0.5f) * 80f, game.gamePlayer.position.Z + (randomGenerator.NextSingle() - 0.5f) * 80f);
+                Vector2 randSpawnPos = new Vector2(game.gamePlayer.position.X + (randomGenerator.NextSingle() - 0.5f) * 60f, game.gamePlayer.position.Z + (randomGenerator.NextSingle() - 0.5f) * 60f);
                 Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
                 SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game);
 
@@ -127,6 +149,7 @@ namespace monogameMinecraftDX.Updateables
         public static void InitEntityList()
         {
             worldEntities = new List<EntityBeh>();
+            pathfindingManager= new PathfindingManager();
         }
 
 

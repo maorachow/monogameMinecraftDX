@@ -169,6 +169,55 @@ namespace monogameMinecraftDX.World
             return blockData;
         }
 
+
+        public static int[,] GetAreaHeightMap(Vector3Int origin, int lengthX, int lengthZ)
+        {
+            tempReadChunks.Clear();
+            int[,] blockData = new int[lengthX, lengthZ];
+            for (int x = origin.x; x < origin.x + blockData.GetLength(0); x++)
+            {
+                for (int z = origin.z; z < origin.z + blockData.GetLength(1); z++)
+                {
+                    Chunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)));
+                    if (c == null)
+                    {
+                        continue;
+                    }
+                    tempReadChunks.TryAdd(c.chunkPos, c);
+                }
+            }
+            foreach (var c in tempReadChunks)
+            {
+                GetAreaHeightMapSingleChunk(origin, ref blockData, c.Value);
+
+            }
+            return blockData;
+        }
+
+        public static void GetAreaHeightMapSingleChunk(Vector3Int origin, ref int[,] heightMapIn, Chunk c)
+        {
+
+            Vector3Int chunkOffset = new Vector3Int(c.chunkPos.x, 0, c.chunkPos.y) - origin;
+            for (int i = 0; i < Chunk.chunkWidth; i++)
+            {
+
+
+                for (int k = 0; k < Chunk.chunkWidth; k++)
+                {
+                    Vector2Int posInData = new Vector2Int(chunkOffset.x + i, chunkOffset.z + k);
+                    if (posInData.x < 0 || posInData.x >= heightMapIn.GetLength(0) || posInData.y < 0 ||
+                        posInData.y >= heightMapIn.GetLength(1))
+
+                    {
+                        continue;
+                    }
+
+                    heightMapIn[posInData.x, posInData.y] = GetSingleChunkLandingPoint(c, i, k);
+
+                }
+
+            }
+        }
         public static void GetBlocksSingleChunk(Vector3Int origin, ref BlockData[,,] blockDataIn,Chunk c)
         {
             Vector3Int chunkOffset = new Vector3Int(c.chunkPos.x, 0, c.chunkPos.y) - origin;

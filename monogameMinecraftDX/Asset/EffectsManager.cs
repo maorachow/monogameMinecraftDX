@@ -121,6 +121,7 @@ namespace monogameMinecraftDX.Asset
             gameEffects.TryAdd("hdriirradianceeffect", Content.Load<Effect>("hdriirradianceeffect"));
             gameEffects.TryAdd("hdriprefiltereffect", Content.Load<Effect>("hdriprefiltereffect"));
             gameEffects.TryAdd("gbufferparticleeffect", Content.Load<Effect>("gbufferparticleeffect"));
+            gameEffects.TryAdd("debuglineeffect", Content.Load<Effect>("debuglineeffect"));
             isEffectsLoaded = true;
         }
 

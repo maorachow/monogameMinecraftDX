@@ -84,7 +84,19 @@ namespace monogameMinecraftDX
 
             EntityManager.entityDataReadFromDisk.Add(tmpData);
         }
-       
+
+        public void RemoveCurrentEntity()
+        {
+            foreach (EntityData ed in EntityManager.entityDataReadFromDisk)
+            {
+                if (ed.entityID == this.entityID)
+                {
+
+                    EntityManager.entityDataReadFromDisk.Remove(ed);
+                    break;
+                }
+            }
+        }
       
 
         public void InitBounds()
@@ -113,6 +125,11 @@ namespace monogameMinecraftDX
         public float Vec3Magnitude(Vector3 pos)
         {
             return (float)Math.Sqrt(pos.X * pos.X + pos.Y * pos.Y + pos.Z * pos.Z);
+        }
+
+        public virtual void OnFixedUpdate(float deltaTime)
+        {
+
         }
         public virtual void OnUpdate(float deltaTime)
         {

@@ -11,6 +11,7 @@ using monogameMinecraftDX.Asset;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using monogameMinecraftDX.Rendering.Particle;
+using monogameMinecraftDX.Updateables;
 
 namespace monogameMinecraftDX.Rendering
 {
@@ -47,6 +48,8 @@ namespace monogameMinecraftDX.Rendering
         public Texture2D particleAtlas;
         public Texture2D environmentHDRITex;
         public Texture2D environmentHDRITexNight;
+        public BoundingBoxVisualizationRenderer boundingBoxVisualizationRenderer;
+        public WalkablePathVisualizationRenderer walkablePathVisualizationRenderer;
         public RenderPipelineManager(MinecraftGame game,EffectsManager em)
         {
             this.game = game;
@@ -112,8 +115,10 @@ namespace monogameMinecraftDX.Rendering
             volumetricLightRenderer = new VolumetricLightRenderer(game.GraphicsDevice, gBufferRenderer, game._spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"], game.gamePlayer, game.gameTimeManager);
             chunkRenderer.SSRRenderer = ssrRenderer;
             volumetricLightRenderer.entityRenderer = entityRenderer;
-
-            BoundingBoxVisualizationUtility.Initialize(environmentHDRITex, game.GraphicsDevice);
+            boundingBoxVisualizationRenderer = new BoundingBoxVisualizationRenderer();
+            boundingBoxVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"],gBufferRenderer);
+            walkablePathVisualizationRenderer=new WalkablePathVisualizationRenderer();
+            walkablePathVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"], gBufferRenderer);
         }
 
 
@@ -152,13 +157,17 @@ namespace monogameMinecraftDX.Rendering
 
             deferredShadingRenderer.FinalBlend(game._spriteBatch, volumetricLightRenderer, game.GraphicsDevice, game.gamePlayer);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            game.GraphicsDevice.BlendState=BlendState.Opaque;
+            game.GraphicsDevice.BlendState=BlendState.Additive;
 
             if (VoxelWorld.currentWorld.structureOperationsManager != null)
             {
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer);
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer);
+                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer,this);
+                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer, this);
             }
+
+             
+                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), game.gamePlayer,this);
+             
 
         }
 

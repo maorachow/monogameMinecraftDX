@@ -9,7 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftDX.Rendering;
 using SharpDX.WIC;
+using System.Runtime.Intrinsics.Arm;
 
 namespace monogameMinecraftDX.World
 {
@@ -62,7 +64,7 @@ namespace monogameMinecraftDX.World
         public static void InvertBlockDataZ(ref BlockData[,,] input)
         {
             int beginZ = 0;
-            int endZ = input.GetLength(1) - 1;
+            int endZ = input.GetLength(2) - 1;
             while (beginZ < endZ)
             {
                 for (int x = 0; x < input.GetLength(0); x++)
@@ -114,7 +116,7 @@ namespace monogameMinecraftDX.World
 
         public bool isShowingStructureSavingBounds = false;
         public bool isShowingStructurePlacingBounds = false;
-        public void DrawStructureSavingBounds(GamePlayer player)
+        public void DrawStructureSavingBounds(GamePlayer player,RenderPipelineManager rpm)
         {
             if (isShowingStructureSavingBounds == true)
             {
@@ -122,14 +124,14 @@ namespace monogameMinecraftDX.World
                     curSaveStructureOrigin.z > int.MinValue && curSaveStructureSize.x > int.MinValue &&
                     curSaveStructureSize.y > int.MinValue && curSaveStructureSize.z > int.MinValue)
                 {
-                    BoundingBoxVisualizationUtility.VisualizeBoundingBox(new BoundingBox(new Vector3(curSaveStructureOrigin.x, curSaveStructureOrigin.y, curSaveStructureOrigin.z), new Vector3(curSaveStructureOrigin.x + curSaveStructureSize.x, curSaveStructureOrigin.y + curSaveStructureSize.y, curSaveStructureOrigin.z + curSaveStructureSize.z)), player.cam.viewMatrix, player.cam.projectionMatrix);
+                    rpm.boundingBoxVisualizationRenderer.VisualizeBoundingBox(new BoundingBox(new Vector3(curSaveStructureOrigin.x, curSaveStructureOrigin.y, curSaveStructureOrigin.z), new Vector3(curSaveStructureOrigin.x + curSaveStructureSize.x, curSaveStructureOrigin.y + curSaveStructureSize.y, curSaveStructureOrigin.z + curSaveStructureSize.z)), player.cam.viewMatrix, player.cam.projectionMatrix);
                 }
                 
             }
        
         }
 
-        public void DrawStructurePlacingBounds(GamePlayer player)
+        public void DrawStructurePlacingBounds(GamePlayer player, RenderPipelineManager rpm)
         {
             if (isShowingStructurePlacingBounds == true)
             {
@@ -137,7 +139,7 @@ namespace monogameMinecraftDX.World
                     curPlacingStructureOrigin.z > int.MinValue && curPlacingStructureSize.x > int.MinValue &&
                     curPlacingStructureSize.y > int.MinValue && curPlacingStructureSize.z > int.MinValue)
                 {
-                    BoundingBoxVisualizationUtility.VisualizeBoundingBox(
+                    rpm.boundingBoxVisualizationRenderer.VisualizeBoundingBox(
                         new BoundingBox(
                             new Vector3(curPlacingStructureOrigin.x, curPlacingStructureOrigin.y, curPlacingStructureOrigin.z),
                             new Vector3(curPlacingStructureOrigin.x + curPlacingStructureSize.x,

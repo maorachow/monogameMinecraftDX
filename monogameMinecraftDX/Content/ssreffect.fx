@@ -674,6 +674,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         curRDir = rayRoughnessAmp;
         curRDir = normalize(curRDir);*/
         float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    
+    
         curRDir = importanceSampleDir;
         float3 marchPos = worldPos + curRDir * 0.01;
         float3 preMarchPos = rayOrigin;
@@ -681,13 +683,27 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float strideLen = 1;
         float3 result = 0;
         bool isHit = false;
+    int k = 0;
+    while (dot(normal, curRDir) < 0&&k<3)
+    {
+        float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
+        float3 importanceSampleDir = ImportanceSampleGGX(noiseValue3.xy, rDir, mer.z);
+    
+    
+        curRDir = importanceSampleDir;
+         marchPos = worldPos + curRDir * 0.01;
+        k++;
+      
+
+    }
          [unroll]
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 20; i++)
         {
-            if (dot(normal, curRDir) < 0)
-            {
-                return float4(0, 0, 0, 1);
-            }
+        if (dot(normal, curRDir) < 0)
+        {
+            
+            return float4(0, 0, 0, 1);
+        }
             marchPos += (curRDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
    /*     float4 offset = float4(marchPos, 1.0);

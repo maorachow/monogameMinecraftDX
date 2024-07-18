@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using monogameMinecraftDX.Pathfinding;
+using monogameMinecraftDX.Rendering;
 using SharpDX.MediaFoundation;
 namespace monogameMinecraftDX.Utility
 {
@@ -26,7 +28,8 @@ namespace monogameMinecraftDX.Utility
 
             public Texture2D texture;
             public BasicEffect basicEffect;
-
+            
+            
             public Matrix World { set { basicEffect.World = value; } get { return basicEffect.World; } }
             public Matrix View { set { basicEffect.View = value; } get { return basicEffect.View; } }
             public Matrix Projection { set { basicEffect.Projection = value; } get { return basicEffect.Projection; } }
@@ -46,8 +49,8 @@ namespace monogameMinecraftDX.Utility
                 basicEffect.Projection = proj;
                 basicEffect.Texture = texture;
             }
-
-            public VisualizationLine(Texture2D t, Vector3 start, Vector3 end, float thickness, Color c)
+           
+        public VisualizationLine(Texture2D t, Vector3 start, Vector3 end, float thickness, Color c)
             {
                 List<VertexPositionNormalTexture> nverts = new List<VertexPositionNormalTexture>();
                 List<int> nindices = new List<int>();
@@ -208,9 +211,15 @@ namespace monogameMinecraftDX.Utility
                 }
             }
 
-            public void Draw(GraphicsDevice gd, Effect effect)
+            public void DrawCustomEffect(GraphicsDevice gd, Effect effect,Matrix view,Matrix projection,RenderTarget2D depthTex,Texture2D texutre)
             {
-                foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+                effect.Parameters["View"]?.SetValue(view);
+
+                effect.Parameters["Projection"]?.SetValue(projection);
+
+                effect.Parameters["Texture"]?.SetValue(texutre);
+                effect.Parameters["TextureDepth"]?.SetValue(depthTex);
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
                     gd.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, (indices.Length / 3), VertexPositionNormalTexture.VertexDeclaration);
@@ -218,44 +227,106 @@ namespace monogameMinecraftDX.Utility
             }
         }
 
-
-        public static class BoundingBoxVisualizationUtility
+        public class WalkablePathVisualizationRenderer
         {
-            public static VisualizationLine line;
-            public static Texture2D texture;
-            public static GraphicsDevice device;
-            public static void Initialize(Texture2D tex,GraphicsDevice device)
+            public VisualizationLine line;
+            public Texture2D texture;
+            public GraphicsDevice device;
+            public Effect lineOcclusionEffect;
+            public GBufferRenderer gBufferRenderer;
+            public void Initialize(Texture2D tex, GraphicsDevice device, Effect lineOcclusionEffect, GBufferRenderer gBufferRenderer)
             {
-                texture = tex;
-               BoundingBoxVisualizationUtility.device = device;
+                this.texture = tex;
+                this.device = device;
                 line = new VisualizationLine(texture, new Vector3(), new Vector3(), 0.1f, new Color(1, 1, 1));
+                this.lineOcclusionEffect = lineOcclusionEffect;
+                this.gBufferRenderer = gBufferRenderer;
+            }
+        public void DrawLine(Vector3 start, Vector3 end, Matrix view, Matrix projection)
+            {
+                line.ReCreateVisualLine(start, end, 0.1f, view);
+                line.SetUpBasicEffect(device, texture, view, projection);
+                line.Draw(device);
             }
 
-            public static void VisualizeBoundingBox(BoundingBox bounds,Matrix view,Matrix projection)
+            public void DrawLineCustomEffect(Vector3 start, Vector3 end, Matrix view, Matrix projection)
             {
-            DrawLine(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), view,projection);
-            DrawLine(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view,projection);
-            DrawLine(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view,projection);
-            DrawLine(new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view,projection);
-            DrawLine(new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view,projection);
-            DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
-                DrawLine(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), view, projection);
-                DrawLine(new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view, projection);
-                DrawLine(new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view, projection);
+                if (lineOcclusionEffect == null || (lineOcclusionEffect != null && lineOcclusionEffect.IsDisposed == true))
+                {
+                    return;
+                }
+                line.ReCreateVisualLine(start, end, 0.1f, view);
+
+                line.DrawCustomEffect(device, lineOcclusionEffect, view, projection, gBufferRenderer.renderTargetProjectionDepth, texture);
+            }
+        public void VisualizeWalkablePath(WalkablePath path, Matrix view, Matrix projection, Vector3 origin)
+            {
+                if (path != null)
+                {
+                    for (int i = 0; i < path.steps.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            DrawLineCustomEffect(new Vector3(path.steps[i - 1].X, path.steps[i - 1].Y, path.steps[i - 1].Z) + origin, new Vector3(path.steps[i].X, path.steps[i].Y, path.steps[i].Z) + origin, view, projection);
+                        }
+                    }
+            }
+               
+            }
+    }
+
+        public class BoundingBoxVisualizationRenderer
+        {
+            public VisualizationLine line;
+            public Texture2D texture;
+            public GraphicsDevice device;
+            public Effect lineOcclusionEffect;
+            public GBufferRenderer gBufferRenderer;
+            public void Initialize(Texture2D tex,GraphicsDevice device,Effect lineOcclusionEffect,GBufferRenderer gBufferRenderer)
+            {
+               this. texture = tex;
+               this.device = device;
+                line = new VisualizationLine(texture, new Vector3(), new Vector3(), 0.1f, new Color(1, 1, 1));
+                this.lineOcclusionEffect = lineOcclusionEffect;
+                this.gBufferRenderer = gBufferRenderer;
+            }
+
+            public void VisualizeBoundingBox(BoundingBox bounds,Matrix view,Matrix projection)
+            {
+                DrawLineCustomEffect(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), view,projection);
+                DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view,projection);
+            DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Max.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Max.Z), view,projection);
+            DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Min.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Min.Y, bounds.Min.Z), view, projection);
+            DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), new Vector3(bounds.Max.X, bounds.Max.Y, bounds.Min.Z), view, projection);
+            DrawLineCustomEffect(new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Min.Z), new Vector3(bounds.Min.X, bounds.Max.Y, bounds.Max.Z), view, projection);
             //  DrawLine(new Vector3(bounds.Min.X,bounds.Min.Y,bounds.Min.Z),new Vector3(bounds.Max.X,bounds.Max.Y,bounds.Max.Z),view,projection);
         }
 
-        public static void DrawLine(Vector3 start, Vector3 end, Matrix view, Matrix projection)
+        public void DrawLine(Vector3 start, Vector3 end, Matrix view, Matrix projection)
             {
                 line.ReCreateVisualLine( start, end, 0.1f,view);
                 line.SetUpBasicEffect(device,texture,view,projection);
                 line.Draw(device);
             }
-        }
+
+            public void DrawLineCustomEffect(Vector3 start, Vector3 end, Matrix view, Matrix projection)
+            {
+                if (lineOcclusionEffect == null || (lineOcclusionEffect != null && lineOcclusionEffect.IsDisposed == true))
+                {
+                    return;
+                }
+                line.ReCreateVisualLine(start, end, 0.1f, view);
+                
+                line.DrawCustomEffect(device, lineOcclusionEffect, view,projection,gBufferRenderer.renderTargetProjectionDepth,texture);
+            }
+    }
     }
 

@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using monogameMinecraftDX.Core;
+using monogameMinecraftDX.Pathfinding;
 using monogameMinecraftDX.Utility;
 using monogameMinecraftDX.UI;
 
@@ -208,6 +209,7 @@ namespace monogameMinecraftDX
 
             Debug.WriteLine(GraphicsDevice.Viewport.Width + " " + GraphicsDevice.Viewport.Height);
         }
+ 
         public void InitGameplay(object obj)
         {
 
@@ -236,6 +238,7 @@ namespace monogameMinecraftDX
             particleManager = new ParticleManager();
             particleManager.Initialize();
             
+
             /*     updateWorldThread = new Thread(() => ChunkManager.UpdateWorldThread( gamePlayer,this));
                  updateWorldThread.IsBackground = true;
                  updateWorldThread.Start();
@@ -551,6 +554,27 @@ namespace monogameMinecraftDX
                         //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
                         VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
                     }
+                    if (Keyboard.GetState().IsKeyUp(Keys.P) && !lastKeyState1.IsKeyUp(Keys.P))
+                    {
+                    /*    int[,] heightMap = gamePlayer.curChunk?.thisAccurateHeightMap;
+                        WalkablePath path;
+                        if (heightMap != null)
+                        {
+                            path = FlatTilemapPathfindingUtility.FindPathByChunkHeightMap(heightMap,
+                                ChunkHelper.GetChunkSpacePos(gamePlayer.position, gamePlayer.curChunk),
+                                new Vector2Int(Chunk.chunkWidth - 2, Chunk.chunkWidth - 2));
+                          foreach (var VARIABLE in path.steps)
+                            {
+                                Debug.WriteLine(VARIABLE);
+                            }
+                      pathfindingManager.curDebuggingPath= path;
+                        }*/
+                    EntityManager.pathfindingManager.drawDebugLines=!EntityManager.pathfindingManager.drawDebugLines;
+                    }
+                    if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
+                    {
+                    EntityManager.SpawnNewEntity(gamePlayer.position,0,0,0,0,this);
+                    }
                     /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                           {
                               //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
@@ -629,6 +653,7 @@ namespace monogameMinecraftDX
                     //    _spriteBatch.End();
                     // TODO: Add your update logic here
                     EntityManager.UpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    EntityManager.FixedUpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
                     ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using monogameMinecraftDX.Animations;
 using monogameMinecraftDX.Core;
+using monogameMinecraftDX.Pathfinding;
 using monogameMinecraftDX.Rendering;
 using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.World;
@@ -36,6 +38,30 @@ namespace monogameMinecraftDX
 
         public Vector3 lastPos;
 
+
+        public WalkablePath entityPath;
+        public bool isPathValid = false;
+        public bool hasReachedCurStep = false;
+        public bool isPathfindingNeeded = false;
+        public bool hasReachedFinalStep = false;
+        public float timeSpentToNextStep = 0f;
+
+        public float timeInUnloadedChunks = 0f;
+        public override void OnFixedUpdate(float deltaTime)
+        {
+            if (isPathfindingNeeded == true)
+            {
+                bool isNewPathValid;
+                entityPath = EntityManager.pathfindingManager.GetFlatTilemapPath(ChunkHelper.Vec3ToBlockPos(position), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position),
+                    out isNewPathValid);
+                if (entityPath == null)
+                {
+                    isNewPathValid = false;
+                }
+                isPathValid = isNewPathValid;
+                isPathfindingNeeded = false;
+            }
+        }
         public override void OnUpdate(float deltaTime)
         {
             if (isEntityDying == true)
@@ -46,6 +72,7 @@ namespace monogameMinecraftDX
 
                 if (entityDyingTime >= 1f && isEntityDying)
                 {
+                    RemoveCurrentEntity();
                     EntityManager.worldEntities.Remove(this);
 
                 }
@@ -53,7 +80,15 @@ namespace monogameMinecraftDX
             }
             animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
             entityLifetime += deltaTime;
-            targetPos = game.gamePlayer.position;
+            if (!isPathValid)
+            {
+                targetPos = game.gamePlayer.position;
+            }
+            else
+            {
+                targetPos = entityPath.steps[entityPath.curStep];
+            }
+       
             entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
 
             curSpeed = MathHelper.Lerp(curSpeed, (new Vector2(position.X, position.Z) - new Vector2(lastPos.X, lastPos.Z)).Length() / deltaTime, 5f * deltaTime);
@@ -62,10 +97,23 @@ namespace monogameMinecraftDX
             Vector3Int intPos = Vector3Int.FloorToIntVec3(position);
 
             curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
-
+            if (curChunk == null)
+            {
+                timeInUnloadedChunks += deltaTime;
+                if (timeInUnloadedChunks > 30f)
+                {
+                    RemoveCurrentEntity();
+                    EntityManager.worldEntities.Remove(this);
+                }
+            }
+            else
+            {
+                timeInUnloadedChunks=0f;
+            }
 
             if (curChunk != null)
             {
+
                 if (lastChunkIsReadyToRender != curChunk.isReadyToRender && (lastChunkIsReadyToRender == false && curChunk.isReadyToRender == true))
                 {
                     //  Debug.WriteLine("update");
@@ -96,29 +144,77 @@ namespace monogameMinecraftDX
             GetEntitiesAround();
 
 
-            if (Vector3.Distance(position, targetPos) > 1f)
+            if (Vector3.Distance(position, targetPos) > 0.6f)
             {
                 Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
+                float movePosY = movePos.Y;
                 if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
                 {
-                    movePos = new Vector3(0.001f, 0.001f, 0.001f);
+                    movePos = new Vector3(0.00f, 0.001f, 0.00f);
                 }
-                Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f, targetPos.Z - position.Z);
+
+                Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f,
+                    targetPos.Z - position.Z);
+                lookPos.Normalize();
                 Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
+             
                 entityVec = movePosN;
                 //              Debug.WriteLine(movePos);
-                Vector3 entityRot = LookRotation(lookPos);
-                rotationX = entityRot.X; rotationY = entityRot.Y; rotationZ = entityRot.Z;
+                if (isGround != false || !(entityGravity < 0f))
+                {
+                    Vector3 entityRot = LookRotation(lookPos);
+                    rotationX = entityRot.X;
+                    rotationY = entityRot.Y;
+                    rotationZ = entityRot.Z;
+                }
+                else
+                {
+                }
+
+
                 Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(rotationY), 0, 0);
                 bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
 
-
-
-
+                hasReachedCurStep = false;
+                timeSpentToNextStep += deltaTime;
+                
+            }
+            else
+            {
+                hasReachedCurStep = true;
             }
 
+            if (hasReachedCurStep&&isPathValid)
+            {
+                if (entityPath.curStep < entityPath.steps.Count - 1)
+                {
+                    entityPath.curStep++;
+                    timeSpentToNextStep = 0f;
+                    hasReachedFinalStep = false;
+                }
+                else
+                {
+                    hasReachedFinalStep=true;
+                   
+             
+                }
+            }
 
-
+            if (timeSpentToNextStep >= 3f)
+            {
+                timeSpentToNextStep = 0f;
+                isPathValid = false;
+                isPathfindingNeeded = true;
+            }
+            if (!isPathValid||hasReachedFinalStep==true)
+            {
+                isPathfindingNeeded = true;
+            }
+           
+        /*    if (isPathValid == false&&(game.gamePlayer.position-position).Length()<=2*Chunk.chunkWidth)
+            {
+                isPathfindingNeeded = true;
+            }*/
 
             //  Debug.WriteLine(curSpeed);
 
@@ -143,12 +239,12 @@ namespace monogameMinecraftDX
             }
 
 
-            Vector3 movePos1 = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
+            Vector3 movePos1 =Vector3.Normalize(new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z)) ;
 
-            if (Vector3.Distance(position, targetPos) > 2f)
+            if (Vector3.Distance(position, targetPos) > 0.6f)
             {
 
-                if (isGround && curSpeed <= 0.1f && Vec3Magnitude(movePos1) > 2f)
+                if (isGround && curSpeed <= 0.1f/* && Vec3Magnitude(movePos1) > 2f*/)
                 {
 
                     entityGravity = 5f;
@@ -165,7 +261,7 @@ namespace monogameMinecraftDX
 
 
             }
-            entityVec.Y = entityGravity * deltaTime;
+            entityVec.Y = entityGravity *deltaTime;
 
 
 
@@ -185,6 +281,7 @@ namespace monogameMinecraftDX
 
                 entityGravity += -9.8f * deltaTime;
             }
+         
         }
     }
 }

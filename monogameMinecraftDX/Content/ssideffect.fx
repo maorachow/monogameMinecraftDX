@@ -371,6 +371,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float3 preMarchPos = marchPos;
         for (int j = 0; j < 16; j++)
         {
+            if (dot(normal, sampleDir) < 0)
+            {
+            
+                isHit = false;
+           
+                break;
+            }
             marchPos += sampleDir * 0.15 * (1+strideNoiseVal) * strideLen;
              uv = GetScreenCoordFromWorldPos(marchPos);
             
