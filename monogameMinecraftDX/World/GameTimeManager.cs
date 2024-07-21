@@ -6,7 +6,7 @@ namespace monogameMinecraftDX.World
     public class GameTimeManager
     {
         public GamePlayer player;
-        public float dateTime;
+        public float dateTime=0.1f;
 
         public float skyboxMixValue = 0f;
         public Vector3 sunDir;

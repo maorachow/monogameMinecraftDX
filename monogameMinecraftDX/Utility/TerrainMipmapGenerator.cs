@@ -82,12 +82,12 @@ namespace monogameMinecraftDX.Utility
             }
             else
             {
-                RenderQuadPureColor(device, terrainMip7, new Color(0.231f, 0.278f, 522f, 1f));
+                RenderQuadPureColor(device, terrainMip7, new Color(0.231f, 0.278f, 0.522f, 1f));
 
 
-                RenderQuadPureColor(device, terrainMip8, new Color(0.231f, 0.278f, 522f, 1f));
-                RenderQuadPureColor(device, terrainMip9, new Color(0.231f, 0.278f, 522f, 1f));
-                RenderQuadPureColor(device, terrainMip10, new Color(0.231f, 0.278f, 522f, 1f));
+                RenderQuadPureColor(device, terrainMip8, new Color(0.231f, 0.278f, 0.522f, 1f));
+                RenderQuadPureColor(device, terrainMip9, new Color(0.231f, 0.278f, 0.522f, 1f));
+                RenderQuadPureColor(device, terrainMip10, new Color(0.231f, 0.278f, 0.522f, 1f));
             }
 
             //    RenderQuad(device, terrainMip7, textureCopyEffect);

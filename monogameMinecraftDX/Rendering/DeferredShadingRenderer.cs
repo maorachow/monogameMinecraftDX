@@ -24,6 +24,7 @@ namespace monogameMinecraftDX.Rendering
         public GBufferRenderer gBufferRenderer;
         public ContactShadowRenderer contactShadowRenderer;
         public RenderTarget2D renderTargetLum;
+        public RenderTarget2D renderTargetLumAllDiffuse;
         public RenderTarget2D renderTargetLumSpec;
         public SkyboxRenderer skyboxRenderer;
         public RenderTarget2D finalImage;
@@ -45,6 +46,7 @@ namespace monogameMinecraftDX.Rendering
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
             renderTargetLum = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            renderTargetLumAllDiffuse = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             renderTargetLumSpec = new RenderTarget2D(device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             finalImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             ssrRenderer = sSRRenderer;
@@ -62,6 +64,7 @@ namespace monogameMinecraftDX.Rendering
         {
 
             SetCameraFrustum(player.cam, blockDeferredEffect);
+            blockDeferredEffect.CurrentTechnique = blockDeferredEffect.Techniques["DeferredBlockEffectP"];
             //   blockDeferredEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
             //  blockDeferredEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             blockDeferredEffect.Parameters["fogStart"]?.SetValue(256.0f);
@@ -140,7 +143,21 @@ namespace monogameMinecraftDX.Rendering
 
         }
 
+        public void DiffuseBlend(GamePlayer player)
+        {
+            SetCameraFrustum(player.cam, blockDeferredEffect);
+            blockDeferredEffect.CurrentTechnique = blockDeferredEffect.Techniques["DeferredBlockEffectDiffuse"];
+            blockDeferredEffect.Parameters["TextureAO"]?.SetValue(SSAORenderer.ssaoTarget);
+            blockDeferredEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
+            blockDeferredEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
+            blockDeferredEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
+            blockDeferredEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultIrradianceCubemap);
+            blockDeferredEffect.Parameters["HDRIrradianceTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultIrradianceCubemap);
+            blockDeferredEffect.Parameters["TextureDeferredLumDirect"].SetValue(renderTargetLum);
 
+            blockDeferredEffect.Parameters["TextureIndirectDiffuse"]?.SetValue(ssidRenderer.renderTargetSSID);
+            RenderQuad(device, renderTargetLumAllDiffuse, blockDeferredEffect);
+        }
         public void FinalBlend(SpriteBatch sb, VolumetricLightRenderer vlr, GraphicsDevice device, GamePlayer player)
         {
             skyboxRenderer.Draw(finalImage, true);
@@ -159,7 +176,7 @@ namespace monogameMinecraftDX.Rendering
             deferredBlendEffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
             deferredBlendEffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
-            deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLum);
+            deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLumAllDiffuse);
             deferredBlendEffect.Parameters["TextureDeferredLumSpec"].SetValue(renderTargetLumSpec);
             deferredBlendEffect.Parameters["TextureAO"].SetValue(SSAORenderer.ssaoTarget);
             deferredBlendEffect.Parameters["TextureReflection"]?.SetValue(ssrRenderer.renderTargetSSR);

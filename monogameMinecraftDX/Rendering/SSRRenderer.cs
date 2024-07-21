@@ -81,7 +81,7 @@ namespace monogameMinecraftDX.Rendering
             SSREffect.Parameters["NormalTex"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
 
             SSREffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
-            SSREffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
+            SSREffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLumAllDiffuse);
             SSREffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSREffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             SSREffect.Parameters["binarySearch"]?.SetValue(binarySearch);

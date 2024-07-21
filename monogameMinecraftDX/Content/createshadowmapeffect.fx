@@ -24,7 +24,7 @@ struct PixelShaderOutput
  
 };
 
-
+#define SHADOW_MAP_BIAS 0.45
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 {
     VertexShaderOutput output = (VertexShaderOutput) 0;
@@ -32,6 +32,12 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     float4 worldPosition = mul(input.Position, World);
     
     float4 projectionPositionNear = mul(worldPosition, LightSpaceMat);
+    
+    
+    
+    float dist = length(projectionPositionNear.xy);
+    float distortFactor = (1.0 - SHADOW_MAP_BIAS) + dist * SHADOW_MAP_BIAS;
+    projectionPositionNear.xy /= distortFactor;
     output.Position = projectionPositionNear;
     output.Depth.xy = projectionPositionNear.z / projectionPositionNear.w;
 //    output.PositionFar = projectionPositionFar;

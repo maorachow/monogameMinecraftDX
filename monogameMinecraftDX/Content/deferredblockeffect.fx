@@ -40,11 +40,14 @@ sampler2D texNoise = sampler_state
     AddressU = Wrap;
     AddressV = Wrap;
 };
+#define SHADOW_MAP_BIAS 0.45
 float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
 {
    
     float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-   
+    float distb = sqrt(projCoords.x * projCoords.x + projCoords.y * projCoords.y);
+    float distortFactor = (1.0 - SHADOW_MAP_BIAS) + distb * SHADOW_MAP_BIAS;
+    projCoords.xy /= distortFactor;
     projCoords.xy = projCoords * 0.5 + 0.5;
     projCoords.y = 1 - projCoords.y;
     bool isOutBounds = false;
@@ -59,13 +62,19 @@ float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
      
     float2 texelSize = 1.0 / 2048.0;
      
-    for (int x = -1; x <= 1; ++x)
-    {
-        for (int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = tex2D(sp, projCoords.xy + (tex2D(texNoise, projCoords.xy + float2(x, y) * 0.1).rg * 4 - 2)  * texelSize).r;
+    float shadowLerpBias = shadowBias*6.0;
+    
+  
          //   shadow += currentDepth - shadowBias > pcfDepth ? 1.0 : 0.0;
-            if (pcfDepth - shadowBias + bias > currentDepth)
+  
+   
+    
+   for (int x = 0; x < 4;x++)
+    {
+       
+        float pcfDepth = tex2D(sp, projCoords.xy + texelSize * (tex2D(texNoise, projCoords.xy + float2(x / 10.0, x / 10.0)).xy * 2 - 1)).r;
+       //     float softShadowVal = clamp(((pcfDepth) - (currentDepth - shadowBias)) / shadowLerpBias, 0, 1);
+            if (pcfDepth > currentDepth - shadowBias)
             {
                 shadow += 1;
             }
@@ -73,9 +82,9 @@ float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
             {
                 shadow += 0;
             }
-        }
+        
     }
-    shadow /= 9.0;
+    shadow /= (4.0);
     /*if (closestDepth - shadowBias < currentDepth)
     {
         shadow = 0;
@@ -207,8 +216,8 @@ sampler ShadowMapSampler = sampler_state
     magfilter = Point;
     minfilter = Point;
     mipfilter = Point;
-    AddressU = Wrap;
-    AddressV = Wrap;
+    AddressU = Clamp;
+    AddressV = Clamp;
 };
 sampler ShadowMapFarSampler = sampler_state
 {
@@ -216,8 +225,8 @@ sampler ShadowMapFarSampler = sampler_state
     magfilter = Point;
     minfilter = Point;
     mipfilter = Point;
-    AddressU = Wrap;
-    AddressV = Wrap;
+    AddressU = Clamp;
+    AddressV = Clamp;
 };
 sampler2D gPositionWS = sampler_state
 {
@@ -659,6 +668,66 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     return output;
 }
 
+sampler2D deferredLumSampler1 = sampler_state
+{
+    Texture = <TextureDeferredLumDirect>;
+ 
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Wrap;
+    AddressV = Wrap;
+};
+
+float4 MainPSIntermidiate(VertexShaderOutput input) : COLOR
+{
+    
+    if (tex2D(AlbedoSampler, input.TexCoords).a < 0.1)
+    {
+        discard;
+        
+    }
+    float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
+ //   mer.x = 1;
+    float3 albedo = pow(tex2D(AlbedoSampler, input.TexCoords).rgb, 2.2);
+    float3 normal = tex2D(NormalsSampler, input.TexCoords).xyz * 2 - 1;
+  
+    float3 color = tex2D(deferredLumSampler1, input.TexCoords).xyz;
+     
+  
+    
+    float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(DepthSampler, input.TexCoords).r) + viewPos;
+    float3 V = normalize(viewPos - worldPos);
+    float3 R = reflect(-V, normal);
+    R = normalize(R);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, mer.x);
+    float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, mer.z);
+    float3 kS = F;
+    float3 kD = 1.0 - kS;
+    kD *= 1.0 - mer.x;
+    
+    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
+   
+    float3 irradiance = lerp(texCUBE(irradianceSampler, normal).rgb, texCUBE(irradianceSamplerNight, normal).rgb, mixValue);
+    float3 diffuse = irradiance * albedo;
+    float3 ambientEnv = (kD * diffuse);
+
+    
+    indirectDiffuse = lerp(ambientEnv, indirectDiffuse, tex2D(ssidSampler, input.TexCoords).a);
+
+     
+   /* const float MAX_REFLECTION_LOD = 4.0;
+    float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+    float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y) * 0.1;*/
+    
+    
+    float3 ambient = ( indirectDiffuse /** 0.5 + reflection*/) * tex2D(AOSampler, input.TexCoords).x;
+    float3 final = color + ambient;
+    
+    return float4(final.xyz, 1);
+}
 technique DeferredBlockEffectP
 {
 	pass P0
@@ -666,4 +735,16 @@ technique DeferredBlockEffectP
 		VertexShader = compile VS_SHADERMODEL MainVS();
 		PixelShader = compile PS_SHADERMODEL MainPS();
 	}
+    
+};
+
+
+technique DeferredBlockEffectDiffuse
+{
+    pass P0
+    {
+        VertexShader = compile VS_SHADERMODEL MainVS();
+        PixelShader = compile PS_SHADERMODEL MainPSIntermidiate();
+    }
+    
 };

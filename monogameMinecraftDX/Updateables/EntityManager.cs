@@ -122,6 +122,11 @@ namespace monogameMinecraftDX.Updateables
 
         }
 
+        public static void StopAllThreads()
+        {
+            pathfindingManager.QuitThread();
+        }
+
         public static void SpawnEntityFromData(MinecraftGame game)
         {
             foreach (var etd in entityDataReadFromDisk)
@@ -150,6 +155,7 @@ namespace monogameMinecraftDX.Updateables
         {
             worldEntities = new List<EntityBeh>();
             pathfindingManager= new PathfindingManager();
+            pathfindingManager.Initialize();
         }
 
 

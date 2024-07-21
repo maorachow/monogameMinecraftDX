@@ -139,22 +139,22 @@ namespace monogameMinecraftDX.Rendering
             shadowRenderer.UpdateLightMatrices(game.gamePlayer);
 
             shadowRenderer.UpdateLightMatrices(game.gamePlayer);
-            ssrRenderer.Draw(gameTime);
-
+          
+            pointLightUpdater.UpdatePointLight();
             deferredShadingRenderer.Draw(game.gamePlayer);
             ssidRenderer.Draw(gameTime, sb);
             
             //    skyboxRenderer.Draw(null);
 
             //   GraphicsDevice.RasterizerState = rasterizerState1;
-            pointLightUpdater.UpdatePointLight();
+           
             //        chunkRenderer.RenderAllChunksOpq(ChunkManager.chunks, gamePlayer);
 
             //    entityRenderer.Draw();
 
             //        chunkRenderer.RenderAllChunksTransparent(ChunkManager.chunks, gamePlayer);
-
-
+            deferredShadingRenderer.DiffuseBlend(game.gamePlayer);
+            ssrRenderer.Draw(gameTime);
             deferredShadingRenderer.FinalBlend(game._spriteBatch, volumetricLightRenderer, game.GraphicsDevice, game.gamePlayer);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             game.GraphicsDevice.BlendState=BlendState.Additive;
@@ -165,9 +165,12 @@ namespace monogameMinecraftDX.Rendering
                 VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer, this);
             }
 
-             
-                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), game.gamePlayer,this);
-             
+            if (game.gamePlayer.curChunk != null)
+            {
+                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0,0,0), game.gamePlayer, this);
+
+            }
+
 
         }
 
@@ -192,6 +195,7 @@ namespace monogameMinecraftDX.Rendering
             deferredShadingRenderer.renderTargetLum = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             deferredShadingRenderer.finalImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             deferredShadingRenderer.renderTargetLumSpec = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            deferredShadingRenderer.renderTargetLumAllDiffuse = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             motionBlurRenderer.processedImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
             hiZBufferRenderer.ResizeTarget();
             ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);

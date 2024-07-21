@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using monogameMinecraftDX.World;
 using monogameMinecraftDX.Utility;
 using monogameMinecraftDX.Updateables;
@@ -38,8 +39,8 @@ namespace monogameMinecraftDX.Rendering
             this.shadowMapShader = shadowMapShader;
             entityRenderer = er;
             chunkRenderer = cr;
-            shadowMapTarget = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Rgba64, DepthFormat.Depth24);
-            shadowMapTargetFar = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Rgba64, DepthFormat.Depth24);
+            shadowMapTarget = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            shadowMapTargetFar = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             shadowMapBinding = new RenderTargetBinding[2];
             shadowMapBinding[0] = new RenderTargetBinding(shadowMapTarget);
 
@@ -152,13 +153,18 @@ namespace monogameMinecraftDX.Rendering
         public void RenderShadow(GamePlayer player)
         {
             //   UpdateLightMatrices(player);
+            Vector4 world0 = new Vector4(player.position.X, player.position.Y, player.position.Z, 1);
+            Vector4 world1 = new Vector4(player.position.X, player.position.Y+0.3f, player.position.Z, 1);
+            Vector4 transformedWorld0 = Vector4.Transform(world0, lightSpaceMat);
+            Vector4 transformedWorld1 = Vector4.Transform(world1, lightSpaceMat);
+     //    Debug.WriteLine(transformedWorld0.Z - transformedWorld1.Z);
             if (gameTimeManager.sunX >= 180f)
             {
-                shadowBias = 0.006f;
+                shadowBias = MathF.Abs(transformedWorld0.Z - transformedWorld1.Z);
             }
             else
             {
-                shadowBias = -0.006f;
+                shadowBias = MathF.Abs(transformedWorld0.Z - transformedWorld1.Z);
             }
             UpdateLightMatrices(player);
             BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);

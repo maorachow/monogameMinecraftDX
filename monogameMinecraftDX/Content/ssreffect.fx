@@ -780,7 +780,21 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
             
-            
+                direction *= 0.5;
+                finalPoint += direction * _sign;
+                uv1 = GetScreenCoordFromWorldPos(finalPoint);
+            //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+                testDepth1 = GetViewDepthFromWorldPos(finalPoint);
+                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                _sign = -sign(testDepth1 - sampleDepth1);
+                
+                direction *= 0.5;
+                finalPoint += direction * _sign;
+                uv1 = GetScreenCoordFromWorldPos(finalPoint);
+            //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
+                testDepth1 = GetViewDepthFromWorldPos(finalPoint);
+                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                _sign = -sign(testDepth1 - sampleDepth1);
             
               
                  

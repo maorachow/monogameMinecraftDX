@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using monogameMinecraftDX.Animations;
 using monogameMinecraftDX.Core;
 using monogameMinecraftDX.Pathfinding;
+using monogameMinecraftDX.Physics;
 using monogameMinecraftDX.Rendering;
 using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.World;
@@ -39,8 +40,8 @@ namespace monogameMinecraftDX
         public Vector3 lastPos;
 
 
-        public WalkablePath entityPath;
-        public bool isPathValid = false;
+       
+       
         public bool hasReachedCurStep = false;
         public bool isPathfindingNeeded = false;
         public bool hasReachedFinalStep = false;
@@ -51,14 +52,16 @@ namespace monogameMinecraftDX
         {
             if (isPathfindingNeeded == true)
             {
-                bool isNewPathValid;
-                entityPath = EntityManager.pathfindingManager.GetFlatTilemapPath(ChunkHelper.Vec3ToBlockPos(position), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position),
-                    out isNewPathValid);
-                if (entityPath == null)
+                Debug.WriteLine("try find path");
+          //      bool isNewPathValid=false;
+         //      EntityManager.pathfindingManager.GetThreeDimensionalMapPath(ChunkHelper.Vec3ToBlockPos(position+new Vector3(0f,0.1f,0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position+new Vector3(0,-0.5f,0f)),
+           //          out isNewPathValid,ref entityPath);
+                EntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position + new Vector3(0, -0.5f, 0f)),this);
+       /*         if (entityPath == null)
                 {
                     isNewPathValid = false;
                 }
-                isPathValid = isNewPathValid;
+                isPathValid = isNewPathValid;*/
                 isPathfindingNeeded = false;
             }
         }
@@ -144,8 +147,14 @@ namespace monogameMinecraftDX
             GetEntitiesAround();
 
 
-            if (Vector3.Distance(position, targetPos) > 0.6f)
+            if (Vector3.Distance(position, targetPos) < 0.6f||BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds,targetPos))
             {
+
+                hasReachedCurStep = true;
+            }
+            else
+            {
+
                 Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
                 float movePosY = movePos.Y;
                 if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
@@ -157,7 +166,7 @@ namespace monogameMinecraftDX
                     targetPos.Z - position.Z);
                 lookPos.Normalize();
                 Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
-             
+
                 entityVec = movePosN;
                 //              Debug.WriteLine(movePos);
                 if (isGround != false || !(entityGravity < 0f))
@@ -177,18 +186,16 @@ namespace monogameMinecraftDX
 
                 hasReachedCurStep = false;
                 timeSpentToNextStep += deltaTime;
-                
-            }
-            else
-            {
-                hasReachedCurStep = true;
+
             }
 
             if (hasReachedCurStep&&isPathValid)
             {
                 if (entityPath.curStep < entityPath.steps.Count - 1)
                 {
+
                     entityPath.curStep++;
+                //    Debug.WriteLine("current step index:"+entityPath.curStep);
                     timeSpentToNextStep = 0f;
                     hasReachedFinalStep = false;
                 }
@@ -206,7 +213,7 @@ namespace monogameMinecraftDX
                 isPathValid = false;
                 isPathfindingNeeded = true;
             }
-            if (!isPathValid||hasReachedFinalStep==true)
+            if ((!isPathValid||hasReachedFinalStep==true)&& Vector3.Distance(position, game.gamePlayer.position)>2f)
             {
                 isPathfindingNeeded = true;
             }

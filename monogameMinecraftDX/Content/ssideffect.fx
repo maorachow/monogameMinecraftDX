@@ -358,7 +358,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     for (int i = 0; i <2; i++)
     {
         float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
-        sampleDir.z = clamp(sampleDir.z, 0.02, 1);
+        sampleDir.z = clamp(sampleDir.z, 0.03, 1);
         sampleDir = normalize(sampleDir);
         sampleDir = mul(sampleDir, TBN);
         bool isHit = false;
@@ -373,7 +373,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         {
             if (dot(normal, sampleDir) < 0)
             {
-            
+             //   return float4(0, 1, 0, 1);
                 isHit = false;
            
                 break;

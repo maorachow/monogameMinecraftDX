@@ -149,6 +149,8 @@ namespace monogameMinecraftDX.UI
 
 
                 new UIButton(new Vector2(0.8f, 0.1f), 0.1f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.structureOperationsUIsPageID=1; } ,"Next Page" ,null,0.5f),
+
+                new UIButton(new Vector2(0.1f, 0.1f), 0.1f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{game.CloseStructureOperationsUI(); } ,"Close UI" ,null,0.5f),
             };
 
 

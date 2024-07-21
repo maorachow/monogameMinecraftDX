@@ -269,14 +269,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 kD = 1.0 - kS;
     kD *= 1.0 - mer.x;
     
-    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
+  /*  float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
    
     float3 irradiance = lerp(texCUBE(irradianceSampler, normal).rgb, texCUBE(irradianceSamplerNight, normal).rgb, mixValue);
     float3 diffuse = irradiance * albedo;
     float3 ambientEnv = (kD * diffuse);
 
     
-    indirectDiffuse = lerp(ambientEnv, indirectDiffuse, tex2D(ssidSampler, input.TexCoords).a);
+    indirectDiffuse = lerp(ambientEnv, indirectDiffuse, tex2D(ssidSampler, input.TexCoords).a);*/
 
      
    /* const float MAX_REFLECTION_LOD = 4.0;
@@ -285,7 +285,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y) * 0.1;*/
     
     
-    float3 ambient = (reflection +indirectDiffuse /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
+    float3 ambient = (reflection /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
     float3 final = color + ambient ;
     final = final / (final + float3(1.0, 1.0, 1.0));
     final = pow(final, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));

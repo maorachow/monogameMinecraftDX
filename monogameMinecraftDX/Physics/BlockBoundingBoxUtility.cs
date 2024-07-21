@@ -29,6 +29,31 @@ namespace monogameMinecraftDX.Physics
                     return false;
             }
         }
+        public static bool IsBlockWithBoundingBox(BlockData  data)
+        {
+            if (data.blockID == 0)
+            {
+                return false;
+            }
+            if (!Chunk.blockInfosNew.ContainsKey(data.blockID))
+            {
+                return false;
+            }
+            BlockShape shape = Chunk.blockInfosNew[data.blockID].shape;
+            switch (shape)
+            {
+                case BlockShape.Fence:
+                    return true;
+                case BlockShape.Door:
+                    return true;
+                case BlockShape.Solid:
+                    return true;
+                case BlockShape.Stairs:
+                    return true;
+                default:
+                    return false;
+            }
+        }
         public static BoundingBox GetBoundingBox(int x, int y, int z, BlockData blockData)
         {
             if (blockData.blockID == 0)

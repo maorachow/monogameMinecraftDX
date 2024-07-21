@@ -459,7 +459,7 @@ namespace monogameMinecraftDX
             Vector2Int chunkSpacePos = intPos - locChunk.chunkPos;
             chunkSpacePos.x = MathHelper.Clamp(chunkSpacePos.x, 0, Chunk.chunkWidth - 1);
             chunkSpacePos.y = MathHelper.Clamp(chunkSpacePos.y, 0, Chunk.chunkWidth - 1);
-            for (int i = 200; i > 0; i--)
+            for (int i = Chunk.chunkHeight-1; i > 0; i--)
             {
                 if (locChunk.map[chunkSpacePos.x, i - 1, chunkSpacePos.y] != 0)
                 {

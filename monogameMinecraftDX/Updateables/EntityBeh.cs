@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using monogameMinecraftDX.Animations;
 using monogameMinecraftDX.Physics;
 using monogameMinecraftDX.Core;
+using monogameMinecraftDX.Pathfinding;
 using monogameMinecraftDX.Rendering;
 using monogameMinecraftDX.Updateables;
 using monogameMinecraftDX.Utility;
@@ -45,6 +46,8 @@ namespace monogameMinecraftDX
         // public AnimationState animationState;
         public AnimationBlend animationBlend;
 
+        public WalkablePath entityPath;
+        public bool isPathValid;
         public EntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, int typeID, string entityID, float entityHealth, bool isEntityHurt, MinecraftGame game)
         {
             this.position = position;

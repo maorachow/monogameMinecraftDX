@@ -17,6 +17,7 @@ using monogameMinecraftDX.UI;
 
 using monogameMinecraftDX.Physics;
 using monogameMinecraftDX.Updateables;
+using monogameMinecraftDX.Test;
 
 namespace monogameMinecraftDX
 {
@@ -385,6 +386,8 @@ namespace monogameMinecraftDX
 
             //    ChunkManager.chunks =null;
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
+           UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
+           EntityManager.StopAllThreads();
             EntityManager.InitEntityList();
             ParticleManager.instance.ReleaseResources();
             GC.Collect();
@@ -456,8 +459,21 @@ namespace monogameMinecraftDX
             IsMouseVisible = false;
         }
 
+        public void CloseStructureOperationsUI()
+        {
+            isStructureOperationsUIOpened = false;
+            if (isStructureOperationsUIOpened == true)
+            {
+                IsMouseVisible = true;
+            }
+            else
+            {
+                IsMouseVisible = false;
+            }
+        }
         float prevFPS = 0f;
         public KeyboardState lastKeyState1;
+      //  public Vector3Int debugMapOrigin;
         protected override void Update(GameTime gameTime)
         {
             if (!IsActive) return;
@@ -532,7 +548,7 @@ namespace monogameMinecraftDX
                         //  Exit();
                         //   Environment.Exit(0);
 
-                        isStructureOperationsUIOpened = !isStructureOperationsUIOpened;
+                        isStructureOperationsUIOpened = true;
                         if (isStructureOperationsUIOpened == true)
                         {
                             IsMouseVisible = true;
@@ -556,19 +572,39 @@ namespace monogameMinecraftDX
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.P) && !lastKeyState1.IsKeyUp(Keys.P))
                     {
-                    /*    int[,] heightMap = gamePlayer.curChunk?.thisAccurateHeightMap;
-                        WalkablePath path;
-                        if (heightMap != null)
+                      
+                     /*   if (gamePlayer.curChunk != null)
                         {
-                            path = FlatTilemapPathfindingUtility.FindPathByChunkHeightMap(heightMap,
-                                ChunkHelper.GetChunkSpacePos(gamePlayer.position, gamePlayer.curChunk),
-                                new Vector2Int(Chunk.chunkWidth - 2, Chunk.chunkWidth - 2));
-                          foreach (var VARIABLE in path.steps)
+                           debugMapOrigin = new Vector3Int(gamePlayer.curChunk.chunkPos.x,
+                                (int)gamePlayer.position.Y - 10,
+                                gamePlayer.curChunk.chunkPos.y);
+                            BlockData[,,] map = ChunkHelper.GetBlocks(
+                                debugMapOrigin, Chunk.chunkWidth, 20, Chunk.chunkWidth);
+
+
+                            WalkablePath path;
+
+                            if (map != null)
                             {
-                                Debug.WriteLine(VARIABLE);
+                               // Debug.WriteLine("top:"+(ChunkHelper.GetChunkLandingPoint(gamePlayer.curChunk.chunkPos.x + 14, gamePlayer.curChunk.chunkPos.y + 14)));
+                               // Debug.WriteLine("toporigin:" + (ChunkHelper.GetChunkLandingPoint(ChunkHelper.FloatToInt(gamePlayer.position.X), ChunkHelper.FloatToInt(gamePlayer.position.Z))));
+                               // Debug.WriteLine("origin:"+ debugMapOrigin.y);
+                               // Debug.WriteLine("playerPos:" +( (int)gamePlayer.position.X - gamePlayer.curChunk.chunkPos.x)+" "+( (int)gamePlayer.position.Z - gamePlayer.curChunk.chunkPos.y));
+                                path = ThreeDimensionalMapPathfindingUtility.FindPathByBlockData(map,
+                                    new Vector3Int(ChunkHelper.FloatToInt(gamePlayer.position.X) - gamePlayer.curChunk.chunkPos.x, (ChunkHelper.GetChunkLandingPoint(ChunkHelper.FloatToInt(gamePlayer.position.X), ChunkHelper.FloatToInt(gamePlayer.position.Z)) )- debugMapOrigin.y,
+                                        ChunkHelper.FloatToInt(gamePlayer.position.Z) - gamePlayer.curChunk.chunkPos.y),
+                                new Vector3Int(14, (ChunkHelper.GetChunkLandingPoint(gamePlayer.curChunk.chunkPos.x + 14, gamePlayer.curChunk.chunkPos.y + 14)) - debugMapOrigin.y,
+                                       14));
+                                foreach (var VARIABLE in path.steps)
+                                {
+                                   // Debug.WriteLine(VARIABLE);
+                                }
+                                EntityManager.pathfindingManager.curDebuggingPath= path;
                             }
-                      pathfindingManager.curDebuggingPath= path;
                         }*/
+
+                        
+                       
                     EntityManager.pathfindingManager.drawDebugLines=!EntityManager.pathfindingManager.drawDebugLines;
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
@@ -828,7 +864,8 @@ namespace monogameMinecraftDX
 
                         _spriteBatch.Draw(renderPipelineManager.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 800, 400, 400), Color.White);
+                        _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
+                        _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
                         _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);

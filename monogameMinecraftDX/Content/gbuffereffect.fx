@@ -16,7 +16,7 @@ sampler textureSampler = sampler_state
    
     Filter = Point;
     Mipfilter = Linear;
-    MipLODBias = -3;
+    MipLODBias = -2;
     MaxLOD = 8;
    
 };
@@ -29,7 +29,7 @@ sampler normalSampler = sampler_state
     MagFilter = Point;
     MinFilter = Point;
     Mipfilter = Point;
-    MipLODBias =-4;
+    MipLODBias =-2;
     MaxLOD = 8;
    
 };

@@ -140,9 +140,9 @@ float Random2DTo1D(float2 value)
 }
 float2 PixelSize;
 #define PI 3.1415926
-#define STEP_COUNT 3
-#define DIRECTION_COUNT 3
-#define RADIUS 0.3
+#define STEP_COUNT 8
+#define DIRECTION_COUNT 8
+#define RADIUS 0.5
 float FallOff(float dist)
 {
     return 1 - dist * dist / (RADIUS * RADIUS);
@@ -153,11 +153,12 @@ float FallOff(float dist)
     
     float3 h = stepVpos - vpos;
     float dist = length(h);
-   
-    float occlusion = dot(normal, h) / dist;
+    
+    float occlusion = dot((normal), h)/dist;
      
     float diff = max(occlusion - topOcclusion, 0);
     topOcclusion = max(occlusion, topOcclusion);
+ //   return max( occlusion * saturate(FallOff(dist)), topOcclusion);
     return diff * saturate(FallOff(dist));
 }
 float4x4 NormalView;
@@ -264,54 +265,64 @@ float4 MainPS(VertexShaderOutput input):SV_Target0
         
     float3 randomVec = float3(tex2D(texNoise, input.TexCoords).r , tex2D(texNoise, input.TexCoords).g, 0);
     float ao = 0;
-  //  float2 ScreenDir = randomVec.xy * stride*PixelSize;
-  //  float SinDeltaAngle = sin(PI * 2 / DIRECTION_COUNT);
- //   float CosDeltaAngle = cos(PI*2 / DIRECTION_COUNT);
-   float PixelRadius =min(RADIUS / -viewPos.z, 0.1);
+    float2 ScreenDir = randomVec.xy * stride*PixelSize;
+    float Offset = tex2D(texNoise, input.TexCoords).b;
+    float SinDeltaAngle = sin(PI * 2.0 / (float) DIRECTION_COUNT);
+    float CosDeltaAngle = cos(PI * 2.0 / (float) DIRECTION_COUNT);
+   float PixelRadius =min(RADIUS / -viewPos.z, 0.01);
     float StepRadius = PixelRadius / ((float) STEP_COUNT + 1);
+    
+    float WorldRadius = 30.0f;
+    float AttenFactor = 2.0 / (WorldRadius * WorldRadius);
     [unroll(DIRECTION_COUNT)]
     for (int i = 0; i < DIRECTION_COUNT; i++)
     {
-       float radian = stepRadian * (i + randomVec.x);
+    /*  float radian = stepRadian * ( i + randomVec.x);
         float sinr, cosr;
         sincos(radian, sinr, cosr);
         float2 direction = float2(cosr, sinr) * stride * PixelSize;
        
-        float2 horizons = SearchForLargestAngleDual(STEP_COUNT, input.TexCoords, direction, StepRadius, 0.1, viewPos, normalize(-viewPos), 0.5);
+        float2 horizons = SearchForLargestAngleDual(STEP_COUNT, input.TexCoords, direction, StepRadius, Offset, viewPos, normalize(-viewPos), 0.9);
 
         ao += ComputeInnerIntegral(horizons, direction, normalize(-viewPos), normal);
       //  randomVec.xy += direction;
-      //  float2 TempScreenDir = ScreenDir.xy;
-     //   ScreenDir.x = (TempScreenDir.x * CosDeltaAngle) + (TempScreenDir.y * -SinDeltaAngle);
-     //   ScreenDir.y = (TempScreenDir.x * SinDeltaAngle) + (TempScreenDir.y * CosDeltaAngle);
- 
-                        
+      
+        //Offset = frac(Offset + 0.617);
  
 		// Rotate for the next angle
         
- 
-    /*    float radian = stepRadian * (i + randomVec.x);
+ */
+        float radian = stepRadian * (i + randomVec.x);
         float sinr, cosr;
         sincos(radian, sinr, cosr);
         float2 direction = float2(cosr, sinr);
        
        
         float rayPixels = frac(randomVec.y) * stride + 1.0;
-        float topOcclusion = 0.1;
-    
+        float topOcclusion = 0.2;
+        float occu = 0;
+     
         for (int s = 0; s < STEP_COUNT; s++)
         {
             float2 uv2 = round(rayPixels * direction) * PixelSize + input.TexCoords;
          
             float linearDepth2 = tex2D(gProjectionDepth, uv2).x;
             float3 vpos2 = mul(float4(ReconstructViewPos(uv2, linearDepth2).xyz + CameraPos, 1), View).xyz;
-           
-            ao += ComputeAO(viewPos, vpos2, normal, topOcclusion);
+         
+             
+            occu += ComputeAO(viewPos, vpos2, normal, topOcclusion);
             rayPixels += stride;
-        }*/
+           
+        }
+      //  occu /= STEP_COUNT;
+         
+        ao += occu;
     }
-    
-    ao /= (DIRECTION_COUNT);
+   // ao = pow(ao * rcp((float) STEP_COUNT * DIRECTION_COUNT) * 1, 0.6);
+  // ao /= (DIRECTION_COUNT);
+   
+    ao = ao / ((float) DIRECTION_COUNT);
+    ao = 1 - ao;
 //    ao *= 2.0 / PI;
     return float4(ao.xxx, 1);
   /*      float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
