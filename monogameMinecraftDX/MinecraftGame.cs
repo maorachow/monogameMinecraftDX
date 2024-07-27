@@ -2,36 +2,37 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 //using System.Numerics;
-using monogameMinecraftDX.World;
-using monogameMinecraftDX.Rendering;
-using monogameMinecraftDX.Asset;
+using monogameMinecraftShared.World;
+using monogameMinecraftShared.Rendering;
+using monogameMinecraftShared.Asset;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using monogameMinecraftDX.Core;
-using monogameMinecraftDX.Pathfinding;
-using monogameMinecraftDX.Utility;
-using monogameMinecraftDX.UI;
+using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Pathfinding;
+using monogameMinecraftShared.Utility;
+using monogameMinecraftShared.UI;
 
-using monogameMinecraftDX.Physics;
-using monogameMinecraftDX.Updateables;
-using monogameMinecraftDX.Test;
+using monogameMinecraftShared.Physics;
+using monogameMinecraftShared;
+using monogameMinecraftShared.Updateables;
+ 
 
 namespace monogameMinecraftDX
 {
-    public enum GameStatus
+  /*  public enum GameStatus
     {
         Menu,
         Settings,
         Started,
         Quiting
-    }
-    public class MinecraftGame : Game
+    }*/
+    public class MinecraftGame : MinecraftGameBase
     {
         private GraphicsDeviceManager _graphics;
-        public SpriteBatch _spriteBatch;
+     //   public SpriteBatch _spriteBatch;
         /*    public Effect chunkSolidEffect;
             public Effect chunkShadowEffect;
             public Effect entityEffect;
@@ -53,19 +54,19 @@ namespace monogameMinecraftDX
             public Effect fxaaEffect;
             public Effect motionBlurEffect;*/
         public AlphaTestEffect chunkNSEffect;
-        public GamePlayer gamePlayer;
-        public static Vector3 gameposition;
-    
+    //    public GamePlayer gamePlayer;
+     //   public static Vector3 gameposition;
+    /*
         public Thread updateWorldThread;
         public Thread tryRemoveChunksThread;
-        public int renderDistance = 512;
-        public GameStatus status = GameStatus.Menu;
+        public int renderDistance = 512;*/
+    //    public GameStatus status = GameStatus.Menu;
 
         public RandomTextureGenerator randomTextureGenerator;
         public GlobalMaterialParamsManager globalMaterialParamsManager;
 
-        public GameTimeManager gameTimeManager;
-        public RenderPipelineManager renderPipelineManager;
+      //  public GameTimeManager gameTimeManager;
+     //   public IRenderPipelineManager renderPipelineManager { get; set; }
         public ParticleManager particleManager;
         /*
         public EntityRenderer entityRenderer;
@@ -91,14 +92,14 @@ namespace monogameMinecraftDX
         public HiZBufferRenderer hiZBufferRenderer;
         public MotionBlurRenderer motionBlurRenderer;
         HDRCubemapRenderer hdrCubemapRenderer;*/
-        public EffectsManager effectsManager = new EffectsManager();
+       // public EffectsManager effectsManager = new EffectsManager();
       //  public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
-     
+    /* 
         Texture2D terrainTex;
         Texture2D terrainTexNoMip;
         Texture2D terrainNormal;
         Texture2D terrainDepth;
-        Texture2D terrainMER;
+        Texture2D terrainMER;*/
         
         public MinecraftGame()
         {
@@ -114,7 +115,9 @@ namespace monogameMinecraftDX
             _graphics.SynchronizeWithVerticalRetrace = false;
             IsMouseVisible = true;
             this.IsFixedTimeStep = false;
-            renderPipelineManager = new RenderPipelineManager(this, effectsManager);
+            effectsManager=new EffectsManager();
+            renderPipelineManager = new HighDefRenderPipelineManager(this, effectsManager);
+            gamePlatformType = GamePlatformType.HighDefDX;
             //    TargetElapsedTime = System.TimeSpan.FromMilliseconds(10);
             //         TargetElapsedTime = System.TimeSpan.FromMilliseconds(33);
             //this.OnExiting += OnExit;
@@ -126,7 +129,7 @@ namespace monogameMinecraftDX
             _graphics.SynchronizeWithVerticalRetrace = false;
 
         }
-        void OnResize(Object sender, EventArgs e)
+       public override void OnResize(Object sender, EventArgs e)
         {
             UIElement.ScreenRect = this.Window.ClientBounds;
             foreach (UIElement element in UIElement.menuUIs)
@@ -211,7 +214,7 @@ namespace monogameMinecraftDX
             Debug.WriteLine(GraphicsDevice.Viewport.Width + " " + GraphicsDevice.Viewport.Height);
         }
  
-        public void InitGameplay(object obj)
+        public override void InitGameplay(object obj)
         {
 
 
@@ -232,7 +235,7 @@ namespace monogameMinecraftDX
             BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory() + "/blockinfodata.json");
 
             status = GameStatus.Started;
-            gamePlayer = new GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
@@ -350,12 +353,12 @@ namespace monogameMinecraftDX
             isGamePaused = false;
         }
 
-        public void QuitGameplay()
+        public override void QuitGameplay()
         {
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
             VoxelWorld.currentWorld.SaveAndQuitWorld(this);
-            GamePlayer.SavePlayerData(gamePlayer);
+            monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayer);
             /*     foreach(var c in ChunkManager.chunks)
                  {
                  c.Value.Dispose();
@@ -399,7 +402,7 @@ namespace monogameMinecraftDX
             //   tryRemoveChunksThread.Abort();
         }
 
-        public void GoToSettings(object obj)
+        public override void GoToSettings(object obj)
         {
             GameOptions.ReadOptionsJson();
             foreach (UIElement element1 in UIElement.settingsUIsPage1)
@@ -413,7 +416,7 @@ namespace monogameMinecraftDX
             this.status = GameStatus.Settings;
         }
 
-        public void GoToMenuFromSettings(object obj)
+        public override void GoToMenuFromSettings(object obj)
         {
             GameOptions.SaveOptions(null);
             this.status = GameStatus.Menu;
@@ -453,13 +456,13 @@ namespace monogameMinecraftDX
         public bool isGamePaused = false;
         public bool isInventoryOpen = false;
         public bool isStructureOperationsUIOpened = false;
-        public void ResumeGame()
+        public override void ResumeGame()
         {
             isGamePaused = false;
             IsMouseVisible = false;
         }
 
-        public void CloseStructureOperationsUI()
+        public override void CloseStructureOperationsUI()
         {
             isStructureOperationsUIOpened = false;
             if (isStructureOperationsUIOpened == true)
@@ -473,7 +476,7 @@ namespace monogameMinecraftDX
         }
         float prevFPS = 0f;
         public KeyboardState lastKeyState1;
-      //  public Vector3Int debugMapOrigin;
+        //  public Vector3Int debugMapOrigin;
         protected override void Update(GameTime gameTime)
         {
             if (!IsActive) return;
@@ -854,27 +857,32 @@ namespace monogameMinecraftDX
 
                     if (GameOptions.showGraphicsDebug)
                     {
-                        _spriteBatch.Draw(renderPipelineManager.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
-                        for (int i = 0; i < renderPipelineManager.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                        if (renderPipelineManager is HighDefRenderPipelineManager)
                         {
-                            _spriteBatch.Draw(renderPipelineManager.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
+                            HighDefRenderPipelineManager renderPipelineManagerHighDef=renderPipelineManager as HighDefRenderPipelineManager;
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
+                            for (int i = 0; i < renderPipelineManagerHighDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                            {
+                                _spriteBatch.Draw(renderPipelineManagerHighDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
+                            }
+
+
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);
                         }
-
-
-                        _spriteBatch.Draw(renderPipelineManager.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
-                        _spriteBatch.Draw(renderPipelineManager.ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);
+                       
                     }
 
 
