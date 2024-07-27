@@ -207,7 +207,7 @@ namespace monogameMinecraftShared.Updateables
         Random rand = new Random();
         public bool BreakBlock()
         {
-            Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
+            Physics.Ray ray = new Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
             BlockFaces blockFaces = BlockFaces.PositiveY;
             VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this, graphicsDevice);

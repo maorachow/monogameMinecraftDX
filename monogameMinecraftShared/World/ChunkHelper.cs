@@ -411,7 +411,7 @@ namespace monogameMinecraftShared.World
 
 
             }
-            public static short RaycastFirstBlockID(monogameMinecraftShared.Physics.Ray ray, float distance)
+            public static short RaycastFirstBlockID(Physics.Ray ray, float distance)
         {
             for (float i = 0; i < distance; i += 0.1f)
             {
@@ -424,7 +424,7 @@ namespace monogameMinecraftShared.World
             }
             return 0;
         }
-        public static Vector3 RaycastFirstPosition(monogameMinecraftShared.Physics.Ray ray, float distance)
+        public static Vector3 RaycastFirstPosition(Physics.Ray ray, float distance)
         {
             for (float i = 0; i < distance; i += 0.01f)
             {

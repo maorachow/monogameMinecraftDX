@@ -1,5 +1,13 @@
 ﻿ 
-
+#if OPENGL
+#define SV_POSITION POSITION
+#define VS_SHADERMODEL vs_3_0
+#define PS_SHADERMODEL ps_3_0
+#else
+#define VS_SHADERMODEL vs_4_0_level_9_1
+#define PS_SHADERMODEL ps_4_0_level_9_1
+#endif
+ 
 matrix World;
 matrix View;
 matrix Projection;
@@ -16,7 +24,7 @@ sampler textureSampler = sampler_state
    
     Filter = Point;
     Mipfilter = Linear;
-    MipLODBias = -2;
+    MipLODBias = -3;
     MaxLOD = 8;
    
 };
@@ -29,7 +37,7 @@ sampler normalSampler = sampler_state
     MagFilter = Point;
     MinFilter = Point;
     Mipfilter = Point;
-    MipLODBias =-2;
+    MipLODBias = -2;
     MaxLOD = 8;
    
 };
@@ -55,7 +63,7 @@ struct VertexShaderInput
 
 struct VertexShaderOutput
 {
-    float4 PositionScreenSpace  : SV_Position;
+    float4 PositionScreenSpace : SV_Position;
     float4 PositionV : TEXCOORD1;
     
   //  float4 PositionP : TEXCOORD4;
@@ -69,19 +77,17 @@ struct PixelShaderOutput
 {
     
      
-    float4 ProjectionDepth : COLOR0;
-  //  float4 Normal : COLOR2;
     
-    float4 NormalWS : COLOR1;
-    float4 Albedo : COLOR2;
-    float4 MetallcEmissionRoughness : COLOR3;
+  
+    float4 Albedo : COLOR0;
+   
 };
 
  
  
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
-	VertexShaderOutput output = (VertexShaderOutput)0;
+    VertexShaderOutput output = (VertexShaderOutput) 0;
 	
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
@@ -89,11 +95,11 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     
     output.PositionV = viewPosition;
   
-    float3x3 worldView =   World*View;
+    float3x3 worldView = World * View;
     
     
     
-    output.Normal =input.Normal;
+    output.Normal = input.Normal;
     
     float3 BitTangent = cross(input.Normal, input.Tangent);
     float3 T = normalize((input.Tangent));
@@ -101,20 +107,20 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     float3 N = normalize(input.Normal);
     float3x3 TBN = float3x3(T, B, N);
     output.TBN = TBN;
-    output.PositionWS = worldPosition.xyz/worldPosition.w;
+    output.PositionWS = worldPosition.xyz / worldPosition.w;
     output.TexCoords = input.TexureCoordinate;
     
-	return output;
+    return output;
 }
  
 float LinearizeDepth(float depth)
 {
     float NEAR = 0.1;
-     float FAR = 100.0f;
-    float z = depth * 2.0 - 1.0; 
+    float FAR = 100.0f;
+    float z = depth * 2.0 - 1.0;
     return (2.0 * NEAR * FAR) / (FAR + NEAR - z * (FAR - NEAR));
 }
-PixelShaderOutput MainPS(VertexShaderOutput input) 
+PixelShaderOutput MainPS(VertexShaderOutput input)
 {
     PixelShaderOutput psOut = (PixelShaderOutput) 0;
     
@@ -123,36 +129,29 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     {
         discard;
     }
-    psOut.ProjectionDepth.a = 1;
+    
    // float z = -input.PositionV.z;
   //  float packedZ = ((1 / z) - 1 / 0.1) / (1 / 500 - 1 / 0.1);
   //  float packedZ1 = z / 50.0;
-    psOut.ProjectionDepth.r = -input.PositionV.z;
-    float3 normal = mul(abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).x < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).y < 0.99 || abs(tex2D(normalSampler, input.TexCoords).xyz * 2 - 1).z < 0.99 ? tex2D(normalSampler, input.TexCoords).xyz * 2 - 1 : float3(0, 0, 1) , input.TBN);
-    if (length(normal) < 0.001 )
-    {
-        normal = mul(float3(0.5,0.5,1), input.TBN);
-    }
-    psOut.NormalWS = float4(normal*0.5+0.5, 1);
-    psOut.Albedo = float4(tex2D(textureSampler,input.TexCoords).xyz, 1);
+    
+    psOut.Albedo = float4(tex2D(textureSampler, input.TexCoords).xyz, 1);
     
     psOut.Albedo.a = 1;
 
     
     
-    psOut.MetallcEmissionRoughness.rgb = tex2D(merSampler, input.TexCoords).xyz;
-    psOut.MetallcEmissionRoughness.a = 1;
+  
     
     return psOut;
 
 }
 
-technique GBuffer
+technique LowDefForward
 {
-	pass P0
-	{
-        VertexShader = compile vs_4_0 MainVS();
-        PixelShader = compile ps_4_0 MainPS();
+    pass P0
+    {
+        VertexShader = compile VS_SHADERMODEL MainVS();
+        PixelShader = compile PS_SHADERMODEL MainPS();
     }
 };
 /*matrix World;

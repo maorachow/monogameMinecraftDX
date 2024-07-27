@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 using monogameMinecraftShared.Core;
+using Microsoft.Xna.Framework.Input.Touch;
 namespace monogameMinecraftShared.UI
 {
 
@@ -119,8 +120,19 @@ namespace monogameMinecraftShared.UI
         {
             get
             {
+                
                 //     Debug.WriteLine(ButtonRect.X+" "+ ButtonRect.Y + " "+ ButtonRect.Width + " "+ ButtonRect.Height);
                 //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
+                bool isTouchHovered = false;
+                foreach (var touch in UIElement.allTouches)
+                {
+                    if (this.ButtonRect.Contains(touch.Position))
+                    {
+                        isTouchHovered = true;
+                        break;
+                    }
+                }
+
                 if (ButtonRect.Contains(new Vector2(mouseState.X, mouseState.Y)))
                 {
                     return true;
@@ -128,7 +140,8 @@ namespace monogameMinecraftShared.UI
                 }
                 else
                 {
-                    return false;
+
+                    return isTouchHovered;
                 }
             }
 
@@ -137,7 +150,18 @@ namespace monogameMinecraftShared.UI
         public void Update()
         {
             mouseState = Mouse.GetState();
-            if (isHovered && mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released && isClickable == true)
+
+            bool isTouched = false;
+            foreach (var tc in UIElement.allTouches)
+            {
+
+                if (tc.State == TouchLocationState.Released && isHovered)
+                {
+                    isTouched = true;
+                    //   Debug.WriteLine("touched");
+                }
+            }
+            if (((isHovered && mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)|| isTouched==true) && isClickable == true)
             {
                 //   Debug.WriteLine("pressed");
 

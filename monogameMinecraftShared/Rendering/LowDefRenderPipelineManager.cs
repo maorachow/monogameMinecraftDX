@@ -29,7 +29,7 @@ namespace monogameMinecraftShared.Rendering
         public GBufferRenderer gBufferRenderer;
         public EntityRenderer entityRenderer;
         public TerrainMipmapGenerator terrainMipmapGenerator;
-        public HDRCubemapRenderer hdrCubemapRenderer;
+        public HDRCubemapRendererLowDef hdrCubemapRenderer;
         public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
         public SSAORenderer ssaoRenderer;
 
@@ -46,7 +46,7 @@ namespace monogameMinecraftShared.Rendering
             terrainMipmapGenerator = new TerrainMipmapGenerator(game.GraphicsDevice, effectsManager.gameEffects["texturecopyeffect"]);
        /*     brdfLUTRenderer = new BRDFLUTRenderer(game.GraphicsDevice, effectsManager.gameEffects["brdfluteffect"]);
             brdfLUTRenderer.CalculateLUT();*/
-            hdrCubemapRenderer = new HDRCubemapRenderer(game.GraphicsDevice, effectsManager.gameEffects["hdricubeeffect"], environmentHDRITex, effectsManager.gameEffects["hdriirradianceeffect"], effectsManager.gameEffects["hdriprefiltereffect"], environmentHDRITexNight);
+            hdrCubemapRenderer = new HDRCubemapRendererLowDef(game.GraphicsDevice, effectsManager.gameEffects["hdricubeeffect"], environmentHDRITex, environmentHDRITexNight);
             hdrCubemapRenderer.Render(hdrCubemapRenderer.resultCubeCollection, 0);
             hdrCubemapRenderer.Render(hdrCubemapRenderer.resultCubeCollectionNight, 1);
 
@@ -65,8 +65,8 @@ namespace monogameMinecraftShared.Rendering
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
-            skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0;
-            skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0;
+            skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection;
+            skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight;
             ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             /*        contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayer);
                     shadowRenderer = new ShadowRenderer(game, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer, game.gameTimeManager);
@@ -74,7 +74,7 @@ namespace monogameMinecraftShared.Rendering
                     ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
                     fxaaRenderer = new FXAARenderer(game.GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
                     motionBlurRenderer = new MotionBlurRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);*/
-            deferredShadingRendererLowDef = new DeferredShadingRendererLowDef(game.GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"],ssaoRenderer, game.gameTimeManager, gBufferRenderer, skyboxRenderer, hdrCubemapRenderer);
+            deferredShadingRendererLowDef = new DeferredShadingRendererLowDef(game.GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"],ssaoRenderer, game.gameTimeManager, gBufferRenderer, skyboxRenderer);
 
 
      /*       customPostProcessors.Add(new CustomPostProcessor(game.GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess0"));

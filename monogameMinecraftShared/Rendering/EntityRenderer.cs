@@ -115,7 +115,7 @@ namespace monogameMinecraftShared.Rendering
             //    basicShader.Parameters["View"].SetValue(player.cam.GetViewMatrix());
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             //      
-            gBufferShader.Parameters["TextureE"].SetValue(zombieTex);
+           
             BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityManager.worldEntities)
             {
@@ -124,6 +124,7 @@ namespace monogameMinecraftShared.Rendering
                     switch (entity.typeID)
                     {
                         case 0:
+                            gBufferShader.Parameters["TextureE"].SetValue(zombieTex);
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(entity.position);
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -145,6 +146,55 @@ namespace monogameMinecraftShared.Rendering
                                 {
 
                                     gBufferShader.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+
+                                }
+                            });
+                            break;
+                    }
+                }
+
+            }
+
+
+        }
+
+
+        public void DrawLowDefForward(Effect forwardShader)
+        {
+            //    basicShader.Parameters["View"].SetValue(player.cam.GetViewMatrix());
+            //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
+            //      
+        
+            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
+            foreach (var entity in EntityManager.worldEntities)
+            {
+                if (frustum.Intersects(entity.bounds))
+                {
+                    switch (entity.typeID)
+                    {
+                        case 0:
+                            forwardShader.Parameters["TextureE"].SetValue(zombieTex);
+                            //    DrawZombie(entity,gBufferShader);
+                            Matrix world = Matrix.CreateTranslation(entity.position);
+                            Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                            {
+                                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
+                                {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
+                            };
+
+                            entity.animationBlend.DrawAnimatedModel(device, world, player.cam.viewMatrix, player.cam.projectionMatrix, forwardShader, optionalParams, () =>
+                            {
+                                if (entity.isEntityHurt)
+                                {
+
+
+                                    forwardShader.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+
+                                }
+                                else
+                                {
+
+                                    forwardShader.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
 
                                 }
                             });

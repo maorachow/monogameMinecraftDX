@@ -171,6 +171,102 @@ namespace monogameMinecraftShared.Rendering
 
 
         }
+
+
+
+        public void RenderAllChunksLowDefForward(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Effect forwardEffect)
+        {
+
+            forwardEffect.Parameters["blockTex"].SetValue(atlas);
+            forwardEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
+            forwardEffect.Parameters["merTex"]?.SetValue(atlasMER);
+            forwardEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
+            forwardEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
+
+            foreach (var chunk in RenderingChunks)
+            {
+                Chunk c = chunk.Value;
+                if (c == null)
+                {
+                    continue;
+                }
+
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
+                {
+                    if (frustum.Intersects(c.chunkBounds))
+                    {
+                        if (MathF.Abs(c.chunkPos.x - player.position.X) < 384 && MathF.Abs(c.chunkPos.y - player.position.Z) < 384)
+                        {
+                            RenderSingleChunkGBuffer(c, player, forwardEffect, false);
+                        }
+                        else
+                        {
+                            RenderSingleChunkGBuffer(c, player, forwardEffect, true);
+                        }
+                    }
+
+
+
+
+
+
+
+
+
+
+                }
+            }
+            foreach (var chunk in RenderingChunks)
+            {
+                Chunk c = chunk.Value;
+                if (c == null)
+                {
+                    continue;
+                }
+
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
+                {
+                    if (MathF.Abs(c.chunkPos.x - player.position.X) < 256 && MathF.Abs(c.chunkPos.y - player.position.Z) < 256)
+                    {
+                        if (frustum.Intersects(c.chunkBounds))
+                        {
+                            RenderSingleChunkGBufferAlphaTest(c, player, forwardEffect);
+
+                        }
+                    }
+
+
+
+
+
+                }
+            }
+            foreach (var chunk in RenderingChunks)
+            {
+                Chunk c = chunk.Value;
+                if (c == null)
+                {
+                    continue;
+                }
+
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
+                {
+
+                    if (frustum.Intersects(c.chunkBounds))
+                    {
+                        RenderSingleChunkGBufferWater(c, player, forwardEffect);
+
+                    }
+
+
+
+
+                }
+            }
+
+
+        }
         public void RenderSingleChunkGBuffer(Chunk c, GamePlayer player, Effect gBufferEffect, bool isLOD = false)
         {
             if (isLOD)

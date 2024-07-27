@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftDX", "mono
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MCDXEditor", "MCDXEditor\MCDXEditor.csproj", "{B9685C7F-5272-452A-9DA4-3F96A418DD47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftMobile", "monogameMinecraftMobile\monogameMinecraftMobile.csproj", "{69DBA68B-7509-47A9-8297-A3FB00518F62}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftShared", "monogameMinecraftShared\monogameMinecraftShared.csproj", "{31566FCB-6331-4F29-8B01-9E8AB156DA8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monogameMinecraftGL", "monogameMinecraftGL\monogameMinecraftGL.csproj", "{ACDFBA0F-C2C5-4295-988F-0ECED0D58C08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftGL", "monogameMinecraftGL\monogameMinecraftGL.csproj", "{ACDFBA0F-C2C5-4295-988F-0ECED0D58C08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monogameMinecraftAndroid", "monogameMinecraftAndroid\monogameMinecraftAndroid.csproj", "{20D19569-4974-46E9-8473-329B9C9A3CF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,11 +27,6 @@ Global
 		{B9685C7F-5272-452A-9DA4-3F96A418DD47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9685C7F-5272-452A-9DA4-3F96A418DD47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9685C7F-5272-452A-9DA4-3F96A418DD47}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69DBA68B-7509-47A9-8297-A3FB00518F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69DBA68B-7509-47A9-8297-A3FB00518F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69DBA68B-7509-47A9-8297-A3FB00518F62}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{69DBA68B-7509-47A9-8297-A3FB00518F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69DBA68B-7509-47A9-8297-A3FB00518F62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31566FCB-6331-4F29-8B01-9E8AB156DA8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31566FCB-6331-4F29-8B01-9E8AB156DA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31566FCB-6331-4F29-8B01-9E8AB156DA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,6 +35,11 @@ Global
 		{ACDFBA0F-C2C5-4295-988F-0ECED0D58C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACDFBA0F-C2C5-4295-988F-0ECED0D58C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACDFBA0F-C2C5-4295-988F-0ECED0D58C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20D19569-4974-46E9-8473-329B9C9A3CF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20D19569-4974-46E9-8473-329B9C9A3CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20D19569-4974-46E9-8473-329B9C9A3CF6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{20D19569-4974-46E9-8473-329B9C9A3CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20D19569-4974-46E9-8473-329B9C9A3CF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

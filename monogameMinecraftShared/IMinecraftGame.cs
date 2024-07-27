@@ -26,6 +26,8 @@ namespace monogameMinecraftShared
     }
     public class MinecraftGameBase:Game
     {
+
+        public string optionalPlatformDataPath;
         public GamePlayer gamePlayer { get; set; }
 
         public static Vector3 gameposition;

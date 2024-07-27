@@ -11,9 +11,9 @@ namespace monogameMinecraftShared.Rendering
         {
 
             new VertexPositionTexture(new Vector3(-1.0f,  1.0f, 0.0f),new Vector2(  0.0f, 0.0f)),
-            new VertexPositionTexture(new Vector3(-1.0f, -1.0f, 0.0f),new Vector2(  0.0f, 1.0f)),
-            new VertexPositionTexture(new Vector3(1.0f,  1.0f, 0.0f),new Vector2(1.0f, 1.0f)),
-            new VertexPositionTexture(new Vector3(1.0f, -1.0f, 0.0f),new Vector2(1.0f, 0.0f))
+            new VertexPositionTexture(new Vector3(1.0f, 1.0f, 0.0f),new Vector2(  1.0f, 0.0f)),
+            new VertexPositionTexture(new Vector3(1.0f,  -1.0f, 0.0f),new Vector2(1.0f, 1.0f)),
+            new VertexPositionTexture(new Vector3(-1.0f, -1.0f, 0.0f),new Vector2(0.0f, 1.0f))
          
         
 
@@ -25,6 +25,31 @@ namespace monogameMinecraftShared.Rendering
         
 
         //    new VertexPositionTexture(new Vector3(1.0f, -1.0f,0f),new Vector2(1.0f, 0.0f)) ,  
+
+        
+        };
+
+
+
+        public static VertexPositionTexture[] quadVerticesVertsOnly =
+        {
+
+            new VertexPositionTexture(new Vector3(-1.0f,  1.0f, 0.0f),new Vector2(  0.0f, 0.0f)),
+            new VertexPositionTexture(new Vector3(1.0f, 1.0f, 0.0f),new Vector2(  1.0f, 0.0f)),
+            new VertexPositionTexture(new Vector3(1.0f,  -1.0f, 0.0f),new Vector2(1.0f, 1.0f)),
+            new VertexPositionTexture(new Vector3(1.0f,  -1.0f, 0.0f),new Vector2(1.0f, 1.0f)),
+            new VertexPositionTexture(new Vector3(-1.0f, -1.0f, 0.0f),new Vector2(0.0f, 1.0f)),
+
+
+            new VertexPositionTexture(new Vector3(-1.0f,  1.0f, 0.0f),new Vector2(  0.0f, 0.0f))
+            
+
+
+            //     new VertexPositionTexture(new Vector3(-1.0f,  1.0f,0f),new Vector2( 0.0f, 1.0f)), 
+            ,
+        
+
+            //    new VertexPositionTexture(new Vector3(1.0f, -1.0f,0f),new Vector2(1.0f, 0.0f)) ,  
 
         
         };
@@ -40,6 +65,8 @@ namespace monogameMinecraftShared.Rendering
         public static IndexBuffer quadIndexBuffer;
 
         public static VertexBuffer quadVertexBuffer;
+        public static VertexBuffer quadVertexBufferVertsOnly;
+
         public void InitializeVertices()
         {
             if (isVertsInited == true) { return; }
@@ -64,11 +91,14 @@ namespace monogameMinecraftShared.Rendering
             {
                 return;
             }
-            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 6, BufferUsage.None);
+            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 4, BufferUsage.None);
 
             quadVertexBuffer.SetData(quadVertices);
             quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);
             quadIndexBuffer.SetData(quadIndices);
+
+            quadVertexBufferVertsOnly = new VertexBuffer(device, typeof(VertexPositionTexture), 6, BufferUsage.None);
+            quadVertexBufferVertsOnly.SetData(quadVerticesVertsOnly);
             isQuadBuffersInited = true;
         }
 
@@ -144,6 +174,46 @@ namespace monogameMinecraftShared.Rendering
             {
                 pass.Apply();
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
+            }
+            //    graphicsDevice.Clear(Color.White);
+            if (isRenderingOnDcreen == false)
+            {
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+            }
+
+        }
+
+        public void RenderQuadVertsOnly(GraphicsDevice device, RenderTarget2D target, Effect quadEffect, bool isPureWhite = false, bool isRenderingOnDcreen = false, bool clearColor = true)
+        {
+            if (isRenderingOnDcreen == false)
+            {
+                device.SetRenderTarget(target);
+                if (clearColor == true)
+                {
+                    device.Clear(Color.Transparent);
+                }
+
+            }
+            if (isPureWhite)
+            {
+
+                device.Clear(Color.White);
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+                return;
+            }
+
+            device.SetVertexBuffer(quadVertexBufferVertsOnly);
+          
+            //     RasterizerState rasterizerState = new RasterizerState();
+            //  rasterizerState.CullMode = CullMode.None;
+            device.RasterizerState = rasterizerState;
+            device.BlendState = BlendState.AlphaBlend;
+            foreach (var pass in quadEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.DrawPrimitives(PrimitiveType.TriangleList, 0,6);
             }
             //    graphicsDevice.Clear(Color.White);
             if (isRenderingOnDcreen == false)

@@ -11,6 +11,7 @@ using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
+ 
 
 namespace monogameMinecraftShared.World
 {
@@ -81,7 +82,7 @@ namespace monogameMinecraftShared.World
                 {
                     lock (deleteChunkThreadLock)
                     {
-
+                 //       Debug.WriteLine("update world thread running");
                         if (VoxelWorld.currentWorld.worldID != worldID)
                         {
                             Debug.WriteLine("world changed");
@@ -156,7 +157,7 @@ namespace monogameMinecraftShared.World
         {
             while (true)
             {
-
+                Thread.Sleep(500);
                 lock (deleteChunkThreadLock)
                 {
                     if (VoxelWorld.currentWorld.worldID != worldID)
@@ -166,7 +167,7 @@ namespace monogameMinecraftShared.World
                         return;
                     }
                     //  Debug.WriteLine("delete chunks ID:" + worldID);
-                    Thread.Sleep(500);
+                 
                     if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
                     {
                         Debug.WriteLine("quit delchunk thread");
@@ -241,8 +242,23 @@ namespace monogameMinecraftShared.World
             }
         }
 
-            
-        public static string gameWorldDataPath = AppDomain.CurrentDomain.BaseDirectory;
+        // = AppDomain.CurrentDomain.BaseDirectory
+        public static MinecraftGameBase gameInstance;
+        public static string gameWorldDataPath { get
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }else if (OperatingSystem.IsAndroid())
+            {
+                return gameInstance.optionalPlatformDataPath;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        }
         public bool isWorldDataSaved;
         public static bool isJsonReadFromDisk { get; set; }
         public void SaveWorldData()
@@ -286,6 +302,7 @@ namespace monogameMinecraftShared.World
         public Action actionOnSwitchedWorld;
         public void InitWorld(MinecraftGameBase game)
         {
+            gameInstance = game;
             Debug.WriteLine("current world ID:" + worldID);
 
 

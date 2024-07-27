@@ -144,8 +144,8 @@ sampler2D AOSampler = sampler_state
     MipFilter = Linear;
     MagFilter = Linear;
     MinFilter = Linear;
-    AddressU = Border;
-    AddressV = Border;
+    AddressU = Wrap;
+    AddressV = Wrap;
 };
 sampler2D MERSampler = sampler_state
 {
@@ -164,8 +164,8 @@ sampler2D AlbedoSampler = sampler_state
     MipFilter = Linear;
     MagFilter = Point;
     MinFilter = Point;
-    AddressU = Border;
-    AddressV = Border;
+    AddressU = Wrap;
+    AddressV = Wrap;
 };
 
 sampler2D DepthSampler = sampler_state
@@ -531,154 +531,26 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 }
 
 float3 LightPositions[16];
-PixelShaderOutput MainPS(VertexShaderOutput input)
+float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    if (tex2D(AlbedoSampler, input.TexCoords).a < 0.1)
+    float2 texcoord = float2(input.TexCoords.x, 1 - input.TexCoords.y);
+    if (tex2D(AlbedoSampler, texcoord).a < 0.1)
     {
         discard;
+        
     }
-    PixelShaderOutput output = (PixelShaderOutput) 0;
-    
-    float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
-   // mer.x = 1;
-    float3 N = tex2D(NormalsSampler, input.TexCoords).xyz * 2.0 - 1.0;
-    float3 worldPos = /*tex2D(gPositionWS, input.TexCoords).xyz;*/ ReconstructViewPos(input.TexCoords,tex2D(DepthSampler, input.TexCoords).r)+viewPos;
+   
   
-    float4 LightSpacePosition = mul(float4(worldPos, 1), LightSpaceMat);
-
-    float4 LightSpacePositionFar = mul(float4(worldPos, 1), LightSpaceMatFar);
-    float3 camPos = viewPos;
-    float3 V = normalize(camPos - worldPos);
-    float3 albedo = pow(tex2D(AlbedoSampler, input.TexCoords).rgb, 2.2);
-    
-    float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo, mer.x);
-     float3 L = normalize(LightDir);
-    float3 Lo = float3(0.0, 0.0, 0.0);
-    float3 LoDirLight = float3(0.0, 0.0, 0.0);
-    float3 H = normalize(V + L);
-    
-    
-    float3 LoSpec = float3(0.0, 0.0, 0.0);
-    float3 LoDirLightSpec = float3(0.0, 0.0, 0.0);
-    
-    
-    
+    float3 color = tex2D(AlbedoSampler, texcoord).xyz;
+     
    
-  /* 
+    float ambient = (1 /** 0.5 + reflection*/) * tex2D(AOSampler, texcoord).x;
+    float3 final = color * ambient;
     
-    float3 H = normalize(V + L);
-    float attenuation = 1.0 /1;
-    float3 radiance = LightColor * attenuation;
-    
-    
-    float D = DistributionGGX(N, H, roughness);
-    float G = GeometrySmith(N, V, L, roughness);
-    float3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-    float3 kS = F;
-    float3 kD = float3(1.0, 1.0, 1.0) - kS;
-    
-    float3 nominator = D * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
-    float3 specular = nominator / denominator;
-    
-    float NdotL = max(dot(N, L), 0.0);
-    Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
-    float3 emission = albedo / PI * mer.y*20;
-    float roughness = mer.z;
-    LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true, mer.x);
-    
-    for (int i = 0; i < 16; i++)
-    {
-        Lo += CalculateLightDiffuseP(worldPos, LightPositions[i], N, V, albedo, roughness, F0, false, mer.x);
-    }
-  /*      Lo += CalculateLightDiffuseP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false, mer.x);
-    Lo += CalculateLightDiffuseP(worldPos, LightPosition2, N, V, albedo, roughness, F0, false, mer.x);
-    Lo += CalculateLightDiffuseP(worldPos, LightPosition3, N, V, albedo, roughness, F0, false, mer.x);
-    Lo += CalculateLightDiffuseP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false, mer.x);*/
-   
-    LoDirLightSpec += CalculateLightSpecularP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true);
-    
-    
-    for (int j= 0; j < 16; j++)
-    {
-        LoSpec += CalculateLightSpecularP(worldPos, LightPositions[j], N, V, albedo, roughness, F0, false);
-    }
- /*   LoSpec += CalculateLightSpecularP(worldPos, LightPosition1, N, V, albedo, roughness, F0, false);
-    LoSpec += CalculateLightSpecularP(worldPos, LightPosition2, N, V, albedo, roughness, F0, false);
-    LoSpec += CalculateLightSpecularP(worldPos, LightPosition3, N, V, albedo, roughness, F0, false);
-    LoSpec += CalculateLightSpecularP(worldPos, LightPosition4, N, V, albedo, roughness, F0, false);*/
-    
-    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
-    float3 kS = F;
-    float3 kD = 1.0 - kS;
-    kD *= 1.0 - mer.x;
-    
- 
-    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
-    float3 irradiance = lerp(texCUBE(irradianceSampler, N).rgb, texCUBE(irradianceSamplerNight, N).rgb, mixValue);
-    float3 diffuse = irradiance * albedo;
-    float3 ambientEnv = (kD * diffuse) * 0.5;
-    
-  
-    
-    ambientEnv.xyz *= tex2D(AOSampler, input.TexCoords).x;
-    float shadow;
-    float shadow1;
-    if (receiveShadow == true)
-    {
-        shadow = ShadowCalculation(LightSpacePosition, ShadowMapSampler, 0);
-        float viewZ = -mul(float4(worldPos, 1), View).z;
-        if (viewZ > 30)
-        {
-            shadow1 = ShadowCalculation(LightSpacePositionFar, ShadowMapFarSampler, 0);
-        }
-        else
-        {
-            shadow1 = 1;
-        }
-    }
-    
-    float3 result;
-    float shadowFinal = min(shadow, shadow1);
-    shadowFinal = min(shadowFinal, tex2D(ContactShadowSampler, input.TexCoords).x);
-    
-    float3 color; 
-    float3 colorSpec;
-    if (receiveShadow == true)
-    {
-        color = 0 + emission + LoDirLight * shadowFinal + Lo;
-        colorSpec = LoDirLightSpec * shadowFinal + LoSpec;
-    }
-    else
-    {
-        colorSpec = LoSpec;
-        color = 0 + emission + Lo;
-    }
-    
- //color += tex2D(reflectionSampler, input.TexCoords).rgb;
-  //  color = color / (color + float3(1.0, 1.0, 1.0));
-  //  color = pow(color, float3(1.0 / 1, 1.0 / 1, 1.0 /1));
-   
- 
-    
-    
-    output.Color = float4(color, 1.0);
-    output.ColorSpecular = float4(colorSpec, 1);
-    return output;
+    return float4(final.xyz, 1);
 }
 
-sampler2D deferredLumSampler1 = sampler_state
-{
-    Texture = <TextureDeferredLumDirect>;
  
-    MipFilter = Point;
-    MagFilter = Point;
-    MinFilter = Point;
-    AddressU = Wrap;
-    AddressV = Wrap;
-};
-
 float4 MainPSIntermidiate(VertexShaderOutput input) : COLOR
 {
     
@@ -687,44 +559,13 @@ float4 MainPSIntermidiate(VertexShaderOutput input) : COLOR
         discard;
         
     }
-    float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
- //   mer.x = 1;
-    float3 albedo = pow(tex2D(AlbedoSampler, input.TexCoords).rgb, 2.2);
-    float3 normal = tex2D(NormalsSampler, input.TexCoords).xyz * 2 - 1;
-  
-    float3 color = tex2D(deferredLumSampler1, input.TexCoords).xyz;
-     
-  
-    
-    float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(DepthSampler, input.TexCoords).r) + viewPos;
-    float3 V = normalize(viewPos - worldPos);
-    float3 R = reflect(-V, normal);
-    R = normalize(R);
-    float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo, mer.x);
-    float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, mer.z);
-    float3 kS = F;
-    float3 kD = 1.0 - kS;
-    kD *= 1.0 - mer.x;
-    
-    float3 indirectDiffuse = tex2D(ssidSampler, input.TexCoords).xyz;
    
-    float3 irradiance = lerp(texCUBE(irradianceSampler, normal).rgb, texCUBE(irradianceSamplerNight, normal).rgb, mixValue);
-    float3 diffuse = irradiance * albedo;
-    float3 ambientEnv = (kD * diffuse);
-
-    
-    indirectDiffuse = lerp(ambientEnv, indirectDiffuse, tex2D(ssidSampler, input.TexCoords).a);
-
+  
+    float3 color = tex2D(AlbedoSampler, input.TexCoords).xyz;
      
-   /* const float MAX_REFLECTION_LOD = 4.0;
-    float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
-    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
-    float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y) * 0.1;*/
-    
-    
-    float3 ambient = ( indirectDiffuse /** 0.5 + reflection*/) * tex2D(AOSampler, input.TexCoords).x;
-    float3 final = color + ambient;
+   
+    float ambient = ( 1 /** 0.5 + reflection*/) * tex2D(AOSampler, input.TexCoords).x;
+    float3 final = color * ambient;
     
     return float4(final.xyz, 1);
 }
@@ -737,14 +578,4 @@ technique DeferredBlockEffectP
 	}
     
 };
-
-
-technique DeferredBlockEffectDiffuse
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL MainVS();
-        PixelShader = compile PS_SHADERMODEL MainPSIntermidiate();
-    }
-    
-};
+ 

@@ -8,11 +8,11 @@
 #endif
  
 
-matrix World;
-matrix View;
-matrix Projection;
+float4x4 World;
+float4x4 View;
+float4x4 Projection;
 
-matrix NormalMat;
+float3x3 NormalMat;
 
 sampler2D textureSampler = sampler_state
 {
@@ -29,7 +29,9 @@ float3 DiffuseColor = float3(1, 1, 1);
 
 struct VertexShaderInput
 {
-	float4 Position : POSITION0;
+    
+ 
+	float3 Position : POSITION0;
     float3 Normal : NORMAL0;
     float2 TexureCoordinate : TEXCOORD0;
 };
@@ -39,7 +41,7 @@ struct VertexShaderOutput
 	float4 Position : SV_POSITION;
     float4 PositionV : TEXCOORD2;
     float4 PositionWS : TEXCOORD3;
-    float3 Normal : TEXCOORD1;
+    float4 Normal : TEXCOORD1;
     float2 TexureCoordinate : TEXCOORD0;
 };
 struct PixelShaderOutput
@@ -56,13 +58,17 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
 
-    float4 worldPosition = mul(input.Position, World);
+    float4 worldPosition = mul(float4(input.Position.xyz, 1), World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
     output.PositionV = viewPosition;
     output.PositionWS = worldPosition;
 	output.TexureCoordinate = input.TexureCoordinate;
-    output.Normal = mul(float4(input.Normal, 1), NormalMat).xyz * 0.5 + 0.5;
+    output.Normal = 
+   float4((mul(float4(input.Normal.xyz, 1), float4x4(float4(NormalMat._11, NormalMat._12, NormalMat._13,1),
+    float4(NormalMat._21, NormalMat._22, NormalMat._23, 1),
+    float4(NormalMat._31, NormalMat._32, NormalMat._33, 1),
+    float4(0, 0, 0, 1))).xyz * 0.5 + 0.5).xyz, 1);
 	return output;
 }
 
@@ -70,15 +76,15 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
 {
     PixelShaderOutput psOut = (PixelShaderOutput) 0;
     psOut.ProjectionDepth = float4((-input.PositionV.z).x,0,0,1);
-    psOut.NormalWS = float4(input.Normal, 1);
-    psOut.Albedo = float4((tex2D(textureSampler, input.TexureCoordinate).xyz * DiffuseColor).xyz,1);
+    psOut.NormalWS = float4(input.Normal.xyz, 1);
+    psOut.Albedo = float4(((tex2D(textureSampler, input.TexureCoordinate).xyz) * DiffuseColor).xyz, 1);
     psOut.MetallicEmissionRoughness =float4(0.1,0,0.1,1);
     return psOut;
 }
 
-technique BasicColorDrawing
+technique GBufferEntity1
 {
-	pass P0
+	pass 
 	{
 		VertexShader = compile VS_SHADERMODEL MainVS();
 		PixelShader = compile PS_SHADERMODEL MainPS();

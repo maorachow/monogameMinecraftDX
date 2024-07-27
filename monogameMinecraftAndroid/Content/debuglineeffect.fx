@@ -17,8 +17,8 @@ sampler2D DepthSampler = sampler_state
     MipFilter = Linear;
     MagFilter = Point;
     MinFilter = Point;
-    AddressU = Border;
-    AddressV = Border;
+    AddressU = Wrap;
+    AddressV = Wrap;
 };
 
 sampler2D TextureSampler = sampler_state
@@ -60,13 +60,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float2 screenSpacePos = input.PositionP.xy / input.PositionP.w;
-    screenSpacePos.xy = screenSpacePos.xy* 0.5+0.5;
-    screenSpacePos.y = 1 - screenSpacePos.y;
-    if (tex2D(DepthSampler, screenSpacePos).x < input.viewDepth && tex2D(DepthSampler, screenSpacePos).x > 0.1)
-    {
-        return float4(tex2D(TextureSampler, input.TexCoord).xyz*0.1,1);
-    }
+   
         return float4(tex2D(TextureSampler, input.TexCoord).xyz, 1);
 }
 

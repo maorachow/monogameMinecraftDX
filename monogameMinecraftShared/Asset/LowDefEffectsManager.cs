@@ -35,9 +35,17 @@ namespace monogameMinecraftShared.Asset
             if (isEffectsLoaded == true) { return; }
 
             gameEffects.Clear();
-         
-           // gameEffects.TryAdd("createshadowmapeffect", Content.Load<Effect>("createshadowmapeffect"));
-           
+
+            try
+            {
+                gameEffects.TryAdd("blockforwardeffect", Content.Load<Effect>("blockforwardeffect"));
+                gameEffects.TryAdd("entityforwardeffect", Content.Load<Effect>("entityforwardeffect"));
+            }
+            catch
+            {
+                // ignored
+            }
+
 
             gameEffects.TryAdd("gbuffereffect", Content.Load<Effect>("gbuffereffect"));
             gameEffects.TryAdd("gbufferentityeffect", Content.Load<Effect>("gbufferentityeffect"));
@@ -46,6 +54,8 @@ namespace monogameMinecraftShared.Asset
             gameEffects.TryAdd("skyboxeffect", Content.Load<Effect>("skyboxeffect"));
           
             gameEffects.TryAdd("deferredblockeffect", Content.Load<Effect>("deferredblockeffect"));
+
+
        
             gameEffects.TryAdd("texturecopyraweffect", Content.Load<Effect>("texturecopyraweffect"));
             gameEffects.TryAdd("texturecopyeffect", Content.Load<Effect>("texturecopyeffect"));

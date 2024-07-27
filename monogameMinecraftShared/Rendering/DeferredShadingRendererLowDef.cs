@@ -41,7 +41,7 @@ namespace monogameMinecraftShared.Rendering
             public MotionBlurRenderer motionBlurRenderer;
             public List<CustomPostProcessor> customPostProcessors;
             public HDRCubemapRenderer hdrCubemapRenderer;*/
-        public DeferredShadingRendererLowDef(GraphicsDevice device, Effect blockDeferredEffect, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, GBufferRenderer gBufferRenderer, SkyboxRenderer skyboxRenderer, HDRCubemapRenderer hdrCubemapRenderer)
+        public DeferredShadingRendererLowDef(GraphicsDevice device, Effect blockDeferredEffect, SSAORenderer sSAORenderer, GameTimeManager gameTimeManager, GBufferRenderer gBufferRenderer, SkyboxRenderer skyboxRenderer)
         {
             this.device = device;
             this.blockDeferredEffect = blockDeferredEffect;

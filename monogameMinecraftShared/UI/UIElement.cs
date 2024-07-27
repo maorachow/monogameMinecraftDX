@@ -2,10 +2,11 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input.Touch;
 
 namespace monogameMinecraftShared.UI
 {
-    public interface UIElement
+    public partial interface UIElement
     {
         public static Dictionary<string, Texture2D> UITextures = new Dictionary<string, Texture2D>();
         public static Rectangle ScreenRect = new Rectangle(0, 0, 800, 480);
@@ -28,5 +29,6 @@ namespace monogameMinecraftShared.UI
         public static List<UIElement> structureOperationsPlacingUIs = new List<UIElement>();
         public static int structureOperationsUIsPageID;
         public static Dictionary<string, SoundEffect> uiSounds = new Dictionary<string, SoundEffect>();
+
     }
 }

@@ -5,7 +5,7 @@
 /intermediateDir:obj/$(Platform)
 /platform:Windows
 /config:
-/profile:HiDef
+/profile:Reach
 /compress:False
 
 #-------------------------------- References --------------------------------#
@@ -68,11 +68,11 @@
 /processorParam:TextureFormat=Color
 /build:BeachBallTexture.png
 
-#begin blockeffect.fx
+#begin blockforwardeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:blockeffect.fx
+/build:blockforwardeffect.fx
 
 #begin blocksprites/bedrock.png
 /importer:TextureImporter
@@ -314,12 +314,6 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/woodendoor.png
 
-#begin brdfluteffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:brdfluteffect.fx
-
 #begin buttontexture.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -331,18 +325,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buttontexture.png
-
-#begin contactshadoweffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:contactshadoweffect.fx
-
-#begin createshadowmapeffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:createshadowmapeffect.fx
 
 #begin customresourcespack/blocksprites/bedrock.png
 /importer:TextureImporter
@@ -657,23 +639,17 @@
 /processorParam:TextureFormat=Compressed
 /build:defaultfont.spritefont
 
-#begin deferredblendeffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:deferredblendeffect.fx
-
 #begin deferredblockeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:deferredblockeffect.fx
 
-#begin entityeffect.fx
+#begin entityforwardeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:entityeffect.fx
+/build:entityforwardeffect.fx
 
 #begin environmenthdri.png
 /importer:TextureImporter
@@ -699,12 +675,6 @@
 /processorParam:TextureFormat=NoChange
 /build:environmenthdrinight.png
 
-#begin fxaaeffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:fxaaeffect.fx
-
 #begin gbuffereffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -716,12 +686,6 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:gbufferentityeffect.fx
-
-#begin gbufferparticleeffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:gbufferparticleeffect.fx
 
 #begin hdricubeeffect.fx
 /importer:EffectImporter
@@ -740,12 +704,6 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:hdriprefiltereffect.fx
-
-#begin hizbuffereffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:hizbuffereffect.fx
 
 #begin hotbar.png
 /importer:TextureImporter
@@ -809,12 +767,6 @@
 /processorParam:TextureFormat=Compressed
 /build:huskmodelref.fbx
 
-#begin lightshafteffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:lightshafteffect.fx
-
 #begin menubackground.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -838,36 +790,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:menubackgroundtransparent.png
-
-#begin motionblureffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:motionblureffect.fx
-
-#begin motionvectoreffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:motionvectoreffect.fx
-
-#begin postprocess0.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:postprocess0.fx
-
-#begin postprocess1.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:postprocess1.fx
-
-#begin postprocess2.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:postprocess2.fx
 
 #begin randomnormal.jpg
 /importer:TextureImporter
@@ -1025,30 +947,6 @@
 /processorParam:DebugMode=Auto
 /build:ssaoeffect.fx
 
-#begin ssideffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:ssideffect.fx
-
-#begin ssreffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:ssreffect.fx
-
-#begin terrain - 副本.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:terrain - 副本.png
-
 #begin terrain.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1096,12 +994,6 @@
 /processorParam:MakeSquare=True
 /processorParam:TextureFormat=Color
 /build:terrainnormal.png
-
-#begin testbillboardeffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:testbillboardeffect.fx
 
 #begin textfield.png
 /importer:TextureImporter

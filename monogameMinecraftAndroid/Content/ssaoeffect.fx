@@ -649,7 +649,7 @@ technique Default
 {
     pass SSAO
     {
-        VertexShader = compile vs_4_0 MainVS();
-        PixelShader = compile ps_4_0 MainPS();
+        VertexShader = compile VS_SHADERMODEL MainVS();
+        PixelShader = compile PS_SHADERMODEL MainPS();
     }
 }

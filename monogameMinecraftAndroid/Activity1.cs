@@ -3,9 +3,8 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Views;
 using Microsoft.Xna.Framework;
- 
 
-namespace monogameMinecraftMobile
+namespace monogameMinecraftAndroid
 {
     [Activity(
         Label = "@string/app_name",
@@ -13,19 +12,19 @@ namespace monogameMinecraftMobile
         Icon = "@drawable/icon",
         AlwaysRetainTaskState = true,
         LaunchMode = LaunchMode.SingleInstance,
-        ScreenOrientation = ScreenOrientation.FullUser,
+        ScreenOrientation = ScreenOrientation.Landscape,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenSize
     )]
     public class Activity1 : AndroidGameActivity
     {
-        private Game1 _game;
+        private MinecraftGame _game;
         private View _view;
 
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
-            _game = new Game1();
+            _game = new MinecraftGame(this);
             _view = _game.Services.GetService(typeof(View)) as View;
 
             SetContentView(_view);
