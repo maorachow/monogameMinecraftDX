@@ -563,7 +563,20 @@ sampler2D MERSampler = sampler_state
 float2 PixelSize;
 float mixValue;
 
-
+float RadicalInverse_VdC(uint bits)
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+// ----------------------------------------------------------------------------
+float2 Hammersley(uint i, uint N)
+{
+    return float2(float(i) / float(N), RadicalInverse_VdC(i));
+}
 float3 ImportanceSampleGGX(float2 Xi, float3 N, float roughness)
 {
     float a = roughness * roughness;
@@ -596,6 +609,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     {
         discard;
     }
+    
+    
     float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
   //  return float4(worldPos.xyz, 1);
     float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
@@ -631,6 +646,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance,0,1);
     float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
+    
+    
+    
+ 
     //float2 brdf1 = tex2D(texBRDFLUT, input.TexCoord.xy).rg;
    // return float4(brdf1, 0, 1);
     
@@ -647,20 +666,46 @@ float4 MainPS(VertexShaderOutput input) : COLOR
        //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
        //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
             
+    
+    
+    
     float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1 - mer.z)).rg;
     
-    
-    
-  
     float3 finalColor = 0;
+    if (mer.z > 0.8f)
+    {
+        float3 R = reflect(-V, normal);
+        R = normalize(R);
+        const float MAX_REFLECTION_LOD = 4.0;
+        float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+       
+        float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+      //  finalColor += specularEnv;
+     
+   
+        return float4(specularEnv.xyz, 1);
+        
+        
+    }
   
+    
+ 
     
      
         
     
         float3 curRDir = rDir;
         float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0 + GameTime * 5).g + 0.5;
-        float3 noiseValue2 = tex2D(texNoise, input.TexCoord * 3.0 * (0 + 1) + GameTime * 8).rgb;
+    
+    
+    
+    
+    
+     
+        
+     
+     
      //   float3 noiseValue4 = tex2D(texNoise, input.TexCoord * 6.0*(0+1) + GameTime * 9).rgb * 2 - 1;
     
      /*   float3 randomVec = float3(noiseValue2.rg, 0);
@@ -673,6 +718,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
      
         curRDir = rayRoughnessAmp;
         curRDir = normalize(curRDir);*/
+        float2 noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (0 + 1)).rg;
         float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
     
     
@@ -683,26 +729,28 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float strideLen = 1;
         float3 result = 0;
         bool isHit = false;
-    int k = 0;
-    while (dot(normal, curRDir) < 0&&k<3)
-    {
-        float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
-        float3 importanceSampleDir = ImportanceSampleGGX(noiseValue3.xy, rDir, mer.z);
+        int k = 0;
+        while (dot(normal, curRDir) < 0 && k < 3)
+        {
+        //    float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
+            noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (k + 1)).rg;
+            float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
     
     
-        curRDir = importanceSampleDir;
-         marchPos = worldPos + curRDir * 0.01;
-        k++;
+            curRDir = importanceSampleDir;
+            marchPos = worldPos + curRDir * 0.01;
+            k++;
       
 
-    }
+        }
          [unroll]
         for (int i = 0; i < 20; i++)
         {
-        if (dot(normal, curRDir) < 0)
-        {
+            if (dot(normal, curRDir) < 0)
+            {
             
-            return float4(0, 0, 0, 1);
+            isHit = false;
+            break;
         }
             marchPos += (curRDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
      //   ssrThickness += (0.1);
@@ -748,7 +796,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
       //  }
             if (testDepth > sampleDepth)
             {
-                if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < 0.5 * noiseValue1 * rayLengthAmp /*length(preMarchPos-marchPos)*/ && miplevel <= 0)
+                if (testDepth > sampleDepth && abs((testDepth) - (sampleDepth)) < 0.4 * noiseValue1 * rayLengthAmp /*length(preMarchPos-marchPos)*/ && miplevel <= 0)
                 {
              //   return float4(testDepth/1000.0,0, 0, 1);
                     float3 finalPoint = preMarchPos;
@@ -780,21 +828,21 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
             
-                direction *= 0.5;
-                finalPoint += direction * _sign;
-                uv1 = GetScreenCoordFromWorldPos(finalPoint);
+                    direction *= 0.5;
+                    finalPoint += direction * _sign;
+                    uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-                testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
-                _sign = -sign(testDepth1 - sampleDepth1);
+                    testDepth1 = GetViewDepthFromWorldPos(finalPoint);
+                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    _sign = -sign(testDepth1 - sampleDepth1);
                 
-                direction *= 0.5;
-                finalPoint += direction * _sign;
-                uv1 = GetScreenCoordFromWorldPos(finalPoint);
+                    direction *= 0.5;
+                    finalPoint += direction * _sign;
+                    uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
-                testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
-                _sign = -sign(testDepth1 - sampleDepth1);
+                    testDepth1 = GetViewDepthFromWorldPos(finalPoint);
+                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                    _sign = -sign(testDepth1 - sampleDepth1);
             
               
                  
@@ -847,7 +895,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         {
             const float MAX_REFLECTION_LOD = 4.0;
             float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
-            float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+         //   float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
             float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
     
             finalColor += specularEnv;
@@ -856,8 +904,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
    
     
-   // finalColor /= 8;
-                finalColor = lerp(finalColor, prevColor, 0.5);
+  //  finalColor /= 1;
+                finalColor = lerp(finalColor, prevColor,0.6);
    
                 return float4(finalColor.xyz, 1);
    

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using monogameMinecraftShared.Asset;
+using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.UI;
 using monogameMinecraftShared.Updateables;
@@ -36,7 +37,7 @@ namespace monogameMinecraftShared
 
         public GameTimeManager gameTimeManager;
         public GameStatus status { get; set; }
-
+        public PlayerInputManager playerInputManager;
         public GamePlatformType gamePlatformType { get; set; }
 
         public IEffectsManager effectsManager;
@@ -46,7 +47,14 @@ namespace monogameMinecraftShared
         {
             gameposition = gamePlayer.position;
         }
-
+        public virtual void OpenInventory(object obj)
+        {
+            throw new NotImplementedException();
+        }
+        public virtual void PauseGame(object obj)
+        {
+            throw new NotImplementedException();
+        }
         public virtual void GoToSettings(object obj)
         {
             throw new NotImplementedException();

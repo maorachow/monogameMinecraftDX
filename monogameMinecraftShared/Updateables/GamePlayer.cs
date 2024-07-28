@@ -711,7 +711,7 @@ namespace monogameMinecraftShared.Updateables
             PlayerBlockOnFootChanged(game, deltaTime);
             prevBlockOnFootID = blockOnFootID;
         }
-        public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState)
+        public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState,bool isFlyingPressed,bool isSpeedUpPressed,bool isLMBPressed,bool isRMBPressed,float scrollDelta)
         {
 
             playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
@@ -723,12 +723,12 @@ namespace monogameMinecraftShared.Updateables
 
             finalMoveVec = deltaTime * moveVelocity * new Vector3(dir.X, dir.Y, dir.Z);
             //    Debug.WriteLine(finalMoveVec);
-            if (kState.IsKeyDown(Keys.F) && jumpCD <= 0f)
+            if (isFlyingPressed && jumpCD <= 0f)
             {
                 isPlayerFlying = !isPlayerFlying;
                 jumpCD = 1f;
             }
-            if (kState.IsKeyDown(Keys.LeftControl))
+            if (isSpeedUpPressed)
             {
                 moveVelocity = fastPlayerSpeed;
             }
@@ -750,7 +750,7 @@ namespace monogameMinecraftShared.Updateables
 
             }
 
-            if (mState.LeftButton == ButtonState.Pressed)
+            if (isLMBPressed)
             {
                 isLeftMouseButtonDown = true;
             }
@@ -758,7 +758,7 @@ namespace monogameMinecraftShared.Updateables
             {
                 isLeftMouseButtonDown = false;
             }
-            if (mState.RightButton == ButtonState.Pressed)
+            if (isRMBPressed)
             {
                 isRightMouseButtonDown = true;
             }
@@ -766,12 +766,11 @@ namespace monogameMinecraftShared.Updateables
             {
                 isRightMouseButtonDown = false;
             }
-            if (mState.ScrollWheelValue - prevMouseState.ScrollWheelValue != 0f)
-            {
-                currentSelectedHotbar += (int)((mState.ScrollWheelValue - prevMouseState.ScrollWheelValue) / 120f);
+            
+                currentSelectedHotbar += (int)(scrollDelta / 120f);
                 currentSelectedHotbar = MathHelper.Clamp(currentSelectedHotbar, 0, 8);
                 //      Debug.WriteLine(mState.ScrollWheelValue - prevMouseState.ScrollWheelValue);
-            }
+             
         }
         public float breakBlockCD = 0f;
     }

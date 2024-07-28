@@ -18,6 +18,7 @@ using monogameMinecraftShared.UI;
 
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared;
+using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.Updateables;
  
@@ -103,6 +104,8 @@ namespace monogameMinecraftAndroid
         Texture2D terrainDepth;
         Texture2D terrainMER;*/
         
+
+//    public PlayerInputManager playerInputManager;
         public MinecraftGame(Android.App.Activity activity)
         {
             optionalPlatformDataPath = activity.GetExternalFilesDir("")?.Path;
@@ -111,15 +114,15 @@ namespace monogameMinecraftAndroid
 
             Content.RootDirectory = "Content";
             //    IsMouseVisible = false;
-            Window.AllowUserResizing = true;
+            Window.AllowUserResizing = false;
 
-            Window.ClientSizeChanged += OnResize;
+       //     Window.ClientSizeChanged += OnResize;
                   _graphics.PreparingDeviceSettings += PrepareGraphicsDevice;
             _graphics.SynchronizeWithVerticalRetrace = false;
             IsMouseVisible = true;
             this.IsFixedTimeStep = false;
             effectsManager = new LowDefEffectsManager();
-            gamePlatformType = GamePlatformType.LowDefGL;
+            gamePlatformType = GamePlatformType.VeryLowDefMobile;
             renderPipelineManager = new VeryLowDefRenderPipelineManager(this, effectsManager);
             _graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
@@ -136,7 +139,8 @@ namespace monogameMinecraftAndroid
         }
        public override void OnResize(Object sender, EventArgs e)
         {
-            UIElement.ScreenRect = new Rectangle(0,0,GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight);
+            UIElement.ScreenRect = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            UIElement.screenRectOffset = new Vector2(GraphicsDevice.Viewport.X, GraphicsDevice.Viewport.Y);
             foreach (UIElement element in UIElement.menuUIs)
             {
                 element.OnResize();
@@ -154,6 +158,10 @@ namespace monogameMinecraftAndroid
                 element1.OnResize();
             }
             foreach (UIElement element1 in UIElement.inventoryUIs)
+            {
+                element1.OnResize();
+            }
+            foreach (UIElement element1 in UIElement.inGameUIs)
             {
                 element1.OnResize();
             }
@@ -222,7 +230,7 @@ namespace monogameMinecraftAndroid
         public override void InitGameplay(object obj)
         {
 
-
+          
             GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
 
             IsMouseVisible = false;
@@ -241,6 +249,7 @@ namespace monogameMinecraftAndroid
 
             status = GameStatus.Started;
             gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            playerInputManager = new PlayerInputManager(gamePlayer, true);
             gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
@@ -345,7 +354,7 @@ namespace monogameMinecraftAndroid
 
 
 
-
+   
             EntityManager.InitEntityList();
             EntityManager.LoadEntitySounds(Content);
             //  rasterizerState.CullMode = CullMode.None;
@@ -354,7 +363,7 @@ namespace monogameMinecraftAndroid
             EntityManager.ReadEntityData();
             Debug.WriteLine(EntityManager.entityDataReadFromDisk.Count);
             EntityManager.SpawnEntityFromData(this);
-
+            EntityManager.pathfindingManager.drawDebugLines = false;
             isGamePaused = false;
         }
 
@@ -439,7 +448,7 @@ namespace monogameMinecraftAndroid
             GameOptions.ReadOptionsJson();
             // Chunk c = new Chunk(new Vector2Int(0,0));
             //  chunkSolidEffect = new Effect();
-
+            OnResize(null, null);
             base.Initialize();
         }
 
@@ -461,12 +470,31 @@ namespace monogameMinecraftAndroid
         public bool isGamePaused = false;
         public bool isInventoryOpen = false;
         public bool isStructureOperationsUIOpened = false;
+
+
+        public override void PauseGame(object obj)
+        {
+            isGamePaused = true;
+       
+        }
         public override void ResumeGame()
         {
             isGamePaused = false;
-            IsMouseVisible = false;
+           
         }
 
+        public override void OpenInventory(object obj)
+        {
+            isInventoryOpen = !isInventoryOpen;
+            if (isInventoryOpen == true)
+            {
+                IsMouseVisible = true;
+            }
+            else
+            {
+                IsMouseVisible = false;
+            }
+        }
         public override void CloseStructureOperationsUI()
         {
             isStructureOperationsUIOpened = false;
@@ -540,17 +568,10 @@ namespace monogameMinecraftAndroid
                         //  QuitGameplay();
                         //  Exit();
                         //   Environment.Exit(0);
-                       
-                        isInventoryOpen=!isInventoryOpen;
-                        if (isInventoryOpen == true)
-                        {
-                            IsMouseVisible = true;
-                        }
-                        else
-                        {
-                            IsMouseVisible = false;
-                        }
-                      
+
+                        OpenInventory(null);
+
+
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.H) && !lastKeyState1.IsKeyUp(Keys.H)&&!isInventoryOpen)
                     {
@@ -676,11 +697,11 @@ namespace monogameMinecraftAndroid
                         isGamePaused = true;
                         IsMouseVisible = true;
                     }
-                    ProcessPlayerKeyboardInput(gameTime);
-                
-                 
-                    ProcessPlayerMouseInput(true);
+                    //       ProcessPlayerKeyboardInput(gameTime);
 
+
+                    //      ProcessPlayerMouseInput(true);
+                    playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                     gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -723,7 +744,7 @@ namespace monogameMinecraftAndroid
             base.Update(gameTime);
 
         }
-        void ProcessPlayerMouseInput(bool isTouchEnabled=false)
+     /*   void ProcessPlayerMouseInput(bool isTouchEnabled=false)
         {
             var mState = Mouse.GetState();
             gamePlayer.cam.ProcessMouseMovement(mState.X - lastMouseX, lastMouseY - mState.Y);
@@ -782,12 +803,12 @@ namespace monogameMinecraftAndroid
                 playerVec.Y = -1f;
             }
 
-            gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState, mState, lastMouseState);
+       //     gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState, mState, lastMouseState);
 
             lastKeyboardState = kState;
             lastMouseState = mState;
 
-        }
+        }*/
         RasterizerState rasterizerState = new RasterizerState();
         RasterizerState rasterizerState1 = new RasterizerState{DepthClipEnable=false};
         

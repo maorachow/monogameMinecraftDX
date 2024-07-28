@@ -20,6 +20,8 @@ namespace monogameMinecraftShared.UI
         public string text { get; set; }
         public static List<UIElement> menuUIs = new List<UIElement>();
         public static List<UIElement> settingsUIsPage1 = new List<UIElement>();
+
+        public static List<UIElement> mobileInGameTOuchUIs = new List<UIElement>();
         public static List<UIElement> settingsUIsPage2 = new List<UIElement>();
         public static int settingsUIsPageID;
         public static List<UIElement> inGameUIs = new List<UIElement>();

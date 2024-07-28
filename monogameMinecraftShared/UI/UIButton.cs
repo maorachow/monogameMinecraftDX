@@ -35,14 +35,19 @@ namespace monogameMinecraftShared.UI
         // public string text="123";
         SpriteBatch spriteBatch;
         public Texture2D texture;
+        public Texture2D texturePressed;
+
+        public bool isConstantPressable = false;
         public SpriteFont font;
         public GameWindow window;
         public Vector2 initalWidthHeight;
         public bool keepsAspectRatio = false;
         public string text { get; set; }
         public bool isClickable = true;
-
-        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos, SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction, float textScale, bool keepsAspectRatio = false, bool isClickable = true)
+        public UIPanel optionalBasePanel;
+         
+        public bool isConstantPressed=false;
+        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos, SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction, float textScale, bool keepsAspectRatio = false, bool isClickable = true, UIPanel optionalBasePanel = null, bool isConstantPressable = false, Texture2D texturePressed = null)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -67,6 +72,15 @@ namespace monogameMinecraftShared.UI
 
             }
             this.isClickable = isClickable;
+            this.optionalBasePanel = optionalBasePanel;
+            if (optionalBasePanel != null)
+            {
+                optionalBasePanel.OnResize();
+                OnResize();
+            }
+
+            this.isConstantPressable = isConstantPressable;
+            this.texturePressed = texturePressed;
         }
         public void Draw()
         {
@@ -80,7 +94,22 @@ namespace monogameMinecraftShared.UI
             // ButtonRect.Center;
             if (texture != null)
             {
-                spriteBatch.Draw(texture, ButtonRect, Color.White);
+                if (texturePressed == null)
+                {
+                    spriteBatch.Draw(texture, ButtonRect, Color.White);
+                }
+                else
+                {
+                    if (isConstantPressed == true)
+                    {
+                        spriteBatch.Draw(texturePressed, ButtonRect, Color.White);
+                    }
+                    else
+                    {
+                        spriteBatch.Draw(texture, ButtonRect, Color.White);
+                    }
+                }
+                
             }
 
             textHeight = (element01Pos - element00Pos).Y;
@@ -126,7 +155,7 @@ namespace monogameMinecraftShared.UI
                 bool isTouchHovered = false;
                 foreach (var touch in UIElement.allTouches)
                 {
-                    if (this.ButtonRect.Contains(touch.Position))
+                    if (this.ButtonRect.Contains(touch.Position + UIElement.screenRectOffset))
                     {
                         isTouchHovered = true;
                         break;
@@ -152,36 +181,77 @@ namespace monogameMinecraftShared.UI
             mouseState = Mouse.GetState();
 
             bool isTouched = false;
-            foreach (var tc in UIElement.allTouches)
-            {
 
-                if (tc.State == TouchLocationState.Released && isHovered)
+            if (!isConstantPressable)
+            {
+                foreach (var tc in UIElement.allTouches)
                 {
-                    isTouched = true;
-                    //   Debug.WriteLine("touched");
+
+                    if (tc.State == TouchLocationState.Released && isHovered)
+                    {
+                        isTouched = true;
+                        //   Debug.WriteLine("touched");
+                    }
+                }
+                if (((isHovered && mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released) || isTouched == true) && isClickable == true)
+                {
+                    //   Debug.WriteLine("pressed");
+
+
+                    if (UIElement.uiSounds.ContainsKey("uiclick"))
+                    {
+                        UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
+                    }
+                    ButtonAction(this);
                 }
             }
-            if (((isHovered && mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)|| isTouched==true) && isClickable == true)
+            else
             {
-                //   Debug.WriteLine("pressed");
-
-
-                if (UIElement.uiSounds.ContainsKey("uiclick"))
+                foreach (var tc in UIElement.allTouches)
                 {
-                    UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
+
+                    if ((tc.State == TouchLocationState.Pressed|| tc.State == TouchLocationState.Moved) && isHovered)
+                    {
+                        isTouched = true;
+                        //   Debug.WriteLine("touched");
+                    }
                 }
-                ButtonAction(this);
+
+
+                if (((isHovered && mouseState.LeftButton == ButtonState.Pressed) || isTouched == true) && isClickable == true)
+                {
+                    //   Debug.WriteLine("pressed");
+
+                    isConstantPressed = true;
+                    ButtonAction(this);
+                    
+                }
+                else
+                {
+                    isConstantPressed = false;
+                }
             }
+        
 
             lastMouseState = mouseState;
         }
         public void GetScreenSpaceRect()
         {
-            Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
-
-            Vector2 transformedP00 = new Vector2(element00Pos.X * UIElement.ScreenRect.Width, element00Pos.Y * UIElement.ScreenRect.Height);
-            float width = (element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
-            float height = (element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
+          //  Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
+            Rectangle alignedRect;
+            if (optionalBasePanel == null)
+            {
+                alignedRect = UIElement.ScreenRect;
+            }
+            else
+            {
+                optionalBasePanel.OnResize();
+                alignedRect = optionalBasePanel.screenSpaceRect;
+            }
+        
+            Vector2 transformedP00 = new Vector2(element00Pos.X * alignedRect.Width+alignedRect.X, element00Pos.Y * alignedRect.Height + alignedRect.Y);
+            float width = (element10Pos - element00Pos).X * alignedRect.Width;
+            float height = (element01Pos - element00Pos).Y * alignedRect.Height;
             if (keepsAspectRatio)
             {
                 if (width > height)
@@ -206,10 +276,10 @@ namespace monogameMinecraftShared.UI
                 //        element01Pos = new Vector2(element00Pos.X, element00Pos.Y  +initalWidthHeight.Y*(initalWidthHeight.X/ initalWidthHeight.Y));
             }
             ButtonRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
-            Debug.WriteLine(ButtonRect.X + " " + ButtonRect.Y + " " + ButtonRect.Width + " " + ButtonRect.Height);
+          //  Debug.WriteLine(ButtonRect.X + " " + ButtonRect.Y + " " + ButtonRect.Width + " " + ButtonRect.Height);
 
             //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));
-            Debug.WriteLine(textPixelPos.x + " " + textPixelPos.y);
+      //      Debug.WriteLine(textPixelPos.x + " " + textPixelPos.y);
         }
 
         public void Initialize()

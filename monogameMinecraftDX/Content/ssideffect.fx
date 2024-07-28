@@ -324,7 +324,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float linearDepth = 0;
-    linearDepth = tex2D(gProjectionDepthM0, input.TexCoords).x;
+    linearDepth = tex2D(gProjectionDepth, input.TexCoords).x;
     if (linearDepth >= 900 || linearDepth <= 0.1)
     {
         discard;
@@ -387,7 +387,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float testDepth = GetViewDepthFromWorldPos(marchPos);
             
             
-            float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy).x;
+            float sampleDepthM0 = tex2D(gProjectionDepth, uv.xy).x;
 
         /*    float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
            

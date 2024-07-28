@@ -1,4 +1,5 @@
-using monogameMinecraftDX.World;
+using monogameMinecraftDX;
+using monogameMinecraftShared.World;
 
 namespace MCDX.Editor.Model;
 

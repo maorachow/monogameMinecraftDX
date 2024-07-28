@@ -9,6 +9,7 @@ namespace monogameMinecraftShared.Utility
     public enum GamePlatformType
     {
         HighDefDX=0,
-        LowDefGL=1
+        LowDefGL=1,
+        VeryLowDefMobile=2
     }
 }

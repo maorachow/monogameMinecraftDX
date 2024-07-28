@@ -126,8 +126,8 @@ namespace monogameMinecraftShared.Animations
                     foreach (Effect effect in mesh.Effects)
                     {
                         Matrix normalMat = sharedDrawBoneMatrices[mesh.ParentBone.Index] * world;
-                     //   normalMat.Translation = new Vector3(0, 0, 0);
-                        effect.Parameters["NormalMat"].SetValue(normalMat);
+                        normalMat.Translation = new Vector3(0, 0, 0);
+                        effect.Parameters["NormalMat"]?.SetValue(normalMat);
                         effect.Parameters["World"]?.SetValue(sharedDrawBoneMatrices[mesh.ParentBone.Index] * world);
                         effect.Parameters["View"]?.SetValue(view);
                         effect.Parameters["Projection"]?.SetValue(projection);

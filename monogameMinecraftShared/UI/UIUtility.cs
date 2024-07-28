@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.IO;
 using monogameMinecraftShared.Asset;
+using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
@@ -41,6 +42,9 @@ namespace monogameMinecraftShared.UI
             Texture2D blockTex13 = game.Content.Load<Texture2D>("blocksprites/endframe_top");
             Texture2D blockTex14 = game.Content.Load<Texture2D>("blocksprites/sea_lantern");
             Texture2D blockTex102 = game.Content.Load<Texture2D>("blocksprites/torch_on");
+
+
+         
             UIElement.uiSounds.Clear();
 
             UIElement.uiSounds.TryAdd("uiclick", game.Content.Load<SoundEffect>("sounds/uiclick"));
@@ -67,6 +71,68 @@ namespace monogameMinecraftShared.UI
                     { "blocktexture14",blockTex14},
                 { "blocktexture102",blockTex102}
             };
+
+
+            if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
+            {
+                Texture2D touchUpTex = game.Content.Load<Texture2D>("mobiletouch/up");
+                Texture2D touchDownTex = game.Content.Load<Texture2D>("mobiletouch/down");
+                Texture2D touchLeftTex = game.Content.Load<Texture2D>("mobiletouch/left");
+                Texture2D touchRightTex = game.Content.Load<Texture2D>("mobiletouch/right");
+
+
+                Texture2D touchUpPressedTex = game.Content.Load<Texture2D>("mobiletouch/up_pressed");
+                Texture2D touchDownPressedTex = game.Content.Load<Texture2D>("mobiletouch/down_pressed");
+                Texture2D touchLeftPressedTex = game.Content.Load<Texture2D>("mobiletouch/left_pressed");
+                Texture2D touchRightPressedTex = game.Content.Load<Texture2D>("mobiletouch/right_pressed");
+
+
+
+                Texture2D touchJumpTex = game.Content.Load<Texture2D>("mobiletouch/jump");
+                Texture2D touchFlyTex = game.Content.Load<Texture2D>("mobiletouch/flyingascend");
+                Texture2D touchJumpPressedTex = game.Content.Load<Texture2D>("mobiletouch/jump_pressed");
+
+
+                Texture2D touchAttackTex = game.Content.Load<Texture2D>("mobiletouch/attack");
+                Texture2D touchAttackPressedTex = game.Content.Load<Texture2D>("mobiletouch/attack_pressed");
+
+                Texture2D touchInteractTex = game.Content.Load<Texture2D>("mobiletouch/interact");
+                Texture2D touchInteractPressedTex = game.Content.Load<Texture2D>("mobiletouch/interact_pressed");
+
+                Texture2D touchSprintTex = game.Content.Load<Texture2D>("mobiletouch/sprint");
+                Texture2D touchSprintPressedTex = game.Content.Load<Texture2D>("mobiletouch/sprint_pressed");
+
+                Texture2D touchPauseTex = game.Content.Load<Texture2D>("mobiletouch/pause");
+                Texture2D touchInventoryTex = game.Content.Load<Texture2D>("mobiletouch/inventorybutton");
+
+                UIElement.UITextures.TryAdd("mobiletouchup",touchUpTex);
+                UIElement.UITextures.TryAdd("mobiletouchdown", touchDownTex);
+                UIElement.UITextures.TryAdd("mobiletouchleft", touchLeftTex);
+                UIElement.UITextures.TryAdd("mobiletouchright", touchRightTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchuppressed", touchUpPressedTex);
+                UIElement.UITextures.TryAdd("mobiletouchdownpressed", touchDownPressedTex);
+                UIElement.UITextures.TryAdd("mobiletouchleftpressed", touchLeftPressedTex);
+                UIElement.UITextures.TryAdd("mobiletouchrightpressed", touchRightPressedTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchjump", touchJumpTex);
+
+
+                UIElement.UITextures.TryAdd("mobiletouchfly", touchFlyTex);
+                UIElement.UITextures.TryAdd("mobiletouchjumppressed", touchJumpPressedTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchattack", touchAttackTex);
+                UIElement.UITextures.TryAdd("mobiletouchattackpressed", touchAttackPressedTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchinteract", touchInteractTex);
+                UIElement.UITextures.TryAdd("mobiletouchinteractpressed", touchInteractPressedTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchsprint", touchSprintTex);
+                UIElement.UITextures.TryAdd("mobiletouchsprintpressed", touchSprintPressedTex);
+
+                UIElement.UITextures.TryAdd("mobiletouchpause", touchPauseTex);
+                UIElement.UITextures.TryAdd("mobiletouchinventory", touchInventoryTex);
+            }
             BlockResourcesManager.LoadDefaultUIResources(game.Content, game);
 
             UIElement.menuUIs = new List<UIElement> {
@@ -125,13 +191,95 @@ namespace monogameMinecraftShared.UI
              //     new UIButton(new Vector2(0.25f, 0.85f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,game.GoToMenuFromSettings ,"Return To Menu" ),
                   new UIButton(new Vector2(0.1f, 0.4f), 0.1f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.settingsUIsPageID-=1; } ,"Previous Page" ,null,0.5f),
             };
-            }
-         
-            UIElement.inGameUIs = new List<UIElement>
+            }else if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
             {
-                new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"])
-            };
 
+                UIElement.settingsUIsPage1 = new List<UIElement> {
+
+                    new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
+                    new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeRenderDistance ,"Render Distance : "+GameOptions.renderDistance,GameOptions.UpdateRenderDistanceUIText,1),
+
+
+                  
+
+                    new UIButton(new Vector2(0.25f, 0.25f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeShowGraphicsDebug ,"Show Graphics Debug : "+GameOptions.showGraphicsDebug,GameOptions.UpdateShowGraphicsDebugUIText,1),
+                    new UIButton(new Vector2(0.25f, 0.85f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,game.GoToMenuFromSettings ,"Return To Menu",null ,1),
+                 
+                };
+            }
+
+            UIPanel leftDownPanel = new UIPanel(new Vector2(0.05f, 0.6f), 0.3f, 0.3f, true);
+
+            UIPanel rightDownPanel = new UIPanel(new Vector2(0.65f, 0.6f), 0.3f, 0.3f, true);
+
+            UIPanel rightUpPanel = new UIPanel(new Vector2(0.65f, 0.05f), 0.3f, 0.3f, true);
+
+            UIPanel leftUpPanel = new UIPanel(new Vector2(0.05f, 0.05f), 0.3f, 0.3f, true);
+
+            UIPanel middleDownPanel = new UIPanel(new Vector2(0.2f, 0.85f), 0.6f, 0.15f, false);
+
+            if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
+            {
+                UIElement.inGameUIs = new List<UIElement>
+                {
+                    new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    leftDownPanel,
+                    new UIButton(new Vector2(0.333f, 0.0f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchup"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.Z = 1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchuppressed"]),
+
+
+                    new UIButton(new Vector2(0.333f, 0.666f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchdown"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => {PlayerInputManager.mobilemotionVec.Z = -1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchdownpressed"]),
+
+                    new UIButton(new Vector2(0.666f, 0.333f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchright"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.X = 1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchrightpressed"]),
+
+                    new UIButton(new Vector2(0f, 0.333f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchleft"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.X = -1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchleftpressed"]),
+
+
+
+                    rightDownPanel,
+
+                    rightUpPanel,
+                    leftUpPanel,
+                    middleDownPanel,
+                    new UIButton(new Vector2(0.25f, 0.25f), 0.5f, 0.5f, UIElement.UITextures["mobiletouchjump"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobilemotionVec.Y = 1f;} ,"",null,1,false,true,rightDownPanel,true,UIElement.UITextures["mobiletouchjumppressed"]),
+
+                
+
+                    new UIButton(new Vector2(0.25f, 0.0f), 0.5f, 0.5f, UIElement.UITextures["mobiletouchattack"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileIsLMBPressed = true;} ,"",null,1,false,true,leftUpPanel,true,UIElement.UITextures["mobiletouchattackpressed"]),
+
+
+                    new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.5f, UIElement.UITextures["mobiletouchsprint"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileIsSprintingPressed = true;} ,"",null,1,false,true,leftUpPanel,true,UIElement.UITextures["mobiletouchsprintpressed"]),
+
+                    new UIButton(new Vector2(0.25f, 0.0f), 0.5f, 0.5f, UIElement.UITextures["mobiletouchinteract"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileIsRMBPressed =true;} ,"",null,1,false,true,rightUpPanel,true,UIElement.UITextures["mobiletouchinteractpressed"]),
+
+                    new UIButton(new Vector2(0.25f, 0.5f), 0.5f, 0.5f, UIElement.UITextures["mobiletouchfly"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileIsFlyingPressed =true;} ,"",null,1,false,true,rightUpPanel,false),
+                    new UIButton(new Vector2(0.45f, 0.0f), 0.1f, 0.1f, UIElement.UITextures["mobiletouchpause"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {game.PauseGame(null);} ,"",null,1,true,true,null,false),
+
+
+                    new UIButton(new Vector2(0.0f, 0.35f), 0.08f, 0.5f, UIElement.UITextures["mobiletouchleft"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileScrollDelta-=130;} ,"",null,1,false,true,middleDownPanel,false),
+
+
+                    new UIButton(new Vector2(0.92f, 0.35f), 0.08f, 0.5f, UIElement.UITextures["mobiletouchright"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {PlayerInputManager.mobileScrollDelta+=130;} ,"",null,1,false,true,middleDownPanel,false),
+
+                    new UIButton(new Vector2(0.35f, 0.0f), 0.3f, 0.3f, UIElement.UITextures["mobiletouchinventory"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,
+                        (ub) => {game.OpenInventory(ub);} ,"",null,1,true,true,middleDownPanel,false),
+                };
+            }
+            else
+            {
+                UIElement.inGameUIs = new List<UIElement>
+                {
+                    new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                   
+                };
+            }
             UIElement.pauseMenuUIs = new List<UIElement>
             {
                // new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"])
@@ -260,6 +408,10 @@ namespace monogameMinecraftShared.UI
         {
             UIElement.inventoryUIs = new List<UIElement> { new UIImage(new Vector2(0.1f, 0.1f), 0.8f, 0.8f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),
              new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{} ,"Inventory",null,1,false,false),
+
+
+
+             new UIButton(new Vector2(0.35f, 0.7f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{game.OpenInventory(ub);} ,"Close",null,1,false,true),
             };
             int elementCount = 0;
             foreach (var element in Chunk.blockInfosNew)

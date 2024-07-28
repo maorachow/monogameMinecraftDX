@@ -17,6 +17,7 @@ using monogameMinecraftShared.UI;
 
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared;
+using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Updateables;
  
 
@@ -68,6 +69,7 @@ namespace monogameMinecraftDX
       //  public GameTimeManager gameTimeManager;
      //   public IRenderPipelineManager renderPipelineManager { get; set; }
         public ParticleManager particleManager;
+    //    public PlayerInputManager playerInputManager;
         /*
         public EntityRenderer entityRenderer;
         public ChunkRenderer chunkRenderer;
@@ -156,6 +158,11 @@ namespace monogameMinecraftDX
             {
                 element1.OnResize();
             }
+
+            foreach (UIElement element1 in UIElement.inGameUIs)
+            {
+                element1.OnResize();
+            }
             foreach (UIElement element1 in UIElement.structureOperationsPlacingUIs)
             {
                 element1.OnResize();
@@ -236,6 +243,7 @@ namespace monogameMinecraftDX
 
             status = GameStatus.Started;
             gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            playerInputManager = new PlayerInputManager(gamePlayer, false);
             gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
@@ -668,11 +676,11 @@ namespace monogameMinecraftDX
                         isGamePaused = true;
                         IsMouseVisible = true;
                     }
-                    ProcessPlayerKeyboardInput(gameTime);
-                
-                 
-                    ProcessPlayerMouseInput();
+                    //    ProcessPlayerKeyboardInput(gameTime);
 
+
+                    //    ProcessPlayerMouseInput();
+                    playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                     gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -715,7 +723,7 @@ namespace monogameMinecraftDX
             base.Update(gameTime);
 
         }
-        void ProcessPlayerMouseInput()
+    /*    void ProcessPlayerMouseInput()
         {
             var mState = Mouse.GetState();
             gamePlayer.cam.ProcessMouseMovement(mState.X - lastMouseX, lastMouseY - mState.Y);
@@ -770,7 +778,7 @@ namespace monogameMinecraftDX
             lastKeyboardState = kState;
             lastMouseState = mState;
 
-        }
+        }*/
         RasterizerState rasterizerState = new RasterizerState();
         RasterizerState rasterizerState1 = new RasterizerState{DepthClipEnable=false};
         

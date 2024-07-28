@@ -765,7 +765,7 @@ namespace monogameMinecraftGL
                 playerVec.Y = -1f;
             }
 
-            gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState, mState, lastMouseState);
+         //   gamePlayer.ProcessPlayerInputs(playerVec, (float)gameTime.ElapsedGameTime.TotalSeconds, kState, mState, lastMouseState);
 
             lastKeyboardState = kState;
             lastMouseState = mState;
