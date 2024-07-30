@@ -38,18 +38,25 @@ namespace monogameMinecraftShared.Input
             if (isTouchEnabled)
             {
 
-
-                if (prevTouches.Count > 0 && UIElement.allTouches.Count > 0)
+                foreach (var tc in UIElement.allTouches)
                 {
-                    if (UIElement.CheckIsPointColliding(ref UIElement.inGameUIs, UIElement.allTouches[0].Position))
+                    TouchLocation prevTouch;
+                    if (prevTouches.FindById(tc.Id, out prevTouch) == false)
                     {
-                        return;
+                        continue;
+                    }
+                    if (UIElement.CheckIsPointColliding(ref UIElement.inGameUIs, tc.Position))
+                    {
+                        continue;
                     }
                     mouseDelta = new Vector2();
-                    mouseDelta.X = (int)(UIElement.allTouches[0].Position.X - prevTouches[0].Position.X);
-                    mouseDelta.Y = (int)(prevTouches[0].Position.Y - UIElement.allTouches[0].Position.Y);
-                 //   Debug.WriteLine(mouseDelta);
+                    mouseDelta.X = (int)(tc.Position.X - prevTouch.Position.X);
+                    mouseDelta.Y = (int)(prevTouch.Position.Y - tc.Position.Y);
                 }
+               
+                  
+                 //   Debug.WriteLine(mouseDelta);
+                 
             }
         }
 
