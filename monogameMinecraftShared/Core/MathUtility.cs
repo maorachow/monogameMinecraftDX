@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -226,6 +227,15 @@ namespace monogameMinecraftShared.Core
             return 0;
         }
 
-
+        public static byte[] CombineBytes(byte[] firstBytes, int firstIndex, int firstLength, byte[] secondBytes, int secondIndex, int secondLength)
+        {
+            byte[] bytes = null;
+            MemoryStream ms = new MemoryStream();
+            ms.Write(firstBytes, firstIndex, firstLength);
+            ms.Write(secondBytes, secondIndex, secondLength);
+            bytes = ms.ToArray();
+            ms.Close();
+            return (bytes);
+        }
     }
 }

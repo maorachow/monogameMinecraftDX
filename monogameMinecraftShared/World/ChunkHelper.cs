@@ -771,7 +771,7 @@ namespace monogameMinecraftShared.World
                 {
                     return;
                 }
-                Vector3Int chunkSpacePos = position - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
+          /*      Vector3Int chunkSpacePos = position - new Vector3Int(chunkNeededUpdate.chunkPos.x, 0, chunkNeededUpdate.chunkPos.y);
                 if (chunkSpacePos.x == 0)
                 {
 
@@ -801,7 +801,7 @@ namespace monogameMinecraftShared.World
                     //     }
 
                     GetChunk(new Vector2Int(chunkNeededUpdate.chunkPos.x, chunkNeededUpdate.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsync();
-                }
+                }*/
             }
             public static void SetBlockOptionalDataWithoutUpdate(Vector3Int pos, byte optionalData)
             {

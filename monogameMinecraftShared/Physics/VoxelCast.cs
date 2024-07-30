@@ -17,9 +17,9 @@ namespace monogameMinecraftShared.Physics
     public static class VoxelCast
     {
 
-        public static VisualizationLine line = new VisualizationLine(null, new Vector3(0, 0, 0), new Vector3(0, 1, 0), 1, new Color(1, 1, 1));
-        public static List<BoundingBox> blocksTmp = new List<BoundingBox>();
-        public static void Cast(Ray ray, int radius, out Vector3Int result, out BlockFaces resultFaces, GamePlayer player, GraphicsDevice device)
+    //    public static VisualizationLine line = new VisualizationLine(null, new Vector3(0, 0, 0), new Vector3(0, 1, 0), 1, new Color(1, 1, 1));
+      //  public static List<BoundingBox> blocksTmp = new List<BoundingBox>();
+        public static void Cast(Ray ray, int radius, out Vector3Int result, out BlockFaces resultFaces, GamePlayer player)
         {
             //     blocksTmp.Clear();
 
@@ -60,5 +60,9 @@ namespace monogameMinecraftShared.Physics
 
             //   Debug.WriteLine(result);
         }
+
+
+
+    
     }
 }

@@ -210,7 +210,7 @@ namespace monogameMinecraftShared.Updateables
             Physics.Ray ray = new Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
             BlockFaces blockFaces = BlockFaces.PositiveY;
-            VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this, graphicsDevice);
+            VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this);
 
             /*    for (int i = 0; i < 30; i++)
                 {
@@ -237,7 +237,7 @@ namespace monogameMinecraftShared.Updateables
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
 
             BlockFaces blockFaces = BlockFaces.PositiveY;
-            VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this, graphicsDevice);
+            VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this);
             if (blockPoint.y < 0)
             {
                 return;
