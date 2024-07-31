@@ -31,6 +31,32 @@ namespace monogameMinecraftShared.World
         public FastNoise frequentNoiseGenerator = new FastNoise();
 
         public ConcurrentDictionary<Vector2Int, Chunk> chunks = new ConcurrentDictionary<Vector2Int, Chunk>();
+
+        public ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> _renderingChunks =
+            new ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers>();
+        public ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> renderingChunks
+        {
+            get
+            {
+                foreach (var kvp in chunks)
+                {
+                    if (!_renderingChunks.ContainsKey(kvp.Key))
+                    {
+                        _renderingChunks.TryAdd(kvp.Key, (IRenderableChunkBuffers)kvp.Value);
+                    }
+                }
+                foreach (var kvp in _renderingChunks)
+                {
+                    if (!chunks.ContainsKey(kvp.Key))
+                    {
+                        _renderingChunks.TryRemove(kvp.Key,out IRenderableChunkBuffers _);
+                    }
+                }
+
+                return _renderingChunks;
+            }
+        }
+
         public Dictionary<Vector2Int, ChunkData> chunkDataReadFromDisk = new Dictionary<Vector2Int, ChunkData>();
 
         public List<GeneratingStructureData> worldStructures= new List<GeneratingStructureData>();

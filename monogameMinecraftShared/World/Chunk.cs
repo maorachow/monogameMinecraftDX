@@ -15,7 +15,7 @@ namespace monogameMinecraftShared.World
     
 
 
-        public class Chunk : IDisposable
+        public class Chunk : IDisposable,IChunkFaceBuildingChecks,IRenderableChunkBuffers
     {
         
         public static FastNoise noiseGenerator { get { return VoxelWorld.currentWorld.noiseGenerator; } set { } }
@@ -34,7 +34,7 @@ namespace monogameMinecraftShared.World
         //  [IgnoreMember]
         // public short[,,] additiveMap = new short[chunkWidth, chunkHeight, chunkWidth];
          
-        public Vector2Int chunkPos = new Vector2Int(0, 0);
+        public Vector2Int chunkPos { get; set; }
        
         public bool isChunkDataSavedInDisk = false;
         public GraphicsDevice device;
@@ -462,7 +462,7 @@ namespace monogameMinecraftShared.World
         //  public SemaphoreSlim semaphore = new SemaphoreSlim(1);
         public List<Vector3> lightPoints = new List<Vector3>();
         public int usedByOthersCount = 0;
-        public bool isUnused = false;
+        public bool isUnused { get; set; } = false;
         public float unusedSeconds = 0f;
 
         public bool isAccurateHeightMapGenerated = false;
@@ -1356,7 +1356,7 @@ namespace monogameMinecraftShared.World
             }
         }
 
-        public bool isReadyToRender = false;
+        public bool isReadyToRender { get; set; } = false;
         public List<VertexPositionNormalTangentTexture> verticesOpq;//= new List<VertexPositionNormalTexture>();
         public List<ushort> indicesOpq;
         public List<VertexPositionNormalTangentTexture> verticesOpqLOD;//= new List<VertexPositionNormalTexture>();
@@ -1365,7 +1365,11 @@ namespace monogameMinecraftShared.World
         public List<ushort> indicesNS;
         public List<VertexPositionNormalTangentTexture> verticesWT;// = new List<VertexPositionNormalTexture>();
         public List<ushort> indicesWT;
-        public BoundingBox chunkBounds;
+        public BoundingBox chunkBounds
+        {
+            get;
+            set;
+        }
         public bool isVertexBufferDirty = false;
         // void BuildMesh();
         // void BuildBlocks();
@@ -1764,7 +1768,7 @@ namespace monogameMinecraftShared.World
                     }
                 }
             }
-            GenerateMeshOpqLOD(verticesOpqLOD, indicesOpqLOD, ref verticesOpqLOD1Array, ref indicesOpqLOD1Array, ref VBOpqLOD1, ref IBOpqLOD1, 2);
+            GenerateMeshOpqLOD(verticesOpqLOD, indicesOpqLOD, ref _verticesOpqLOD1Array, ref _indicesOpqLOD1Array, ref _VBOpqLOD1, ref _IBOpqLOD1, 2);
             verticesNSArray = verticesNS.ToArray();
             verticesWTArray = verticesWT.ToArray();
             verticesOpqArray = verticesOpq.ToArray();
@@ -2681,22 +2685,177 @@ namespace monogameMinecraftShared.World
             return map[x, y, z];
         }
 
-        public VertexPositionNormalTangentTexture[] verticesOpqArray;
-        public VertexPositionNormalTangentTexture[] verticesOpqLOD1Array;
-        public VertexPositionNormalTangentTexture[] verticesNSArray;
-        public VertexPositionNormalTangentTexture[] verticesWTArray;
-        public ushort[] indicesOpqArray;
-        public ushort[] indicesOpqLOD1Array;
-        public ushort[] indicesNSArray;
-        public ushort[] indicesWTArray;
-        public  IndexBuffer IBOpq;
-        public  VertexBuffer VBOpq;
-        public  IndexBuffer IBOpqLOD1;
-        public  VertexBuffer VBOpqLOD1;
-        public  IndexBuffer IBWT;
-        public  VertexBuffer VBWT;
-        public  IndexBuffer IBNS;
-        public  VertexBuffer VBNS;
+        public VertexPositionNormalTangentTexture[] verticesOpqArray
+        {
+            get
+            {
+                return _verticesOpqArray;
+            } set
+            {
+                _verticesOpqArray = value;
+            }
+        }
+        public VertexPositionNormalTangentTexture[] verticesOpqLOD1Array
+        {
+            get
+            {
+                return _verticesOpqLOD1Array;
+            }
+            set
+            {
+                _verticesOpqLOD1Array = value;
+            }
+        }
+        public VertexPositionNormalTangentTexture[] verticesNSArray
+        {
+            get
+            {
+                return _verticesNSArray;
+            }
+            set
+            {
+                _verticesNSArray = value;
+            }
+        }
+        public VertexPositionNormalTangentTexture[] verticesWTArray
+        {
+            get
+            {
+                return _verticesWTArray;
+            }
+            set
+            {
+                _verticesWTArray = value;
+            }
+        }
+        public ushort[] indicesOpqArray
+        {
+            get
+            {
+                return _indicesOpqArray;
+            }
+            set
+            {
+                _indicesOpqArray = value;
+            }
+        }
+        public ushort[] indicesOpqLOD1Array
+        {
+            get
+            {
+                return _indicesOpqLOD1Array;
+            }
+            set
+            {
+                _indicesOpqLOD1Array = value;
+            }
+        }
+        public ushort[] indicesNSArray
+        {
+            get
+            {
+                return _indicesNSArray;
+            }
+            set
+            {
+                _indicesNSArray = value;
+            }
+        }
+        public ushort[] indicesWTArray
+        {
+            get
+            {
+                return _indicesWTArray;
+            }
+            set
+            {
+                _indicesWTArray = value;
+            }
+        }
+
+
+
+        public VertexPositionNormalTangentTexture[] _verticesOpqArray;
+        public VertexPositionNormalTangentTexture[] _verticesOpqLOD1Array;
+        public VertexPositionNormalTangentTexture[] _verticesNSArray;
+        public VertexPositionNormalTangentTexture[] _verticesWTArray;
+        public ushort[] _indicesOpqArray;
+        public ushort[] _indicesOpqLOD1Array;
+        public ushort[] _indicesNSArray;
+        public ushort[] _indicesWTArray;
+        public  IndexBuffer IBOpq
+        {
+            get { return _IBOpq;}
+            set
+            {
+                _IBOpq=value;
+            } }
+        public  VertexBuffer VBOpq
+        {
+            get { return _VBOpq; }
+            set
+            {
+                _VBOpq = value;
+            }
+        }
+        public  IndexBuffer IBOpqLOD1
+        {
+            get { return _IBOpqLOD1; }
+            set
+            {
+                _IBOpqLOD1 = value;
+            }
+        }
+        public  VertexBuffer VBOpqLOD1
+        {
+            get { return _VBOpqLOD1; }
+            set
+            {
+                _VBOpqLOD1 = value;
+            }
+        }
+        public  IndexBuffer IBWT
+        {
+            get { return _IBWT; }
+            set
+            {
+                _IBWT = value;
+            }
+        }
+        public  VertexBuffer VBWT
+        {
+            get { return _VBWT; }
+            set
+            {
+                _VBWT = value;
+            }
+        }
+        public  IndexBuffer IBNS
+        {
+            get { return _IBNS; }
+            set
+            {
+                _IBNS = value;
+            }
+        }
+        public  VertexBuffer VBNS
+        {
+            get { return _VBNS; }
+            set
+            {
+                _VBNS = value;
+            }
+        }
+
+
+        public IndexBuffer _IBOpq;
+        public VertexBuffer _VBOpq;
+        public IndexBuffer _IBOpqLOD1;
+        public VertexBuffer _VBOpqLOD1;
+        public IndexBuffer _IBWT;
+        public VertexBuffer _VBWT;
+        public IndexBuffer _IBNS;
+        public VertexBuffer _VBNS;
         public int GetHighestPoint()
         {
             int returnValue = 0;
@@ -2718,11 +2877,11 @@ namespace monogameMinecraftShared.World
         //  public bool isTaskCompleted { get { return _isTaskCompleted; } set {  _isTaskCompleted = value;if (_isTaskCompleted == false) { ChunkHelper.buildingChunksCount++; } else {  ChunkHelper.buildingChunksCount--; } } }
         public bool isTaskCompleted;
 
-        public bool isNSBuffersValid = false;
+        public bool isNSBuffersValid { get; set; } = false;
 
-        public bool isWTBuffersValid = false;
+        public bool isWTBuffersValid { get; set; } = false;
 
-        public bool isOpqBuffersValid = false;
+        public bool isOpqBuffersValid { get; set; } = false;
             public void BuildChunk()
         {
             isTaskCompleted = false;
@@ -2784,7 +2943,7 @@ namespace monogameMinecraftShared.World
         }
 
 
-            public bool disposed;
+            public bool disposed { get; set; }
 
 
         public void Dispose()

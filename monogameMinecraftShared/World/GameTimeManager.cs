@@ -6,7 +6,7 @@ namespace monogameMinecraftShared.World
 {
     public class GameTimeManager
     {
-        public GamePlayer player;
+        public IGamePlayer player;
         public float dateTime = 0.1f;
 
         public float skyboxMixValue = 0f;
@@ -14,7 +14,7 @@ namespace monogameMinecraftShared.World
         public float sunX;
         public float sunY;
         public float sunZ = 0f;
-        public GameTimeManager(GamePlayer player) { this.player = player; }
+        public GameTimeManager(IGamePlayer player) { this.player = player; }
         public Vector3 EulerToVec3(Vector3 euler)
         {
             float yaw = euler.Y;

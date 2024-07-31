@@ -11,7 +11,7 @@ using monogameMinecraftShared.Core;
 
 public class Program
 {
-    public static UserData userData = new UserData(0, 100, 0, 0, 0, 0, "abc", false);
+    public static UserData userData = new UserData(0, 100, 0, 0, 0, 0, "abc", false,0);
 
     static IPAddress ip = IPAddress.Parse("127.0.0.1");
     static int port = 11111;
@@ -105,6 +105,11 @@ public class Program
                         }
                     }
 
+                    if (mp.command == (byte)MessageCommandType.UserDataRequest)
+                    {
+                        SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(userData)));
+                        }
+
                     } // 拆包循环结束
                 }
 
@@ -169,7 +174,8 @@ public class Program
                     SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogout,new byte[]{}));
                     break;
                 case '3':
-            //        SendMessageToServer(new Message("ChunkGen", "null"));
+                    Console.WriteLine("request chunk");
+                    SendMessageToServer(new MessageProtocol((byte)MessageCommandType.ChunkDataRequest,MessagePackSerializer.Serialize(new ChunkDataRequestData(new Vector2Int(0,0),0))));
                     break;
             }
             //    clientSocket.Send(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message(Console.ReadLine(), Console.ReadLine()))));

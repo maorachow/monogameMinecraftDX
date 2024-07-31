@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,9 @@ namespace monogameMinecraftNetworking.Data
         [Key(7)]
         public bool isAttacking;
 
-        public UserData(float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string userName, bool isAttacking)
+        [Key(8)]
+        public int curWorldID;
+        public UserData(float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string userName, bool isAttacking,int curWorldID)
         {
             this.posX = posX;
             this.posY = posY;
@@ -37,6 +40,7 @@ namespace monogameMinecraftNetworking.Data
             this.rotZ = rotZ;
             this.userName = userName;
             this.isAttacking = isAttacking;
+            this.curWorldID= curWorldID;
         }
     }
 }

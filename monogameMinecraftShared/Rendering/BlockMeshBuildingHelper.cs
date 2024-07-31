@@ -9,10 +9,10 @@ namespace monogameMinecraftShared.Rendering
 
    
         //commit
-        public static class BlockMeshBuildingHelper
+        public static partial class BlockMeshBuildingHelper
         {
 
-            public static void BuildSingleBlock(Chunk curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> OpqVerts, ref List<VertexPositionNormalTangentTexture> NSVerts, ref List<VertexPositionNormalTangentTexture> WTVerts, ref List<ushort> OpqIndices, ref List<ushort> NSIndices, ref List<ushort> WTIndices)
+            public static void BuildSingleBlock(IChunkFaceBuildingChecks curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> OpqVerts, ref List<VertexPositionNormalTangentTexture> NSVerts, ref List<VertexPositionNormalTangentTexture> WTVerts, ref List<ushort> OpqIndices, ref List<ushort> NSIndices, ref List<ushort> WTIndices)
             {
                 if (blockData.blockID == 0 || !Chunk.blockInfosNew.ContainsKey(blockData.blockID))
                 {
@@ -168,7 +168,11 @@ namespace monogameMinecraftShared.Rendering
                         break;
                     case BlockShape.Torch:
                         //datavalues: 0ground 1left 2right 3front 4back
-                        curChunk.lightPoints.Add(new Vector3(x, y, z) + new Vector3(0.5f, 0.725f, 0.5f) + new Vector3(curChunk.chunkPos.x, 0, curChunk.chunkPos.y));
+                        if (curChunk is Chunk)
+                        {
+                            (curChunk as Chunk).lightPoints.Add(new Vector3(x, y, z) + new Vector3(0.5f, 0.725f, 0.5f) + new Vector3(curChunk.chunkPos.x, 0, curChunk.chunkPos.y));
+                    }
+                        
                         if (Chunk.blockInfosNew[blockData.blockID].uvCorners.Count < 6 || Chunk.blockInfosNew[blockData.blockID].uvSizes.Count < 6)
                         {
                             return;
@@ -687,8 +691,11 @@ namespace monogameMinecraftShared.Rendering
                 }
 
             }
-            
-            public static void BuildSingleBlockLOD(int LODSkipBlockCount,Chunk curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> verts, ref List<ushort> indices)
+
+
+
+        
+        public static void BuildSingleBlockLOD(int LODSkipBlockCount,IChunkFaceBuildingChecks curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> verts, ref List<ushort> indices)
             {
                 if (blockData.blockID == 0 || !Chunk.blockInfosNew.ContainsKey(blockData.blockID))
                 {

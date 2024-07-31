@@ -23,7 +23,8 @@ namespace monogameMinecraftShared.Rendering.Particle
         public VertexBuffer instancingBufferGravityTextured;
         public VertexBuffer quadVertexBuffer;
         public IndexBuffer quadIndexBuffer;
-        public MinecraftGameBase game;
+     public bool isEnabled=true;
+        public IGamePlayer gamePlayer;
 
         public ushort[] quadIndices =
         {
@@ -85,7 +86,7 @@ namespace monogameMinecraftShared.Rendering.Particle
         }
 
 
-        public ParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, MinecraftGameBase game)
+        public ParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer,bool isEnabled)
         {
             this.atlas = atlas;
             this.device = device;
@@ -94,15 +95,16 @@ namespace monogameMinecraftShared.Rendering.Particle
             this.gBufferParticleEffect = gBufferParticleEffect;
             InitializeVertices();
             InitializeQuadBuffers(this.device);
-            this.game = game;
+      this.isEnabled=isEnabled;
             instancingBufferGravityTextured = new VertexBuffer(device, typeof(VertexMatrix4x4UVScale),
                1, BufferUsage.WriteOnly);
+            this.gamePlayer = gamePlayer;
         }
 
         RasterizerState rasterizerState = new RasterizerState { CullMode = CullMode.None };
         public void DrawGBuffer()
         {
-            if (game.gamePlatformType == GamePlatformType.LowDefGL)
+            if (isEnabled==false)
             {
                 return;
             }
@@ -117,7 +119,7 @@ namespace monogameMinecraftShared.Rendering.Particle
                     if (item1 != null && item1.Value.isAlive == true)
                     {
                         VertexMatrix4x4UVScale vertex = new VertexMatrix4x4UVScale();
-                        item1.Value.GetInstancingElement(game.gamePlayer, out vertex);
+                        item1.Value.GetInstancingElement(gamePlayer, out vertex);
                         //     Debug.WriteLine(vertex.row3);
                         instancingDataGravityTextured.Add(vertex);
                     }
@@ -146,8 +148,8 @@ namespace monogameMinecraftShared.Rendering.Particle
             //   basicEffect.View = view;
             //     basicEffect.World = world;
 
-            gBufferParticleEffect.Parameters["View"].SetValue(game.gamePlayer.cam.viewMatrix);
-            gBufferParticleEffect.Parameters["Projection"].SetValue(game.gamePlayer.cam.projectionMatrix);
+            gBufferParticleEffect.Parameters["View"].SetValue(gamePlayer.cam.viewMatrix);
+            gBufferParticleEffect.Parameters["Projection"].SetValue(gamePlayer.cam.projectionMatrix);
             gBufferParticleEffect.Parameters["Texture"]?.SetValue(atlas);
             gBufferParticleEffect.Parameters["TextureNormal"]?.SetValue(atlasNormal);
             gBufferParticleEffect.Parameters["TextureMER"]?.SetValue(atlasMER);

@@ -21,7 +21,7 @@ namespace monogameMinecraftShared.Rendering
              public RenderTargetBinding[] binding;*/
         public GBufferRenderer gBufferRenderer;
         public GraphicsDevice graphicsDevice;
-        public GamePlayer player;
+        public IGamePlayer player;
         public List<Vector3> ssaoKernel = new List<Vector3>();
         public List<Color> ssaoNoise = new List<Color>();
         public Texture2D ssaoNoiseTexture;
@@ -30,7 +30,7 @@ namespace monogameMinecraftShared.Rendering
 
         public Texture2D randNormal;
         public Camera cam;
-        public SSAORenderer(Effect ssaoEffect, GBufferRenderer gBufferRenderer, ChunkRenderer chunkRenderer, GraphicsDevice gd, GamePlayer player, Texture2D randNormal)
+        public SSAORenderer(Effect ssaoEffect, GBufferRenderer gBufferRenderer, ChunkRenderer chunkRenderer, GraphicsDevice gd, IGamePlayer player, Texture2D randNormal)
         {
             graphicsDevice = gd;
             this.ssaoEffect = ssaoEffect;

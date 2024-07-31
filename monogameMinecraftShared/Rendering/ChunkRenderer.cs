@@ -13,7 +13,7 @@ namespace monogameMinecraftShared.Rendering
     public class ChunkRenderer
     {
 
-        public MinecraftGameBase game;
+        public Game game;
         public GraphicsDevice device;
         //  public AlphaTestEffect basicNSShader;
         public Effect basicShader;
@@ -64,7 +64,7 @@ namespace monogameMinecraftShared.Rendering
             //    basicShader.Parameters["TextureDepth"].SetValue(atlasDepth);
             //     basicShader.Parameters["TextureAO"].SetValue(SSAORenderer.ssaoTarget);
         }
-        public ChunkRenderer(MinecraftGameBase game, GraphicsDevice device, Effect basicSolidShader, ShadowRenderer shadowRenderer, GameTimeManager gameTimeManager)
+        public ChunkRenderer(Game game, GraphicsDevice device, Effect basicSolidShader, ShadowRenderer shadowRenderer, GameTimeManager gameTimeManager)
         {
             this.game = game;
             this.device = device;
@@ -78,7 +78,7 @@ namespace monogameMinecraftShared.Rendering
 
         }
 
-        public void RenderAllChunksGBuffer(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Effect gBufferEffect)
+        public void RenderAllChunksGBuffer(ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> RenderingChunks, IGamePlayer player, Effect gBufferEffect)
         {
 
             gBufferEffect.Parameters["blockTex"].SetValue(atlas);
@@ -90,7 +90,7 @@ namespace monogameMinecraftShared.Rendering
 
             foreach (var chunk in RenderingChunks)
             {
-                Chunk c = chunk.Value;
+                IRenderableChunkBuffers c = chunk.Value;
                 if (c == null)
                 {
                     continue;
@@ -123,7 +123,7 @@ namespace monogameMinecraftShared.Rendering
             }
             foreach (var chunk in RenderingChunks)
             {
-                Chunk c = chunk.Value;
+                IRenderableChunkBuffers c = chunk.Value;
                 if (c == null)
                 {
                     continue;
@@ -148,7 +148,7 @@ namespace monogameMinecraftShared.Rendering
             }
             foreach (var chunk in RenderingChunks)
             {
-                Chunk c = chunk.Value;
+                IRenderableChunkBuffers c = chunk.Value;
                 if (c == null)
                 {
                     continue;
@@ -267,7 +267,7 @@ namespace monogameMinecraftShared.Rendering
 
 
         }
-        public void RenderSingleChunkGBuffer(Chunk c, GamePlayer player, Effect gBufferEffect, bool isLOD = false)
+        public void RenderSingleChunkGBuffer(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect, bool isLOD = false)
         {
             if (isLOD)
             {
@@ -298,8 +298,7 @@ namespace monogameMinecraftShared.Rendering
                     return;
                 }
 
-                lock (c.asyncTaskLock)
-                {
+                
                     Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
                     gBufferEffect.Parameters["World"].SetValue(world);
                     //   gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world*player.cam.viewMatrix)));
@@ -315,7 +314,7 @@ namespace monogameMinecraftShared.Rendering
                         device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesOpqArray.Length / 3);
 
                     }
-                }
+                
 
 
 
@@ -323,7 +322,7 @@ namespace monogameMinecraftShared.Rendering
 
         }
 
-        public void RenderSingleChunkGBufferWater(Chunk c, GamePlayer player, Effect gBufferEffect)
+        public void RenderSingleChunkGBufferWater(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect)
         {
             if (c.indicesWTArray.Length > 0 && c.isWTBuffersValid == true)
             {
@@ -349,7 +348,7 @@ namespace monogameMinecraftShared.Rendering
         }
 
 
-        public void RenderSingleChunkGBufferAlphaTest(Chunk c, GamePlayer player, Effect gBufferEffect)
+        public void RenderSingleChunkGBufferAlphaTest(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect)
         {
             if (c.indicesNSArray.Length > 0 && c.isNSBuffersValid == true)
             {
@@ -679,7 +678,7 @@ namespace monogameMinecraftShared.Rendering
 
             basicShader.Parameters["Alpha"].SetValue(1.0f);
 
-            basicShader.Parameters["viewPos"].SetValue(game.gamePlayer.cam.position);
+            basicShader.Parameters["viewPos"].SetValue(player.cam.position);
             //    basicShader.Parameters["fogDensity"].SetValue(0.01f);
             // buffer.SetData(c.verticesOpqArray);
             device.SetVertexBuffer(c.VBOpq);

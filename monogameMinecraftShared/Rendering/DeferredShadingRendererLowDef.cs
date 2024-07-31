@@ -76,7 +76,7 @@ namespace monogameMinecraftShared.Rendering
                  this.hdrCubemapRenderer = hdrCubemapRenderer;*/
         }
 
-        public void Draw(GamePlayer player, SpriteBatch sb)
+        public void Draw(IGamePlayer player, SpriteBatch sb)
         {
 
             SetCameraFrustum(player.cam, blockDeferredEffect);

@@ -13,11 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftGL", "mono
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftAndroid", "monogameMinecraftAndroid\monogameMinecraftAndroid.csproj", "{20D19569-4974-46E9-8473-329B9C9A3CF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monogameMinecraftNetworking", "monogameMinecraftNetworking\monogameMinecraftNetworking.csproj", "{D954252A-3666-4EC3-B3F2-05602E314E20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftNetworking", "monogameMinecraftNetworking\monogameMinecraftNetworking.csproj", "{D954252A-3666-4EC3-B3F2-05602E314E20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monogameMinecraftServer", "monogameMinecraftServer\monogameMinecraftServer.csproj", "{2EDB028F-E733-4647-B968-04B2DF7EBD22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftServer", "monogameMinecraftServer\monogameMinecraftServer.csproj", "{2EDB028F-E733-4647-B968-04B2DF7EBD22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "monogameMinecraftTestClient", "monogameMinecraftTestClient\monogameMinecraftTestClient.csproj", "{04EF0610-0D43-4272-ADD4-2CAEF34C8405}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftTestClient", "monogameMinecraftTestClient\monogameMinecraftTestClient.csproj", "{04EF0610-0D43-4272-ADD4-2CAEF34C8405}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "monogameMinecraftClient", "monogameMinecraftClient\monogameMinecraftClient.csproj", "{CC0350BE-EFA1-4D77-AD05-E9255DE6D80C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{04EF0610-0D43-4272-ADD4-2CAEF34C8405}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04EF0610-0D43-4272-ADD4-2CAEF34C8405}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04EF0610-0D43-4272-ADD4-2CAEF34C8405}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC0350BE-EFA1-4D77-AD05-E9255DE6D80C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC0350BE-EFA1-4D77-AD05-E9255DE6D80C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC0350BE-EFA1-4D77-AD05-E9255DE6D80C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC0350BE-EFA1-4D77-AD05-E9255DE6D80C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

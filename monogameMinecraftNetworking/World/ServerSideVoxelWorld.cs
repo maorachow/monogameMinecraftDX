@@ -15,6 +15,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
 
@@ -30,6 +31,7 @@ namespace monogameMinecraftNetworking.World
             new ServerSideVoxelWorld("worldender.bin",2,1)};
 
 
+        public WorldGenParamsData genParamsData = new WorldGenParamsData();
         public FastNoise noiseGenerator = new FastNoise();
         public FastNoise biomeNoiseGenerator = new FastNoise();
         public FastNoise frequentNoiseGenerator = new FastNoise();
@@ -51,6 +53,7 @@ namespace monogameMinecraftNetworking.World
 
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
+        public static IMultiplayerServer serverInstance;
         public ServerSideVoxelWorld(string curWorldSaveName, int worldGenType, int worldID)
         {
             this.worldGenType = worldGenType;
@@ -205,14 +208,22 @@ namespace monogameMinecraftNetworking.World
 
         }
 
+        public void SetupNoiseGenerators(float bngf,float ngf,float fngf)
+        {
+            genParamsData = new WorldGenParamsData(worldGenType, bngf, ngf, fngf,worldID);
+            noiseGenerator.SetFrequency(genParamsData.noiseGeneratorFrequency);
+
+            frequentNoiseGenerator.SetFrequency(genParamsData.frequentNoiseGeneratorFrequency);
+            biomeNoiseGenerator.SetFrequency(genParamsData.biomeNoiseGeneratorFrequency);
+        }
         public void InitWorld(IMultiplayerServer server)
         {
 
             Console.WriteLine("initializing world ID:" + worldID);
+        
+            SetupNoiseGenerators(0.002f, 0.01f, 0.01f);
 
-
-         
-
+            
 
 
             // InitChunkPool();
@@ -274,7 +285,11 @@ namespace monogameMinecraftNetworking.World
                             NetworkingUtility.SendToClient(item.remoteClient,new MessageProtocol((byte)MessageCommandType.WorldData,ChunkDataSerializingUtility.SerializeChunk(c)));
                           
                         }
-                        else continue;
+                        else
+                        {
+                            ServerSideChunk c = GetChunk(item.chunkPos);
+                            NetworkingUtility.SendToClient(item.remoteClient, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(c)));
+                        }
                     }
                 }
                 

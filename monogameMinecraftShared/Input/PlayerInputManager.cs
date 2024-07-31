@@ -14,9 +14,9 @@ namespace monogameMinecraftShared.Input
 {
     public class PlayerInputManager
     {
-        public GamePlayer gamePlayer;
+        public IGamePlayer gamePlayer;
         public bool isTouchEnabled;
-        public PlayerInputManager(GamePlayer gamePlayer, bool isTouchEnabled)
+        public PlayerInputManager(IGamePlayer gamePlayer, bool isTouchEnabled)
         {
             this.gamePlayer = gamePlayer;
             this.isTouchEnabled = isTouchEnabled;

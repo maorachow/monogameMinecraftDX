@@ -13,9 +13,9 @@ using monogameMinecraftShared.World;
 
 namespace monogameMinecraftShared.Updateables
 {
-    public class GamePlayer : IMovableCollider
+    public class GamePlayer : IMovableCollider,IGamePlayer
     {
-        public Camera cam;
+        public Camera cam { get; set; }
         public BoundingBox bounds { get; set; }
         public Vector3 position { get; set; }
         public float moveVelocity = 5f;

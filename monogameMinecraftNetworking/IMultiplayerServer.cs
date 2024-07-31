@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using monogameMinecraftNetworking.Data;
+using monogameMinecraftNetworking.Updateables;
 
 namespace monogameMinecraftNetworking
 {
@@ -17,7 +18,7 @@ namespace monogameMinecraftNetworking
 
           public object remoteClientsLock { get; }
 
-      public object todoListLock { get;  }
+        public object todoListLock { get;  }
         public List<RemoteClient> remoteClients { get; set; }
         
         public List<ServerTodoList> serverTodoLists { get; set; }
@@ -25,6 +26,8 @@ namespace monogameMinecraftNetworking
         public List<UserData> allUserDatas { get; }
 
         public IPEndPoint ipEndPoint { get; set; }
+
+        public List<IUpdatingManager> updatingManagers { get; set; }
         public void Initialize();
         public void Start();
     }

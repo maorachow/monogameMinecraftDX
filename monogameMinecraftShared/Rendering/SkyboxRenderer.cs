@@ -16,10 +16,10 @@ namespace monogameMinecraftShared.Rendering
         public TextureCube skyboxTextureNight;
         public VertexBuffer skyboxVertexBuffer;
         public List<VertexPosition> skyboxVertices;
-        public GamePlayer player;
+        public IGamePlayer player;
         public float curDateTime = 0f;
         public GameTimeManager gametimeManager;
-        public SkyboxRenderer(GraphicsDevice device, Effect skyboxEffect, TextureCube skyboxTex, GamePlayer player, Texture2D skyboxTexPX, Texture2D skyboxTexPY, Texture2D skyboxTexPZ, Texture2D skyboxTexNX, Texture2D skyboxTexNY, Texture2D skyboxTexNZ
+        public SkyboxRenderer(GraphicsDevice device, Effect skyboxEffect, TextureCube skyboxTex, IGamePlayer player, Texture2D skyboxTexPX, Texture2D skyboxTexPY, Texture2D skyboxTexPZ, Texture2D skyboxTexNX, Texture2D skyboxTexNY, Texture2D skyboxTexNZ
             , Texture2D skyboxTexPXN, Texture2D skyboxTexPYN, Texture2D skyboxTexPZN, Texture2D skyboxTexNXN, Texture2D skyboxTexNYN, Texture2D skyboxTexNZN, GameTimeManager gametimeManager
             )
         {

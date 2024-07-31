@@ -149,7 +149,7 @@ namespace monogameMinecraftShared.Updateables
             this.friction = friction;
             gravity = 0f;
         }
-        public void GetInstancingElement(GamePlayer player, out VertexMatrix4x4UVScale element)
+        public void GetInstancingElement(IGamePlayer player, out VertexMatrix4x4UVScale element)
         {
             Matrix transMat = Matrix.CreateScale(size) *
                               Matrix.CreateBillboard(position, position - player.cam.front, player.cam.up, player.cam.front);

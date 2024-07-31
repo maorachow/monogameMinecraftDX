@@ -78,7 +78,7 @@ namespace monogameMinecraftShared.Rendering
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-                effectsManager.gameEffects["gbufferparticleeffect"], game);
+                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayer,true);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
             entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager);
             gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
@@ -131,7 +131,7 @@ namespace monogameMinecraftShared.Rendering
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
             shadowRenderer.RenderShadow(game.gamePlayer);
-            gBufferRenderer.Draw();
+            gBufferRenderer.Draw(VoxelWorld.currentWorld.renderingChunks);
             ssaoRenderer.Draw();
             hiZBufferRenderer.Draw();
             contactShadowRenderer.Draw();

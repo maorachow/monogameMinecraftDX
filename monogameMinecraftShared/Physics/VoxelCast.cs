@@ -14,7 +14,7 @@ using monogameMinecraftShared.World;
 
 namespace monogameMinecraftShared.Physics
 {
-    public static class VoxelCast
+    public static partial class VoxelCast
     {
 
     //    public static VisualizationLine line = new VisualizationLine(null, new Vector3(0, 0, 0), new Vector3(0, 1, 0), 1, new Color(1, 1, 1));
@@ -62,7 +62,6 @@ namespace monogameMinecraftShared.Physics
         }
 
 
-
-    
+      
     }
 }

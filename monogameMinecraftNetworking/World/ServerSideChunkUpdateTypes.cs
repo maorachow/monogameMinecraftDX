@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Data;
 
 namespace monogameMinecraftNetworking.World
 {
@@ -15,6 +16,28 @@ namespace monogameMinecraftNetworking.World
 
         public int worldID { get; set; }
         public void Update();
+
+
+        public static IChunkUpdateOperation? ParseFromData(ChunkUpdateData data,ServerSideWorldUpdater updater)
+        {
+            switch ((ChunkUpdateDataTypes)data.dataType)
+            {
+                case ChunkUpdateDataTypes.BreakingBlockUpdate:
+
+                    return new BreakBlockOperation(new Vector3Int(data.posX, data.posY, data.posZ), updater,
+                        data.optionalData2, data.worldID);
+
+                case ChunkUpdateDataTypes.PlaceBlockUpdate:
+
+                    return new PlacingBlockOperation(new Vector3Int(data.posX, data.posY, data.posZ), updater,
+                        data.optionalData1, data.worldID);
+                case ChunkUpdateDataTypes.DoorInteractingUpdate:
+                    return new DoorInteractingOperation(new Vector3Int(data.posX, data.posY, data.posZ),
+                         data.worldID);
+                default:
+                    return null;
+            }
+        }
     }
 
     public struct PlacingBlockOperation : IChunkUpdateOperation
@@ -174,9 +197,10 @@ namespace monogameMinecraftNetworking.World
         }
         public void Update()
         {
+            Debug.WriteLine("server break block");
             Vector3Int tempPos = position;
             var key = prevBlockData;
-        
+            ServerSideChunkHelper.SetBlockWithoutUpdateWithSaving(position,0,worldID);
             //send break block particle command to client
             BlockShape? shapeRight =
                 ServerSideChunkHelper.GetBlockShape(ServerSideChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0), worldID));

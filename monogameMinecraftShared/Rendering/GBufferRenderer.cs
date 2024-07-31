@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftShared.Rendering.Particle;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.World;
+using System.Collections.Concurrent;
+using monogameMinecraftShared.Core;
 
 namespace monogameMinecraftShared.Rendering
 {
@@ -18,13 +20,14 @@ namespace monogameMinecraftShared.Rendering
         public RenderTarget2D renderTargetMER;
         public RenderTargetBinding[] binding;
         public GraphicsDevice graphicsDevice;
-        public GamePlayer player;
+        public IGamePlayer player;
         public VertexBuffer quadVertexBuffer;
         public ChunkRenderer chunkRenderer;
         public EntityRenderer entityRenderer;
         public ParticleRenderer particleRenderer;
         public Effect gBufferEffect;
         public Effect gBufferEntityEffect;
+        public bool chunksOnly = false;
         public VertexPositionTexture[] quadVertices =
       {
 
@@ -70,7 +73,7 @@ namespace monogameMinecraftShared.Rendering
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
         }
         public IndexBuffer quadIndexBuffer;
-        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, GamePlayer player, ChunkRenderer cr, EntityRenderer er, ParticleRenderer pr)
+        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, IGamePlayer player, ChunkRenderer cr, EntityRenderer er, ParticleRenderer pr, bool chunksOnly=false)
         {
             graphicsDevice = device;
             this.gBufferEffect = gBufferEffect;
@@ -98,6 +101,7 @@ namespace monogameMinecraftShared.Rendering
             quadIndexBuffer.SetData(quadIndices);
             quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 4, BufferUsage.None);
             quadVertexBuffer.SetData(quadVertices);
+            this.chunksOnly = chunksOnly;
         }
         public void Resize(int width, int height, GraphicsDevice device)
         {
@@ -112,14 +116,18 @@ namespace monogameMinecraftShared.Rendering
             binding[2] = new RenderTargetBinding(renderTargetAlbedo);
             binding[3] = new RenderTargetBinding(renderTargetMER);
         }
-        public void Draw()
+        public void Draw(ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> RenderingChunks)
         {
 
             graphicsDevice.SetRenderTargets(binding);
             graphicsDevice.Clear(Color.Transparent);
-            chunkRenderer.RenderAllChunksGBuffer(VoxelWorld.currentWorld.chunks, player, gBufferEffect);
-            entityRenderer.DrawGBuffer(gBufferEntityEffect);
-            particleRenderer.DrawGBuffer();
+            chunkRenderer.RenderAllChunksGBuffer(RenderingChunks, player, gBufferEffect);
+            if (!chunksOnly)
+            {
+                entityRenderer.DrawGBuffer(gBufferEntityEffect);
+                particleRenderer.DrawGBuffer();
+            }
+          
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);
 

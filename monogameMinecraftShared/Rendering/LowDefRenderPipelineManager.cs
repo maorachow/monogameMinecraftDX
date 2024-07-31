@@ -58,7 +58,7 @@ namespace monogameMinecraftShared.Rendering
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-              null, game);
+              null, game.gamePlayer,false);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
             entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"),null, null, game.gameTimeManager);
             gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
@@ -111,7 +111,7 @@ namespace monogameMinecraftShared.Rendering
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
             game.GraphicsDevice.BlendState = BlendState.Opaque;
-            gBufferRenderer.Draw();
+            gBufferRenderer.Draw(VoxelWorld.currentWorld.renderingChunks);
             ssaoRenderer.Draw();
         
             deferredShadingRendererLowDef.Draw(game.gamePlayer,game._spriteBatch);
