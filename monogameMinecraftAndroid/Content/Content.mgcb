@@ -827,18 +827,6 @@
 /processorParam:TextureFormat=Color
 /build:mobiletouch/down_pressed.png
 
-#begin mobiletouch/down_pressed.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/down_pressed.png
-
 #begin mobiletouch/down.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -850,30 +838,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:mobiletouch/down.png
-
-#begin mobiletouch/down.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/down.png
-
-#begin mobiletouch/flyingascend.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/flyingascend.png
 
 #begin mobiletouch/flyingascend.png
 /importer:TextureImporter
@@ -935,30 +899,6 @@
 /processorParam:TextureFormat=Color
 /build:mobiletouch/jump_pressed.png
 
-#begin mobiletouch/jump_pressed.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/jump_pressed.png
-
-#begin mobiletouch/jump.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/jump.png
-
 #begin mobiletouch/jump.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -982,30 +922,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:mobiletouch/left_pressed.png
-
-#begin mobiletouch/left_pressed.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/left_pressed.png
-
-#begin mobiletouch/left.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/left.png
 
 #begin mobiletouch/left.png
 /importer:TextureImporter
@@ -1042,30 +958,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:mobiletouch/right_pressed.png
-
-#begin mobiletouch/right_pressed.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/right_pressed.png
-
-#begin mobiletouch/right.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/right.png
 
 #begin mobiletouch/right.png
 /importer:TextureImporter
@@ -1115,18 +1007,6 @@
 /processorParam:TextureFormat=Color
 /build:mobiletouch/up_pressed.png
 
-#begin mobiletouch/up_pressed.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/up_pressed.png
-
 #begin mobiletouch/up.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1139,17 +1019,24 @@
 /processorParam:TextureFormat=Color
 /build:mobiletouch/up.png
 
-#begin mobiletouch/up.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
+#begin playermodel.fbx
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
 /processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:mobiletouch/up.png
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=0
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:playermodel.fbx
 
 #begin randomnormal.jpg
 /importer:TextureImporter
@@ -1306,6 +1193,18 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:ssaoeffect.fx
+
+#begin steve.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:steve.png
 
 #begin terrain.png
 /importer:TextureImporter

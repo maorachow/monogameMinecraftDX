@@ -41,8 +41,8 @@ namespace monogameMinecraftNetworking.Updateables
                 {
                     return;
                 }
-                Thread.Sleep(500);
-                lock (server.todoListLock)
+                Thread.Sleep(50);
+             /*   lock (server.todoListLock)
                 {
                     if (server.serverTodoLists.Count> 0)
                     {
@@ -50,8 +50,10 @@ namespace monogameMinecraftNetworking.Updateables
                         server.serverTodoLists[0].value.Enqueue((null, new MessageProtocol((byte)MessageCommandType.UserDataBroadcast, new byte[] { })), 0);
                     }
                    
-                }
-            
+                }*/
+             NetworkingUtility.EnqueueTodoList(server.serverTodoLists, (null, new MessageProtocol((byte)MessageCommandType.UserDataRequest, new byte[] { })));
+             NetworkingUtility.EnqueueTodoList(server.serverTodoLists, (null, new MessageProtocol((byte)MessageCommandType.UserDataBroadcast, new byte[] { })));
+
             }
 
         }

@@ -321,7 +321,7 @@ namespace monogameMinecraftShared.Asset
                 cr.SetTexture(atlasNormal, null, atlas, atlasMER);
             }
 
-            public static void LoadDefaultUIResources(ContentManager content, MinecraftGameBase game)
+            public static void LoadDefaultUIResources(ContentManager content, Game game)
             {
                 Dictionary<int, string> blockSpriteInfoData = new Dictionary<int, string>
                 {
@@ -374,7 +374,7 @@ namespace monogameMinecraftShared.Asset
             }
 
             public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr,ParticleRenderer pr,
-                MinecraftGameBase game)
+                Game game)
             {
                 string blockInfoDataString;
                 string blockSoundInfoDataString;

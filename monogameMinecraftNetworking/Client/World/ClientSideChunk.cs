@@ -50,10 +50,7 @@ namespace monogameMinecraftNetworking.Client.World
         public ClientSideChunk backRightChunk;
         public int usedByOthersCount = 0;
         public float unusedSeconds = 0f;
-        public void Dispose()
-        {
-            // TODO release managed resources here
-        }
+       
 
         public GraphicsDevice device;
         public bool isUnused { get; set; }
@@ -72,8 +69,8 @@ namespace monogameMinecraftNetworking.Client.World
             }
             world.chunks.TryAdd(chunkPos, this);
             isReadyToRender = false;
-
-         //   BuildChunk();
+            isTaskCompleted = true;
+            //   BuildChunk();
 
         }
         public List<VertexPositionNormalTangentTexture> verticesOpq;//= new List<VertexPositionNormalTexture>();
@@ -1344,6 +1341,137 @@ namespace monogameMinecraftNetworking.Client.World
                 default:
                     return false;
             }
+        }
+ 
+
+
+        public void Dispose()
+        {
+            // Debug.WriteLine("dispose");
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+        ~ClientSideChunk()
+        {
+
+            Dispose(false);
+        }
+
+        public void Dispose(bool disposing)
+        {
+
+            if (disposed)
+            {
+                return;
+            }
+            //    Debug.WriteLine("dispose"+disposing);
+            if (disposing)
+            {
+                if (isTaskCompleted == false)
+                {
+                    Debug.WriteLine("dispose failed");
+                    return;
+                }
+
+
+                this.backChunk = null;
+
+                this.frontChunk = null;
+
+                this.leftChunk = null;
+
+
+                this.rightChunk = null;
+
+
+
+                this.backLeftChunk = null;
+
+
+                this.backRightChunk = null;
+
+
+                this.frontLeftChunk = null;
+
+
+                this.frontRightChunk = null;
+
+                this.map = null;
+                this.thisHeightMap = null;
+
+                this.verticesNSArray = null;
+                //  this.additiveMap = null;
+                this.verticesWTArray = null;
+                this.verticesOpqArray = null;
+                this.verticesOpq = null;
+                this.verticesNS = null;
+                this.verticesWT = null;
+                this.indicesOpq = null;
+                this.indicesNS = null;
+                this.indicesWT = null;
+                this.verticesNSArray = null;
+                this.indicesOpqArray = null;
+                this.verticesOpqLOD1Array = null;
+                this.indicesOpqLOD1Array = null;
+                this.indicesNSArray = null;
+                this.indicesWTArray = null;
+                if (this.VBOpqLOD1 != null)
+                {
+                    this.VBOpqLOD1.Dispose();
+                }
+                if (this.IBOpqLOD1 != null)
+                {
+                    this.IBOpqLOD1.Dispose();
+                }
+                if (this.VBOpq != null)
+                {
+                    this.VBOpq.Dispose();
+                }
+                if (this.VBOpq != null)
+                {
+                    this.VBOpq.Dispose();
+                }
+                if (this.IBOpq != null)
+                {
+                    this.IBOpq.Dispose();
+                }
+                if (this.VBWT != null)
+                {
+                    this.VBWT.Dispose();
+                }
+                if (this.IBWT != null)
+                {
+                    this.IBWT.Dispose();
+                }
+                if (this.VBNS != null)
+                {
+                    this.VBNS.Dispose();
+                }
+                if (this.IBNS != null)
+                {
+                    this.IBNS.Dispose();
+                }
+
+                this.VBOpq = null;
+                this.IBOpq = null;
+                this.VBOpqLOD1 = null;
+                this.IBOpqLOD1 = null;
+                this.VBWT = null;
+                this.IBWT = null;
+                this.VBNS = null;
+                this.IBNS = null;
+                this.device = null;
+               
+                //   this.semaphore=null;
+            }
+            disposed = true;
+
+
+
+
+
+
         }
     }
 }

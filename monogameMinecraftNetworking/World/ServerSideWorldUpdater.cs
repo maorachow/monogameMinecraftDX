@@ -2,6 +2,7 @@
 using monogameMinecraftShared.World;
 using monogameMinecraftShared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace monogameMinecraftNetworking.World
         public void Init()
         {
            
-            queuedChunkUpdatePoints = new Queue<IChunkUpdateOperation>();
+            queuedChunkUpdatePoints = new ConcurrentQueue<IChunkUpdateOperation>();
             chunksNeededRebuild = new List<ServerSideChunk>();
             tryUpdateWorldBlocksThread = new Thread(UpdateWorldBlocksThread);
             tryUpdateWorldBlocksThread.IsBackground = true;
@@ -55,7 +56,8 @@ namespace monogameMinecraftNetworking.World
                     //       Debug.WriteLine("count: "+queuedChunkUpdatePoints.Count);
                     if (queuedChunkUpdatePoints.Count > 0)
                     {
-                        IChunkUpdateOperation updateOper = queuedChunkUpdatePoints.Dequeue();
+                        IChunkUpdateOperation updateOper;
+                        queuedChunkUpdatePoints.TryDequeue(out updateOper);
                         if (updateOper.worldID != world.worldID)
                         {
                             continue;
@@ -106,6 +108,7 @@ namespace monogameMinecraftNetworking.World
                 {
                     if (chunk != null&&chunk.map!=null)
                     {
+                         chunk.isModifiedInGame=true;
                         NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(chunk)));
                     }
                       
@@ -119,7 +122,7 @@ namespace monogameMinecraftNetworking.World
             }
         }
 
-        public Queue<IChunkUpdateOperation> queuedChunkUpdatePoints;
+        public ConcurrentQueue<IChunkUpdateOperation> queuedChunkUpdatePoints;
         public Thread tryUpdateWorldBlocksThread;
         public Thread trySendUpdatedChunkDatasThread;
         public List<ServerSideChunk> chunksNeededRebuild;

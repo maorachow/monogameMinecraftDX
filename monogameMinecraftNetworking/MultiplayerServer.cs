@@ -36,7 +36,7 @@ namespace monogameMinecraftNetworking
         private object _todoListLock = new object();
         public List<RemoteClient> remoteClients { get; set; }
         public List<ServerTodoList> serverTodoLists { get; set; }
-
+        public bool isGoingToQuit { get; set; } = false;
         public List<IUpdatingManager> updatingManagers { get; set; }
         public List<UserData> allUserDatas
         {
@@ -64,23 +64,31 @@ namespace monogameMinecraftNetworking
         {
             while (true)
             {
-
-                socket.Listen();
-                Socket s = socket.Accept();
-                
-                RemoteClient client = new RemoteClient(s, null,this);
-                client.isUserDataLoaded = false;
-                lock (remoteClientsLock)
+                try
                 {
-                    remoteClients.Add(client);
-                }
-               
+                    socket.Listen();
+                    Socket s = socket.Accept();
 
-                //   allClientSockets.Add(s);
-               // Thread t = new Thread(new ParameterizedThreadStart(RecieveClient));
-              //  t.Start(s);
-              Console.WriteLine("connected");
-              Console.WriteLine(socket.LocalEndPoint. ToString());
+                    RemoteClient client = new RemoteClient(s, null, this);
+                    client.isUserDataLoaded = false;
+                    lock (remoteClientsLock)
+                    {
+                        remoteClients.Add(client);
+                    }
+
+
+                    //   allClientSockets.Add(s);
+                    // Thread t = new Thread(new ParameterizedThreadStart(RecieveClient));
+                    //  t.Start(s);
+                    Console.WriteLine("connected");
+                    Console.WriteLine(socket.LocalEndPoint.ToString());
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("quit waiter thread: "+e);
+                    return;
+                }
+              
             }
 
 
@@ -90,6 +98,7 @@ namespace monogameMinecraftNetworking
         public IPEndPoint ipEndPoint{ get; set; }
         public void Initialize()
         {
+            isGoingToQuit= false;
             foreach (var world in ServerSideVoxelWorld.voxelWorlds)
             {
                 world.InitWorld(this);
@@ -98,7 +107,11 @@ namespace monogameMinecraftNetworking
             ServerSideVoxelWorld.serverInstance = this;
             updatingManagers = new List<IUpdatingManager> { new UserUpdatingManager(this) };
             remoteClients =new List<RemoteClient>();
-            serverTodoLists = new List<ServerTodoList> { new ServerTodoList() };
+            serverTodoLists = new List<ServerTodoList>
+            {
+                new ServerTodoList(), new ServerTodoList(), new ServerTodoList(), new ServerTodoList() 
+               
+            };
             ipEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11111);
                 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -107,98 +120,119 @@ namespace monogameMinecraftNetworking
         }
 
         public Thread executeTodoListThread;
-        public void ExecuteToDoList()
+        public void ExecuteToDoList(int listIndex)
         {
             while (true)
             {
-                Thread.Sleep(1);
-                lock (todoListLock)
+               
+                if (isGoingToQuit == true)
                 {
-                    if (serverTodoLists.Count > 0)
+                    Console.WriteLine("quit execute todo list thread:"+Thread.CurrentThread.ManagedThreadId);
+                    return;
+                }
+            //    Thread.Sleep(0);
+                lock (serverTodoLists[listIndex].queueLock)
+                {
+
+                    if (serverTodoLists[listIndex].value.Count > 0)
                     {
-                        foreach (var todo in serverTodoLists)
+                        (RemoteClient sourceClient, MessageProtocol message) item;
+                            serverTodoLists[listIndex].value.TryDequeue(out item);
+                        if (item.message == null)
                         {
-                            if (todo.value.Count > 0)
-                            {
-                                var item = todo.value.Dequeue();
+                            Console.WriteLine("null message received");
+                            continue;
+                        }
 
-
-                                switch ((MessageCommandType)item.message.command )
+                        switch ((MessageCommandType)item.message.command )
+                        {
+                            case MessageCommandType.ChunkDataRequest:
+                                ChunkDataRequestData data =
+                                    MessagePackSerializer.Deserialize<ChunkDataRequestData>(item.message.messageData);
+                               
+                                if (ServerSideVoxelWorld.voxelWorlds[data.worldID] != null)
                                 {
-                                    case MessageCommandType.ChunkDataRequest:
-                                        ChunkDataRequestData data =
-                                            MessagePackSerializer.Deserialize<ChunkDataRequestData>(item.message.messageData);
-                                        if (ServerSideVoxelWorld.voxelWorlds[data.worldID] != null)
-                                        {
-                                            ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueue.Enqueue((item.sourceClient,data.chunkPos));
-                                        }
-                                        break;
+                                    lock (ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueueLock)
+                                    { 
+                                        ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueue.Enqueue((item.sourceClient,data.chunkPos));
 
-                                    case MessageCommandType.UserLogin:
-                                        Console.WriteLine("login");
-                                        NetworkingUtility.UserLogin(item.sourceClient,item.message.messageData,this);
-                                        break;
-
-                                    case MessageCommandType.UserLogout:
-                                       NetworkingUtility.UserLogout(item.sourceClient,this);
-                                        break;
-
-
-                                    case MessageCommandType.UserDataUpdate:
-                                        UserData userData = MessagePackSerializer.Deserialize<UserData>(item.message.messageData);
-                                        lock (remoteClientsLock)
-                                        {
-                                            int idx = remoteClients.FindIndex((client =>
-                                            {
-                                                if (client.isUserDataLoaded == false)
-                                                {
-                                                    return false;
-                                                }
-
-                                                return client.curUserData.userName == userData.userName;
-
-                                            }));
-                                            Console.WriteLine(userData.userName);
-                                            if (idx != -1)
-                                            {
-                                                remoteClients[idx] .curUserData=userData;
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("unknown user data");
-                                                Console.WriteLine(userData.userName);
-                                            }
-                                        }
-                                    
-                                        break;
-                                    case MessageCommandType.UserDataRequest:
-                                        NetworkingUtility.CastToAllClients(this,item.message,true);
-                                        break;
-
-                                    case MessageCommandType.UserDataBroadcast:
-                                        NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.UserDataBroadcast, MessagePackSerializer.Serialize(this.allUserDatas)),true );
-                                        break;
-
-                                    case MessageCommandType.WorldGenParamsRequest:
-                                        int worldID = MessagePackSerializer.Deserialize<int>(item.message.messageData);
-                                        NetworkingUtility.SendToClient(item.sourceClient, new MessageProtocol((byte)MessageCommandType.WorldGenParamsData, MessagePackSerializer.Serialize(ServerSideVoxelWorld.voxelWorlds[worldID].genParamsData)));
-                                        break;
-                                    case MessageCommandType.ChunkUpdateData:
-                                        ChunkUpdateData data2 =
-                                            MessagePackSerializer
-                                                .Deserialize<ChunkUpdateData>(item.message.messageData);
-                                        if (ServerSideVoxelWorld.voxelWorlds[data2.worldID] != null)
-                                        {
-                                            IChunkUpdateOperation? operation1 = IChunkUpdateOperation.ParseFromData(data2, ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater);
-                                            ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater.queuedChunkUpdatePoints.Enqueue(operation1);
-                                        }
-                                    
-                                        break;
+                                    }
+                                   
                                 }
-                            }
+                                break;
+
+                            case MessageCommandType.UserLogin:
+                                Console.WriteLine("login");
+                                NetworkingUtility.UserLogin(item.sourceClient,item.message.messageData,this);
+                                break;
+
+                            case MessageCommandType.UserLogout:
+                                NetworkingUtility.UserLogout(item.sourceClient,this);
+                                break;
+
+
+                            case MessageCommandType.UserDataUpdate:
+                                UserData userData = MessagePackSerializer.Deserialize<UserData>(item.message.messageData);
+                                lock (remoteClientsLock)
+                                {
+                                    int idx = remoteClients.FindIndex((client =>
+                                    {
+                                        if (client.isUserDataLoaded == false)
+                                        {
+                                            return false;
+                                        }
+
+                                        return client.curUserData.userName == userData.userName;
+
+                                    }));
+                                 //   Console.WriteLine(userData.userName);
+                                    if (idx != -1)
+                                    {
+                                        remoteClients[idx] .curUserData=userData;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("unknown user data");
+                                        Console.WriteLine(userData.userName);
+                                    }
+                                }
+                                    
+                                break;
+                            case MessageCommandType.UserDataRequest:
+                                NetworkingUtility.CastToAllClients(this,item.message,true);
+                                break;
+
+                            case MessageCommandType.UserDataBroadcast:
+                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.UserDataBroadcast, MessagePackSerializer.Serialize(this.allUserDatas)),true );
+                                break;
+
+                            case MessageCommandType.WorldGenParamsRequest:
+                                int worldID = MessagePackSerializer.Deserialize<int>(item.message.messageData);
+                                NetworkingUtility.SendToClient(item.sourceClient, new MessageProtocol((byte)MessageCommandType.WorldGenParamsData, MessagePackSerializer.Serialize(ServerSideVoxelWorld.voxelWorlds[worldID].genParamsData)));
+                                break;
+                            case MessageCommandType.ChunkUpdateData:
+                                ChunkUpdateData data2 =
+                                    MessagePackSerializer
+                                        .Deserialize<ChunkUpdateData>(item.message.messageData);
+                                if (ServerSideVoxelWorld.voxelWorlds[data2.worldID] != null)
+                                {
+                                    IChunkUpdateOperation? operation1 = IChunkUpdateOperation.ParseFromData(data2, ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater);
+                                    if (operation1 != null)
+                                    {
+                                        ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater.queuedChunkUpdatePoints.Enqueue(operation1);
+                                    }
+                                 
+                                }
+                                    
+                                break;
                         }
                     }
+
                 }
+                  
+                           
+                    
+                
             }
         }
 
@@ -207,6 +241,11 @@ namespace monogameMinecraftNetworking
         {
             while (true)
             {
+                if (isGoingToQuit == true)
+                {
+                    Console.WriteLine("quit validate clients thread:" + Thread.CurrentThread.ManagedThreadId);
+                    return;
+                }
                 Thread.Sleep(50);
                 NetworkingUtility.RemoveDisconnectedClients(this);
             }
@@ -219,12 +258,40 @@ namespace monogameMinecraftNetworking
 
             validateClientsThread = new Thread(ValidateClientsThread);
             validateClientsThread.Start();
-            executeTodoListThread = new Thread(() => { ExecuteToDoList(); });
-            executeTodoListThread.Start();
+            for (int i = 0; i < serverTodoLists.Count; i++)
+            {
+                Console.WriteLine("thread:"+i);
+                var i1 = i;
+                Thread t = new Thread(() => { ExecuteToDoList(i1); });
+                t.Start();
+            }
+      //      executeTodoListThread = new Thread(() => { ExecuteToDoList(); });
+     //       executeTodoListThread.Start();
             foreach (var item in updatingManagers)
             {
                 item.Start();
             }
+        }
+
+        public void ShutDown()
+        {
+            isGoingToQuit = true;
+            validateClientsThread.Join();
+            foreach (var client in remoteClients)
+            {
+              client.messageParser.Stop();  
+            }
+            foreach (var item in updatingManagers)
+            {
+                item.Stop();
+            }
+
+            foreach (var world in ServerSideVoxelWorld.voxelWorlds)
+            {
+                world.ShutDown();    
+            }
+            serverSocket.Close();
+            Console.WriteLine("server shutdown");
         }
     }
 }

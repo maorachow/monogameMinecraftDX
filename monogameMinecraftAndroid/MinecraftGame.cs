@@ -10,6 +10,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using Android.App;
+using Android.Content;
+using Android.Text;
+using Android.Views;
+using Android.Widget;
 using Microsoft.Xna.Framework.Input.Touch;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Pathfinding;
@@ -108,6 +114,7 @@ namespace monogameMinecraftAndroid
 //    public PlayerInputManager playerInputManager;
         public MinecraftGame(Android.App.Activity activity)
         {
+           
             optionalPlatformDataPath = activity.GetExternalFilesDir("")?.Path;
             _graphics = new GraphicsDeviceManager(this);
             _graphics.GraphicsProfile = GraphicsProfile.HiDef;
@@ -226,7 +233,8 @@ namespace monogameMinecraftAndroid
 
             Debug.WriteLine(GraphicsDevice.Viewport.Width + " " + GraphicsDevice.Viewport.Height);
         }
- 
+     //   private static AlertDialog alert;
+      //  string resultText = "";
         public override void InitGameplay(object obj)
         {
 
@@ -247,12 +255,12 @@ namespace monogameMinecraftAndroid
             //    BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",Content,GraphicsDevice);
          //   BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory() + "/blockinfodata.json");
 
-            status = GameStatus.Started;
+  
             gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             playerInputManager = new PlayerInputManager(gamePlayer, true);
             gamePlayer.graphicsDevice=GraphicsDevice;
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
-            VoxelWorld.currentWorld.InitWorld(this);
+          
             particleManager = new ParticleManager();
             particleManager.Initialize();
             
@@ -365,6 +373,15 @@ namespace monogameMinecraftAndroid
             EntityManager.SpawnEntityFromData(this);
             EntityManager.pathfindingManager.drawDebugLines = false;
             isGamePaused = false;
+            status = GameStatus.Started;
+            VoxelWorld.currentWorld.InitWorld(this);
+          
+        
+             
+         
+           
+           
+         
         }
 
         public override void QuitGameplay()
@@ -514,9 +531,12 @@ namespace monogameMinecraftAndroid
         public TouchCollection prevTouches;
         protected override void Update(GameTime gameTime)
         {
+    //        string s = resultText;
+       //     Debug.WriteLine("input string received:" + s);
             if (!IsActive) return;
             //  Draw1(gameTime);
             UIElement.UpdateTouches();
+            AndroidTextInputManager.Update();
             switch (status)
             {
                

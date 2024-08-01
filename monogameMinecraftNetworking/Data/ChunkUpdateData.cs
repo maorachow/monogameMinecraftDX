@@ -13,7 +13,8 @@ namespace monogameMinecraftNetworking.Data
         PlaceBlockUpdate=(byte)0,
         BreakingBlockUpdate = (byte)1,
         DoorInteractingUpdate= (byte)2,
-
+        DoorUpperPartPlacingUpdate = (byte)3,
+        FenceUpdatingUpdate=(byte)4
     }
     [MessagePackObject]
     public struct ChunkUpdateData

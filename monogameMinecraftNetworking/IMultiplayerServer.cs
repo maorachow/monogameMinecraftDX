@@ -27,8 +27,10 @@ namespace monogameMinecraftNetworking
 
         public IPEndPoint ipEndPoint { get; set; }
 
+        public bool isGoingToQuit { get; set; }
         public List<IUpdatingManager> updatingManagers { get; set; }
         public void Initialize();
         public void Start();
+        public void ShutDown();
     }
 }

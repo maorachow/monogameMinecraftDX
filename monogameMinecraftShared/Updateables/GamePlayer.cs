@@ -22,8 +22,21 @@ namespace monogameMinecraftShared.Updateables
         float fastPlayerSpeed = 20f;
         float slowPlayerSpeed = 5f;
         public bool isLanded = false;
-        public int currentSelectedHotbar = 0;
-        public short[] inventoryData = new short[9];
+        public int currentSelectedHotbar { get; set; }= 0;
+
+        public short[] inventoryData
+        {
+            get
+            {
+                return _inventoryData;
+            }
+            set
+            {
+                _inventoryData=value;
+            }
+        }
+
+        public short[] _inventoryData = new short[9];
         public static bool isPlayerDataSaved = false;
         public bool isChunkNeededUpdate = false;
         public Chunk curChunk;

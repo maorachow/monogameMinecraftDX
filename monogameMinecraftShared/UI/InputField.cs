@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using monogameMinecraftShared.Core;
+using Microsoft.Xna.Framework.Input.Touch;
 
 namespace monogameMinecraftShared.UI
 {
@@ -19,6 +20,7 @@ namespace monogameMinecraftShared.UI
         [DllImport("user32.dll", EntryPoint = "GetKeyboardState")]
         public static extern int GetKeyboardState(byte[] pbKeyState);
 
+        
         public static bool CapsLockStatus
         {
             get
@@ -85,8 +87,8 @@ namespace monogameMinecraftShared.UI
 
         public void DrawString(string text)
         {
-            this.text = text;
-            text = text == null ? " " : text;
+            //  this.text = text;
+            this.text = text == null ? " " : text;
             // ButtonRect.Center;
             if (texture != null && selectedTexture != null)
             {
@@ -155,6 +157,17 @@ namespace monogameMinecraftShared.UI
             {
                 //     Debug.WriteLine(ButtonRect.X+" "+ ButtonRect.Y + " "+ ButtonRect.Width + " "+ ButtonRect.Height);
                 //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
+                bool isTouchHovered = false;
+
+                foreach (var touch in UIElement.allTouches)
+                {
+                    if (this.inputFieldRect.Contains(touch.Position + UIElement.screenRectOffset))
+                    {
+                        isTouchHovered = true;
+                        break;
+                    }
+                }
+
                 if (inputFieldRect.Contains(new Vector2(mouseState.X, mouseState.Y)))
                 {
                     return true;
@@ -162,7 +175,8 @@ namespace monogameMinecraftShared.UI
                 }
                 else
                 {
-                    return false;
+
+                    return isTouchHovered;
                 }
             }
 
@@ -172,7 +186,17 @@ namespace monogameMinecraftShared.UI
         {
             mouseState = Mouse.GetState();
             keyboardState = Keyboard.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)
+            bool isTouched = false;
+            foreach (var tc in UIElement.allTouches)
+            {
+
+                if (tc.State == TouchLocationState.Released)
+                {
+                    isTouched = true;
+                    //   Debug.WriteLine("touched");
+                }
+            }
+            if ((mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton == ButtonState.Released)||isTouched==true)
             {
                 //   Debug.WriteLine("pressed");
 
@@ -183,6 +207,9 @@ namespace monogameMinecraftShared.UI
                     {
                         UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
                     }
+
+                    UIElement.androidCurEditingElement = this;
+                    UIElement.androidIsInputPanelOpened= true;
                 }
                 else
                 {
@@ -226,7 +253,12 @@ namespace monogameMinecraftShared.UI
 
                                     text += keyString;
                                 }
+                                if (key == Keys.OemPeriod)
+                                {
+                                    string keyString = ".";
 
+                                    text += keyString;
+                                }
                                 if (numbersOnly == false)
                                 {
                                     if (key >= (Keys)65 && key <= (Keys)90)

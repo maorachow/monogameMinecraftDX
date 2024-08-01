@@ -16,9 +16,16 @@ public class Program
         server.Initialize();
         server.Start();
 
+        bool isGoingToQuit=false;
         while (true)
-        { 
-            Console.WriteLine("Enter Message Type: 1 query user 2 query chunks 3 loaded client sockets");
+        {
+            if (isGoingToQuit)
+            {
+                Console.WriteLine("quit main thread");
+
+                break;
+            }
+            Console.WriteLine("Enter Message Type: 1 query user 2 query chunks 3 loaded client sockets X shutdown server");
             char a = Console.ReadKey().KeyChar;
             switch (a)
             {
@@ -51,10 +58,25 @@ public class Program
                     Console.WriteLine(server.remoteClients.Count);
                     break;
 
+                case 'X':
+                    Console.WriteLine(" ");
+                    Console.WriteLine("are you sure you are shutting down the server? enter Y to confirm");
+                    char c = Console.ReadKey().KeyChar;
+                    if (c == 'Y')
+                    {
+                        isGoingToQuit = true;
+                        server.ShutDown();
+                    }
+                    //    BlockModifyData b = new BlockModifyData(float.Parse(Console.ReadLine()), float.Parse(Console.ReadLine()), float.Parse(Console.ReadLine()), Int32.Parse(Console.ReadLine()));
+
+                    
+                    break;
             }
             //    clientSocket.Send(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message(Console.ReadLine(), Console.ReadLine()))));
             Console.WriteLine(" ");
         }
+
+       
         Console.ReadKey();
 
     }

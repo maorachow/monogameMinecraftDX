@@ -48,6 +48,7 @@ namespace monogameMinecraftNetworking.Client.World
         {
             get
             {
+                _renderingChunks.Clear();
                 foreach (var kvp in chunks)
                 {
                     if (!_renderingChunks.ContainsKey(kvp.Key))
@@ -55,18 +56,12 @@ namespace monogameMinecraftNetworking.Client.World
                         _renderingChunks.TryAdd(kvp.Key, (IRenderableChunkBuffers)kvp.Value);
                     }
                 }
-                foreach (var kvp in _renderingChunks)
-                {
-                    if (!chunks.ContainsKey(kvp.Key))
-                    {
-                        _renderingChunks.TryRemove(kvp.Key, out IRenderableChunkBuffers _);
-                    }
-                }
+               
 
                 return _renderingChunks;
             }
         }
-        public List<GeneratingStructureData> worldStructures = new List<GeneratingStructureData>();
+    
 
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
@@ -112,6 +107,11 @@ namespace monogameMinecraftNetworking.Client.World
             while (true)
             {
                 Thread.Sleep(500);
+                if (isThreadsStopping == true)
+                {
+                    Debug.WriteLine("quit updateworld thread threads stopping");
+                    return;
+                }
                 lock (updateWorldThreadLock)
                 {
                     lock (deleteChunkThreadLock)
@@ -120,6 +120,7 @@ namespace monogameMinecraftNetworking.Client.World
                      
 
                         //     Debug.WriteLine("update world ID:" + worldID);
+                      
                         if (client.isGoingToQuitGame==true)
                         {
                             Debug.WriteLine("quit updateworld thread");
@@ -195,12 +196,17 @@ namespace monogameMinecraftNetworking.Client.World
             while (true)
             {
                 Thread.Sleep(500);
+                if (isThreadsStopping == true)
+                {
+                    Debug.WriteLine("quit delchunks thread");
+                    return;
+                }
                 lock (deleteChunkThreadLock)
                 {
                      
                     //  Debug.WriteLine("delete chunks ID:" + worldID);
 
-                  
+               
 
                     
                     if (chunks == null)
@@ -332,7 +338,7 @@ namespace monogameMinecraftNetworking.Client.World
         {
             gameInstance = game;
             Debug.WriteLine("current world ID:" + worldID);
-
+            Debug.WriteLine(isWorldStopped);
 
             int playerInWorldID = 0;
             if (isWorldStopped == false)
@@ -423,12 +429,12 @@ namespace monogameMinecraftNetworking.Client.World
                     {
 
                         c.Value.Dispose();
-                        ClientSideChunk _;
-                        chunks.Remove<Vector2Int, ClientSideChunk>(c.Key, out _);
+                        chunks.Remove(c.Key, out _);
 
                     }
                     chunks.Clear();
-                   // chunkDataReadFromDisk.Clear();
+                    renderingChunks.Clear();
+                    // chunkDataReadFromDisk.Clear();
 
                 }
             }
@@ -440,8 +446,17 @@ namespace monogameMinecraftNetworking.Client.World
         public void StopAllThreads()
         {
             isThreadsStopping = true;
-            tryRemoveChunksThread.Join();
-            updateWorldThread.Join();
+            if (tryRemoveChunksThread != null)
+            {
+                tryRemoveChunksThread.Join();
+            }
+
+            if (updateWorldThread != null)
+            {
+                updateWorldThread.Join();
+            }
+
+          
         //    worldUpdater.StopAllThreads();
         }
 

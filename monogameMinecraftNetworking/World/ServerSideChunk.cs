@@ -245,10 +245,10 @@ namespace monogameMinecraftNetworking.World
 
                 return;
             }
-            if (VoxelWorld.currentWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
+            if (curWorld.chunkDataReadFromDisk.ContainsKey(chunkPos))
             {
                 isChunkDataSavedInDisk = true;
-                map = (BlockData[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
+                map = (BlockData[,,])curWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
             //    this.chunkBounds = this.CalculateBounds();
           //      GenerateHeightMap();
            //     GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT, generateRenderBuffers);

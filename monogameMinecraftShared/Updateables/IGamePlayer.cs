@@ -12,6 +12,9 @@ namespace monogameMinecraftShared.Updateables
     {
         public Camera cam { get; }
         public Vector3 position { get; set; }
+
+        public int currentSelectedHotbar { get; }
+        public short[] inventoryData { get; }
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState, bool isFlyingPressed, bool isSpeedUpPressed, bool isLMBPressed, bool isRMBPressed, float scrollDelta);
     }
 }

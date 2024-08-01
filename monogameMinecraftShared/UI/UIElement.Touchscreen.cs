@@ -39,6 +39,8 @@ namespace monogameMinecraftShared.UI
             }
             return false;
         }
-    
-}
+
+        public static UIElement androidCurEditingElement = null;
+        public static bool androidIsInputPanelOpened=false;
+    }
 }

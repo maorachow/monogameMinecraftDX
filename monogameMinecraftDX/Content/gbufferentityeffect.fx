@@ -62,7 +62,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     output.PositionV = viewPosition;
     output.PositionWS = worldPosition;
 	output.TexureCoordinate = input.TexureCoordinate;
-    output.Normal = mul(float4(input.Normal, 1), NormalMat).xyz * 0.5 + 0.5;
+    output.Normal = mul(float4((input.Normal), 1), (NormalMat)).xyz * 0.5 + 0.5;
 	return output;
 }
 
@@ -76,7 +76,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     return psOut;
 }
 
-technique BasicColorDrawing
+technique GBufferEntity
 {
 	pass P0
 	{

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace monogameMinecraftNetworking.World
         public bool isWorldDataSaved;
         public List<GeneratingStructureData> worldStructures = new List<GeneratingStructureData>();
 
-
+        public object chunkBuildingQueueLock=new object();
         public Queue<(RemoteClient client, Vector2Int chunkPos)> chunkBuildingQueue=new Queue<(RemoteClient client, Vector2Int chunkPos)>();
 
 
@@ -99,6 +100,7 @@ namespace monogameMinecraftNetworking.World
         public void SaveWorldData()
         {
             Console.WriteLine(curWorldSaveName);
+           
             FileStream fs;
             if (File.Exists(gameWorldDataPath + "unityMinecraftServerData/GameData/" + curWorldSaveName))
             {
@@ -156,6 +158,14 @@ namespace monogameMinecraftNetworking.World
 
 
         }
+
+        public void ShutDown()
+        {
+            SaveWorldData();
+            StopAllThreads();
+            worldUpdater.StopAllThreads();
+            DestroyAllChunks();
+        }
         public void ReadJson()
         {
             worldStructures.Clear();
@@ -193,6 +203,7 @@ namespace monogameMinecraftNetworking.World
             {
                 chunkDataReadFromDisk = MessagePackSerializer.Deserialize<Dictionary<Vector2Int, ChunkData>>(worldData);
             }
+            Console.WriteLine("saved chunks:" + chunkDataReadFromDisk.Count);
             isJsonReadFromDisk = true;
             if (worldGenType == 0)
             {
@@ -263,8 +274,15 @@ namespace monogameMinecraftNetworking.World
             while (true)
             {
                 Thread.Sleep(50);
+                if (isThreadsStopping == true)
+                {
+                    Console.WriteLine("quit update world thread:"+Thread.CurrentThread.ManagedThreadId);
+                    return;
+                }
                 lock (updateWorldThreadLock)
                 {
+                    lock (chunkBuildingQueueLock)
+                    {
                     if (chunkBuildingQueue.Count > 0)
                     {
                         (RemoteClient remoteClient,Vector2Int chunkPos) item = chunkBuildingQueue.Dequeue();
@@ -291,6 +309,8 @@ namespace monogameMinecraftNetworking.World
                             NetworkingUtility.SendToClient(item.remoteClient, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(c)));
                         }
                     }
+                    }
+                    
                 }
                 
             }
@@ -300,8 +320,8 @@ namespace monogameMinecraftNetworking.World
         public void StopAllThreads()
         {
             isThreadsStopping = true;
-            tryRemoveChunksThread.Join();
-            updateWorldThread.Join();
+            tryRemoveChunksThread?.Join();
+            updateWorldThread?.Join();
             worldUpdater.StopAllThreads();
         }
         public bool isJsonReadFromDisk { get; set; }

@@ -13,23 +13,26 @@ namespace monogameMinecraftShared.Rendering
         public Effect shadowMapShader;
         public GraphicsDevice device;
         public static Model zombieModel;
+        public static Model playerModel;
         public Model zombieModelRef;
-        public GamePlayer player;
+       
         public Texture2D zombieTex;
-        public static MinecraftGameBase game;
+        public Texture2D playerTex;
+        public IGamePlayer gamePlayer;
         public ShadowRenderer shadowRenderer;
         public GameTimeManager gameTimeManager;
-        public EntityRenderer(MinecraftGameBase game, GraphicsDevice device, GamePlayer player, Effect shader, Model model, Texture2D zombieTex, Model zombieModelRef, Effect shadowmapShader, ShadowRenderer sr, GameTimeManager gameTimeManager)
+        public EntityRenderer( GraphicsDevice device, IGamePlayer player, Effect shader, Model model, Texture2D zombieTex, Model zombieModelRef, Effect shadowmapShader, ShadowRenderer sr, GameTimeManager gameTimeManager,Model playerModel,Texture2D playerTex)
         {
             this.device = device;
             basicShader = shader;
+            EntityRenderer.playerModel=playerModel;
             zombieModel = model;
             this.zombieModelRef = zombieModelRef;
-            this.player = player;
+            this.gamePlayer = player;
             shadowMapShader = shadowmapShader;
             this.zombieTex = zombieTex;
             shadowRenderer = sr;
-            EntityRenderer.game = game;
+         this.playerTex=playerTex;
             this.gameTimeManager = gameTimeManager;
             /*  foreach(var modelMesh in zombieModel.Meshes)
                {
@@ -91,7 +94,7 @@ namespace monogameMinecraftShared.Rendering
             {
                 basicShader.Parameters["receiveShadow"].SetValue(true);
             }
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityManager.worldEntities)
             {
                 if (frustum.Intersects(entity.bounds))
@@ -116,7 +119,7 @@ namespace monogameMinecraftShared.Rendering
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             //      
            
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityManager.worldEntities)
             {
                 if (frustum.Intersects(entity.bounds))
@@ -129,11 +132,11 @@ namespace monogameMinecraftShared.Rendering
                             Matrix world = Matrix.CreateTranslation(entity.position);
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
                             {
-                                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
+                                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX) ,0) },
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
 
-                            entity.animationBlend.DrawAnimatedModel(device, world, player.cam.viewMatrix, player.cam.projectionMatrix, gBufferShader, optionalParams, () =>
+                            entity.animationBlend.DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, gBufferShader, optionalParams, () =>
                             {
                                 if (entity.isEntityHurt)
                                 {
@@ -165,7 +168,7 @@ namespace monogameMinecraftShared.Rendering
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             //      
         
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityManager.worldEntities)
             {
                 if (frustum.Intersects(entity.bounds))
@@ -182,7 +185,7 @@ namespace monogameMinecraftShared.Rendering
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
 
-                            entity.animationBlend.DrawAnimatedModel(device, world, player.cam.viewMatrix, player.cam.projectionMatrix, forwardShader, optionalParams, () =>
+                            entity.animationBlend.DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, forwardShader, optionalParams, () =>
                             {
                                 if (entity.isEntityHurt)
                                 {
@@ -336,7 +339,7 @@ namespace monogameMinecraftShared.Rendering
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
 
-            entity.animationBlend.DrawAnimatedModel(device,world, player.cam.viewMatrix, player.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
+            entity.animationBlend.DrawAnimatedModel(device,world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
         public void DrawZombie(EntityBeh entity)
         {
@@ -388,7 +391,7 @@ namespace monogameMinecraftShared.Rendering
             zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
             zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
             zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix);
+            DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
 
         }
 
@@ -438,7 +441,7 @@ namespace monogameMinecraftShared.Rendering
             zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModel.Bones["body"].Parent.Transform;
             zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
             zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModel(zombieModel, world, player.cam.viewMatrix, player.cam.projectionMatrix, shader);
+            DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shader);
 
         }
         //      basicShader.Parameters["World"].SetValue(world * bone.Transform);

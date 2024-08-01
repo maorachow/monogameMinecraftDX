@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,12 +10,12 @@ namespace monogameMinecraftNetworking.Utility
 {
     public class ServerTodoList
     {
-        public PriorityQueue<(RemoteClient sourceClient, MessageProtocol message), int> value;
+        public ConcurrentQueue<(RemoteClient sourceClient, MessageProtocol message)> value;
         public object queueLock=new object();
 
         public ServerTodoList()
         {
-            this.value = new PriorityQueue<(RemoteClient sourceClient, MessageProtocol message), int>();
+            this.value = new ConcurrentQueue<(RemoteClient sourceClient, MessageProtocol message)>();
         }
     }
 }

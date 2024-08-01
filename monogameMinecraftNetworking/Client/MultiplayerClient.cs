@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -21,11 +22,13 @@ namespace monogameMinecraftNetworking.Client
     {
         public object todoListLock { get=> _todoListLock; }
         public object _todoListLock=new object();
-        public Queue<MessageProtocol> todoList { get; set; }
+        public ConcurrentQueue<MessageProtocol> todoList { get; set; }
         public UserData playerData
         {
             get { return gamePlayer.ToUserData(); }
         }
+
+        public List<UserData> allUserDatas { get; set; }
         public Socket socket { get; set; }
         public bool isLoggedIn { get; set; }
         public bool isGoingToQuitGame { get; set; }=false;
@@ -33,6 +36,15 @@ namespace monogameMinecraftNetworking.Client
         public ClientSideGamePlayer gamePlayer { get; set; }
         public ClientGameBase game { get; set; }
 
+        public IMultiplayerClient.OnAllUsersDataUpdated allUsersUpdatedAction
+        {
+            get { return _allUsersUpdatedAction;}
+
+            set { _allUsersUpdatedAction = value; }
+
+
+        }
+        public IMultiplayerClient.OnAllUsersDataUpdated _allUsersUpdatedAction;
         public IPAddress address;
         public int port;
 
@@ -42,7 +54,7 @@ namespace monogameMinecraftNetworking.Client
             this.address = address;
             this.port = port;
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            this.todoList = new Queue<MessageProtocol>();
+            this.todoList = new ConcurrentQueue<MessageProtocol>();
             isLoggedIn = false;
             isGoingToQuitGame=false;
             messageParser = new MessageParserSingleSocket(todoList, socket, todoListLock);
@@ -55,11 +67,20 @@ namespace monogameMinecraftNetworking.Client
         {
             while (true)
             {
-                lock (todoListLock)
+                if (isGoingToQuitGame == true)
                 {
+                    Debug.WriteLine("quit game");
+                    return;
+                }
+                
                     if (todoList.Count > 0)
                     {
-                        MessageProtocol item = todoList.Dequeue();
+                        MessageProtocol item;
+                             todoList.TryDequeue(out item);
+                             if (item == null)
+                             {
+                            continue;
+                             }
                         switch ((MessageCommandType)item.command)
                         {
                             case MessageCommandType.WorldData:
@@ -114,6 +135,7 @@ namespace monogameMinecraftNetworking.Client
                                        {
                                            ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y + ClientSideChunk.chunkWidth))?.BuildChunk();
                                        }
+                                    gamePlayer.isGetBlockNeeded=true;
                                     }
 
                                  
@@ -147,14 +169,21 @@ namespace monogameMinecraftNetworking.Client
                                 }
                               //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
                                 break;
+                            case MessageCommandType.UserDataBroadcast:
+                                allUserDatas = MessagePackSerializer.Deserialize<List<UserData>>(item.messageData);
+                                if (_allUsersUpdatedAction != null)
+                                {
+                                    _allUsersUpdatedAction();
+                                }
+                                break;
                         }
                     }
-                }
+                
                
             }
         }
 
-        public void Connect()
+        public bool Connect()
         {
             try
             {
@@ -165,20 +194,50 @@ namespace monogameMinecraftNetworking.Client
             {
                 Debug.WriteLine("connecting failed:"+e);
                 isGoingToQuitGame = true;
-                return;
+                return false;
             }
           executeTodoListThread=new Thread(ExecuteTodoList);
           executeTodoListThread.IsBackground = true;
           executeTodoListThread.Start();
           messageParser.Start();
-
-          PlayerLogin();
+          disconnectIfSocketClosedThread = new Thread(DisconnectIfSocketClosedThread);
+          disconnectIfSocketClosedThread.IsBackground= true;
+          disconnectIfSocketClosedThread.Start();
+          bool loginResult=PlayerLogin();
+        
+          return true;
         }
-
-        public void PlayerLogin()
+        public Thread disconnectIfSocketClosedThread;
+        public void DisconnectIfSocketClosedThread()
+        {
+            while (true)
+            {
+                if (isGoingToQuitGame == true)
+                {
+                    Debug.WriteLine("quit game disconnecting socket thread");
+                    return;
+                }
+                Thread.Sleep(2000);
+                if (messageParser.isMessageParsingThreadRunning == false)
+                {
+                    isGoingToQuitGame = true;
+               
+                }
+            }
+        }
+        public bool PlayerLogin()
         {
             byte[] userDataBytes = MessagePackSerializer.Serialize(playerData);
-            NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogin,userDataBytes),socket);
+          bool result=  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogin,userDataBytes),socket);
+          return result;
+        }
+
+        public void Disconnect()
+        {
+            NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogout, new byte[]{}), socket);
+            isGoingToQuitGame = true;
+            messageParser.Stop();
+            socket.Close(5000);
         }
     }
 }

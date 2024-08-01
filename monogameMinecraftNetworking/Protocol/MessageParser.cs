@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -7,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Client;
 using monogameMinecraftShared.Core;
 
 namespace monogameMinecraftNetworking.Protocol
@@ -74,11 +76,12 @@ namespace monogameMinecraftNetworking.Protocol
 
 
                     // ReceiveLength = s.Receive(staticReceiveBuffer);
-                    if ((!s.Poll(1000, SelectMode.SelectRead) || s.Available > 0) == false)
+               /*     if ((!s.Poll(1000, SelectMode.SelectRead) || s.Available > 0) == false)
                     {
                         Console.WriteLine("polled socket disconnected");
+                        isMessageParsingThreadRunning = false;
                         return;
-                    }
+                    }*/
 
                     ReceiveLength = s.Receive(staticReceiveBuffer);  // 同步接收数据
 
@@ -89,9 +92,9 @@ namespace monogameMinecraftNetworking.Protocol
 
 
                         Console.WriteLine("收到0字节数据");
-                        isMessageParsingThreadRunning = false;
+                    //    isMessageParsingThreadRunning = false;
                         //  UserLogout(s);
-                        return;  // 终止接收循环
+                  //      return;  // 终止接收循环
                     }
                     else if (dynamicReceiveBuffer.Length < MessageProtocol.HEADLENGTH)  // 如果缓存中的数据长度小于协议头长度,则继续接收
                     {
@@ -108,14 +111,15 @@ namespace monogameMinecraftNetworking.Protocol
                             headInfo = MessageProtocol.GetHeadInfo(dynamicReceiveBuffer);  // 从缓存中解读出下一次数据所需要的协议头信息,已准备下一次拆包循环,如果数据长度不能构成协议头所需的长度,拆包结果为0,下一次循环则不能成功进入,跳到外层循环继续接收数据合并缓存形成一个完整的数据包
                             Debug.WriteLine((MessageCommandType)mp.command);
                             //   parsedMessages.Enqueue(new MessageProtocol(mp.command,(byte[])mp.messageData.Clone()));
-                            lock (server.todoListLock)
-                         {
+                       //     lock (server.todoListLock)
+                     //    {
                            
                              if (server.serverTodoLists.Count > 0)
                              {
-                                 server.serverTodoLists[0].value.Enqueue(new ValueTuple<RemoteClient, MessageProtocol>(remoteClient, new MessageProtocol(mp.command, (byte[])mp.messageData.Clone())), 0);
+                               Utility.NetworkingUtility.EnqueueTodoList(server.serverTodoLists, new ValueTuple<RemoteClient, MessageProtocol>(remoteClient, new MessageProtocol(mp.command, (byte[])mp.messageData.Clone())));
+                             //   server.serverTodoLists[0].value.Enqueue(new ValueTuple<RemoteClient, MessageProtocol>(remoteClient, new MessageProtocol(mp.command, (byte[])mp.messageData.Clone())), 0);
                              }
-                            } 
+                      //      } 
                        
                        
                         } // 拆包循环结束
@@ -140,7 +144,7 @@ namespace monogameMinecraftNetworking.Protocol
 
         public Socket socket;
         //       public Queue<MessageProtocol> parsedMessages;
-        public Queue<MessageProtocol> todoList;
+        public ConcurrentQueue<MessageProtocol> todoList;
 
         public object todoListLock;
         public bool isMessageParsingThreadRunning = false;
@@ -148,7 +152,7 @@ namespace monogameMinecraftNetworking.Protocol
 
         public bool isThreadsStopping = false;
         public Thread messageParsingThread;
-        public MessageParserSingleSocket(Queue<MessageProtocol> todoList, Socket s, object todoListLock)
+        public MessageParserSingleSocket(ConcurrentQueue<MessageProtocol> todoList, Socket s, object todoListLock)
         {
 
             this.todoList = todoList;
@@ -184,12 +188,12 @@ namespace monogameMinecraftNetworking.Protocol
             {
                 if (isThreadsStopping == true)
                 {
-                    Console.WriteLine("message parsing thread stopped");
+                    Debug.WriteLine("message parsing thread stopped");
                     return;
                 }
                 if (s == null || s.Connected == false)
                 {
-                    Console.WriteLine("Recieve client failed:socket closed");
+                    Debug.WriteLine("Recieve client failed:socket closed");
                     isMessageParsingThreadRunning = false;
                     return;
                 }
@@ -200,11 +204,11 @@ namespace monogameMinecraftNetworking.Protocol
 
 
                     // ReceiveLength = s.Receive(staticReceiveBuffer);
-                    if ((!s.Poll(1000, SelectMode.SelectRead) || s.Available > 0) == false)
+          /*          if ((!s.Poll(1000, SelectMode.SelectRead) || s.Available > 0) == false)
                     {
                         Console.WriteLine("polled socket disconnected");
                         return;
-                    }
+                    }*/
 
                     ReceiveLength = s.Receive(staticReceiveBuffer);  // 同步接收数据
 
@@ -214,7 +218,7 @@ namespace monogameMinecraftNetworking.Protocol
                     {
 
 
-                        Console.WriteLine("收到0字节数据");
+                        Debug.WriteLine("收到0字节数据");
                         isMessageParsingThreadRunning = false;
                         //  UserLogout(s);
                         return;  // 终止接收循环
@@ -240,13 +244,12 @@ namespace monogameMinecraftNetworking.Protocol
                            // Debug.WriteLine((MessageCommandType)mp.command);
 
                             //   parsedMessages.Enqueue(new MessageProtocol(mp.command,(byte[])mp.messageData.Clone()));
-                            lock (todoListLock)
-                            {
+                            
 
                                 
                                  todoList.Enqueue(new MessageProtocol(mp.command, (byte[])mp.messageData.Clone()));
                                  
-                            }
+                            
 
 
                         } // 拆包循环结束
@@ -256,7 +259,7 @@ namespace monogameMinecraftNetworking.Protocol
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Connection stopped : " + ex.ToString());
+                    Debug.WriteLine("Connection stopped : " + ex.ToString());
                     isMessageParsingThreadRunning = false;
                     break;
                 }

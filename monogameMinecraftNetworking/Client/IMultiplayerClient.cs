@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -15,8 +16,8 @@ namespace monogameMinecraftNetworking.Client
     public interface IMultiplayerClient
     {
         public object todoListLock { get; }
-        public Queue<MessageProtocol> todoList { get; }
-
+        public ConcurrentQueue<MessageProtocol> todoList { get; }
+        public List<UserData> allUserDatas { get; set; }
         public UserData playerData { get; }
         public Socket socket { get; }
         public bool isLoggedIn { get; }
@@ -27,9 +28,16 @@ namespace monogameMinecraftNetworking.Client
         public ClientGameBase game { get; }
 
         public bool isGoingToQuitGame { get; set; }
-        public void Connect();
+        public bool Connect();
 
-        public void PlayerLogin();
+        public bool PlayerLogin();
+
+        public void Disconnect();
+        public void DisconnectIfSocketClosedThread();
+
+        public delegate void OnAllUsersDataUpdated();
+
+        public OnAllUsersDataUpdated allUsersUpdatedAction { get; set; }
         //   public void MessageParsingThread(Socket s);
     }
 }

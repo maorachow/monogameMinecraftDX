@@ -11,5 +11,6 @@ namespace monogameMinecraftNetworking.Updateables
         public IMultiplayerServer server { get; }
         public void UpdateThread();
         public void Start();
+        public void Stop();
     }
 }

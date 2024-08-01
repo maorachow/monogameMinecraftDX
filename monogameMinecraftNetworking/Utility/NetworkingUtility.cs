@@ -66,19 +66,28 @@ namespace monogameMinecraftNetworking.Utility
                    {
                        for (int i = 0; i < server.remoteClients.Count; i++)
                        {
-                           if (server.remoteClients[i].socket.Poll(1000, SelectMode.SelectError))
+           /*                if (server.remoteClients[i].socket.Poll(1000, SelectMode.SelectError))
                            {
                                Console.WriteLine("casting failed:polled socket disconnected");
                                continue;
-                           }
-                            if (!server.remoteClients[i].socket.Poll(1000, SelectMode.SelectRead) || server.remoteClients[i].socket.Available > 0)
-                           {
-                               server.remoteClients[i].socket.Send(msg.GetBytes());
-                           }
-                            else
+                           }*/
+                  //          if (!server.remoteClients[i].socket.Poll(1000, SelectMode.SelectRead) || server.remoteClients[i].socket.Available > 0)
+                    //       {
+
+                    try
+                    {
+                        server.remoteClients[i].socket.Send(msg.GetBytes());
+                    }
+                    catch
                             {
-                                Console.WriteLine("casting failed:polled socket disconnected");
-                            }
+
+                    }
+                          
+                    //       }
+                     //       else
+                     //       {
+                    //            Console.WriteLine("casting failed:polled socket disconnected");
+                    //        }
                             
                        }
                    }
@@ -118,19 +127,17 @@ namespace monogameMinecraftNetworking.Utility
                                     continue;
                                 }
                             }
-                            if (server.remoteClients[i].socket.Poll(1000, SelectMode.SelectError))
-                            {
-                                Console.WriteLine("casting failed:polled socket disconnected");
-                                continue;
-                            }
-                            if (!server.remoteClients[i].socket.Poll(1000, SelectMode.SelectRead) || server.remoteClients[i].socket.Available > 0)
+
+                            try
                             {
                                 server.remoteClients[i].socket.Send(msg.GetBytes());
                             }
-                            else
+                            catch
                             {
-                                Console.WriteLine("casting failed:polled socket disconnected");
+
                             }
+                              
+                           
 
                         }
                     }
@@ -233,6 +240,45 @@ namespace monogameMinecraftNetworking.Utility
                 
                 //     SendToClient(s, new Message("userCount", MessagePackSerializer.Serialize(allClientSocketsOnline.Count.ToString())));
                 CastToAllClients(server, new MessageProtocol(135, MessagePackSerializer.Serialize(server.allUserDatas)));
+            }
+        }
+
+        public static int toDoListIndex = 0;
+        public static void EnqueueTodoList(List<ServerTodoList> list, ValueTuple<RemoteClient, MessageProtocol> message)
+        {
+            if (list.Count > 0)
+            {
+                lock (list[toDoListIndex].queueLock)
+                {
+                    int priority = 0;
+                    switch ((MessageCommandType)message.Item2.command)
+                    {
+                        case MessageCommandType.ChunkDataRequest:
+                            priority = 1;
+                            break;
+                        case MessageCommandType.UserDataBroadcast:
+                            priority = 10;
+                            break;
+                        case MessageCommandType.UserDataRequest:
+                            priority = 5;
+                            break;
+                        case MessageCommandType.UserDataUpdate:
+                            priority = 0;
+                            break;
+                        default:
+                            priority = 20;
+                            break;
+                    }
+                    list[toDoListIndex].value.Enqueue(message);
+                    toDoListIndex++;
+                    if (toDoListIndex >= list.Count)
+                    {
+                        toDoListIndex = 0;
+                    }
+               //     Debug.WriteLine(toDoListIndex);
+                }
+
+               
             }
         }
     }

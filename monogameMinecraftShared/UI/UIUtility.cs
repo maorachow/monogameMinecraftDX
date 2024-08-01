@@ -138,7 +138,9 @@ namespace monogameMinecraftShared.UI
             UIElement.menuUIs = new List<UIElement> {
 
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
-            //    new InputField(new Vector2(0.3f, 0.1f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, null ,"",1,10,false),
+                new InputField(new Vector2(0.3f, 0.1f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, null ,"",1,10,false),
+
+                new InputField(new Vector2(0.3f, 0.85f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, null ,"",1,10,false),
                 new UIButton(new Vector2(0.3f, 0.3f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.InitGameplay ,"Start Game",null,1),
                 new UIButton(new Vector2(0.3f, 0.6f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.GoToSettings ,"Game Settings",null,1)
 
@@ -222,7 +224,7 @@ namespace monogameMinecraftShared.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
                     leftDownPanel,
                     new UIButton(new Vector2(0.333f, 0.0f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchup"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.Z = 1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchuppressed"]),
 
@@ -276,7 +278,7 @@ namespace monogameMinecraftShared.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch, game,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch,  game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
                    
                 };
             }
@@ -404,20 +406,23 @@ namespace monogameMinecraftShared.UI
                 new UIButton(new Vector2(0.1f, 0.1f), 0.1f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.structureOperationsUIsPageID=0; } ,"Previous Page" ,null,0.5f),
             };
         }
-        public static void InitInventoryUI(MinecraftGameBase game, SpriteFont sf)
+        public static void InitInventoryUI(Game game, SpriteFont sf)
         {
-            UIElement.inventoryUIs = new List<UIElement> { new UIImage(new Vector2(0.1f, 0.1f), 0.8f, 0.8f, UIElement.UITextures["menubackgroundtransparent"], game._spriteBatch),
-             new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{} ,"Inventory",null,1,false,false),
+            if (game is MinecraftGameBase)
+            {
+                MinecraftGameBase minecraftGame=game as MinecraftGameBase;
+            UIElement.inventoryUIs = new List<UIElement> { new UIImage(new Vector2(0.1f, 0.1f), 0.8f, 0.8f, UIElement.UITextures["menubackgroundtransparent"], minecraftGame._spriteBatch),
+             new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,minecraftGame._spriteBatch,game.Window, (ub)=>{} ,"Inventory",null,1,false,false),
 
 
 
-             new UIButton(new Vector2(0.35f, 0.7f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>{game.OpenInventory(ub);} ,"Close",null,1,false,true),
+             new UIButton(new Vector2(0.35f, 0.7f), 0.3f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,minecraftGame._spriteBatch,game.Window, (ub)=>{minecraftGame.OpenInventory(ub);} ,"Close",null,1,false,true),
             };
             int elementCount = 0;
             foreach (var element in Chunk.blockInfosNew)
             {
                 UIElement.inventoryUIs.Add(new UIButton(new Vector2(elementCount % 10 * 0.05f + 0.25f, elementCount / 10 * 0.05f + 0.25f), 0.05f, 0.05f, UIElement.UITextures.ContainsKey("blocktexture" + element.Key) && UIElement.UITextures["blocktexture" + element.Key] != null ? UIElement.UITextures["blocktexture" + element.Key] : UIElement.UITextures["blocktexture-1"],
-                    new Vector2(0f, 0f), null, game._spriteBatch, game.Window, (ub) => game.gamePlayer.inventoryData[game.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
+                    new Vector2(0f, 0f), null, minecraftGame._spriteBatch, game.Window, (ub) => minecraftGame.gamePlayer.inventoryData[minecraftGame.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
                     ));
                 elementCount++;
             }
@@ -425,6 +430,8 @@ namespace monogameMinecraftShared.UI
             {
                 element.OnResize();
             }
+            } 
+           
         }
 
     }

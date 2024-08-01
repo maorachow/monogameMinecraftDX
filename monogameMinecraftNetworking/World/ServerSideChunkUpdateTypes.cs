@@ -34,6 +34,13 @@ namespace monogameMinecraftNetworking.World
                 case ChunkUpdateDataTypes.DoorInteractingUpdate:
                     return new DoorInteractingOperation(new Vector3Int(data.posX, data.posY, data.posZ),
                          data.worldID);
+
+                case ChunkUpdateDataTypes.FenceUpdatingUpdate:
+                    return new FenceUpdatingOperation(new Vector3Int(data.posX, data.posY, data.posZ), updater, new Vector3Int(data.posX, data.posY, data.posZ),0,
+                        data.worldID);
+                case ChunkUpdateDataTypes.DoorUpperPartPlacingUpdate:
+                    return new DoorUpperPartPlacingOperation(new Vector3Int(data.posX, data.posY, data.posZ),
+                        data.worldID);
                 default:
                     return null;
             }
@@ -87,6 +94,7 @@ namespace monogameMinecraftNetworking.World
             {
                 ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, -1), ServerSideWorldUpdater, new Vector3Int(0, 0, 1), 1, this.worldID));
             }
+
         }
     }
     public struct FenceUpdatingOperation : IChunkUpdateOperation

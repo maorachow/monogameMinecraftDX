@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Client.UI;
 using monogameMinecraftNetworking.Client.World;
 
 namespace monogameMinecraftNetworking.Client.Rendering
@@ -37,6 +38,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public HDRCubemapRendererLowDef hdrCubemapRenderer;
         public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
         public SSAORenderer ssaoRenderer;
+        public ClientSidePlayersRenderer clientSidePlayersRenderer;
 
 
         public LowDefNetworkingClientRenderPipelineManager(ClientGameBase game, IEffectsManager em)
@@ -65,8 +67,11 @@ namespace monogameMinecraftNetworking.Client.Rendering
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
               null, game.gamePlayer,false);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
-         //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true);
+            clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
+                effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer,
+                game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf);
+            //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
+            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer);
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
@@ -112,6 +117,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public void RenderWorld(GameTime gameTime, SpriteBatch sb)
         {
 
+            clientSidePlayersRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
@@ -124,17 +130,18 @@ namespace monogameMinecraftNetworking.Client.Rendering
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             game.GraphicsDevice.BlendState = BlendState.Additive;
 
-          /*  if (VoxelWorld.currentWorld.structureOperationsManager != null)
-            {
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer, this);
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer, this);
-            }
+            /*  if (VoxelWorld.currentWorld.structureOperationsManager != null)
+              {
+                  VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer, this);
+                  VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer, this);
+              }
 
-            if (game.gamePlayer.curChunk != null)
-            {
-                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), game.gamePlayer, this);
+              if (game.gamePlayer.curChunk != null)
+              {
+                  EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), game.gamePlayer, this);
 
-            }*/
+              }*/
+            clientSidePlayersRenderer.DrawPlayerNames();
 
         }
 
