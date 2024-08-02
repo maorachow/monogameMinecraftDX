@@ -398,12 +398,16 @@ namespace monogameMinecraftNetworking.Client.World
             //    tryUpdateChunksThread = Task.Run(() => VoxelWorld.currentWorld.TryUpdateChunkThread());
 
             isThreadsStopping = false;
-            updateWorldThread = new Thread(() => UpdateWorldThread(game.gamePlayer, game.networkingClient));
-            updateWorldThread.IsBackground = true;
-            updateWorldThread.Start();
-            tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(game.gamePlayer, game.networkingClient));
-            tryRemoveChunksThread.IsBackground = true;
-            tryRemoveChunksThread.Start();
+            if (game.gamePlayerR.gamePlayer is ClientSideGamePlayer gamePlayer1)
+            {
+                updateWorldThread = new Thread(() => UpdateWorldThread(gamePlayer1, game.networkingClient));
+                updateWorldThread.IsBackground = true;
+                updateWorldThread.Start();
+                tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(gamePlayer1, game.networkingClient));
+                tryRemoveChunksThread.IsBackground = true;
+                tryRemoveChunksThread.Start();
+            }
+      
           //  game.gamePlayer.curChunk = null;
          //   worldUpdater.Init(game);
             if (actionOnSwitchedWorld != null)

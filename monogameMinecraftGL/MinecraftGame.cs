@@ -17,6 +17,7 @@ using monogameMinecraftShared.UI;
 
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared;
+using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Updateables;
  
 
@@ -117,6 +118,7 @@ namespace monogameMinecraftGL
             this.IsFixedTimeStep = false;
             effectsManager = new LowDefEffectsManager();
             gamePlatformType = GamePlatformType.LowDefGL;
+            gamePlayerR = new GamePlayerReference();
             renderPipelineManager = new LowDefRenderPipelineManager(this, effectsManager);
             //    TargetElapsedTime = System.TimeSpan.FromMilliseconds(10);
             //         TargetElapsedTime = System.TimeSpan.FromMilliseconds(33);
@@ -132,6 +134,7 @@ namespace monogameMinecraftGL
        public override void OnResize(Object sender, EventArgs e)
         {
             UIElement.ScreenRect = this.Window.ClientBounds;
+            Debug.WriteLine("bounds:"+this.Window.ClientBounds);
             foreach (UIElement element in UIElement.menuUIs)
             {
                 element.OnResize();
@@ -217,7 +220,14 @@ namespace monogameMinecraftGL
         public override void InitGameplay(object obj)
         {
 
-
+            if (VoxelWorld.currentWorld.updateWorldThread != null)
+            {
+                if (VoxelWorld.currentWorld.updateWorldThread.IsAlive)
+                {
+                    Debug.WriteLine("thread not stopped");
+                    return;
+                }
+            }
             GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
 
             IsMouseVisible = false;
@@ -235,8 +245,8 @@ namespace monogameMinecraftGL
             BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory() + "/blockinfodata.json");
 
             status = GameStatus.Started;
-            gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
-            gamePlayer.graphicsDevice=GraphicsDevice;
+            gamePlayerR.gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
             particleManager = new ParticleManager();
@@ -283,7 +293,7 @@ namespace monogameMinecraftGL
             terrainDepth = Content.Load<Texture2D>("terrainheight");
             terrainMER = Content.Load<Texture2D>("terrainmer");*/
           
-            gameTimeManager = new GameTimeManager(gamePlayer);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
         //    BlockResourcesManager.LoadDefaultResources(Content, GraphicsDevice, chunkRenderer);
          //   effectsManager.LoadCustomPostProcessEffects(GraphicsDevice, customPostProcessors, Content);
 
@@ -358,14 +368,19 @@ namespace monogameMinecraftGL
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
             VoxelWorld.currentWorld.SaveAndQuitWorld(this);
-            monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayer);
+       /*     if (gamePlayerR.gamePlayer is GamePlayer player1)
+            {
+                monogameMinecraftShared.Updateables.GamePlayer.SavePlayerData(player1);
+                player1.curChunk = null;
+            }*/
+         
             /*     foreach(var c in ChunkManager.chunks)
                  {
                  c.Value.Dispose();
                  }*/
             EntityManager.SaveWorldEntityData();
             ChunkHelper.isJsonReadFromDisk = false;
-            gamePlayer.curChunk = null;
+          
             /*     lock(.updateWorldThreadLock)
                  {
                  foreach (var c in ChunkManager.chunks)
@@ -376,10 +391,10 @@ namespace monogameMinecraftGL
 
                  }
                  }*/
-            foreach (var world in VoxelWorld.voxelWorlds)
+       /*     foreach (var world in VoxelWorld.voxelWorlds)
             {
                 world.DestroyAllChunks();
-            }
+            }*/
 
             //        ChunkManager.chunks.Keys.Clear() ; 
 
@@ -391,7 +406,7 @@ namespace monogameMinecraftGL
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
            UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
            EntityManager.StopAllThreads();
-            EntityManager.InitEntityList();
+      //      EntityManager.InitEntityList();
             ParticleManager.instance.ReleaseResources();
             GC.Collect();
 
@@ -402,6 +417,19 @@ namespace monogameMinecraftGL
             //   tryRemoveChunksThread.Abort();
         }
 
+        public override void OpenInventory(object obj)
+        {
+
+            isInventoryOpen = !isInventoryOpen;
+            if (isInventoryOpen == true)
+            {
+                IsMouseVisible = true;
+            }
+            else
+            {
+                IsMouseVisible = false;
+            }
+        }
         public override void GoToSettings(object obj)
         {
             GameOptions.ReadOptionsJson();
@@ -532,17 +560,9 @@ namespace monogameMinecraftGL
                         //  QuitGameplay();
                         //  Exit();
                         //   Environment.Exit(0);
-                       
-                        isInventoryOpen=!isInventoryOpen;
-                        if (isInventoryOpen == true)
-                        {
-                            IsMouseVisible = true;
-                        }
-                        else
-                        {
-                            IsMouseVisible = false;
-                        }
-                      
+                        OpenInventory(null);
+
+
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.H) && !lastKeyState1.IsKeyUp(Keys.H)&&!isInventoryOpen)
                     {
@@ -565,13 +585,13 @@ namespace monogameMinecraftGL
                     if (Keyboard.GetState().IsKeyUp(Keys.J) && !lastKeyState1.IsKeyUp(Keys.J))
                     {
                       //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
+                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
                     }
 
                     if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                     {
                         //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
+                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.P) && !lastKeyState1.IsKeyUp(Keys.P))
                     {
@@ -612,7 +632,7 @@ namespace monogameMinecraftGL
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
                     {
-                    EntityManager.SpawnNewEntity(gamePlayer.position,0,0,0,0,this);
+                    EntityManager.SpawnNewEntity(gamePlayerR.gamePlayer.position,0,0,0,0,this);
                     }
                     /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                           {
@@ -668,13 +688,17 @@ namespace monogameMinecraftGL
                         isGamePaused = true;
                         IsMouseVisible = true;
                     }
-                    ProcessPlayerKeyboardInput(gameTime);
+           //         ProcessPlayerKeyboardInput(gameTime);
                 
                  
-                    ProcessPlayerMouseInput();
+             //       ProcessPlayerMouseInput();
+             playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-
-                    gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    if (gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
+                    {
+                        gamePlayer1.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+                
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -696,7 +720,7 @@ namespace monogameMinecraftGL
                     ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
-                    gameposition = gamePlayer.position;
+                    gameposition = gamePlayerR.gamePlayer.position;
 
 
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -718,7 +742,7 @@ namespace monogameMinecraftGL
         void ProcessPlayerMouseInput()
         {
             var mState = Mouse.GetState();
-            gamePlayer.cam.ProcessMouseMovement(mState.X - lastMouseX, lastMouseY - mState.Y);
+            gamePlayerR.gamePlayer.cam.ProcessMouseMovement(mState.X - lastMouseX, lastMouseY - mState.Y);
             lastMouseY = mState.Y;
             lastMouseX = mState.X;
         }
@@ -821,9 +845,9 @@ namespace monogameMinecraftGL
                    
                     //            Debug.WriteLine("started");
 
-                    GraphicsDevice.Clear(Color.CornflowerBlue); 
+                    GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
-                    gamePlayer.cam.updateCameraVectors();
+                    gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
                     renderPipelineManager.RenderWorld(gameTime,_spriteBatch);
                     //        _spriteBatch.Begin(blendState:BlendState.Additive);

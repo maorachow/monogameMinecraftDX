@@ -12,11 +12,11 @@ namespace monogameMinecraftShared.Rendering
         public Effect motionVectorEffect;
         public GBufferRenderer gBufferRenderer;
         public RenderTarget2D renderTargetMotionVector;
-        public GamePlayer player;
+        public IGamePlayer player;
         public Matrix playerPrevProjectionMat;
         public Matrix playerPrevViewMat;
 
-        public MotionVectorRenderer(GraphicsDevice device, Effect motionVectorEffect, GBufferRenderer gBufferRenderer, GamePlayer player)
+        public MotionVectorRenderer(GraphicsDevice device, Effect motionVectorEffect, GBufferRenderer gBufferRenderer, IGamePlayer player)
         {
             this.device = device;
             this.motionVectorEffect = motionVectorEffect;

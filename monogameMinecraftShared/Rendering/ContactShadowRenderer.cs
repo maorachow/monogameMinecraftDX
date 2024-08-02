@@ -13,9 +13,9 @@ namespace monogameMinecraftShared.Rendering
         public Effect contactShadowEffect;
         public GBufferRenderer gBufferRenderer;
         public GameTimeManager gameTimeManager;
-        public GamePlayer player;
+        public IGamePlayer player;
         public RenderTarget2D contactShadowRenderTarget;
-        public ContactShadowRenderer(GraphicsDevice device, Effect contactShadowEffect, GBufferRenderer gBufferRenderer, GameTimeManager gameTimeManager, GamePlayer player)
+        public ContactShadowRenderer(GraphicsDevice device, Effect contactShadowEffect, GBufferRenderer gBufferRenderer, GameTimeManager gameTimeManager, IGamePlayer player)
         {
             this.device = device;
             this.contactShadowEffect = contactShadowEffect;

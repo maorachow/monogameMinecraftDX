@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace monogameMinecraftNetworking.Client.World
@@ -33,21 +35,21 @@ namespace monogameMinecraftNetworking.Client.World
         public bool disposed { get; set; }
 
         [IgnoreMember]
-        public ClientSideChunk frontChunk;
+        public volatile ClientSideChunk frontChunk;
         [IgnoreMember]
-        public ClientSideChunk backChunk;
+        public volatile ClientSideChunk backChunk;
         [IgnoreMember]
-        public ClientSideChunk leftChunk;
+        public volatile ClientSideChunk leftChunk;
         [IgnoreMember]
-        public ClientSideChunk rightChunk;
+        public volatile ClientSideChunk rightChunk;
         [IgnoreMember]
-        public ClientSideChunk frontLeftChunk;
+        public volatile ClientSideChunk frontLeftChunk;
         [IgnoreMember]
-        public ClientSideChunk frontRightChunk;
+        public volatile ClientSideChunk frontRightChunk;
         [IgnoreMember]
-        public ClientSideChunk backLeftChunk;
+        public volatile ClientSideChunk backLeftChunk;
         [IgnoreMember]
-        public ClientSideChunk backRightChunk;
+        public volatile ClientSideChunk backRightChunk;
         public int usedByOthersCount = 0;
         public float unusedSeconds = 0f;
        
@@ -56,6 +58,8 @@ namespace monogameMinecraftNetworking.Client.World
         public bool isUnused { get; set; }
         public bool isTaskCompleted;
 
+        public object chunkBuildingLock=new object();
+        public bool _lockWasTaken=false;
         public ClientSideChunk(Vector2Int chunkPos, GraphicsDevice device, ClientSideVoxelWorld world)
         {
 
@@ -340,22 +344,22 @@ namespace monogameMinecraftNetworking.Client.World
             if (frontChunk != null)
             {
                 frontChunk.usedByOthersCount += 1;
-
+           //     Monitor.Enter(frontChunk.chunkBuildingLock);
             }
             if (backChunk != null)
             {
                 backChunk.usedByOthersCount += 1;
-
+          //      Monitor.Enter(backChunk.chunkBuildingLock);
             }
             if (leftChunk != null)
             {
                 leftChunk.usedByOthersCount += 1;
-
+        //        Monitor.Enter(leftChunk.chunkBuildingLock);
             }
             if (rightChunk != null)
             {
                 rightChunk.usedByOthersCount += 1;
-
+         //       Monitor.Enter(rightChunk.chunkBuildingLock);
             }
 
 
@@ -410,22 +414,22 @@ namespace monogameMinecraftNetworking.Client.World
                 if (frontChunk != null)
                 {
                     frontChunk.usedByOthersCount -= 1;
-
+            //        Monitor.Exit(frontChunk.chunkBuildingLock);
                 }
                 if (backChunk != null)
                 {
                     backChunk.usedByOthersCount -= 1;
-
+           //         Monitor.Exit(backChunk.chunkBuildingLock);
                 }
                 if (leftChunk != null)
                 {
                     leftChunk.usedByOthersCount -= 1;
-
+         //           Monitor.Exit(leftChunk.chunkBuildingLock);
                 }
                 if (rightChunk != null)
                 {
                     rightChunk.usedByOthersCount -= 1;
-
+             //       Monitor.Exit(rightChunk.chunkBuildingLock);
                 }
 
 
@@ -640,8 +644,8 @@ namespace monogameMinecraftNetworking.Client.World
             isTaskCompleted = false;
 
 
-            Task t = new Task(() => InitMap(chunkPos));
-            t.RunSynchronously();
+            InitMap(chunkPos);
+        
 
             isTaskCompleted = true;
             //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
@@ -669,13 +673,18 @@ namespace monogameMinecraftNetworking.Client.World
 
             }).GetAwaiter().OnCompleted(() =>
             {
-                GenerateRenderBuffers();
+                
 
-                isTaskCompleted = true;
-                //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
-                //  Debug.WriteLine(verticesOpqArray.Length);
-                //Debug.WriteLine(verticesWTArray.Length);
-                isReadyToRender = true;
+                    GenerateRenderBuffers();
+
+                    isTaskCompleted = true;
+                    //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
+                    //  Debug.WriteLine(verticesOpqArray.Length);
+                    //Debug.WriteLine(verticesWTArray.Length);
+                    isReadyToRender = true;
+
+                
+             
             });
 
             //  sw.Stop();
@@ -966,111 +975,122 @@ namespace monogameMinecraftNetworking.Client.World
                 return 0;
             }
 
-            if ((x < 0) || (z < 0) || (x >= chunkWidth) || (z >= chunkWidth))
+            try
             {
-
-                if (ClientSideVoxelWorld.singleInstance.worldGenType == 0)
-                {
-                    if (x >= chunkWidth)
-                    {
-                        if (rightChunk != null && rightChunk.isMapGenCompleted == true && rightChunk.disposed == false)
-                        {
-                            return rightChunk.map[0, y, z];
-                        }
-                        else return PredictBlockType(thisHeightMap[x - chunkWidth + 25, z + 8], y);
-
-                    }
-                    else if (z >= chunkWidth)
-                    {
-                        if (frontChunk != null && frontChunk.isMapGenCompleted == true && frontChunk.disposed == false)
-                        {
-                            return frontChunk.map[x, y, 0];
-                        }
-                        else return PredictBlockType(thisHeightMap[x + 8, z - chunkWidth + 25], y);
-                    }
-                    else if (x < 0)
-                    {
-                        if (leftChunk != null && leftChunk.isMapGenCompleted == true && leftChunk.disposed == false)
-                        {
-                            return leftChunk.map[chunkWidth - 1, y, z];
-                        }
-                        else return PredictBlockType(thisHeightMap[8 + x, z + 8], y);
-                    }
-                    else if (z < 0)
-                    {
-                        if (backChunk != null && backChunk.isMapGenCompleted == true && backChunk.disposed == false)
-                        {
-                            return backChunk.map[x, y, chunkWidth - 1];
-                        }
-                        else return PredictBlockType(thisHeightMap[x + 8, 8 + z], y);
-                    }
-                }
-                else if (ClientSideVoxelWorld.singleInstance.worldGenType == 2)
+                if ((x < 0) || (z < 0) || (x >= chunkWidth) || (z >= chunkWidth))
                 {
 
-                    if (x >= chunkWidth)
+                    if (ClientSideVoxelWorld.singleInstance.worldGenType == 0)
                     {
-                        if (rightChunk != null && rightChunk.isMapGenCompleted == true)
+                        if (x >= chunkWidth)
                         {
-                            if (rightChunk.isMapGenCompleted == true)
+                            if (rightChunk != null && rightChunk.isMapGenCompleted == true &&
+                                rightChunk.disposed == false)
                             {
-
                                 return rightChunk.map[0, y, z];
                             }
-                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                            else return PredictBlockType(thisHeightMap[x - chunkWidth + 25, z + 8], y);
 
                         }
-                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
-
-                    }
-                    else if (z >= chunkWidth)
-                    {
-                        if (frontChunk != null && frontChunk.isMapGenCompleted == true)
+                        else if (z >= chunkWidth)
                         {
-                            if (frontChunk.isMapGenCompleted == true)
+                            if (frontChunk != null && frontChunk.isMapGenCompleted == true &&
+                                frontChunk.disposed == false)
                             {
-
                                 return frontChunk.map[x, y, 0];
                             }
-                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
-
-
-
+                            else return PredictBlockType(thisHeightMap[x + 8, z - chunkWidth + 25], y);
                         }
-                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
-                    }
-                    else if (x < 0)
-                    {
-                        if (leftChunk != null && leftChunk.isMapGenCompleted == true)
+                        else if (x < 0)
                         {
-                            if (leftChunk.isMapGenCompleted == true)
+                            if (leftChunk != null && leftChunk.isMapGenCompleted == true && leftChunk.disposed == false)
                             {
-
                                 return leftChunk.map[chunkWidth - 1, y, z];
                             }
-                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
-
+                            else return PredictBlockType(thisHeightMap[8 + x, z + 8], y);
                         }
-                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
-                    }
-                    else if (z < 0)
-                    {
-                        if (backChunk != null && backChunk.isMapGenCompleted == true)
+                        else if (z < 0)
                         {
-                            if (backChunk.isMapGenCompleted == true)
+                            if (backChunk != null && backChunk.isMapGenCompleted == true && backChunk.disposed == false)
                             {
                                 return backChunk.map[x, y, chunkWidth - 1];
                             }
+                            else return PredictBlockType(thisHeightMap[x + 8, 8 + z], y);
+                        }
+                    }
+                    else if (ClientSideVoxelWorld.singleInstance.worldGenType == 2)
+                    {
+
+                        if (x >= chunkWidth)
+                        {
+                            if (rightChunk != null && rightChunk.isMapGenCompleted == true)
+                            {
+                                if (rightChunk.isMapGenCompleted == true)
+                                {
+
+                                    return rightChunk.map[0, y, z];
+                                }
+                                else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                            }
                             else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
 
                         }
-                        else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                        else if (z >= chunkWidth)
+                        {
+                            if (frontChunk != null && frontChunk.isMapGenCompleted == true)
+                            {
+                                if (frontChunk.isMapGenCompleted == true)
+                                {
+
+                                    return frontChunk.map[x, y, 0];
+                                }
+                                else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+
+
+                            }
+                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                        }
+                        else if (x < 0)
+                        {
+                            if (leftChunk != null && leftChunk.isMapGenCompleted == true)
+                            {
+                                if (leftChunk.isMapGenCompleted == true)
+                                {
+
+                                    return leftChunk.map[chunkWidth - 1, y, z];
+                                }
+                                else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                            }
+                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                        }
+                        else if (z < 0)
+                        {
+                            if (backChunk != null && backChunk.isMapGenCompleted == true)
+                            {
+                                if (backChunk.isMapGenCompleted == true)
+                                {
+                                    return backChunk.map[x, y, chunkWidth - 1];
+                                }
+                                else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+
+                            }
+                            else return PredictBlockType3D(chunkPos.x + x, y, chunkPos.y + z);
+                        }
+
                     }
 
+
                 }
-
-
             }
+            catch (Exception e)
+            {
+                return 1;
+            }
+           
+           
             return map[x, y, z];
         }
 

@@ -24,9 +24,9 @@ namespace monogameMinecraftShared.World
         public struct BlockData
         {
             [Key(0)]
-            public short blockID;
+            public short blockID;//2*byte
             [Key(1)]
-            public byte optionalDataValue;
+            public byte optionalDataValue;//1*byte
             public BlockData(short blockID)
             {
                 this.blockID = blockID;

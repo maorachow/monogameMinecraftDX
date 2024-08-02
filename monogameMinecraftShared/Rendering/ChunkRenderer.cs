@@ -174,7 +174,7 @@ namespace monogameMinecraftShared.Rendering
 
 
 
-        public void RenderAllChunksLowDefForward(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Effect forwardEffect)
+        public void RenderAllChunksLowDefForward(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, IGamePlayer player, Effect forwardEffect)
         {
 
             forwardEffect.Parameters["blockTex"].SetValue(atlas);
@@ -540,7 +540,7 @@ namespace monogameMinecraftShared.Rendering
 
 
         public static bool isBusy = false;
-        public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, GamePlayer player, Matrix lightSpaceMat, Effect shadowmapShader, int maxRenderDistance, bool useFrustumCulling = true)
+        public void RenderShadow(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, IGamePlayer player, Matrix lightSpaceMat, Effect shadowmapShader, int maxRenderDistance, bool useFrustumCulling = true)
         {
 
             shadowmapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);

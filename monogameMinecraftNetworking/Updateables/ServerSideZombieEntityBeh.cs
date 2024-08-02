@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using monogameMinecraftShared.Pathfinding;
+﻿using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Animations;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared.Rendering;
+using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.World;
-
-namespace monogameMinecraftShared.Updateables
+using monogameMinecraftShared;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using monogameMinecraftNetworking.World;
+using EntityData = monogameMinecraftNetworking.Data.EntityData;
+namespace monogameMinecraftNetworking.Updateables
 {
-    public class ZombieEntityBeh : EntityBeh
+    public class ServerSideZombieEntityBeh:ServerSideEntityBeh
     {
-
-        public ZombieEntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, string entityID, float entityHealth, bool isEntityHurt, MinecraftGameBase game) : base(position, rotationX, rotationY, rotationZ, 0, entityID, entityHealth, isEntityHurt, game)
+        public ServerSideZombieEntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, string entityID, float entityHealth, bool isEntityHurt,int worldID, IMultiplayerServer server) : base(position, rotationX, rotationY, rotationZ, 0, entityID, entityHealth, isEntityHurt,worldID, server)
         {
             this.position = position;
             this.rotationX = rotationX;
@@ -27,12 +27,12 @@ namespace monogameMinecraftShared.Updateables
             this.entityID = entityID;
             this.entityHealth = entityHealth;
             this.isEntityHurt = isEntityHurt;
-            this.game = game;
+            this.server = server;
             isEntityDying = false;
-            animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(EntityManager.zombieAnim, EntityRenderer.zombieModel), new AnimationState(EntityManager.entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
+            this.curWorldID=worldID;
             entitySize = new Vector3(0.6f, 1.8f, 0.6f);
             InitBounds();
-            EntityManager.worldEntities.Add(this);
+            ServerSideEntityManager.worldEntities.Add(this);
 
         }
 
@@ -47,15 +47,43 @@ namespace monogameMinecraftShared.Updateables
         public float timeSpentToNextStep = 0f;
 
         public float timeInUnloadedChunks = 0f;
+
+        public Vector3 FindClosestPlayerPos(IMultiplayerServer server)
+        {
+         
+            Vector3 returnVal= new Vector3(float.MaxValue);
+            foreach (var client in server.remoteClients)
+            {
+                if (client.isUserDataLoaded)
+                {
+                    if (client.curUserData.curWorldID == curWorldID)
+                    {
+                        Vector3 newPos = new Vector3(client.curUserData.posX, client.curUserData.posY,
+                            client.curUserData.posZ);
+                        if ((newPos - position).Length() < (returnVal - position).Length())
+                        {
+                            returnVal = newPos;
+                        }
+                    }
+                }
+            }
+
+            if (returnVal.X > float.MaxValue * 0.9f || returnVal.Y > float.MaxValue * 0.9f ||
+                returnVal.Z > float.MaxValue * 0.9f)
+            {
+                return position;
+            }
+            return returnVal;
+        }
         public override void OnFixedUpdate(float deltaTime)
         {
             if (isPathfindingNeeded == true)
             {
                 //  Debug.WriteLine("try find path");
                 //      bool isNewPathValid=false;
-                //      EntityManager.pathfindingManager.GetThreeDimensionalMapPath(ChunkHelper.Vec3ToBlockPos(position+new Vector3(0f,0.1f,0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position+new Vector3(0,-0.5f,0f)),
+                //      ServerSideEntityManager.pathfindingManager.GetThreeDimensionalMapPath(ServerSideChunkHelper.Vec3ToBlockPos(position+new Vector3(0f,0.1f,0f)), ServerSideChunkHelper.Vec3ToBlockPos(game.gamePlayer.position+new Vector3(0,-0.5f,0f)),
                 //          out isNewPathValid,ref entityPath);
-                EntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayerR.gamePlayer.position + new Vector3(0, -0.5f, 0f)), this);
+                ServerSideEntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ServerSideChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ServerSideChunkHelper.Vec3ToBlockPos(FindClosestPlayerPos(server) ), this);
                 /*         if (entityPath == null)
                          {
                              isNewPathValid = false;
@@ -70,21 +98,21 @@ namespace monogameMinecraftShared.Updateables
             {
                 entityDyingTime += deltaTime;
                 isEntityHurt = true;
-                animationBlend.Update(deltaTime, 0f, 1f);
+              
 
                 if (entityDyingTime >= 1f && isEntityDying)
                 {
                     RemoveCurrentEntity();
-                    EntityManager.worldEntities.Remove(this);
+                    ServerSideEntityManager.worldEntities.Remove(this);
 
                 }
                 return;
             }
-            animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
+            
             entityLifetime += deltaTime;
             if (!isPathValid)
             {
-                targetPos = game.gamePlayerR.gamePlayer.position;
+                targetPos = FindClosestPlayerPos(server);
             }
             else
             {
@@ -98,14 +126,14 @@ namespace monogameMinecraftShared.Updateables
             lastPos = position;
             Vector3Int intPos = Vector3Int.FloorToIntVec3(position);
 
-            curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
+            curChunk = ServerSideChunkHelper.GetChunk(ServerSideChunkHelper.Vec3ToChunkPos(position),curWorldID);
             if (curChunk == null)
             {
                 timeInUnloadedChunks += deltaTime;
                 if (timeInUnloadedChunks > 30f)
                 {
                     RemoveCurrentEntity();
-                    EntityManager.worldEntities.Remove(this);
+                    ServerSideEntityManager.worldEntities.Remove(this);
                 }
             }
             else
@@ -116,20 +144,17 @@ namespace monogameMinecraftShared.Updateables
             if (curChunk != null)
             {
 
-                if (lastChunkIsReadyToRender != curChunk.isReadyToRender && lastChunkIsReadyToRender == false && curChunk.isReadyToRender == true)
-                {
-                    //  Debug.WriteLine("update");
+             
                     isNeededUpdateBlock = true;
-                    //      GetBlocksAround(bounds);
-                }
+                
             }
 
-            if (curChunk != null)
+      /*      if (curChunk != null)
             {
                 lastChunkIsReadyToRender = curChunk.isReadyToRender;
             }
 
-
+            */
 
 
 
@@ -201,8 +226,6 @@ namespace monogameMinecraftShared.Updateables
                 else
                 {
                     hasReachedFinalStep = true;
-
-
                 }
             }
 
@@ -212,7 +235,7 @@ namespace monogameMinecraftShared.Updateables
                 isPathValid = false;
                 isPathfindingNeeded = true;
             }
-            if ((!isPathValid || hasReachedFinalStep == true) && Vector3.Distance(position, game.gamePlayerR.gamePlayer.position) > 2f)
+            if ((!isPathValid || hasReachedFinalStep == true) /*&& Vector3.Distance(position, FindClosestPlayerPos(server)) > 2f*/)
             {
                 isPathfindingNeeded = true;
             }

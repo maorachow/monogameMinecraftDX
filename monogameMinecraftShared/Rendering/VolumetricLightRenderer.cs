@@ -16,13 +16,13 @@ namespace monogameMinecraftShared.Rendering
         public Effect blendEffect;
         public Effect lightShaftEffect;
         public RenderTarget2D lightShaftTarget;
-        public GamePlayer player;
+        public IGamePlayer player;
         int width;
         int height;
         public GameTimeManager gameTimeManager;
         public EntityRenderer entityRenderer;
 
-        public VolumetricLightRenderer(GraphicsDevice device, GBufferRenderer gBufferRenderer, SpriteBatch sb, Effect blendEffect, Effect lightShaftEffect, GamePlayer player, GameTimeManager gameTimeManager)
+        public VolumetricLightRenderer(GraphicsDevice device, GBufferRenderer gBufferRenderer, SpriteBatch sb, Effect blendEffect, Effect lightShaftEffect, IGamePlayer player, GameTimeManager gameTimeManager)
         {
             this.device = device;
             this.gBufferRenderer = gBufferRenderer;

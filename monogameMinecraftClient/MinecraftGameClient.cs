@@ -43,7 +43,9 @@ namespace Project1
             effectsManager = new LowDefEffectsManager();
          
             renderPipelineManager = new LowDefNetworkingClientRenderPipelineManager(this, effectsManager);
-           
+            gamePlayerR = new GamePlayerReference();
+
+
         }
 
         public void OnResize(object sender, EventArgs e)
@@ -129,7 +131,8 @@ namespace Project1
         {
             // TODO: Add your initialization logic here
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            gamePlayer =
+            
+           gamePlayerR. gamePlayer =
                 new ClientSideGamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this, "default user");
             MultiplayerClientUIUtility.InitGameUI(this);
             status = GameStatus.Menu;
@@ -236,15 +239,15 @@ namespace Project1
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
             font =Content.Load<SpriteFont>("defaultfont");
 
-            gamePlayer.playerName = name;
-         gamePlayer.Reset();
+           (gamePlayerR.gamePlayer as ClientSideGamePlayer).playerName = name;
+           (gamePlayerR.gamePlayer as ClientSideGamePlayer).Reset();
             
            //  MultiplayerClientUIUtility.InitGameUI(this);
-           playerInputManager = new PlayerInputManager(gamePlayer, false);
-            gameTimeManager = new GameTimeManager(gamePlayer);
+           playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
             effectsManager.LoadEffects(Content);
          
-            networkingClient = new MultiplayerClient(address, port, gamePlayer, this);
+            networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
             renderPipelineManager.InitRenderPipeline();
         
            
@@ -383,7 +386,8 @@ namespace Project1
                     PauseGame(null);
                     }
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
-                    gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                   
+                 (gamePlayerR.gamePlayer as ClientSideGamePlayer)  .UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
 
                    
@@ -401,7 +405,7 @@ namespace Project1
                     // TODO: Add your update logic here
             
              
-                    gameposition = gamePlayer.position;
+                    gameposition = gamePlayerR.gamePlayer.position;
 
 
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -453,7 +457,7 @@ namespace Project1
 
                     GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
-                    gamePlayer.cam.updateCameraVectors();
+                    gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
                     renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
                     //        _spriteBatch.Begin(blendState:BlendState.Additive);

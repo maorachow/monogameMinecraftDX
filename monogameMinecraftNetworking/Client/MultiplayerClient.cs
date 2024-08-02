@@ -13,9 +13,10 @@ using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
+using monogameMinecraftNetworking.Utility;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.World;
-
+using EntityData = monogameMinecraftNetworking.Data.EntityData;
 namespace monogameMinecraftNetworking.Client
 {
     public class MultiplayerClient:IMultiplayerClient
@@ -29,6 +30,18 @@ namespace monogameMinecraftNetworking.Client
         }
 
         public List<UserData> allUserDatas { get; set; }
+
+        public List<EntityData> allEntityDatas { get; set; }
+
+        public IMultiplayerClient.OnAllEntitiesDataUpdated allEntitiesUpdatedAction
+        {
+
+
+            get { return _allEntitiesUpdatedAction; }
+
+            set { _allEntitiesUpdatedAction = value; }
+        }
+        public IMultiplayerClient.OnAllEntitiesDataUpdated _allEntitiesUpdatedAction;
         public Socket socket { get; set; }
         public bool isLoggedIn { get; set; }
         public bool isGoingToQuitGame { get; set; }=false;
@@ -62,7 +75,7 @@ namespace monogameMinecraftNetworking.Client
         }
 
         public Thread executeTodoListThread;
-
+     
         public void ExecuteTodoList()
         {
             while (true)
@@ -79,69 +92,81 @@ namespace monogameMinecraftNetworking.Client
                              todoList.TryDequeue(out item);
                              if (item == null)
                              {
+                                 Debug.WriteLine("null message");
                             continue;
                              }
                         switch ((MessageCommandType)item.command)
                         {
                             case MessageCommandType.WorldData:
-                                ChunkData chunkData = MessagePackSerializer.Deserialize<ChunkData>(item.messageData);
+                                Task.Run(() => { ChunkData chunkData = ChunkDataSerializingUtility.DeserializeChunk(item.messageData);// MessagePackSerializer.Deserialize<ChunkData>(item.messageData);
+                                if (chunkData == null)
+                                {
+                                    return;
+                                }
                                 if (ClientSideVoxelWorld.singleInstance.chunks.ContainsKey(chunkData.chunkPos))
                                 {
                                     ClientSideChunk c =
                                         ClientSideVoxelWorld.singleInstance.GetChunk(chunkData.chunkPos);
-                                   c.map =
-                                        (BlockData[,,])chunkData.map.Clone();
-                                   bool isChunkFirstLoaded = (c.isMapDataFetchedFromServer == false);
+                                    lock (c.chunkBuildingLock)
+                                    {
+                                        c.map =
+                                            (BlockData[,,])chunkData.map.Clone();
+                                        bool isChunkFirstLoaded = (c.isMapDataFetchedFromServer == false);
 
-                                   c.isMapDataFetchedFromServer = true;
-
-
-                                   c.BuildChunk();
-
-                                   if (!isChunkFirstLoaded)
-                                   {
-                                       if (ClientSideChunkHelper
-                                               .GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth,
-                                                   c.chunkPos.y))?.isMapDataFetchedFromServer == true)
-                                       {
-                                           ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunk();
-                                       }
+                                        c.isMapDataFetchedFromServer = true;
 
 
+                                        c.BuildChunkAsync();
 
-
-                                       if (ClientSideChunkHelper
-                                               .GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth,
-                                                   c.chunkPos.y))?.isMapDataFetchedFromServer == true)
-                                       {
-                                           ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunk();
-                                       }
-
-
-                                       if (ClientSideChunkHelper
-                                               .GetChunk(new Vector2Int(c.chunkPos.x,
-                                                   c.chunkPos.y - ClientSideChunk.chunkWidth))
-                                               ?.isMapDataFetchedFromServer == true)
-                                       {
-                                           ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y - ClientSideChunk.chunkWidth))?.BuildChunk();
-                                       }
+                                        if (!isChunkFirstLoaded)
+                                        {
+                                            if (ClientSideChunkHelper
+                                                    .GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth,
+                                                        c.chunkPos.y))?.isMapDataFetchedFromServer == true)
+                                            {
+                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunkAsync();
+                                            }
 
 
 
-                                       if (ClientSideChunkHelper
-                                               .GetChunk(new Vector2Int(c.chunkPos.x,
-                                                   c.chunkPos.y + ClientSideChunk.chunkWidth))
-                                               ?.isMapDataFetchedFromServer == true)
-                                       {
-                                           ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y + ClientSideChunk.chunkWidth))?.BuildChunk();
-                                       }
-                                    gamePlayer.isGetBlockNeeded=true;
+
+                                            if (ClientSideChunkHelper
+                                                    .GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth,
+                                                        c.chunkPos.y))?.isMapDataFetchedFromServer == true)
+                                            {
+                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunkAsync();
+                                            }
+
+
+                                            if (ClientSideChunkHelper
+                                                    .GetChunk(new Vector2Int(c.chunkPos.x,
+                                                        c.chunkPos.y - ClientSideChunk.chunkWidth))
+                                                    ?.isMapDataFetchedFromServer == true)
+                                            {
+                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y - ClientSideChunk.chunkWidth))?.BuildChunkAsync();
+                                            }
+
+
+
+                                            if (ClientSideChunkHelper
+                                                    .GetChunk(new Vector2Int(c.chunkPos.x,
+                                                        c.chunkPos.y + ClientSideChunk.chunkWidth))
+                                                    ?.isMapDataFetchedFromServer == true)
+                                            {
+                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y + ClientSideChunk.chunkWidth))?.BuildChunkAsync();
+                                            }
+                                            gamePlayer.isGetBlockNeeded=true;
+                                        }
+                                 
+
+
                                     }
 
                                  
                                  
                                   
-                                }
+                                } });
+                               
                                 break;
                             case MessageCommandType.UserLoginReturn:
                                 string result= MessagePackSerializer.Deserialize<string>(item.messageData);
@@ -176,7 +201,15 @@ namespace monogameMinecraftNetworking.Client
                                     _allUsersUpdatedAction();
                                 }
                                 break;
-                        }
+
+                            case MessageCommandType.EntityDataBroadcast:
+                                allEntityDatas = EntityDataSerializingUtility.DeserializeEntityDatas(item.messageData);
+                                if (_allEntitiesUpdatedAction != null)
+                                {
+                                    _allEntitiesUpdatedAction();
+                                }
+                                break;
+                    }
                     }
                 
                

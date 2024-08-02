@@ -61,7 +61,7 @@ namespace monogameMinecraftShared.Rendering
             this.hdrCubemapRenderer = hdrCubemapRenderer;
         }
 
-        public void Draw(GamePlayer player)
+        public void Draw(IGamePlayer player)
         {
 
             SetCameraFrustum(player.cam, blockDeferredEffect);
@@ -144,7 +144,7 @@ namespace monogameMinecraftShared.Rendering
 
         }
 
-        public void DiffuseBlend(GamePlayer player)
+        public void DiffuseBlend(IGamePlayer player)
         {
             SetCameraFrustum(player.cam, blockDeferredEffect);
             blockDeferredEffect.CurrentTechnique = blockDeferredEffect.Techniques["DeferredBlockEffectDiffuse"];
@@ -159,7 +159,7 @@ namespace monogameMinecraftShared.Rendering
             blockDeferredEffect.Parameters["TextureIndirectDiffuse"]?.SetValue(ssidRenderer.renderTargetSSID);
             RenderQuad(device, renderTargetLumAllDiffuse, blockDeferredEffect);
         }
-        public void FinalBlend(SpriteBatch sb, VolumetricLightRenderer vlr, GraphicsDevice device, GamePlayer player)
+        public void FinalBlend(SpriteBatch sb, VolumetricLightRenderer vlr, GraphicsDevice device, IGamePlayer player)
         {
             skyboxRenderer.Draw(finalImage, true);
             SetCameraFrustum(player.cam, deferredBlendEffect);

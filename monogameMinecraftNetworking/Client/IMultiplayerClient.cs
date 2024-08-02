@@ -10,6 +10,8 @@ using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftShared.Updateables;
+using EntityData = monogameMinecraftNetworking.Data.EntityData;
+
 
 namespace monogameMinecraftNetworking.Client
 {
@@ -18,6 +20,8 @@ namespace monogameMinecraftNetworking.Client
         public object todoListLock { get; }
         public ConcurrentQueue<MessageProtocol> todoList { get; }
         public List<UserData> allUserDatas { get; set; }
+
+        public List<EntityData> allEntityDatas { get; set; }
         public UserData playerData { get; }
         public Socket socket { get; }
         public bool isLoggedIn { get; }
@@ -37,7 +41,11 @@ namespace monogameMinecraftNetworking.Client
 
         public delegate void OnAllUsersDataUpdated();
 
+        public delegate void OnAllEntitiesDataUpdated();
         public OnAllUsersDataUpdated allUsersUpdatedAction { get; set; }
+
+        public OnAllEntitiesDataUpdated allEntitiesUpdatedAction { get; set; }
+      
         //   public void MessageParsingThread(Socket s);
     }
 }

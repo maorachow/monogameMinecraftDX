@@ -109,11 +109,11 @@ namespace monogameMinecraftNetworking.Protocol
                                                                              //       mainForm.LogOnTextbox("Message:"+mp.Command);
                             dynamicReceiveBuffer = mp.moreData;  // 将拆包后得出多余的字节付给缓存变量,以待下一次循环处理数据时使用,若下一次循环缓存数据长度不能构成一个完整的数据包则不进入循环跳到外层循环继续接收数据并将本次得出的多余数据与之合并重新拆包,依次循环。
                             headInfo = MessageProtocol.GetHeadInfo(dynamicReceiveBuffer);  // 从缓存中解读出下一次数据所需要的协议头信息,已准备下一次拆包循环,如果数据长度不能构成协议头所需的长度,拆包结果为0,下一次循环则不能成功进入,跳到外层循环继续接收数据合并缓存形成一个完整的数据包
-                            Debug.WriteLine((MessageCommandType)mp.command);
+                         //   Debug.WriteLine((MessageCommandType)mp.command);
                             //   parsedMessages.Enqueue(new MessageProtocol(mp.command,(byte[])mp.messageData.Clone()));
                        //     lock (server.todoListLock)
                      //    {
-                           
+                           //带宽过大
                              if (server.serverTodoLists.Count > 0)
                              {
                                Utility.NetworkingUtility.EnqueueTodoList(server.serverTodoLists, new ValueTuple<RemoteClient, MessageProtocol>(remoteClient, new MessageProtocol(mp.command, (byte[])mp.messageData.Clone())));
@@ -237,10 +237,10 @@ namespace monogameMinecraftNetworking.Protocol
                             dynamicReceiveBuffer = mp.moreData;  // 将拆包后得出多余的字节付给缓存变量,以待下一次循环处理数据时使用,若下一次循环缓存数据长度不能构成一个完整的数据包则不进入循环跳到外层循环继续接收数据并将本次得出的多余数据与之合并重新拆包,依次循环。
                             headInfo = MessageProtocol.GetHeadInfo(dynamicReceiveBuffer);  // 从缓存中解读出下一次数据所需要的协议头信息,已准备下一次拆包循环,如果数据长度不能构成协议头所需的长度,拆包结果为0,下一次循环则不能成功进入,跳到外层循环继续接收数据合并缓存形成一个完整的数据包
 
-                            if ((MessageCommandType)mp.command == MessageCommandType.WorldData)
+                      /*      if ((MessageCommandType)mp.command == MessageCommandType.WorldData)
                             {
                                 Debug.WriteLine("world data");
-                            }
+                            }*/
                            // Debug.WriteLine((MessageCommandType)mp.command);
 
                             //   parsedMessages.Enqueue(new MessageProtocol(mp.command,(byte[])mp.messageData.Clone()));

@@ -29,7 +29,7 @@ namespace monogameMinecraftShared
     {
 
         public string optionalPlatformDataPath;
-        public GamePlayer gamePlayer { get; set; }
+        public GamePlayerReference gamePlayerR { get; set; }
 
         public static Vector3 gameposition;
 
@@ -45,7 +45,7 @@ namespace monogameMinecraftShared
         public IRenderPipelineManager renderPipelineManager;
         public virtual void UpdateStaticPlayerPos()
         {
-            gameposition = gamePlayer.position;
+            gameposition = gamePlayerR.gamePlayer.position;
         }
         public virtual void OpenInventory(object obj)
         {

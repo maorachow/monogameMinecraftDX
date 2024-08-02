@@ -11,12 +11,12 @@ namespace monogameMinecraftShared.Utility
     public class PointLightUpdater
     {
 
-        public GamePlayer player;
+        public IGamePlayer player;
         public List<Vector3> lights;
         public List<Vector3> lightsPrev;
         public List<Vector3> lightsDestroying;
 
-        public PointLightUpdater(GamePlayer player)
+        public PointLightUpdater(IGamePlayer player)
         {
 
             this.player = player;

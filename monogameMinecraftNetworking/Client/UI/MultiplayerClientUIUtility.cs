@@ -147,7 +147,7 @@ namespace monogameMinecraftNetworking.Client.UI
 
 
                 new UIButton(new Vector2(0.3f, 0.1f), 0.4f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, null,"Enter IP Address, Port And Player Name",null,0.6f,false,false),
-                new InputField(new Vector2(0.3f, 0.25f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (field =>game.inputIPAddress= field.text) ,"",1,10,false),
+                new InputField(new Vector2(0.3f, 0.25f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (field =>game.inputIPAddress= field.text) ,"",1,16,false),
 
                 new InputField(new Vector2(0.3f, 0.4f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (field =>game.inputPort=field.TryParseInt() ) ,"",1,10,false),
                 new InputField(new Vector2(0.3f, 0.55f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (field =>game.inputUserName=field.text ) ,"",1,10,false),
@@ -238,7 +238,7 @@ namespace monogameMinecraftNetworking.Client.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayerR,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
                     leftDownPanel,
                     new UIButton(new Vector2(0.333f, 0.0f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchup"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.Z = 1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchuppressed"]),
 
@@ -292,7 +292,7 @@ namespace monogameMinecraftNetworking.Client.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayerR,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
 
                 };
             }
@@ -436,7 +436,7 @@ namespace monogameMinecraftNetworking.Client.UI
                 foreach (var element in Chunk.blockInfosNew)
                 {
                     UIElement.inventoryUIs.Add(new UIButton(new Vector2(elementCount % 10 * 0.05f + 0.25f, elementCount / 10 * 0.05f + 0.25f), 0.05f, 0.05f, UIElement.UITextures.ContainsKey("blocktexture" + element.Key) && UIElement.UITextures["blocktexture" + element.Key] != null ? UIElement.UITextures["blocktexture" + element.Key] : UIElement.UITextures["blocktexture-1"],
-                        new Vector2(0f, 0f), null, game1._spriteBatch, game1.Window, (ub) => game1.gamePlayer.inventoryData[game1.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
+                        new Vector2(0f, 0f), null, game1._spriteBatch, game1.Window, (ub) => game1.gamePlayerR.gamePlayer.inventoryData[game1.gamePlayerR.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
                     ));
                     elementCount++;
                 }

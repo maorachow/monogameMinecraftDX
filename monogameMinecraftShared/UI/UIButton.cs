@@ -239,17 +239,24 @@ namespace monogameMinecraftShared.UI
         {
           //  Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
             Rectangle alignedRect;
+            bool originAligned = false;
             if (optionalBasePanel == null)
             {
                 alignedRect = UIElement.ScreenRect;
+                originAligned= true;
             }
             else
             {
                 optionalBasePanel.OnResize();
                 alignedRect = optionalBasePanel.screenSpaceRect;
+                originAligned = false;  
             }
-        
+            
             Vector2 transformedP00 = new Vector2(element00Pos.X * alignedRect.Width+alignedRect.X, element00Pos.Y * alignedRect.Height + alignedRect.Y);
+            if (originAligned == true)
+            {
+                transformedP00 = new Vector2(element00Pos.X * alignedRect.Width, element00Pos.Y * alignedRect.Height);
+            }
             float width = (element10Pos - element00Pos).X * alignedRect.Width;
             float height = (element01Pos - element00Pos).Y * alignedRect.Height;
             if (keepsAspectRatio)
@@ -275,7 +282,11 @@ namespace monogameMinecraftShared.UI
                 //       element11Pos = new Vector2(element00Pos.X + initalWidthHeight.X, element00Pos.Y + initalWidthHeight.Y+(initalWidthHeight.X / initalWidthHeight.Y));
                 //        element01Pos = new Vector2(element00Pos.X, element00Pos.Y  +initalWidthHeight.Y*(initalWidthHeight.X/ initalWidthHeight.Y));
             }
-            ButtonRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
+
+           
+                ButtonRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
+           
+           
           //  Debug.WriteLine(ButtonRect.X + " " + ButtonRect.Y + " " + ButtonRect.Width + " " + ButtonRect.Height);
 
             //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));

@@ -10,6 +10,7 @@ namespace monogameMinecraftNetworking.Data
     [MessagePackObject]
     public class EntityData
     {
+       
         [Key(0)]
         public int typeid;
         [Key(1)]
@@ -28,10 +29,11 @@ namespace monogameMinecraftNetworking.Data
         public string entityID;
         [Key(8)]
         public float entityHealth;
-        [Key(9)]
-        public bool isEntityHurt;
 
-        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth, bool isEntityHurt)
+        [Key(9)]
+        public int entityInWorldID;
+
+        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth, int entityInWorldID)
         {
             this.typeid = typeid;
             this.posX = posX;
@@ -42,7 +44,7 @@ namespace monogameMinecraftNetworking.Data
             this.rotZ = rotZ;
             this.entityID = entityID;
             this.entityHealth = entityHealth;
-            this.isEntityHurt = isEntityHurt;
+            this.entityInWorldID = entityInWorldID;
         }
     }
 }

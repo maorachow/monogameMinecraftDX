@@ -26,6 +26,7 @@ namespace monogameMinecraftShared.Rendering
         public EntityRenderer entityRenderer;
         public ParticleRenderer particleRenderer;
         public IGBufferDrawableRenderer optionalRenderer;
+        public IGBufferDrawableRenderer optionalRenderer1;
         public Effect gBufferEffect;
         public Effect gBufferEntityEffect;
         public bool chunksOnly = false;
@@ -74,7 +75,7 @@ namespace monogameMinecraftShared.Rendering
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
         }
         public IndexBuffer quadIndexBuffer;
-        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, IGamePlayer player, ChunkRenderer cr, EntityRenderer er, ParticleRenderer pr, bool chunksOnly=false,IGBufferDrawableRenderer optionalRenderer=null)
+        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, IGamePlayer player, ChunkRenderer cr, EntityRenderer er, ParticleRenderer pr, bool chunksOnly=false,IGBufferDrawableRenderer optionalRenderer=null, IGBufferDrawableRenderer optionalRenderer1 = null)
         {
             graphicsDevice = device;
             this.gBufferEffect = gBufferEffect;
@@ -104,6 +105,7 @@ namespace monogameMinecraftShared.Rendering
             quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), 4, BufferUsage.None);
             quadVertexBuffer.SetData(quadVertices);
             this.chunksOnly = chunksOnly;
+            this.optionalRenderer1=optionalRenderer1;
         }
         public void Resize(int width, int height, GraphicsDevice device)
         {
@@ -133,6 +135,10 @@ namespace monogameMinecraftShared.Rendering
             if (optionalRenderer != null)
             {
                 optionalRenderer.DrawGBuffer();
+            }
+            if (optionalRenderer1 != null)
+            {
+                optionalRenderer1.DrawGBuffer();
             }
             graphicsDevice.SetRenderTargets(null);
             graphicsDevice.Clear(Color.CornflowerBlue);

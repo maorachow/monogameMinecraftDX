@@ -19,6 +19,7 @@ namespace monogameMinecraftNetworking.Protocol
         WorldGenParamsRequest= (byte)139,
         WorldGenParamsData = (byte)140,
         BlockModifyData=(byte)141,
-        ChunkUpdateData=(byte)142
+        ChunkUpdateData=(byte)142,
+        EntityDataBroadcast=(byte)143
     }
 }

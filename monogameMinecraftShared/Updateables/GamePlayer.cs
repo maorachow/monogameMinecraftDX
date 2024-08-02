@@ -41,7 +41,7 @@ namespace monogameMinecraftShared.Updateables
         public bool isChunkNeededUpdate = false;
         public Chunk curChunk;
         public int playerInWorldID;
-        public GraphicsDevice graphicsDevice;
+       
         public static int ReadPlayerData(GamePlayer player, Game game, bool ExludePlayerInWorldIDData = false)
         {
 

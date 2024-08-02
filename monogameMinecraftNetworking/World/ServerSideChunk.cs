@@ -15,7 +15,8 @@ namespace monogameMinecraftNetworking.World
     public class ServerSideChunk : IDisposable
     {
 
-        public BlockData[,,] map;
+        public BlockData[,,] map;//16*256*16*3=?
+        //65536*3=
 
         public Vector2Int chunkPos = new Vector2Int(0, 0);
 

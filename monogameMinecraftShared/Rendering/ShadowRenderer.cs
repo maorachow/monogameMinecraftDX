@@ -48,7 +48,7 @@ namespace monogameMinecraftShared.Rendering
             shadowMapBinding[1] = new RenderTargetBinding(shadowMapTargetFar);
             gameTimeManager = gtr;
         }
-        public void UpdateLightMatrices(GamePlayer player)
+        public void UpdateLightMatrices(IGamePlayer player)
         {
             Vector3 lightDir = gameTimeManager.sunDir;
             Vector3 lightDirFar = gameTimeManager.sunDir * 2f;
@@ -93,7 +93,7 @@ namespace monogameMinecraftShared.Rendering
             //     Debug.WriteLine(frustumCorners[7]);
             return frustumCorners;
         }
-        Matrix GetLightSpaceMatrix(float nearPlane, float farPlane, GamePlayer player, Vector3 lightDir)
+        Matrix GetLightSpaceMatrix(float nearPlane, float farPlane, IGamePlayer player, Vector3 lightDir)
         {
             Matrix proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90f), player.cam.aspectRatio, nearPlane, farPlane); ;
             var corners = GetFrustumCornersWorldSpaceBoundingFrustum(proj, player.cam.viewMatrix);
@@ -151,7 +151,7 @@ namespace monogameMinecraftShared.Rendering
             return lightView1 * lightProjection1;
         }
         public bool isRenderingFarShadow = true;
-        public void RenderShadow(GamePlayer player)
+        public void RenderShadow(IGamePlayer player)
         {
             //   UpdateLightMatrices(player);
             Vector4 world0 = new Vector4(player.position.X, player.position.Y, player.position.Z, 1);
@@ -168,7 +168,7 @@ namespace monogameMinecraftShared.Rendering
                 shadowBias = MathF.Abs(transformedWorld0.Z - transformedWorld1.Z);
             }
             UpdateLightMatrices(player);
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayer.cam.viewMatrix * game.gamePlayer.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayerR.gamePlayer.cam.viewMatrix * game.gamePlayerR.gamePlayer.cam.projectionMatrix);
             if (GameOptions.renderShadow)
             {
                 device.SetRenderTarget(shadowMapTarget);

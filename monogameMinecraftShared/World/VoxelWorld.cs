@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Asset;
@@ -98,117 +99,142 @@ namespace monogameMinecraftShared.World
 
         private PriorityQueue<Vector2Int, int> tempChunkUpdatingQueue=new PriorityQueue<Vector2Int, int>();
 
-        public void UpdateWorldThread(GamePlayer player, MinecraftGameBase game)
+        public void UpdateWorldThread(IGamePlayer player, MinecraftGameBase game)
         {
             BoundingFrustum frustum;
-            while (true)
+            try
             {
-                Thread.Sleep(500);
-                    lock (updateWorldThreadLock)
+                while (true)
                 {
-                    lock (deleteChunkThreadLock)
-                    {
-                 //       Debug.WriteLine("update world thread running");
-                        if (VoxelWorld.currentWorld.worldID != worldID)
-                        {
-                            Debug.WriteLine("world changed");
-                            return;
-                        }
-                       
-                        //     Debug.WriteLine("update world ID:" + worldID);
-                        if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
-                        {
-                            Debug.WriteLine("quit updateworld thread");
-                            return;
-                        }
-
-
-                        if (chunks == null)
-                        {
-                            return;
-                        }
-                            //         Debug.WriteLine("building chunks count:"+buildingChunksCount);
-                            tempChunkUpdatingQueue.Clear();
-                        if (player.isChunkNeededUpdate == true)
-                        {
-                            //    Debug.WriteLine("update");
-
-                            frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
-                            for (float x = player.position.X - GameOptions.renderDistance; x < player.position.X + GameOptions.renderDistance; x += Chunk.chunkWidth)
-                            {
-                                for (float z = player.position.Z - GameOptions.renderDistance; z < player.position.Z + GameOptions.renderDistance; z += Chunk.chunkWidth)
-                                {
-                                    //   Thread.Sleep(1);
-                                    Vector2Int chunkPos = ChunkHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
-
-                                    if (GetChunk(chunkPos) == null && !chunks.ContainsKey(chunkPos))
-                                    {
-                                        BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
-                                        if (frustum.Intersects(chunkBoundingBox))
-                                        {
-                                                //         Chunk c = new Chunk(chunkPos, game.GraphicsDevice, this);
-                                                tempChunkUpdatingQueue.Enqueue(chunkPos,Math.Abs(chunkPos.x-(int)player.position.X)+Math.Abs(chunkPos.y-(int)player.position.Z));
-                                            // goto endUpdateWorld;
-                                            //    break;
-                                        }
-                                        else continue;
-
-
-                                    }
-                                    else continue;
-
-                                }
-                            }
-
-                            while (tempChunkUpdatingQueue.Count > 0)
-                            {
-                                Chunk c = new Chunk(tempChunkUpdatingQueue.Dequeue(), game.GraphicsDevice, this);
-                            }
-
-                            // endUpdateWorld:;
-
-                            player.isChunkNeededUpdate = false;
-
-                        }
-                    }
-
-                }
-
-            }
-        }
-
-
-
-        public void TryDeleteChunksThread(GamePlayer player, MinecraftGameBase game)
-        {
-            while (true)
-            {
-                Thread.Sleep(500);
-                lock (deleteChunkThreadLock)
-                {
+                    Thread.Sleep(500);
+                    Debug.WriteLine("update world thread:" + isThreadsStopping);
                     if (VoxelWorld.currentWorld.worldID != worldID)
                     {
-
-                        Debug.WriteLine("world changed delchunk thread");
+                        Debug.WriteLine("world changed");
                         return;
                     }
-                    //  Debug.WriteLine("delete chunks ID:" + worldID);
-                 
-                    if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
+                       
+                    //     Debug.WriteLine("update world ID:" + worldID);
+                    if (isThreadsStopping == true)
                     {
-                        Debug.WriteLine("quit delchunk thread");
+                        Debug.WriteLine("quit updateworld thread");
                         return;
                     }
 
-                    if (ChunkRenderer.isBusy == true)
-                    {
-                        continue;
-                    }
+
                     if (chunks == null)
                     {
                         return;
                     }
-                    foreach (Chunk c in chunks.Values)
+
+                    lock (updateWorldThreadLock)
+                    {
+                        lock (deleteChunkThreadLock)
+                        {
+                            //       Debug.WriteLine("update world thread running");
+                        
+                            //         Debug.WriteLine("building chunks count:"+buildingChunksCount);
+                            tempChunkUpdatingQueue.Clear();
+                             
+                            if (player is GamePlayer player1&& player1.isChunkNeededUpdate == true)
+                            {
+                                //    Debug.WriteLine("update");
+
+                                frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
+                                for (float x = player.position.X - GameOptions.renderDistance; x < player.position.X + GameOptions.renderDistance; x += Chunk.chunkWidth)
+                                {
+                                    for (float z = player.position.Z - GameOptions.renderDistance; z < player.position.Z + GameOptions.renderDistance; z += Chunk.chunkWidth)
+                                    {
+                                        //   Thread.Sleep(1);
+                                        Vector2Int chunkPos = ChunkHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
+
+                                        if (GetChunk(chunkPos) == null && !chunks.ContainsKey(chunkPos))
+                                        {
+                                            BoundingBox chunkBoundingBox = new BoundingBox(new Vector3(chunkPos.x, 0, chunkPos.y), new Vector3(chunkPos.x + Chunk.chunkWidth, Chunk.chunkHeight, chunkPos.y + Chunk.chunkWidth));
+                                            if (frustum.Intersects(chunkBoundingBox))
+                                            {
+                                                //         Chunk c = new Chunk(chunkPos, game.GraphicsDevice, this);
+                                                tempChunkUpdatingQueue.Enqueue(chunkPos,Math.Abs(chunkPos.x-(int)player.position.X)+Math.Abs(chunkPos.y-(int)player.position.Z));
+                                                // goto endUpdateWorld;
+                                                //    break;
+                                            }
+                                            else continue;
+
+
+                                        }
+                                        else continue;
+
+                                    }
+                                }
+
+                                while (tempChunkUpdatingQueue.Count > 0)
+                                {
+                                    Chunk c = new Chunk(tempChunkUpdatingQueue.Dequeue(), game.GraphicsDevice, this);
+                                }
+
+                                // endUpdateWorld:;
+
+                                player1.isChunkNeededUpdate = false;
+
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                    
+                        }
+       
+
+                    }
+                 
+                
+
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("thread aborted update world thread");
+                return;
+            }
+           
+        }
+
+
+
+        public void TryDeleteChunksThread(IGamePlayer player, MinecraftGameBase game)
+        {
+            try
+            {
+            while (true)
+            {
+                Thread.Sleep(500); 
+                Debug.WriteLine(isThreadsStopping);
+                if (VoxelWorld.currentWorld.worldID != worldID)
+                {
+
+                    Debug.WriteLine("world changed delchunk thread");
+                    return;
+                }
+                //  Debug.WriteLine("delete chunks ID:" + worldID);
+                 
+                if (game.status == GameStatus.Quiting || game.status == GameStatus.Menu || isThreadsStopping == true)
+                {
+                    Debug.WriteLine("quit delchunk thread");
+                    return;
+                }
+
+                if (ChunkRenderer.isBusy == true)
+                {
+                    continue;
+                }
+                if (chunks == null)
+                {
+                    return;
+                }
+
+                lock ((deleteChunkThreadLock))
+                {
+                foreach (Chunk c in chunks.Values)
                     {
 
                         if ((MathF.Abs(c.chunkPos.x - player.position.X) > (GameOptions.renderDistance + Chunk.chunkWidth) || MathF.Abs(c.chunkPos.y - player.position.Z) > (GameOptions.renderDistance + Chunk.chunkWidth))
@@ -262,10 +288,20 @@ namespace monogameMinecraftShared.World
 
                     }
                 }
+                  
+                   
+                
 
 
 
             }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("thread aborted");
+                return;
+            }
+          
         }
 
         // = AppDomain.CurrentDomain.BaseDirectory
@@ -335,11 +371,18 @@ namespace monogameMinecraftShared.World
             int playerInWorldID = 0;
             if (isWorldChanged == true)
             {
-                playerInWorldID = GamePlayer.ReadPlayerData(game.gamePlayer, game, true);
+                if (game.gamePlayerR.gamePlayer is GamePlayer player1)
+                {
+                    playerInWorldID = GamePlayer.ReadPlayerData(player1, game, true);
+                }
+              
             }
             else
             {
-                playerInWorldID = GamePlayer.ReadPlayerData(game.gamePlayer, game);
+                if (game.gamePlayerR.gamePlayer is GamePlayer player1)
+                {
+                    playerInWorldID = GamePlayer.ReadPlayerData(player1, game);
+                }
 
                 if (playerInWorldID != worldID)
                 {
@@ -369,13 +412,18 @@ namespace monogameMinecraftShared.World
             //    tryUpdateChunksThread = Task.Run(() => VoxelWorld.currentWorld.TryUpdateChunkThread());
 
             isThreadsStopping = false;
-            updateWorldThread = new Thread(() => UpdateWorldThread(game.gamePlayer, game));
+            updateWorldThread = new Thread(() => UpdateWorldThread(game.gamePlayerR.gamePlayer, game));
+           
             updateWorldThread.IsBackground = true;
             updateWorldThread.Start();
-            tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(game.gamePlayer, game));
+            tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(game.gamePlayerR.gamePlayer, game));
             tryRemoveChunksThread.IsBackground = true;
             tryRemoveChunksThread.Start();
-            game.gamePlayer.curChunk = null;
+            if (game.gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
+            {
+                gamePlayer1.curChunk = null;
+            }
+        
             worldUpdater.Init(game);
             if (actionOnSwitchedWorld != null)
             {
@@ -417,8 +465,11 @@ namespace monogameMinecraftShared.World
         public void StopAllThreads()
         {
             isThreadsStopping = true;
-            tryRemoveChunksThread.Join();
-            updateWorldThread.Join();
+
+         
+          //  updateWorldThread.Abort();
+          //  tryRemoveChunksThread.Abort();
+        
             worldUpdater.StopAllThreads();
         }
 
@@ -493,18 +544,23 @@ namespace monogameMinecraftShared.World
         {
 
             // PlayerMove player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMove>();
-            GamePlayer.SavePlayerData(game.gamePlayer, false);
+            if (game.gamePlayerR.gamePlayer is GamePlayer player1)
+            {
+                GamePlayer.SavePlayerData(player1, false);
+            }
+           
 
             EntityManager.SaveWorldEntityData();
 
-
+            isThreadsStopping = true;
 
             StopAllThreads();
+            Debug.WriteLine("main thread is threads stopping:"+isThreadsStopping);
             SaveWorldData();
             structureOperationsManager.SaveAllStructures();
-            DestroyAllChunks();
-            //     chunks.Clear();
-            //    isGoingToQuitWorld = true;
+        Task.Run(() => DestroyAllChunks()) ;
+          //       chunks.Clear();
+         //      isGoingToQuitWorld = true;
 
         }
         public static void SwitchToWorld(int worldIndex, MinecraftGameBase game)

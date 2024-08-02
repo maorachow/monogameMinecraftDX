@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using monogameMinecraftNetworking.Client.UI;
+using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftShared.Asset;
 using monogameMinecraftShared.Rendering.Particle;
 using monogameMinecraftShared.Rendering;
@@ -208,7 +209,7 @@ namespace monogameMinecraftNetworking.Client.Asset
                 cr.SetTexture(monogameMinecraftShared.Asset.BlockResourcesManager.atlasNormal, null, monogameMinecraftShared.Asset.BlockResourcesManager.atlas, monogameMinecraftShared.Asset.BlockResourcesManager.atlasMER);
             }
 
-            ChunkHelper.RebuildAllChunks();
+           // ClientSideChunkHelper.RebuildAllChunks();
 
             monogameMinecraftShared.Asset.BlockResourcesManager.LoadParticleResources(monogameMinecraftShared.Asset.BlockResourcesManager.contentManager, device, pr);
         }

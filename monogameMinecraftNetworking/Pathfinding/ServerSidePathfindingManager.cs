@@ -1,29 +1,27 @@
-﻿using System;
+﻿using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Pathfinding;
+using monogameMinecraftShared.Updateables;
+using monogameMinecraftShared.World;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
- 
-using monogameMinecraftShared.Core;
-using monogameMinecraftShared.Rendering;
-using monogameMinecraftShared.Updateables;
-using monogameMinecraftShared.World;
-using ThreadState = System.Diagnostics.ThreadState;
+using monogameMinecraftNetworking.Updateables;
+using monogameMinecraftNetworking.World;
 
-namespace monogameMinecraftShared.Pathfinding
+namespace monogameMinecraftNetworking.Pathfinding
 {
-    public class PathfindingManager
+    public class ServerSidePathfindingManager
     {
         public WalkablePath curDebuggingPath;
         public bool drawDebugLines = true;
-        public PathfindingManager()
+        public ServerSidePathfindingManager()
         {
-            entityPathfindingQueue = new ConcurrentDictionary<EntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)>();
+            entityPathfindingQueue = new ConcurrentDictionary<ServerSideEntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)>();
         }
 
         public void Initialize()
@@ -33,7 +31,7 @@ namespace monogameMinecraftShared.Pathfinding
             findEntityPathThread.IsBackground = true;
             findEntityPathThread.Start();
         }
-        public WalkablePath GetFlatTilemapPath(Vector3Int start, Vector3Int target, out bool isPathValid)
+      /*  public WalkablePath GetFlatTilemapPath(Vector3Int start, Vector3Int target, out bool isPathValid)
         {
             int distance = Math.Max(Math.Abs(start.x - target.x), Math.Abs(start.z - target.z));
             if (distance > 1 * Chunk.chunkWidth)
@@ -44,15 +42,15 @@ namespace monogameMinecraftShared.Pathfinding
 
             Vector3Int heightMapOrigin = new Vector3Int(Math.Min(start.x, target.x), 0, Math.Min(start.z, target.z)) - new Vector3Int(8, 0, 8);
             Vector3Int heightMapMax = new Vector3Int(Math.Max(start.x, target.x), 0, Math.Max(start.z, target.z)) + new Vector3Int(8, 0, 8);
-            int[,] heightMap = ChunkHelper.GetAreaHeightMap(heightMapOrigin, heightMapMax.x - heightMapOrigin.x,
+            int[,] heightMap = ServerSideChunkHelper.GetAreaHeightMap(heightMapOrigin, heightMapMax.x - heightMapOrigin.x,
                 heightMapMax.z - heightMapOrigin.z);
             WalkablePath path = FlatTilemapPathfindingUtility.FindWorldSpacePathByChunkHeightMap(heightMap, heightMapOrigin, start, target,
                out var isFoundPathValid);
             isPathValid = isFoundPathValid;
             return path;
-        }
+        }*/
 
-        public WalkablePath GetThreeDimensionalMapPath(Vector3Int start, Vector3Int target, out bool isPathValid)
+        public WalkablePath GetThreeDimensionalMapPath(Vector3Int start, Vector3Int target, out bool isPathValid,int worldID)
         {
             int distance = Math.Max(Math.Abs(start.x - target.x), Math.Max(Math.Abs(start.z - target.z), Math.Abs(start.y - target.y)));
             if (distance > 1 * Chunk.chunkWidth)
@@ -63,8 +61,8 @@ namespace monogameMinecraftShared.Pathfinding
 
             Vector3Int mapOrigin = new Vector3Int(Math.Min(start.x, target.x), Math.Min(start.y, target.y), Math.Min(start.z, target.z)) - new Vector3Int(8, 8, 8);
             Vector3Int mapMax = new Vector3Int(Math.Max(start.x, target.x), Math.Max(start.y, target.y), Math.Max(start.z, target.z)) + new Vector3Int(8, 8, 8);
-            BlockData[,,] map = ChunkHelper.GetBlocks(mapOrigin, mapMax.x - mapOrigin.x,
-                 mapMax.y - mapOrigin.y, mapMax.z - mapOrigin.z);
+            BlockData[,,] map = ServerSideChunkHelper.GetBlocks(mapOrigin, mapMax.x - mapOrigin.x,
+                 mapMax.y - mapOrigin.y, mapMax.z - mapOrigin.z, worldID);
             WalkablePath path = ThreeDimensionalMapPathfindingUtility.FindWorldSpacePathByBlockData(map, mapOrigin, start, target,
                 out var isFoundPathValid);
             isPathValid = isFoundPathValid;
@@ -73,7 +71,7 @@ namespace monogameMinecraftShared.Pathfinding
             return path;
         }
 
-        public ConcurrentDictionary<EntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)> entityPathfindingQueue;
+        public ConcurrentDictionary<ServerSideEntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)> entityPathfindingQueue;
         public bool isThreadQuitting = false;
 
         public void QuitThread()
@@ -88,29 +86,30 @@ namespace monogameMinecraftShared.Pathfinding
         {
             while (true)
             {
-             
+
                 if (isThreadQuitting == true)
                 {
                     return;
                 }
-                   Thread.Sleep(100);
+                Thread.Sleep(10);
                 if (entityPathfindingQueue.Count > 0)
                 {
 
-                    KeyValuePair<EntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)> item = entityPathfindingQueue.First();
+                    KeyValuePair<ServerSideEntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)> item = entityPathfindingQueue.First();
                     bool isPathValid = false;
-                    GetThreeDimensionalMapPath(item.Value.pathStart, item.Value.pathTarget, out isPathValid, ref item.Key.entityPath);
+                    GetThreeDimensionalMapPath(item.Value.pathStart, item.Value.pathTarget, out isPathValid, ref item.Key.entityPath,item.Key.curWorldID);
+           //         Debug.WriteLine("find path");
                     item.Key.isPathValid = isPathValid;
                     entityPathfindingQueue.Remove(item.Key, out _);
                 }
             }
         }
 
-        public void GetThreeDimensionalMapPathAsync(Vector3Int start, Vector3Int target, EntityBeh entity)
+        public void GetThreeDimensionalMapPathAsync(Vector3Int start, Vector3Int target, ServerSideEntityBeh entity)
         {
             entityPathfindingQueue.TryAdd(entity, (start, target));
         }
-        public void GetThreeDimensionalMapPath(Vector3Int start, Vector3Int target, out bool isPathValid, ref WalkablePath result)
+        public void GetThreeDimensionalMapPath(Vector3Int start, Vector3Int target, out bool isPathValid, ref WalkablePath result, int worldID)
         {
             //    Debug.WriteLine("thread id:"+Thread.CurrentThread.ManagedThreadId);
             int distance = Math.Max(Math.Abs(start.x - target.x), Math.Max(Math.Abs(start.z - target.z), Math.Abs(start.y - target.y)));
@@ -122,8 +121,8 @@ namespace monogameMinecraftShared.Pathfinding
 
             Vector3Int mapOrigin = new Vector3Int(Math.Min(start.x, target.x), Math.Min(start.y, target.y), Math.Min(start.z, target.z)) - new Vector3Int(8, 8, 8);
             Vector3Int mapMax = new Vector3Int(Math.Max(start.x, target.x), Math.Max(start.y, target.y), Math.Max(start.z, target.z)) + new Vector3Int(8, 8, 8);
-            BlockData[,,] map = ChunkHelper.GetBlocks(mapOrigin, mapMax.x - mapOrigin.x,
-                mapMax.y - mapOrigin.y, mapMax.z - mapOrigin.z);
+            BlockData[,,] map = ServerSideChunkHelper.GetBlocks(mapOrigin, mapMax.x - mapOrigin.x,
+                mapMax.y - mapOrigin.y, mapMax.z - mapOrigin.z,worldID);
 
 
 
@@ -137,24 +136,6 @@ namespace monogameMinecraftShared.Pathfinding
             //    VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureOrigin = mapOrigin;
             //    VoxelWorld.currentWorld.structureOperationsManager.curSaveStructureSize =mapMax- mapOrigin;
             return;
-        }
-        public void DrawDebuggingPath(Vector3 origin, GamePlayer player, IRenderPipelineManager rpm)
-        {
-            if (!drawDebugLines)
-            {
-                return;
-            }
-            //    rpm.walkablePathVisualizationRenderer.VisualizeWalkablePath(curDebuggingPath, player.cam.viewMatrix, player.cam.projectionMatrix, origin);
-            foreach (var entity in EntityManager.worldEntities)
-            {
-                if ((ZombieEntityBeh)entity != null)
-                {
-                    rpm.walkablePathVisualizationRenderer.VisualizeWalkablePath(((ZombieEntityBeh)entity).entityPath, player.cam.viewMatrix, player.cam.projectionMatrix, new Vector3(0, 0, 0));
-                }
-
-
-            }
-
         }
     }
 }

@@ -71,26 +71,26 @@ namespace monogameMinecraftShared.Rendering
             hdrCubemapRenderer.Render(hdrCubemapRenderer.resultCubeCollectionNight, 1);
 
             chunkRenderer = new ChunkRenderer(game, game.GraphicsDevice, effectsManager.gameEffects["blockforwardeffect"], null, game.gameTimeManager);
-            pointLightUpdater = new PointLightUpdater(game.gamePlayer);
+            pointLightUpdater = new PointLightUpdater(game.gamePlayerR.gamePlayer);
             //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
 
             BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayer,true);
+                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer,true);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
-            entityRenderer = new EntityRenderer(game.GraphicsDevice, game.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
-            skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
+            entityRenderer = new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
+            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
+            skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
             skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0;
             skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0;
-            contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayer);
+            contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayerR.gamePlayer);
             shadowRenderer = new ShadowRenderer(game, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer, game.gameTimeManager);
-            motionVectorRenderer = new MotionVectorRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, game.gamePlayer);
-            ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
+            motionVectorRenderer = new MotionVectorRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, game.gamePlayerR.gamePlayer);
+            ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(game.GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
             motionBlurRenderer = new MotionBlurRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);
             deferredShadingRenderer = new DeferredShadingRenderer(game.GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, game.gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer, null, null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer, fxaaRenderer, motionBlurRenderer, hdrCubemapRenderer);
@@ -102,8 +102,8 @@ namespace monogameMinecraftShared.Rendering
             customPostProcessors.Add(new CustomPostProcessor(game.GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess3"));
             effectsManager.LoadCustomPostProcessEffects(game.GraphicsDevice, customPostProcessors, game.Content);
             hiZBufferRenderer = new HiZBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["hizbuffereffect"], gBufferRenderer, effectsManager.gameEffects["texturecopyraweffect"]);
-            ssrRenderer = new SSRRenderer(game.GraphicsDevice, game.gamePlayer, gBufferRenderer, effectsManager.gameEffects["ssreffect"], deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer, hdrCubemapRenderer, game.gameTimeManager);
-            ssidRenderer = new SSIDRenderer(game.GraphicsDevice, effectsManager.gameEffects["ssideffect"], gBufferRenderer, game.gamePlayer, deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer, hdrCubemapRenderer, game.gameTimeManager);
+            ssrRenderer = new SSRRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, gBufferRenderer, effectsManager.gameEffects["ssreffect"], deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer, hdrCubemapRenderer, game.gameTimeManager);
+            ssidRenderer = new SSIDRenderer(game.GraphicsDevice, effectsManager.gameEffects["ssideffect"], gBufferRenderer, game.gamePlayerR.gamePlayer, deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer, hdrCubemapRenderer, game.gameTimeManager);
 
             deferredShadingRenderer.customPostProcessors = customPostProcessors;
             deferredShadingRenderer.ssidRenderer = ssidRenderer;
@@ -114,7 +114,7 @@ namespace monogameMinecraftShared.Rendering
             chunkRenderer.lightUpdater = pointLightUpdater;
             shadowRenderer.zombieModel = game.Content.Load<Model>("zombiemodelref");
 
-            volumetricLightRenderer = new VolumetricLightRenderer(game.GraphicsDevice, gBufferRenderer, game._spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"], game.gamePlayer, game.gameTimeManager);
+            volumetricLightRenderer = new VolumetricLightRenderer(game.GraphicsDevice, gBufferRenderer, game._spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"], game.gamePlayerR.gamePlayer, game.gameTimeManager);
             chunkRenderer.SSRRenderer = ssrRenderer;
             volumetricLightRenderer.entityRenderer = entityRenderer;
             boundingBoxVisualizationRenderer = new BoundingBoxVisualizationRenderer();
@@ -126,11 +126,11 @@ namespace monogameMinecraftShared.Rendering
 
         public void RenderWorld(GameTime gameTime, SpriteBatch sb)
         {
-            shadowRenderer.UpdateLightMatrices(game.gamePlayer);
+            shadowRenderer.UpdateLightMatrices(game.gamePlayerR.gamePlayer);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
-            shadowRenderer.RenderShadow(game.gamePlayer);
+            shadowRenderer.RenderShadow(game.gamePlayerR.gamePlayer);
             gBufferRenderer.Draw(VoxelWorld.currentWorld.renderingChunks);
             ssaoRenderer.Draw();
             hiZBufferRenderer.Draw();
@@ -138,12 +138,12 @@ namespace monogameMinecraftShared.Rendering
 
             volumetricLightRenderer.Draw();
             motionVectorRenderer.Draw();
-            shadowRenderer.UpdateLightMatrices(game.gamePlayer);
+            shadowRenderer.UpdateLightMatrices(game.gamePlayerR.gamePlayer);
 
-            shadowRenderer.UpdateLightMatrices(game.gamePlayer);
+            shadowRenderer.UpdateLightMatrices(game.gamePlayerR.gamePlayer);
 
             pointLightUpdater.UpdatePointLight();
-            deferredShadingRenderer.Draw(game.gamePlayer);
+            deferredShadingRenderer.Draw(game.gamePlayerR.gamePlayer);
             ssidRenderer.Draw(gameTime, sb);
 
             //    skyboxRenderer.Draw(null);
@@ -155,23 +155,27 @@ namespace monogameMinecraftShared.Rendering
             //    entityRenderer.Draw();
 
             //        chunkRenderer.RenderAllChunksTransparent(ChunkManager.chunks, gamePlayer);
-            deferredShadingRenderer.DiffuseBlend(game.gamePlayer);
+            deferredShadingRenderer.DiffuseBlend(game.gamePlayerR.gamePlayer);
             ssrRenderer.Draw(gameTime);
-            deferredShadingRenderer.FinalBlend(game._spriteBatch, volumetricLightRenderer, game.GraphicsDevice, game.gamePlayer);
+            deferredShadingRenderer.FinalBlend(game._spriteBatch, volumetricLightRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             game.GraphicsDevice.BlendState = BlendState.Additive;
 
-            if (VoxelWorld.currentWorld.structureOperationsManager != null)
+            if (game.gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
             {
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(game.gamePlayer, this);
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(game.gamePlayer, this);
-            }
+                if (VoxelWorld.currentWorld.structureOperationsManager != null)
+                {
+                    VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(gamePlayer1, this);
+                    VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(gamePlayer1, this);
+                }
 
-            if (game.gamePlayer.curChunk != null)
-            {
-                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), game.gamePlayer, this);
+                if (gamePlayer1.curChunk != null)
+                {
+                    EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), gamePlayer1, this);
 
-            }
+                }
+            } 
+       
 
 
         }
@@ -210,8 +214,8 @@ namespace monogameMinecraftShared.Rendering
                 processor.processedImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
             }
             float aspectRatio = game.GraphicsDevice.Viewport.Width / (float)game.GraphicsDevice.Viewport.Height;
-            game.gamePlayer.cam.aspectRatio = aspectRatio;
-            game.gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);
+            game.gamePlayerR.gamePlayer.cam.aspectRatio = aspectRatio;
+            game.gamePlayerR.gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);
         }
 
     }

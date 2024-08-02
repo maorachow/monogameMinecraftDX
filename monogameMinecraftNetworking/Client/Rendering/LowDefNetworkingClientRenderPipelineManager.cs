@@ -39,6 +39,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
         public SSAORenderer ssaoRenderer;
         public ClientSidePlayersRenderer clientSidePlayersRenderer;
+        public ClientSideEntitiesRenderer clientSideEntitiesRenderer;
 
 
         public LowDefNetworkingClientRenderPipelineManager(ClientGameBase game, IEffectsManager em)
@@ -65,19 +66,25 @@ namespace monogameMinecraftNetworking.Client.Rendering
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-              null, game.gamePlayer,false);
+              null, game.gamePlayerR.gamePlayer, false);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
             clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
-                effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer,
+                effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf);
+            clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"),
+                effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
+                game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice);
             //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer);
-            skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
+            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer, clientSideEntitiesRenderer);
+
+
+
+            skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
             skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection;
             skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight;
-            ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
+            ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             /*        contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayer);
                     shadowRenderer = new ShadowRenderer(game, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer, game.gameTimeManager);
                     motionVectorRenderer = new MotionVectorRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, game.gamePlayer);
@@ -118,6 +125,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         {
 
             clientSidePlayersRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+            clientSideEntitiesRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
@@ -125,7 +133,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             gBufferRenderer.Draw(ClientSideVoxelWorld.singleInstance.renderingChunks);
             ssaoRenderer.Draw();
 
-            deferredShadingRendererLowDef.Draw(game.gamePlayer,sb);
+            deferredShadingRendererLowDef.Draw(game.gamePlayerR.gamePlayer,sb);
 
             game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             game.GraphicsDevice.BlendState = BlendState.Additive;
@@ -161,8 +169,8 @@ namespace monogameMinecraftNetworking.Client.Rendering
             deferredShadingRendererLowDef.finalImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
 
             float aspectRatio = game.GraphicsDevice.Viewport.Width / (float)game.GraphicsDevice.Viewport.Height;
-            game.gamePlayer.cam.aspectRatio = aspectRatio;
-            game.gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);
+            game.gamePlayerR.gamePlayer.cam.aspectRatio = aspectRatio;
+            game.gamePlayerR.gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);
         }
     }
 }

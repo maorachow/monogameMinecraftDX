@@ -70,7 +70,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         {
             lock (allUsersCacheLock)
             {
-                Debug.WriteLine("update user");
+           //     Debug.WriteLine("update user");
             latestAllUserDatas = client.allUserDatas;
             foreach (var item1 in latestAllUserDatas)
             {

@@ -130,6 +130,7 @@ namespace monogameMinecraftAndroid
             this.IsFixedTimeStep = false;
             effectsManager = new LowDefEffectsManager();
             gamePlatformType = GamePlatformType.VeryLowDefMobile;
+            gamePlayerR = new GamePlayerReference();
             renderPipelineManager = new VeryLowDefRenderPipelineManager(this, effectsManager);
             _graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
@@ -238,7 +239,17 @@ namespace monogameMinecraftAndroid
         public override void InitGameplay(object obj)
         {
 
-          
+            if (VoxelWorld.currentWorld.updateWorldThread != null)
+            {
+                if (VoxelWorld.currentWorld.updateWorldThread.IsAlive)
+                {
+                    Debug.WriteLine("thread not stopped");
+                    return;
+                }
+            }
+
+         
+
             GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
 
             IsMouseVisible = false;
@@ -256,9 +267,9 @@ namespace monogameMinecraftAndroid
          //   BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory() + "/blockinfodata.json");
 
   
-            gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
-            playerInputManager = new PlayerInputManager(gamePlayer, true);
-            gamePlayer.graphicsDevice=GraphicsDevice;
+           gamePlayerR. gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, true);
+           
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
           
             particleManager = new ParticleManager();
@@ -305,7 +316,7 @@ namespace monogameMinecraftAndroid
             terrainDepth = Content.Load<Texture2D>("terrainheight");
             terrainMER = Content.Load<Texture2D>("terrainmer");*/
           
-            gameTimeManager = new GameTimeManager(gamePlayer);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
         //    BlockResourcesManager.LoadDefaultResources(Content, GraphicsDevice, chunkRenderer);
          //   effectsManager.LoadCustomPostProcessEffects(GraphicsDevice, customPostProcessors, Content);
 
@@ -389,14 +400,15 @@ namespace monogameMinecraftAndroid
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
             VoxelWorld.currentWorld.SaveAndQuitWorld(this);
-            monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayer);
+
+           // monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayerR.gamePlayer);
             /*     foreach(var c in ChunkManager.chunks)
                  {
                  c.Value.Dispose();
                  }*/
             EntityManager.SaveWorldEntityData();
             ChunkHelper.isJsonReadFromDisk = false;
-            gamePlayer.curChunk = null;
+       //     gamePlayerR.gamePlayer.curChunk = null;
             /*     lock(.updateWorldThreadLock)
                  {
                  foreach (var c in ChunkManager.chunks)
@@ -407,10 +419,10 @@ namespace monogameMinecraftAndroid
 
                  }
                  }*/
-            foreach (var world in VoxelWorld.voxelWorlds)
+          /*  foreach (var world in VoxelWorld.voxelWorlds)
             {
                 world.DestroyAllChunks();
-            }
+            }*/
 
             //        ChunkManager.chunks.Keys.Clear() ; 
 
@@ -422,7 +434,7 @@ namespace monogameMinecraftAndroid
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
            UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
            EntityManager.StopAllThreads();
-            EntityManager.InitEntityList();
+       //     EntityManager.InitEntityList();
             ParticleManager.instance.ReleaseResources();
             GC.Collect();
 
@@ -614,13 +626,13 @@ namespace monogameMinecraftAndroid
                     if (Keyboard.GetState().IsKeyUp(Keys.J) && !lastKeyState1.IsKeyUp(Keys.J))
                     {
                       //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
+                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
                     }
 
                     if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                     {
                         //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
+                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.P) && !lastKeyState1.IsKeyUp(Keys.P))
                     {
@@ -661,7 +673,7 @@ namespace monogameMinecraftAndroid
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
                     {
-                    EntityManager.SpawnNewEntity(gamePlayer.position,0,0,0,0,this);
+                    EntityManager.SpawnNewEntity(gamePlayerR.gamePlayer.position,0,0,0,0,this);
                     }
                     /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                           {
@@ -723,7 +735,11 @@ namespace monogameMinecraftAndroid
                     //      ProcessPlayerMouseInput(true);
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-                    gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    if (gamePlayerR.gamePlayer is GamePlayer player1)
+                    {
+                        player1.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+               
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -745,7 +761,7 @@ namespace monogameMinecraftAndroid
                     ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
-                    gameposition = gamePlayer.position;
+                    gameposition = gamePlayerR.gamePlayer.position;
                  //   Debug.WriteLine(gamePlayer.position);
 
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -879,9 +895,9 @@ namespace monogameMinecraftAndroid
                    
                     //            Debug.WriteLine("started");
 
-                    GraphicsDevice.Clear(Color.CornflowerBlue); 
+                    GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
-                    gamePlayer.cam.updateCameraVectors();
+                    gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
                     renderPipelineManager.RenderWorld(gameTime,_spriteBatch);
                     //        _spriteBatch.Begin(blendState:BlendState.Additive);

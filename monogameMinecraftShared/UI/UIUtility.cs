@@ -224,7 +224,7 @@ namespace monogameMinecraftShared.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayerR,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
                     leftDownPanel,
                     new UIButton(new Vector2(0.333f, 0.0f), 0.333f, 0.333f, UIElement.UITextures["mobiletouchup"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,   (ub) => { PlayerInputManager.mobilemotionVec.Z = 1f;} ,"",null,1,false,true,leftDownPanel,true,UIElement.UITextures["mobiletouchuppressed"]),
 
@@ -278,7 +278,7 @@ namespace monogameMinecraftShared.UI
             {
                 UIElement.inGameUIs = new List<UIElement>
                 {
-                    new InGameUI(sf,game.Window,game._spriteBatch,  game.gamePlayer,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
+                    new InGameUI(sf,game.Window,game._spriteBatch,  game.gamePlayerR,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
                    
                 };
             }
@@ -422,7 +422,7 @@ namespace monogameMinecraftShared.UI
             foreach (var element in Chunk.blockInfosNew)
             {
                 UIElement.inventoryUIs.Add(new UIButton(new Vector2(elementCount % 10 * 0.05f + 0.25f, elementCount / 10 * 0.05f + 0.25f), 0.05f, 0.05f, UIElement.UITextures.ContainsKey("blocktexture" + element.Key) && UIElement.UITextures["blocktexture" + element.Key] != null ? UIElement.UITextures["blocktexture" + element.Key] : UIElement.UITextures["blocktexture-1"],
-                    new Vector2(0f, 0f), null, minecraftGame._spriteBatch, game.Window, (ub) => minecraftGame.gamePlayer.inventoryData[minecraftGame.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
+                    new Vector2(0f, 0f), null, minecraftGame._spriteBatch, game.Window, (ub) => minecraftGame.gamePlayerR.gamePlayer.inventoryData[minecraftGame.gamePlayerR.gamePlayer.currentSelectedHotbar] = (short)element.Key, " ", null, 0f, true
                     ));
                 elementCount++;
             }

@@ -21,10 +21,10 @@ namespace monogameMinecraftShared.Rendering
         public DeferredShadingRenderer deferredShadingRenderer;
         public MotionVectorRenderer motionVectorRenderer;
         public HiZBufferRenderer hiZBufferRenderer;
-        public GamePlayer player;
+        public IGamePlayer player;
         public HDRCubemapRenderer hdrCubemapRenderer;
         public GameTimeManager gameTimeManager;
-        public SSIDRenderer(GraphicsDevice device, Effect sSIDEffect, GBufferRenderer gBufferRenderer, GamePlayer player, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer, GameTimeManager gtm)
+        public SSIDRenderer(GraphicsDevice device, Effect sSIDEffect, GBufferRenderer gBufferRenderer, IGamePlayer player, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer, GameTimeManager gtm)
         {
             this.device = device;
             SSIDEffect = sSIDEffect;

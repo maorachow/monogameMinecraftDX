@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Updateables;
 
 
 namespace monogameMinecraftShared.World
@@ -23,7 +24,11 @@ namespace monogameMinecraftShared.World
         {
             onUpdated = () =>
             {
-                game.gamePlayer.GetBlocksAround(game.gamePlayer.bounds);
+                if (game.gamePlayerR.gamePlayer is GamePlayer player)
+                {
+                    player.GetBlocksAround(player.bounds);
+                }
+          
                 //    Debug.WriteLine("on updated");
             };
             queuedChunkUpdatePoints = new Queue<IChunkUpdateOperation>();

@@ -26,8 +26,8 @@ namespace monogameMinecraftNetworking.Client
         public string inputIPAddress;
         public int inputPort;
         public string inputUserName;
-        public ClientSideGamePlayer gamePlayer { get; set; }
-
+       
+        public GamePlayerReference gamePlayerR { get; set; }
         public GameTimeManager gameTimeManager { get; set; }
         public static Vector3 gameposition;
 

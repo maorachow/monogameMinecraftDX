@@ -118,6 +118,7 @@ namespace monogameMinecraftDX
             IsMouseVisible = true;
             this.IsFixedTimeStep = false;
             effectsManager=new EffectsManager();
+            gamePlayerR = new GamePlayerReference();
             renderPipelineManager = new HighDefRenderPipelineManager(this, effectsManager);
             gamePlatformType = GamePlatformType.HighDefDX;
             //    TargetElapsedTime = System.TimeSpan.FromMilliseconds(10);
@@ -224,7 +225,14 @@ namespace monogameMinecraftDX
         public override void InitGameplay(object obj)
         {
 
-
+            if (VoxelWorld.currentWorld.updateWorldThread != null)
+            {
+                if (VoxelWorld.currentWorld.updateWorldThread.IsAlive)
+                {
+                    Debug.WriteLine("thread not stopped");
+                    return;
+                }
+            }
             GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
 
             IsMouseVisible = false;
@@ -242,9 +250,9 @@ namespace monogameMinecraftDX
             BlockResourcesManager.WriteDefaultBlockInfo(Directory.GetCurrentDirectory() + "/blockinfodata.json");
 
             status = GameStatus.Started;
-            gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
-            playerInputManager = new PlayerInputManager(gamePlayer, false);
-            gamePlayer.graphicsDevice=GraphicsDevice;
+            gamePlayerR.gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
+            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
+          
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
             particleManager = new ParticleManager();
@@ -291,7 +299,7 @@ namespace monogameMinecraftDX
             terrainDepth = Content.Load<Texture2D>("terrainheight");
             terrainMER = Content.Load<Texture2D>("terrainmer");*/
           
-            gameTimeManager = new GameTimeManager(gamePlayer);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
         //    BlockResourcesManager.LoadDefaultResources(Content, GraphicsDevice, chunkRenderer);
          //   effectsManager.LoadCustomPostProcessEffects(GraphicsDevice, customPostProcessors, Content);
 
@@ -366,14 +374,14 @@ namespace monogameMinecraftDX
             IsMouseVisible = true;
             GameOptions.SaveOptions(null);
             VoxelWorld.currentWorld.SaveAndQuitWorld(this);
-            monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayer);
+        //    monogameMinecraftShared.Updateables. GamePlayer.SavePlayerData(gamePlayer);
             /*     foreach(var c in ChunkManager.chunks)
                  {
                  c.Value.Dispose();
                  }*/
             EntityManager.SaveWorldEntityData();
             ChunkHelper.isJsonReadFromDisk = false;
-            gamePlayer.curChunk = null;
+          //  gamePlayer.curChunk = null;
             /*     lock(.updateWorldThreadLock)
                  {
                  foreach (var c in ChunkManager.chunks)
@@ -384,10 +392,10 @@ namespace monogameMinecraftDX
 
                  }
                  }*/
-            foreach (var world in VoxelWorld.voxelWorlds)
+          /*  foreach (var world in VoxelWorld.voxelWorlds)
             {
                 world.DestroyAllChunks();
-            }
+            }*/
 
             //        ChunkManager.chunks.Keys.Clear() ; 
 
@@ -399,7 +407,7 @@ namespace monogameMinecraftDX
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
            UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
            EntityManager.StopAllThreads();
-            EntityManager.InitEntityList();
+     //       EntityManager.InitEntityList();
             ParticleManager.instance.ReleaseResources();
             GC.Collect();
 
@@ -573,13 +581,13 @@ namespace monogameMinecraftDX
                     if (Keyboard.GetState().IsKeyUp(Keys.J) && !lastKeyState1.IsKeyUp(Keys.J))
                     {
                       //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
+                      VoxelWorld.currentWorld.structureOperationsManager.AddOrReplaceStructure("teststructure",new StructureData(ChunkHelper.GetBlocks((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), 11, 11, 11)));
                     }
 
                     if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                     {
                         //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
-                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
+                        VoxelWorld.currentWorld.structureOperationsManager.PlaceStructure((Vector3Int)gamePlayerR.gamePlayer.position + new Vector3Int(-5, -5, -5), "teststructure",false,true,false);
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.P) && !lastKeyState1.IsKeyUp(Keys.P))
                     {
@@ -620,7 +628,7 @@ namespace monogameMinecraftDX
                     }
                     if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
                     {
-                    EntityManager.SpawnNewEntity(gamePlayer.position,0,0,0,0,this);
+                    EntityManager.SpawnNewEntity(gamePlayerR.gamePlayer.position,0,0,0,0,this);
                     }
                     /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                           {
@@ -682,7 +690,11 @@ namespace monogameMinecraftDX
                     //    ProcessPlayerMouseInput();
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-                    gamePlayer.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    if (gamePlayerR.gamePlayer is GamePlayer player1)
+                    {
+                        player1.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+                  
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -704,7 +716,7 @@ namespace monogameMinecraftDX
                     ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
-                    gameposition = gamePlayer.position;
+                    gameposition = gamePlayerR.gamePlayer.position;
 
 
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -829,9 +841,9 @@ namespace monogameMinecraftDX
                    
                     //            Debug.WriteLine("started");
 
-                    GraphicsDevice.Clear(Color.CornflowerBlue); 
+                    GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
-                    gamePlayer.cam.updateCameraVectors();
+                    gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
                     renderPipelineManager.RenderWorld(gameTime,_spriteBatch);
                     //        _spriteBatch.Begin(blendState:BlendState.Additive);

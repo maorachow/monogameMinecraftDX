@@ -12,7 +12,7 @@ namespace monogameMinecraftShared.Rendering
     {
 
         public GraphicsDevice graphicsDevice;
-        public GamePlayer player;
+        public IGamePlayer player;
         public GBufferRenderer gBufferRenderer;
         public RenderTarget2D renderTargetSSR;
 
@@ -25,7 +25,7 @@ namespace monogameMinecraftShared.Rendering
         public HiZBufferRenderer hiZBufferRenderer;
         public HDRCubemapRenderer hdrCubemapRenderer;
         public GameTimeManager gameTimeManager;
-        public SSRRenderer(GraphicsDevice graphicsDevice, GamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer, GameTimeManager gameTimeManager)
+        public SSRRenderer(GraphicsDevice graphicsDevice, IGamePlayer player, GBufferRenderer gBufferRenderer, Effect sSREffect, DeferredShadingRenderer deferredShadingRenderer, Effect textureCopyEffect, MotionVectorRenderer motionVectorRenderer, HiZBufferRenderer hiZBufferRenderer, HDRCubemapRenderer hdrCubemapRenderer, GameTimeManager gameTimeManager)
         {
             this.graphicsDevice = graphicsDevice;
             this.player = player;

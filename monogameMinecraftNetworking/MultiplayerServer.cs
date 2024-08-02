@@ -15,7 +15,7 @@ using monogameMinecraftNetworking.Updateables;
 using monogameMinecraftNetworking.Utility;
 using monogameMinecraftNetworking.World;
 using monogameMinecraftShared.Core;
-
+using EntityData = monogameMinecraftNetworking.Data.EntityData;
 namespace monogameMinecraftNetworking
 {
     public class MultiplayerServer:IMultiplayerServer
@@ -105,14 +105,14 @@ namespace monogameMinecraftNetworking
             }
 
             ServerSideVoxelWorld.serverInstance = this;
-            updatingManagers = new List<IUpdatingManager> { new UserUpdatingManager(this) };
+            updatingManagers = new List<IUpdatingManager> { new UserUpdatingManager(this),new EntityUpdatingManager(this)};
             remoteClients =new List<RemoteClient>();
             serverTodoLists = new List<ServerTodoList>
             {
                 new ServerTodoList(), new ServerTodoList(), new ServerTodoList(), new ServerTodoList() 
                
             };
-            ipEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11111);
+            ipEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.4"), 11111);
                 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(ipEndPoint);
@@ -224,6 +224,12 @@ namespace monogameMinecraftNetworking
                                  
                                 }
                                     
+
+                                break;
+
+                            case MessageCommandType.EntityDataBroadcast:
+                             
+                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.EntityDataBroadcast,item.message.messageData));
                                 break;
                         }
                     }
