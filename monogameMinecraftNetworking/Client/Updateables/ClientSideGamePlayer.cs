@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
+using EntityData = monogameMinecraftNetworking.Data.EntityData;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
@@ -48,9 +49,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public bool isChunkNeededUpdate = false;
         public ClientSideChunk curChunk;
         public int playerInWorldID;
-        public GraphicsDevice graphicsDevice;
 
-        
+
+        public ClientGameBase game;
         public string playerName;
         public UserData ToUserData()
         {
@@ -175,12 +176,13 @@ namespace monogameMinecraftNetworking.Client.Updateables
         {
             return new Vector3((box.Max.X + box.Min.X) / 2f,box.Min.Y, (box.Max.Z + box.Min.Z) / 2f);
         }
-        public ClientSideGamePlayer(Vector3 min, Vector3 max, Game game,string name)
+        public ClientSideGamePlayer(Vector3 min, Vector3 max, ClientGameBase game,string name)
         {
             this.playerName=name;
             bounds = new BoundingBox(min, max);
             position = GetBoundingBoxCenter(bounds);
             footPosition = GetBoundingBoxBottomCenter(bounds);
+            this.game = game;
             cam = new Camera(position, new Vector3(0.0f, 0f, 1.0f), new Vector3(1.0f, 0f, 0.0f), Vector3.UnitY, game);
             GetBlocksAround(bounds);
         }
@@ -221,16 +223,25 @@ namespace monogameMinecraftNetworking.Client.Updateables
             Microsoft.Xna.Framework.Ray ray = new Microsoft.Xna.Framework.Ray(cam.position, cam.front);
             float rayHitDis = 10000f;
             int finalIndex = -1;
-            for (int i = 0; i < EntityManager.worldEntities.Count; i++)
+            for (int i = 0; i < game.clientSideEntityManager.allEntitiesCache.Count; i++)
             {
-                EntityBeh entity = EntityManager.worldEntities[i];
-                if (ray.Intersects(entity.bounds) <= 4f)
+                var entity = game.clientSideEntityManager.allEntitiesCache[i];
+                BoundingBox bounds = new BoundingBox();
+                switch (entity.data.typeid)
                 {
-                    if (rayHitDis > (float)ray.Intersects(entity.bounds))
+                    case 0:
+                        bounds=new BoundingBox(new Vector3(entity.data.posX-0.3f,entity.data.posY,entity.data.posZ-0.3f), new Vector3(entity.data.posX + 0.3f, entity.data.posY+1.8f, entity.data.posZ + 0.3f));
+                        break;
+                    default:
+                        break;
+                }
+                if (ray.Intersects(bounds) <= 4f)
+                {
+                    if (rayHitDis > (float)ray.Intersects(bounds))
                     {
                         finalIndex = i;
                     }
-                    rayHitDis = MathF.Min(rayHitDis, (float)ray.Intersects(entity.bounds));
+                    rayHitDis = MathF.Min(rayHitDis, (float)ray.Intersects(bounds));
 
                     //     EntityBeh.HurtEntity(entity.entityID, 4f, cam.position);
 
@@ -239,7 +250,8 @@ namespace monogameMinecraftNetworking.Client.Updateables
             }
             if (finalIndex >= 0)
             {
-                EntityManager.HurtEntity(EntityManager.worldEntities[finalIndex].entityID, 4f, cam.position);
+               
+                game.clientSideEntityManager.SendHurtEntityRequest(game.clientSideEntityManager.allEntitiesCache[finalIndex].data.entityID, 4f, cam.position);
                 return true;
             }
             return false;
@@ -257,7 +269,11 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     ParticleManager.instance.SpawnNewParticleTexturedGravity(new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f), 0.2f, new Vector2(0f, 0f), new Vector2(1f, 1f), 3f, new Vector3(rand.NextSingle()*4f-2f, rand.NextSingle() * 4f - 2f, rand.NextSingle() * 4f - 2f), 3f);
                  }*/
 
+            if (blockPoint.x < 0 && blockPoint.y < 0 && blockPoint.z < 0)
+            {
+                return false;
 
+            }
             //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ClientSideChunkHelper.GetBlockData(blockPoint)));
             //  ClientSideChunkHelper.BreakBlock(blockPoint);
             ClientSideChunkHelper.SendBreakBlockOperation(blockPoint, ClientSideVoxelWorld.singleInstance.worldID, ClientSideVoxelWorld.gameInstance.networkingClient.socket);

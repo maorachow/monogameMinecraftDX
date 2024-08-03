@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftShared.Rendering;
 using EntityData = monogameMinecraftNetworking.Data.EntityData;
@@ -23,11 +25,11 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public IGamePlayer curGamePlayer;
        
         public Effect gBufferEffect;
-        public object allEntitiesCacheLock = new object();
+       
         public GraphicsDevice device;
        
-        public List<(EntityData data, AnimationBlend animState)> allEntitiesCache;
-        public List<EntityData> lastAllEntitiesDatas;
+    //    public List<(EntityData data, AnimationBlend animState)> allEntitiesCache;
+     //   public List<EntityData> lastAllEntitiesDatas;
         public IMultiplayerClient client;
         public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
@@ -43,8 +45,20 @@ namespace monogameMinecraftNetworking.Client.Rendering
               
             }, 0.5f)
         }, true);
+        public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
+
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.4f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
+            }, 0.1f)
+        }, false);
+        public ClientGameBase game;
         public ClientSideEntitiesRenderer(Model zombieModel, Effect gBufferEffect, IGamePlayer gamePlayer,
-            Texture2D zombieTex, IMultiplayerClient client, GraphicsDevice device)
+            Texture2D zombieTex, IMultiplayerClient client, GraphicsDevice device,ClientGameBase game)
         {
             this.curGamePlayer = gamePlayer;
             
@@ -52,14 +66,14 @@ namespace monogameMinecraftNetworking.Client.Rendering
             this.gBufferEffect = gBufferEffect;
             ClientSideEntitiesRenderer.zombieModel = zombieModel;
             this.client = client;
-            client.allEntitiesUpdatedAction += Update;
-            allEntitiesCache = new List<(EntityData data, AnimationBlend animState)>();
-            lastAllEntitiesDatas = new List<EntityData>();
+        //    client.allEntitiesUpdatedAction += Update;
+        //    allEntitiesCache = new List<(EntityData data, AnimationBlend animState)>();
+         //   lastAllEntitiesDatas = new List<EntityData>();
             this.device = device;
-            
+            this.game = game;
         }
 
-        public void Update()
+       /* public void Update()
         {
             lock (allEntitiesCacheLock)
             {
@@ -84,9 +98,9 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 }
             }
 
-        }
+        }*/
 
-        public void FrameUpdate(float deltaTime)
+    /*    public void FrameUpdate(float deltaTime)
         {
             lock (allEntitiesCacheLock)
             {
@@ -123,14 +137,19 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 }
             }
 
-        }
+        }*/
 
         public void DrawGBuffer()
         {
             BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
-            lock (allEntitiesCacheLock)
+            if (game.clientSideEntityManager == null)
             {
-                foreach (var entity in allEntitiesCache)
+                return;
+            }
+            lock (game.clientSideEntityManager.allEntitiesCacheLock)
+            {
+
+                foreach (var entity in game.clientSideEntityManager. allEntitiesCache)
                 {
 
 
@@ -150,7 +169,19 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
                                 entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
                                 {
+                                    if (entity.data.isEntityHurt)
+                                    {
 
+
+                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+
+                                    }
+                                    else
+                                    {
+
+                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+
+                                    }
                                 });
                                 break;
 

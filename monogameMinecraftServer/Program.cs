@@ -4,6 +4,7 @@ using monogameMinecraftNetworking;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using System.Diagnostics;
+using System.Net;
 using monogameMinecraftNetworking.World;
 
 public class Program
@@ -13,7 +14,30 @@ public class Program
         //Console.WriteLine("hello world!");
 
         MultiplayerServer server = new MultiplayerServer();
-        server.Initialize();
+
+        Console.WriteLine("input server IP");
+        string? s=Console.ReadLine();
+        while (s == null ||(IPAddress.TryParse(s, out _) == false) )
+        {
+            Console.WriteLine("invalid IP");
+            s = Console.ReadLine();
+        }
+        Console.WriteLine("input server port");
+        string? portString = Console.ReadLine();
+        while (portString == null || (int.TryParse(portString, out _) == false))
+        {
+            Console.WriteLine("invalid port");
+            portString = Console.ReadLine();
+        }
+
+        int port = 11111;
+      
+        if (portString != null)
+        {
+             port = int.Parse(portString);
+        }
+
+        server.Initialize(s,port);
         server.Start();
 
         bool isGoingToQuit=false;

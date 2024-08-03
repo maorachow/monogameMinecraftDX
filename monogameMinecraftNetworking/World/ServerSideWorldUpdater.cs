@@ -9,7 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MessagePack;
 using Microsoft.Xna.Framework;
+using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Utility;
 using monogameMinecraftNetworking.Protocol;
 
@@ -28,11 +30,12 @@ namespace monogameMinecraftNetworking.World
            
             queuedChunkUpdatePoints = new ConcurrentQueue<IChunkUpdateOperation>();
             chunksNeededRebuild = new List<ServerSideChunk>();
+            soundDatasToSend = new List<BlockSoundBroadcastData>();
             tryUpdateWorldBlocksThread = new Thread(UpdateWorldBlocksThread);
             tryUpdateWorldBlocksThread.IsBackground = true;
             tryUpdateWorldBlocksThread.Start();
 
-            trySendUpdatedChunkDatasThread = new Thread(SendUpdatedChunkDatasThread);
+            trySendUpdatedChunkDatasThread = new Thread(SendUpdatedDatasThread);
             trySendUpdatedChunkDatasThread.IsBackground = true;
             trySendUpdatedChunkDatasThread.Start();
         }
@@ -78,7 +81,7 @@ namespace monogameMinecraftNetworking.World
 
         }
 
-        public void SendUpdatedChunkDatasThread()
+        public void SendUpdatedDatasThread()
         {
             while (true)
             {
@@ -113,6 +116,13 @@ namespace monogameMinecraftNetworking.World
                     }
                       
                 }
+
+                foreach (var item in soundDatasToSend)
+                {
+                    NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.BlockSoundBroadcast,MessagePackSerializer.Serialize(item)));
+                }
+
+                soundDatasToSend.Clear();
                 chunksNeededRebuild.Clear();
                 }
 
@@ -127,7 +137,7 @@ namespace monogameMinecraftNetworking.World
         public Thread trySendUpdatedChunkDatasThread;
         public List<ServerSideChunk> chunksNeededRebuild;
 
-
+        public List<BlockSoundBroadcastData> soundDatasToSend;
         public readonly float maxDelayedTime = 0.2f;
         public float delayedTime = 0f;
 

@@ -34,6 +34,7 @@ namespace monogameMinecraftNetworking.Client
         public SpriteBatch _spriteBatch;
         public PlayerInputManager playerInputManager;
 
+        public ClientSideEntityManager clientSideEntityManager;
         public IEffectsManager effectsManager;
 
         public INetworkClientRenderPipelineManager renderPipelineManager;

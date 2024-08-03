@@ -41,7 +41,7 @@ namespace Project1
             IsMouseVisible = true;
             this.IsFixedTimeStep = false;
             effectsManager = new LowDefEffectsManager();
-         
+          
             renderPipelineManager = new LowDefNetworkingClientRenderPipelineManager(this, effectsManager);
             gamePlayerR = new GamePlayerReference();
 
@@ -248,6 +248,8 @@ namespace Project1
             effectsManager.LoadEffects(Content);
          
             networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
+
+            clientSideEntityManager = new ClientSideEntityManager(this.networkingClient);
             renderPipelineManager.InitRenderPipeline();
         
            
@@ -386,7 +388,7 @@ namespace Project1
                     PauseGame(null);
                     }
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
-                   
+                   clientSideEntityManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                  (gamePlayerR.gamePlayer as ClientSideGamePlayer)  .UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
 

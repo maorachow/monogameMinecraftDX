@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MessagePack;
+using Microsoft.Xna.Framework;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Updateables;
@@ -96,7 +97,7 @@ namespace monogameMinecraftNetworking
 
         public Socket serverSocket;
         public IPEndPoint ipEndPoint{ get; set; }
-        public void Initialize()
+        public void Initialize(string ipAddress1, int port)
         {
             isGoingToQuit= false;
             foreach (var world in ServerSideVoxelWorld.voxelWorlds)
@@ -112,7 +113,7 @@ namespace monogameMinecraftNetworking
                 new ServerTodoList(), new ServerTodoList(), new ServerTodoList(), new ServerTodoList() 
                
             };
-            ipEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.4"), 11111);
+            ipEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress1), port);
                 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(ipEndPoint);
@@ -230,6 +231,12 @@ namespace monogameMinecraftNetworking
                             case MessageCommandType.EntityDataBroadcast:
                              
                                 NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.EntityDataBroadcast,item.message.messageData));
+                                break;
+
+                            case MessageCommandType.HurtEntityRequest:
+                                HurtEntityRequestData data3 =
+                                    MessagePackSerializer.Deserialize<HurtEntityRequestData>(item.message.messageData);
+                                ServerSideEntityManager.HurtEntity(data3.entityID,data3.hurtValue,new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ));
                                 break;
                         }
                     }

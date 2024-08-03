@@ -46,7 +46,8 @@ namespace monogameMinecraftNetworking.Updateables
         {
             ServerSideEntityManager.ReadEntityData();
             ServerSideEntityManager.InitEntityList();
-            updateAllEntitiesThread=new Thread(UpdateThread);
+            ServerSideEntityManager.SpawnEntityFromData(server);
+            updateAllEntitiesThread =new Thread(UpdateThread);
             updateAllEntitiesThread.Start();
 
 
@@ -54,6 +55,7 @@ namespace monogameMinecraftNetworking.Updateables
 
         public void Stop()
         {
+            ServerSideEntityManager.SaveWorldEntityData();
             isThreadStopping = true;
             updateAllEntitiesThread.Join();
             ServerSideEntityManager.pathfindingManager.QuitThread();

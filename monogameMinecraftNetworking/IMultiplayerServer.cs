@@ -29,7 +29,7 @@ namespace monogameMinecraftNetworking
 
         public bool isGoingToQuit { get; set; }
         public List<IUpdatingManager> updatingManagers { get; set; }
-        public void Initialize();
+        public void Initialize(string inputIP,int port);
         public void Start();
         public void ShutDown();
     }

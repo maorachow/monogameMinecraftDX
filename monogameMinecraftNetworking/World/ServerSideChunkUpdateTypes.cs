@@ -33,7 +33,7 @@ namespace monogameMinecraftNetworking.World
                         data.optionalData1, data.worldID);
                 case ChunkUpdateDataTypes.DoorInteractingUpdate:
                     return new DoorInteractingOperation(new Vector3Int(data.posX, data.posY, data.posZ),
-                         data.worldID);
+                         data.worldID,updater);
 
                 case ChunkUpdateDataTypes.FenceUpdatingUpdate:
                     return new FenceUpdatingOperation(new Vector3Int(data.posX, data.posY, data.posZ), updater, new Vector3Int(data.posX, data.posY, data.posZ),0,
@@ -78,6 +78,10 @@ namespace monogameMinecraftNetworking.World
                ServerSideChunkHelper.GetBlockShape(ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1), worldID));
 
             ServerSideChunkHelper.SetBlockWithoutUpdateWithSaving(position, placingBlockData, worldID);
+            lock (ServerSideWorldUpdater.chunksNeededRebuildListLock)
+            {
+                ServerSideWorldUpdater.soundDatasToSend.Add(new BlockSoundBroadcastData(position.x+0.5f,position.y+0.5f,position.z+0.5f,placingBlockData.blockID));
+            }
             if (shapeLeft != null && shapeLeft.Value == BlockShape.Fence)
             {
                 ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(-1, 0, 0), ServerSideWorldUpdater, new Vector3Int(1, 0, 0), 1, this.worldID));
@@ -94,6 +98,7 @@ namespace monogameMinecraftNetworking.World
             {
                 ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, -1), ServerSideWorldUpdater, new Vector3Int(0, 0, 1), 1, this.worldID));
             }
+
 
         }
     }
@@ -209,6 +214,11 @@ namespace monogameMinecraftNetworking.World
             Vector3Int tempPos = position;
             var key = prevBlockData;
             ServerSideChunkHelper.SetBlockWithoutUpdateWithSaving(position,0,worldID);
+
+            lock (ServerSideWorldUpdater.chunksNeededRebuildListLock)
+            {
+                ServerSideWorldUpdater.soundDatasToSend.Add(new BlockSoundBroadcastData(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f, prevBlockData.blockID));
+            }
             //send break block particle command to client
             BlockShape? shapeRight =
                 ServerSideChunkHelper.GetBlockShape(ServerSideChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0), worldID));
@@ -381,10 +391,12 @@ namespace monogameMinecraftNetworking.World
     {
         public Vector3Int position { get; set; }
         public int worldID { get; set; }
-        public DoorInteractingOperation(Vector3Int position,int worldID)
+        public ServerSideWorldUpdater serverSideWorldUpdater;
+        public DoorInteractingOperation(Vector3Int position,int worldID,ServerSideWorldUpdater worldUpdater)
         {
             this.position = position;
             this.worldID = worldID;
+            this.serverSideWorldUpdater = worldUpdater;
         }
         public void Update()
         {
@@ -427,7 +439,10 @@ namespace monogameMinecraftNetworking.World
                 ServerSideChunkHelper.SetBlockOptionalDataWithoutUpdate(position + new Vector3Int(0, 1, 0), MathUtility.GetByte(dataBinary), worldID);
                 //         Debug.WriteLine(dataBinary);
             }
-
+            lock (serverSideWorldUpdater.chunksNeededRebuildListLock)
+            {
+                serverSideWorldUpdater.soundDatasToSend.Add(new BlockSoundBroadcastData(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 0), worldID).blockID));
+            }
         }
     }
 

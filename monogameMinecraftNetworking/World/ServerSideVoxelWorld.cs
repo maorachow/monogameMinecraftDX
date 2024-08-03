@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace monogameMinecraftNetworking.World
 {
@@ -259,9 +260,9 @@ namespace monogameMinecraftNetworking.World
             updateWorldThread = new Thread(() => UpdateWorldThread(server));
             updateWorldThread.IsBackground = true;
             updateWorldThread.Start();
-       //     tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread());
-       //     tryRemoveChunksThread.IsBackground = true;
-        //    tryRemoveChunksThread.Start();
+            tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(server));
+            tryRemoveChunksThread.IsBackground = true;
+            tryRemoveChunksThread.Start();
         
             worldUpdater.Init();
            
@@ -306,6 +307,7 @@ namespace monogameMinecraftNetworking.World
                         else
                         {
                             ServerSideChunk c = GetChunk(item.chunkPos);
+                               
                             NetworkingUtility.SendToClient(item.remoteClient, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(c)));
                         }
                     }
@@ -317,6 +319,51 @@ namespace monogameMinecraftNetworking.World
            
         }
 
+        public void TryDeleteChunksThread(IMultiplayerServer server)
+        {
+            while (true)
+            {
+                Thread.Sleep(50);
+                if (isThreadsStopping == true)
+                {
+                    Console.WriteLine("quit delete chunks thread:" + Thread.CurrentThread.ManagedThreadId);
+                    return;
+                }
+                lock (updateWorldThreadLock)
+                {
+                    lock (chunkBuildingQueueLock)
+                    {
+                        foreach (var c in chunks.Values)
+                        {
+                            bool isChunkRemoving=true;
+                            
+                            foreach (var userData in server.allUserDatas)
+                            {
+                                Vector3 userPos = new Vector3(userData.posX, userData.posY, userData.posZ);
+                                if (c.isMapGenCompleted == true &&
+                                    (MathF.Abs(c.chunkPos.x - userPos.X) < 128 + Chunk.chunkWidth &&
+                                     MathF.Abs(c.chunkPos.y - userPos.Z) <128 + Chunk.chunkWidth))
+                                {
+                                  isChunkRemoving=false;
+
+                                }
+                            }
+
+                            if (isChunkRemoving == true&&c.isMapGenCompleted==true)
+                            {
+                                c.SaveSingleChunk();
+                                c.isUnused = true;
+                            //    c.Dispose();
+                            Console.WriteLine("remove chunk");
+                                chunks.TryRemove(c.chunkPos, out _);
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
         public void StopAllThreads()
         {
             isThreadsStopping = true;

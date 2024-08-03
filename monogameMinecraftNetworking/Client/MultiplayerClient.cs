@@ -9,12 +9,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MessagePack;
+using Microsoft.Xna.Framework;
 using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
 using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
 using EntityData = monogameMinecraftNetworking.Data.EntityData;
 namespace monogameMinecraftNetworking.Client
@@ -192,7 +194,7 @@ namespace monogameMinecraftNetworking.Client
                                     ClientSideVoxelWorld.singleInstance.isWorldGenParamsInited = true;
                                     ClientSideVoxelWorld.singleInstance.genParamsData= data;
                                 }
-                              //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
+                                //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
                                 break;
                             case MessageCommandType.UserDataBroadcast:
                                 allUserDatas = MessagePackSerializer.Deserialize<List<UserData>>(item.messageData);
@@ -208,6 +210,14 @@ namespace monogameMinecraftNetworking.Client
                                 {
                                     _allEntitiesUpdatedAction();
                                 }
+                                break;
+                            case MessageCommandType.HurtEntityRequest:
+                                NetworkingUtility.SendMessageToServer(item, socket);
+                                break;
+                            case MessageCommandType.BlockSoundBroadcast:
+                                BlockSoundBroadcastData data4 =
+                                    MessagePackSerializer.Deserialize<BlockSoundBroadcastData>(item.messageData);
+                               SoundsUtility.PlaySound(gamePlayer.position,new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID],20f);
                                 break;
                     }
                     }

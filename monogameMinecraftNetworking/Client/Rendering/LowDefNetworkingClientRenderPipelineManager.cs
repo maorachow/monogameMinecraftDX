@@ -73,7 +73,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf);
             clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
-                game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice);
+                game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice,game);
             //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
             gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer, clientSideEntitiesRenderer);
 
@@ -125,7 +125,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         {
 
             clientSidePlayersRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
-            clientSideEntitiesRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+          //  clientSideEntitiesRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //  GraphicsDevice.RasterizerState = rasterizerState;

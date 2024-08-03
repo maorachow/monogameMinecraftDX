@@ -1061,7 +1061,7 @@ namespace monogameMinecraftNetworking.World
         public bool isMapGenCompleted = false;
         public void Dispose()
         {
-            // TODO release managed resources here
+            
         }
 
         public void SaveSingleChunk()

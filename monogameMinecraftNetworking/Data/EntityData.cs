@@ -33,7 +33,13 @@ namespace monogameMinecraftNetworking.Data
         [Key(9)]
         public int entityInWorldID;
 
-        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth, int entityInWorldID)
+        [Key(10)]
+        public bool isEntityHurt;
+
+        [Key(11)]
+        public bool isEntityDying;
+
+        public EntityData(int typeid, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, string entityID, float entityHealth, int entityInWorldID,bool isEntityHurt,bool isEntityDying)
         {
             this.typeid = typeid;
             this.posX = posX;
@@ -45,6 +51,8 @@ namespace monogameMinecraftNetworking.Data
             this.entityID = entityID;
             this.entityHealth = entityHealth;
             this.entityInWorldID = entityInWorldID;
+            this.isEntityHurt=isEntityHurt;
+            this.isEntityDying=isEntityDying;
         }
     }
 }

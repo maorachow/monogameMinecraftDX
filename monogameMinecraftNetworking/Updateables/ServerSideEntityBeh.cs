@@ -75,13 +75,13 @@ namespace monogameMinecraftNetworking.Updateables
 
         public EntityData ToEntityData()
         {
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, rotationX, rotationY, rotationZ, entityID, entityHealth, curWorldID);
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, rotationX, rotationY, rotationZ, entityID, entityHealth, curWorldID,isEntityHurt, isEntityDying);
             return tmpData;
         }
         public void SaveSingleEntity()
         {
 
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, rotationX, rotationY, rotationZ, entityID, entityHealth, curWorldID);
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, rotationX, rotationY, rotationZ, entityID, entityHealth, curWorldID, isEntityHurt,isEntityDying);
 
             foreach (EntityData ed in ServerSideEntityManager.entityDataReadFromDisk)
             {

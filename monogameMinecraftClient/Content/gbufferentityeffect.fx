@@ -77,7 +77,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input) : COLOR
     PixelShaderOutput psOut = (PixelShaderOutput) 0;
     psOut.ProjectionDepth = float4((-input.PositionV.z).x,0,0,1);
     psOut.NormalWS = float4(input.Normal.xyz, 1);
-    psOut.Albedo = float4(((tex2D(textureSampler, input.TexureCoordinate).xyz) * 1).xyz, 1);
+    psOut.Albedo = float4(((tex2D(textureSampler, input.TexureCoordinate).xyz) * DiffuseColor).xyz, 1);
     psOut.MetallicEmissionRoughness =float4(0.1,0,0.1,1);
     return psOut;
 }

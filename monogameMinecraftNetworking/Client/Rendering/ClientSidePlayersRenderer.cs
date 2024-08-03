@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftShared.Animations;
 using monogameMinecraftShared.Rendering;
@@ -152,7 +153,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
                             entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
                             {
-                                 
+                                gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
                             });
                           
                     
@@ -170,6 +171,11 @@ namespace monogameMinecraftNetworking.Client.Rendering
             {
 
                 if (entity.data.userName == curUserName)
+                {
+                    continue;
+                }
+
+                if (entity.data.curWorldID != ClientSideVoxelWorld.singleInstance.worldID)
                 {
                     continue;
                 }
