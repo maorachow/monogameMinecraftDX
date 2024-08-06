@@ -49,7 +49,15 @@ namespace monogameMinecraftShared.Updateables
             if (randomGenerator.NextSingle() >= 1 - deltaTime * 0.15f && worldEntities.Count < 35 && VoxelWorld.currentWorld.worldID == 0)
             {
                 Vector2 randSpawnPos = new Vector2(game.gamePlayerR.gamePlayer.position.X + (randomGenerator.NextSingle() - 0.5f) * 60f, game.gamePlayerR.gamePlayer.position.Z + (randomGenerator.NextSingle() - 0.5f) * 60f);
+                if((randSpawnPos-new Vector2(game.gamePlayerR.gamePlayer.position.X, game.gamePlayerR.gamePlayer.position.Z)).Length()<10f)
+                {
+                    return;
+                }
                 Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
+                if(ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(spawnPos))==null)
+                {
+                    return;
+                }
                 SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game);
 
             }

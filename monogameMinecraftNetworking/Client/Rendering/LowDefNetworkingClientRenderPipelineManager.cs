@@ -66,7 +66,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-              null, game.gamePlayerR.gamePlayer, false);
+                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer, true);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
             clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,

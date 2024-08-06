@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Updateables;
+using monogameMinecraftShared.Utility;
 
 namespace monogameMinecraftShared.World
 {
@@ -182,6 +183,10 @@ namespace monogameMinecraftShared.World
                 };
             }
 
+            if (Chunk.blockSoundInfo.ContainsKey((int)prevBlockData.blockID))
+            {
+                SoundsUtility.PlaySound(MinecraftGameBase.gameposition, new Vector3(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f), Chunk.blockSoundInfo[prevBlockData.blockID], 20f);
+            }
             BlockShape? shapeRight =
                 ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0)));
             BlockShape? shapeLeft =
@@ -194,6 +199,16 @@ namespace monogameMinecraftShared.World
             BlockShape? shapeThis =
                 ChunkHelper.GetBlockShape(prevBlockData);
 
+
+
+            BlockShape? shapeUp =
+                ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(0, 1, 0)));
+
+            if (shapeUp is BlockShape.CrossModel||shapeUp is BlockShape.Torch)
+            {
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(new Vector3Int(position.x,position.y+1,position.z),worldUpdater,ChunkHelper.GetBlockData(position + new Vector3Int(0, 1, 0))));
+                worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(new Vector3Int(position.x, position.y + 1, position.z), worldUpdater, 0));
+            }
             if (shapeThis is BlockShape.Door)
             {
                 Debug.WriteLine("break door");
@@ -366,6 +381,11 @@ namespace monogameMinecraftShared.World
                 return;
             }
 
+            BlockData thisData = (int)ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 0));
+            if (Chunk.blockSoundInfo.ContainsKey(thisData.blockID))
+            {
+                SoundsUtility.PlaySound(MinecraftGameBase.gameposition, new Vector3(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f), Chunk.blockSoundInfo[thisData.blockID], 20f);
+            }
             BlockShape? shapeDown =
                 ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(position + new Vector3Int(0, -1, 0)));
             BlockShape? shapeUp =

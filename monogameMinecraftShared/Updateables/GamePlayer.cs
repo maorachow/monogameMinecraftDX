@@ -251,14 +251,14 @@ namespace monogameMinecraftShared.Updateables
 
             BlockFaces blockFaces = BlockFaces.PositiveY;
             VoxelCast.Cast(ray, 3, out blockPoint, out blockFaces, this);
-            if (blockPoint.y < 0)
+            if (blockPoint.y < 0&& blockPoint.x < 0 && blockPoint.z < 0)
             {
                 return;
             }
             Vector3 setBlockPoint = new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f);
 
             Vector3 castBlockPoint = new Vector3(blockPoint.x, blockPoint.y, blockPoint.z);
-
+          
             // ParticleManager.instance.SpawnNewParticle(setBlockPoint,1f,new Vector2(0f,0f),new Vector2(1f,1f),1f,new Vector3(1f,1f,1f),1f);
 
             switch (blockFaces)
@@ -288,6 +288,8 @@ namespace monogameMinecraftShared.Updateables
 
                     break;
             }
+          
+         
             //interactable blocks
 
             if (ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(castBlockPoint)) is BlockShape.Door)
@@ -299,6 +301,13 @@ namespace monogameMinecraftShared.Updateables
 
 
             Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
+            BoundingBox box = BlockBoundingBoxUtility.GetBoundingBox(setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, inventoryData[currentSelectedHotbar]);
+            box.Max -= new Vector3(0.01f, 0.01f, 0.01f);
+            box.Min += new Vector3(0.01f, 0.01f, 0.01f);
+            if (bounds.Intersects(box))
+            {
+                return;
+            }
             switch (Chunk.blockInfosNew[inventoryData[currentSelectedHotbar]].shape)
             {
                 case BlockShape.Solid:
@@ -618,6 +627,14 @@ namespace monogameMinecraftShared.Updateables
                             Debug.WriteLine("action teleport to world 1");
                             MoveToPosition(new Vector3(0f, 150f, 0f));
                         };
+                        if (VoxelWorld.voxelWorlds[1].updateWorldThread != null)
+                        {
+                            if (VoxelWorld.voxelWorlds[1].updateWorldThread.IsAlive)
+                            {
+                                Debug.WriteLine("teleport world thread not stopped");
+                                return;
+                            }
+                        }
                         VoxelWorld.SwitchToWorld(1, game);
                         break;
                     case 1:
@@ -626,6 +643,14 @@ namespace monogameMinecraftShared.Updateables
                             Debug.WriteLine("action teleport to world 0");
                             MoveToPosition(new Vector3(0f, 150f, 0f));
                         };
+                        if (VoxelWorld.voxelWorlds[0].updateWorldThread != null)
+                        {
+                            if (VoxelWorld.voxelWorlds[0].updateWorldThread.IsAlive)
+                            {
+                                Debug.WriteLine("teleport world thread not stopped");
+                                return;
+                            }
+                        }
                         VoxelWorld.SwitchToWorld(0, game);
                         break;
                     default:
@@ -780,10 +805,18 @@ namespace monogameMinecraftShared.Updateables
                 isRightMouseButtonDown = false;
             }
             
-                currentSelectedHotbar += (int)(scrollDelta / 120f);
-                currentSelectedHotbar = MathHelper.Clamp(currentSelectedHotbar, 0, 8);
-                //      Debug.WriteLine(mState.ScrollWheelValue - prevMouseState.ScrollWheelValue);
-             
+                currentSelectedHotbar -= (int)(scrollDelta / 120f);
+                if (currentSelectedHotbar < 0)
+                {
+                    currentSelectedHotbar = 8;
+                }
+                if (currentSelectedHotbar >8)
+                {
+                    currentSelectedHotbar = 0;
+                }
+             currentSelectedHotbar = MathHelper.Clamp(currentSelectedHotbar, 0, 8);
+            //      Debug.WriteLine(mState.ScrollWheelValue - prevMouseState.ScrollWheelValue);
+
         }
         public float breakBlockCD = 0f;
     }

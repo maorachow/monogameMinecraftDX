@@ -31,7 +31,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
         {
             lock (allEntitiesCacheLock)
             {
-                Debug.WriteLine("update entities");
+             //   Debug.WriteLine("update entities");
                 lastAllEntitiesDatas = client.allEntityDatas;
                 foreach (var item1 in lastAllEntitiesDatas)
                 {

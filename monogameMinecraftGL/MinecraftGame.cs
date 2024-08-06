@@ -69,6 +69,7 @@ namespace monogameMinecraftGL
       //  public GameTimeManager gameTimeManager;
      //   public IRenderPipelineManager renderPipelineManager { get; set; }
         public ParticleManager particleManager;
+        public MouseMovementManager mouseMovementManager;
         /*
         public EntityRenderer entityRenderer;
         public ChunkRenderer chunkRenderer;
@@ -134,6 +135,11 @@ namespace monogameMinecraftGL
        public override void OnResize(Object sender, EventArgs e)
         {
             UIElement.ScreenRect = this.Window.ClientBounds;
+            if (mouseMovementManager != null)
+            {
+                mouseMovementManager.windowBounds = this.Window.ClientBounds;
+            }
+           
             Debug.WriteLine("bounds:"+this.Window.ClientBounds);
             foreach (UIElement element in UIElement.menuUIs)
             {
@@ -219,7 +225,7 @@ namespace monogameMinecraftGL
  
         public override void InitGameplay(object obj)
         {
-
+        
             if (VoxelWorld.currentWorld.updateWorldThread != null)
             {
                 if (VoxelWorld.currentWorld.updateWorldThread.IsAlive)
@@ -247,6 +253,9 @@ namespace monogameMinecraftGL
             status = GameStatus.Started;
             gamePlayerR.gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
+            mouseMovementManager = new MouseMovementManager(playerInputManager);
+            mouseMovementManager.windowBounds = this.Window.ClientBounds;
+
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
             particleManager = new ParticleManager();
@@ -361,6 +370,7 @@ namespace monogameMinecraftGL
             EntityManager.SpawnEntityFromData(this);
 
             isGamePaused = false;
+            mouseMovementManager.isMouseLocked = true;
         }
 
         public override void QuitGameplay()
@@ -413,6 +423,7 @@ namespace monogameMinecraftGL
 
 
             status = GameStatus.Menu;
+            mouseMovementManager.isMouseLocked = false;
             // updateWorldThread.Abort();
             //   tryRemoveChunksThread.Abort();
         }
@@ -424,10 +435,12 @@ namespace monogameMinecraftGL
             if (isInventoryOpen == true)
             {
                 IsMouseVisible = true;
+                mouseMovementManager.isMouseLocked = false;
             }
             else
             {
                 IsMouseVisible = false;
+                mouseMovementManager.isMouseLocked = true;
             }
         }
         public override void GoToSettings(object obj)
@@ -488,6 +501,7 @@ namespace monogameMinecraftGL
         {
             isGamePaused = false;
             IsMouseVisible = false;
+            mouseMovementManager.isMouseLocked = true;
         }
 
         public override void CloseStructureOperationsUI()
@@ -496,10 +510,12 @@ namespace monogameMinecraftGL
             if (isStructureOperationsUIOpened == true)
             {
                 IsMouseVisible = true;
+                mouseMovementManager.isMouseLocked = false;
             }
             else
             {
                 IsMouseVisible = false;
+                mouseMovementManager.isMouseLocked = true;
             }
         }
         float prevFPS = 0f;
@@ -575,10 +591,12 @@ namespace monogameMinecraftGL
                         if (isStructureOperationsUIOpened == true)
                         {
                             IsMouseVisible = true;
+                            mouseMovementManager.isMouseLocked = false;
                         }
                         else
                         {
                             IsMouseVisible = false;
+                            mouseMovementManager.isMouseLocked = true;
                         }
 
                     }
@@ -687,6 +705,7 @@ namespace monogameMinecraftGL
                         //   Environment.Exit(0);
                         isGamePaused = true;
                         IsMouseVisible = true;
+                        mouseMovementManager.isMouseLocked = false;
                     }
            //         ProcessPlayerKeyboardInput(gameTime);
                 
@@ -727,8 +746,9 @@ namespace monogameMinecraftGL
                           float deltaFps = Math.Abs(curFps - prevFPS);
                           Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
                           prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;*/
-                 
-                
+                    mouseMovementManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+
                     break;
             }
 

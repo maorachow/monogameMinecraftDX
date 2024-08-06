@@ -301,14 +301,14 @@ namespace monogameMinecraftNetworking.World
                             ServerSideChunk c = new ServerSideChunk(item.chunkPos, this);
                             // goto endUpdateWorld;
                             //    break;
-                            NetworkingUtility.SendToClient(item.remoteClient,new MessageProtocol((byte)MessageCommandType.WorldData,ChunkDataSerializingUtility.SerializeChunk(c)));
+                            NetworkingUtility.SendToClient(item.remoteClient,new MessageProtocol((byte)MessageCommandType.WorldData,ChunkDataSerializingUtility.SerializeChunkWithWorldID(c,worldID)));
                           
                         }
                         else
                         {
                             ServerSideChunk c = GetChunk(item.chunkPos);
                                
-                            NetworkingUtility.SendToClient(item.remoteClient, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(c)));
+                            NetworkingUtility.SendToClient(item.remoteClient, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunkWithWorldID(c, worldID)));
                         }
                     }
                     }
@@ -339,6 +339,10 @@ namespace monogameMinecraftNetworking.World
                             
                             foreach (var userData in server.allUserDatas)
                             {
+                                if (userData.curWorldID!=worldID)
+                                {
+                                    continue;
+                                }
                                 Vector3 userPos = new Vector3(userData.posX, userData.posY, userData.posZ);
                                 if (c.isMapGenCompleted == true &&
                                     (MathF.Abs(c.chunkPos.x - userPos.X) < 128 + Chunk.chunkWidth &&

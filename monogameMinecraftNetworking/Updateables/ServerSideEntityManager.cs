@@ -56,11 +56,16 @@ namespace monogameMinecraftNetworking.Updateables
             {
                 foreach (var client in game.remoteClients)
                 {
+                    
                     if (client.isUserDataLoaded == true)
                     {
-                        Vector2 randSpawnPos = new Vector2(client.curUserData.posX + (randomGenerator.NextSingle() - 0.5f) * 60f, client.curUserData.posZ+ (randomGenerator.NextSingle() - 0.5f) * 60f);
-                        Vector3 spawnPos = new Vector3(randSpawnPos.X, ServerSideChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y,client.curUserData.curWorldID), randSpawnPos.Y);
-                        SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game, client.curUserData.curWorldID);
+                        if (client.curUserData.curWorldID == 0)
+                        {
+                            Vector2 randSpawnPos = new Vector2(client.curUserData.posX + (randomGenerator.NextSingle() - 0.5f) * 60f, client.curUserData.posZ+ (randomGenerator.NextSingle() - 0.5f) * 60f);
+                            Vector3 spawnPos = new Vector3(randSpawnPos.X, ServerSideChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y,client.curUserData.curWorldID), randSpawnPos.Y);
+                            SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0, game, client.curUserData.curWorldID);
+                        }
+                    
                     }
                 }
              

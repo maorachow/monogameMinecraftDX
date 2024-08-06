@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Xna.Framework;
@@ -2919,11 +2921,11 @@ namespace monogameMinecraftShared.World
             }).GetAwaiter().OnCompleted(() =>
             {
                 GenerateRenderBuffers();
-
+                
                 isTaskCompleted = true;
                 //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
                 //  Debug.WriteLine(verticesOpqArray.Length);
-                //Debug.WriteLine(verticesWTArray.Length);
+                Debug.WriteLine("rebuild chunk thread:"+Thread.CurrentThread.ManagedThreadId);
                 isReadyToRender = true;
             });
 
@@ -2942,8 +2944,57 @@ namespace monogameMinecraftShared.World
 
         }
 
+        public void BuildChunkAsyncWithActionOnCompleted(ConcurrentQueue<Action> actionQueue)
+        {
+            if (isTaskCompleted == false)
+            {
+                return;
+            }
 
-            public bool disposed { get; set; }
+            isTaskCompleted = false;
+            //     Stopwatch sw = new Stopwatch();
+            //     sw.Start(); 
+            Task.Run(() =>
+            {
+
+
+                InitMap(chunkPos, false);
+
+
+            }).GetAwaiter().OnCompleted(()=> actionQueue.Enqueue(() =>
+            {
+
+
+                GenerateRenderBuffers();
+
+                isTaskCompleted = true;
+                //     GenerateMesh(verticesOpq, verticesNS, verticesWT);
+                //  Debug.WriteLine(verticesOpqArray.Length);
+           //     Debug.WriteLine("rebuild chunk thread:" + Thread.CurrentThread.ManagedThreadId);
+                isReadyToRender = true;
+            }));
+           
+                    
+
+              
+
+
+
+            //  sw.Stop();
+            //   Debug.WriteLine(sw.ElapsedMilliseconds);
+
+
+
+
+
+
+
+            //      t.RunSynchronously();
+
+
+
+        }
+        public bool disposed { get; set; }
 
 
         public void Dispose()

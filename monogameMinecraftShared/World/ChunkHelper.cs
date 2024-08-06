@@ -762,10 +762,7 @@ namespace monogameMinecraftShared.World
 
               
               
-                if (Chunk.blockSoundInfo.ContainsKey((int)prevData.blockID))
-                {
-                    SoundsUtility.PlaySound(MinecraftGameBase.gameposition, new Vector3(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f), Chunk.blockSoundInfo[prevData.blockID], 20f);
-                }
+             
                 Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {

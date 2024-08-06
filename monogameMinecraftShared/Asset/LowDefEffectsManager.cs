@@ -49,6 +49,7 @@ namespace monogameMinecraftShared.Asset
 
             gameEffects.TryAdd("gbuffereffect", Content.Load<Effect>("gbuffereffect"));
             gameEffects.TryAdd("gbufferentityeffect", Content.Load<Effect>("gbufferentityeffect"));
+            gameEffects.TryAdd("gbufferparticleeffect", Content.Load<Effect>("gbufferparticleeffect"));
             gameEffects.TryAdd("ssaoeffect", Content.Load<Effect>("ssaoeffect"));
       
             gameEffects.TryAdd("skyboxeffect", Content.Load<Effect>("skyboxeffect"));

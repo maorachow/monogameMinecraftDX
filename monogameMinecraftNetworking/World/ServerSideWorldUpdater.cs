@@ -112,7 +112,7 @@ namespace monogameMinecraftNetworking.World
                     if (chunk != null&&chunk.map!=null)
                     {
                          chunk.isModifiedInGame=true;
-                        NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunk(chunk)));
+                        NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.WorldData, ChunkDataSerializingUtility.SerializeChunkWithWorldID(chunk, world.worldID)));
                     }
                       
                 }

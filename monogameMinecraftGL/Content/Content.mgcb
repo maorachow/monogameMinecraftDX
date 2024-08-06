@@ -675,6 +675,12 @@
 /processorParam:DebugMode=Auto
 /build:gbufferentityeffect.fx
 
+#begin gbufferparticleeffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:gbufferparticleeffect.fx
+
 #begin hdricubeeffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor

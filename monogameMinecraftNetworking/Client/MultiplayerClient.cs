@@ -88,139 +88,175 @@ namespace monogameMinecraftNetworking.Client
                     return;
                 }
                 
-                    if (todoList.Count > 0)
+                if (todoList.Count > 0)
+                {
+                    MessageProtocol item;
+                    todoList.TryDequeue(out item);
+                    if (item == null)
                     {
-                        MessageProtocol item;
-                             todoList.TryDequeue(out item);
-                             if (item == null)
-                             {
-                                 Debug.WriteLine("null message");
-                            continue;
-                             }
-                        switch ((MessageCommandType)item.command)
-                        {
-                            case MessageCommandType.WorldData:
-                                Task.Run(() => { ChunkData chunkData = ChunkDataSerializingUtility.DeserializeChunk(item.messageData);// MessagePackSerializer.Deserialize<ChunkData>(item.messageData);
-                                if (chunkData == null)
+                        Debug.WriteLine("null message");
+                        continue;
+                    }
+                    switch ((MessageCommandType)item.command)
+                    {
+                        case MessageCommandType.WorldData:
+
+
+                            Task.Run(() => {
+
+                                lock (ClientSideVoxelWorld.singleInstance.allChunksBuildingLock)
                                 {
-                                    return;
-                                }
-                                if (ClientSideVoxelWorld.singleInstance.chunks.ContainsKey(chunkData.chunkPos))
-                                {
-                                    ClientSideChunk c =
-                                        ClientSideVoxelWorld.singleInstance.GetChunk(chunkData.chunkPos);
-                                    lock (c.chunkBuildingLock)
+                                    ChunkDataWithWorldID chunkData = ChunkDataSerializingUtility.DeserializeChunkWithWorldID(item.messageData);// MessagePackSerializer.Deserialize<ChunkData>(item.messageData);
+                                    if (chunkData == null)
                                     {
-                                        c.map =
-                                            (BlockData[,,])chunkData.map.Clone();
+                                        return;
+                                    }
+
+                                    if (chunkData.worldID != ClientSideVoxelWorld.singleInstance.worldID)
+                                    {
+                                        return;
+                                    }
+                                    if (ClientSideVoxelWorld.singleInstance.chunks.ContainsKey(chunkData.chunkData.chunkPos))
+                                    {
+                                        ClientSideChunk c =
+                                            ClientSideVoxelWorld.singleInstance.GetChunk(chunkData.chunkData.chunkPos);
                                         bool isChunkFirstLoaded = (c.isMapDataFetchedFromServer == false);
+                                        lock (c.chunkBuildingLock)
+                                        {
+                                            c.map =
+                                                (BlockData[,,])chunkData.chunkData.map.Clone();
+                                         
 
-                                        c.isMapDataFetchedFromServer = true;
+                                            c.isMapDataFetchedFromServer = true;
 
 
-                                        c.BuildChunkAsync();
+                                            c.BuildChunkAsyncWithActionOnCompleted(ClientSideVoxelWorld.singleInstance
+                                                .clientSideWorldUpdater.chunkMainThreadUpdateActions);
+                                        }
 
                                         if (!isChunkFirstLoaded)
                                         {
-                                            if (ClientSideChunkHelper
-                                                    .GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth,
-                                                        c.chunkPos.y))?.isMapDataFetchedFromServer == true)
+                                            ClientSideChunk c1 = ClientSideChunkHelper
+                                                .GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth,
+                                                    c.chunkPos.y));
+                                            if (c1!=null&&c1.isMapDataFetchedFromServer == true)
                                             {
-                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x - ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunkAsync();
+                                                lock (c1.chunkBuildingLock)
+                                                {
+                                                    c1.BuildChunkAsyncWithActionOnCompleted(ClientSideVoxelWorld.singleInstance.clientSideWorldUpdater.chunkMainThreadUpdateActions);
+                                                }
+                                            
                                             }
 
 
 
-
-                                            if (ClientSideChunkHelper
-                                                    .GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth,
-                                                        c.chunkPos.y))?.isMapDataFetchedFromServer == true)
+                                            ClientSideChunk c2 = ClientSideChunkHelper
+                                                .GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth,
+                                                    c.chunkPos.y));
+                                            if (c2!=null&&c2.isMapDataFetchedFromServer == true)
                                             {
-                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x + ClientSideChunk.chunkWidth, c.chunkPos.y))?.BuildChunkAsync();
+                                                lock (c2.chunkBuildingLock)
+                                                {
+                                                    c2.BuildChunkAsyncWithActionOnCompleted(ClientSideVoxelWorld.singleInstance.clientSideWorldUpdater.chunkMainThreadUpdateActions);
+                                                }
+                                              
+                                            }
+
+                                            ClientSideChunk c3 = ClientSideChunkHelper
+                                                .GetChunk(new Vector2Int(c.chunkPos.x,
+                                                    c.chunkPos.y - ClientSideChunk.chunkWidth));
+
+
+                                            if (c3!=null&&c3.isMapDataFetchedFromServer == true)
+                                            {
+                                                lock (c3.chunkBuildingLock)
+                                                {
+                                                    c3.BuildChunkAsyncWithActionOnCompleted(ClientSideVoxelWorld.singleInstance.clientSideWorldUpdater.chunkMainThreadUpdateActions);
+                                                }
+                                            
                                             }
 
 
-                                            if (ClientSideChunkHelper
-                                                    .GetChunk(new Vector2Int(c.chunkPos.x,
-                                                        c.chunkPos.y - ClientSideChunk.chunkWidth))
-                                                    ?.isMapDataFetchedFromServer == true)
+                                            ClientSideChunk c4 = ClientSideChunkHelper
+                                                .GetChunk(new Vector2Int(c.chunkPos.x,
+                                                    c.chunkPos.y + ClientSideChunk.chunkWidth));
+
+
+
+;                                            if (c4 !=null&&c4.isMapDataFetchedFromServer == true)
                                             {
-                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y - ClientSideChunk.chunkWidth))?.BuildChunkAsync();
-                                            }
-
-
-
-                                            if (ClientSideChunkHelper
-                                                    .GetChunk(new Vector2Int(c.chunkPos.x,
-                                                        c.chunkPos.y + ClientSideChunk.chunkWidth))
-                                                    ?.isMapDataFetchedFromServer == true)
-                                            {
-                                                ClientSideChunkHelper.GetChunk(new Vector2Int(c.chunkPos.x, c.chunkPos.y + ClientSideChunk.chunkWidth))?.BuildChunkAsync();
+                                                lock (c4.chunkBuildingLock)
+                                                {
+                                                    c4.BuildChunkAsyncWithActionOnCompleted(ClientSideVoxelWorld.singleInstance.clientSideWorldUpdater.chunkMainThreadUpdateActions);
+                                                }
+                                             
                                             }
                                             gamePlayer.isGetBlockNeeded=true;
                                         }
                                  
 
 
-                                    }
+                                        
 
                                  
                                  
                                   
-                                } });
-                               
-                                break;
-                            case MessageCommandType.UserLoginReturn:
-                                string result= MessagePackSerializer.Deserialize<string>(item.messageData);
-                                if (result == "Success")
-                                {
-                                    isLoggedIn=true;
-                                }else if (result == "Failed")
-                                {
-                                    isGoingToQuitGame = true;
+                                    }
                                 }
-                                break;
-                            case MessageCommandType.UserDataRequest:
+                            });
+                               
+                            break;
+                        case MessageCommandType.UserLoginReturn:
+                            string result= MessagePackSerializer.Deserialize<string>(item.messageData);
+                            if (result == "Success")
+                            {
+                                isLoggedIn=true;
+                            }else if (result == "Failed")
+                            {
+                                isGoingToQuitGame = true;
+                            }
+                            break;
+                        case MessageCommandType.UserDataRequest:
 
                              
-                                NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)),socket);
-                                    break;
-                            case MessageCommandType.WorldGenParamsData:
+                            NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)),socket);
+                            break;
+                        case MessageCommandType.WorldGenParamsData:
 
-                                WorldGenParamsData data =
-                                    MessagePackSerializer.Deserialize<WorldGenParamsData>(item.messageData);
-                                if (data.worldID == ClientSideVoxelWorld.singleInstance.worldID)
-                                {
-                                    ClientSideVoxelWorld.singleInstance.isWorldGenParamsInited = true;
-                                    ClientSideVoxelWorld.singleInstance.genParamsData= data;
-                                }
-                                //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
-                                break;
-                            case MessageCommandType.UserDataBroadcast:
-                                allUserDatas = MessagePackSerializer.Deserialize<List<UserData>>(item.messageData);
-                                if (_allUsersUpdatedAction != null)
-                                {
-                                    _allUsersUpdatedAction();
-                                }
-                                break;
+                            WorldGenParamsData data =
+                                MessagePackSerializer.Deserialize<WorldGenParamsData>(item.messageData);
+                            if (data.worldID == ClientSideVoxelWorld.singleInstance.worldID)
+                            {
+                                ClientSideVoxelWorld.singleInstance.isWorldGenParamsInited = true;
+                                ClientSideVoxelWorld.singleInstance.genParamsData= data;
+                            }
+                            //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
+                            break;
+                        case MessageCommandType.UserDataBroadcast:
+                            allUserDatas = MessagePackSerializer.Deserialize<List<UserData>>(item.messageData);
+                            if (_allUsersUpdatedAction != null)
+                            {
+                                _allUsersUpdatedAction();
+                            }
+                            break;
 
-                            case MessageCommandType.EntityDataBroadcast:
-                                allEntityDatas = EntityDataSerializingUtility.DeserializeEntityDatas(item.messageData);
-                                if (_allEntitiesUpdatedAction != null)
-                                {
-                                    _allEntitiesUpdatedAction();
-                                }
-                                break;
-                            case MessageCommandType.HurtEntityRequest:
-                                NetworkingUtility.SendMessageToServer(item, socket);
-                                break;
-                            case MessageCommandType.BlockSoundBroadcast:
-                                BlockSoundBroadcastData data4 =
-                                    MessagePackSerializer.Deserialize<BlockSoundBroadcastData>(item.messageData);
-                               SoundsUtility.PlaySound(gamePlayer.position,new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID],20f);
-                                break;
+                        case MessageCommandType.EntityDataBroadcast:
+                            allEntityDatas = EntityDataSerializingUtility.DeserializeEntityDatas(item.messageData);
+                            if (_allEntitiesUpdatedAction != null)
+                            {
+                                _allEntitiesUpdatedAction();
+                            }
+                            break;
+                        case MessageCommandType.HurtEntityRequest:
+                            NetworkingUtility.SendMessageToServer(item, socket);
+                            break;
+                        case MessageCommandType.BlockSoundBroadcast:
+                            BlockSoundBroadcastData data4 =
+                                MessagePackSerializer.Deserialize<BlockSoundBroadcastData>(item.messageData);
+                            SoundsUtility.PlaySound(gamePlayer.position,new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID],20f);
+                            break;
                     }
-                    }
+                }
                 
                
             }

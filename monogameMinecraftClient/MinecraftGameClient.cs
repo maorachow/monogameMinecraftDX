@@ -27,6 +27,8 @@ namespace Project1
         private GraphicsDeviceManager _graphics;
     //    private SpriteBatch _spriteBatch;
         public RandomTextureGenerator randomTextureGenerator;
+        public MouseMovementManager mouseMovementManager;
+
         public MinecraftGameClient()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -50,7 +52,11 @@ namespace Project1
 
         public void OnResize(object sender, EventArgs e)
         {
-            UIElement.ScreenRect = new Rectangle(0,0,GraphicsDevice.Viewport.Width,GraphicsDevice.Viewport.Height);
+            UIElement.ScreenRect = Window.ClientBounds;
+            if (mouseMovementManager != null)
+            {
+                mouseMovementManager.windowBounds = Window.ClientBounds;
+            }
             foreach (UIElement element in UIElement.menuUIs)
             {
                 element.OnResize();
@@ -135,6 +141,7 @@ namespace Project1
            gamePlayerR. gamePlayer =
                 new ClientSideGamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this, "default user");
             MultiplayerClientUIUtility.InitGameUI(this);
+          
             status = GameStatus.Menu;
             base.Initialize();
         }
@@ -164,12 +171,14 @@ namespace Project1
         {
             isGamePaused = true;
             IsMouseVisible = true;
+            mouseMovementManager.isMouseLocked = false;
         }
 
         public override void ResumeGame(object o)
         {
             isGamePaused = false;
             IsMouseVisible = false;
+            mouseMovementManager.isMouseLocked = true;
         }
 
         public override void QuitGameplay()
@@ -177,14 +186,33 @@ namespace Project1
             networkingClient.Disconnect();
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
+            mouseMovementManager.isMouseLocked = false;
         }
         public  void QuitGameplayDirectly()
         {
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
+            mouseMovementManager.isMouseLocked = false;
         }
         public UIButton errorLogButton;
-        
+
+
+        public override void ClientSwitchToWorld(int worldID)
+        {
+            if (gamePlayerR.gamePlayer == null)
+            {
+                return;
+            }
+
+            if (status != GameStatus.Started)
+            {
+                return;
+            }
+            ClientSideVoxelWorld.singleInstance.Stop();
+            ClientSideVoxelWorld.SwitchToWorldWithoutSaving(worldID);
+            ClientSideVoxelWorld.singleInstance.InitWorld(this);
+            (gamePlayerR.gamePlayer as ClientSideGamePlayer).Reset();
+        }
         public override void InitGameplay(UIButton obj)
         {
           
@@ -244,6 +272,8 @@ namespace Project1
             
            //  MultiplayerClientUIUtility.InitGameUI(this);
            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
+           mouseMovementManager = new MouseMovementManager(playerInputManager);
+           mouseMovementManager.windowBounds = Window.ClientBounds;
             gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
             effectsManager.LoadEffects(Content);
          
@@ -265,6 +295,7 @@ namespace Project1
                 }
             }
             status = GameStatus.Started;
+            mouseMovementManager.isMouseLocked = true;
         }
         protected override void LoadContent()
         {
@@ -281,6 +312,10 @@ namespace Project1
 
         protected override void Update(GameTime gameTime)
         {
+            if (!IsActive)
+            {
+                return;
+            }
      /*       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();*/
             
@@ -348,11 +383,13 @@ namespace Project1
                         isInventoryOpen = !isInventoryOpen;
                         if (isInventoryOpen == true)
                         {
+                            mouseMovementManager.isMouseLocked = false;
                             IsMouseVisible = true;
                         }
                         else
                         {
                             IsMouseVisible = false;
+                            mouseMovementManager.isMouseLocked = true;
                         }
 
                     }
@@ -389,10 +426,11 @@ namespace Project1
                     }
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    clientSideEntityManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    ClientSideVoxelWorld.singleInstance.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                  (gamePlayerR.gamePlayer as ClientSideGamePlayer)  .UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
 
-                   
+                   mouseMovementManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -423,6 +461,10 @@ namespace Project1
 
         protected override void Draw(GameTime gameTime)
         {
+            if (!IsActive)
+            {
+                return;
+            }
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             /*      gamePlayer.cam.updateCameraVectors();
@@ -488,12 +530,12 @@ namespace Project1
                             }*/
 
 
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
 
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
+                //        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
+                //        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
+                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
+                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
 
                     }
                     _spriteBatch.End();

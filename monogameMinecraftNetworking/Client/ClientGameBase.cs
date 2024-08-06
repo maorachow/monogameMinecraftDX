@@ -71,5 +71,10 @@ namespace monogameMinecraftNetworking.Client
         {
             
         }
+
+        public virtual void ClientSwitchToWorld(int worldID)
+        {
+
+        }
     }
 }

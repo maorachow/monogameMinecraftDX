@@ -61,20 +61,22 @@ namespace monogameMinecraftNetworking.Client.World
                 return _renderingChunks;
             }
         }
-    
 
+
+        public ClientSideWorldUpdater clientSideWorldUpdater;
         public object updateWorldThreadLock = new object();
         public object deleteChunkThreadLock = new object();
-
+        public object allChunksBuildingLock= new object();
       
         public ClientSideVoxelWorld(int worldGenType, int worldID)
         {
             singleInstance = this;
             this.worldGenType = worldGenType;
             this.worldID = worldID;
-          
-           
-       
+            clientSideWorldUpdater = new ClientSideWorldUpdater();
+
+
+
         }
 
 
@@ -328,7 +330,8 @@ namespace monogameMinecraftNetworking.Client.World
         }
         public void SetupNoiseGenerators()
         {
-         
+            worldGenType = genParamsData.worldGenType;
+
             noiseGenerator.SetFrequency(genParamsData.noiseGeneratorFrequency);
 
             frequentNoiseGenerator.SetFrequency(genParamsData.frequentNoiseGeneratorFrequency);
@@ -337,6 +340,7 @@ namespace monogameMinecraftNetworking.Client.World
         public void InitWorld(ClientGameBase game)
         {
             gameInstance = game;
+            isWorldGenParamsInited = false;
             Debug.WriteLine("current world ID:" + worldID);
             Debug.WriteLine(isWorldStopped);
 
@@ -362,6 +366,7 @@ namespace monogameMinecraftNetworking.Client.World
 
             SetupNoiseGenerators();
             Debug.WriteLine("inited");
+            Debug.WriteLine("cur world gen type:"+ worldGenType);
             /*     if (isWorldChanged == true)
                  {
                      playerInWorldID = GamePlayer.ReadPlayerData(game.gamePlayer, game, true);
@@ -421,27 +426,32 @@ namespace monogameMinecraftNetworking.Client.World
 
         public void FrameUpdate(float deltaTime)
         {
-      //      worldUpdater.MainThreadUpdate(deltaTime);
+            //      worldUpdater.MainThreadUpdate(deltaTime);
+            clientSideWorldUpdater.MainThreadUpdate(deltaTime);
         }
         public void DestroyAllChunks()
         {
-            lock (updateWorldThreadLock)
+            lock (allChunksBuildingLock)
             {
-                lock (deleteChunkThreadLock)
+                lock (updateWorldThreadLock)
                 {
-                    foreach (var c in chunks)
+                    lock (deleteChunkThreadLock)
                     {
+                        foreach (var c in chunks)
+                        {
 
-                        c.Value.Dispose();
-                        chunks.Remove(c.Key, out _);
+                            c.Value.Dispose();
+                            chunks.Remove(c.Key, out _);
+
+                        }
+                        chunks.Clear();
+                        renderingChunks.Clear();
+                        // chunkDataReadFromDisk.Clear();
 
                     }
-                    chunks.Clear();
-                    renderingChunks.Clear();
-                    // chunkDataReadFromDisk.Clear();
-
                 }
             }
+           
             GC.Collect();
 
 
@@ -517,7 +527,7 @@ namespace monogameMinecraftNetworking.Client.World
 
         }*/
 
-        public static void SwitchToWorldWithoutSaving(int worldIndex, MinecraftGameBase game)
+        public static void SwitchToWorldWithoutSaving(int worldIndex)
         {
            singleInstance. worldID = worldIndex;
 
@@ -533,6 +543,7 @@ namespace monogameMinecraftNetworking.Client.World
             isWorldStopped = true;
         }
 
+        
 
       /*  public void SaveAndQuitWorld(MinecraftGameBase game)
         {

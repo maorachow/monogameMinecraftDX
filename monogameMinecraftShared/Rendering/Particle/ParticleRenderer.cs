@@ -34,32 +34,40 @@ namespace monogameMinecraftShared.Rendering.Particle
         public bool isVertsInited = false;
         public bool isQuadBuffersInited = false;
 
-        public VertexPositionNormalTangentTexture[] quadVertices;
+        public VertexPositionNormalTangentTextureVertID[] quadVertices;
         public List<VertexMatrix4x4UVScale> instancingDataGravityTextured;
         public void InitializeVertices()
         {
             if (isVertsInited == true) { return; }
-            quadVertices = new VertexPositionNormalTangentTexture[4];
+            quadVertices = new VertexPositionNormalTangentTextureVertID[4];
 
             quadVertices[0].Position = new Vector3(-0.5f, 0.5f, 0);
             quadVertices[0].Normal = new Vector3(0, 0, -1);
             quadVertices[0].Tangent = new Vector3(0, 1, 0);
             quadVertices[0].TextureCoordinate = new Vector2(0, 0);
+            quadVertices[0].vertID = 0;
+            quadVertices[0].vertID1 = 0;
 
             quadVertices[1].Position = new Vector3(0.5f, 0.5f, 0);
             quadVertices[1].TextureCoordinate = new Vector2(1, 0);
             quadVertices[1].Normal = new Vector3(0, 0, -1);
             quadVertices[1].Tangent = new Vector3(0, 1, 0);
+            quadVertices[1].vertID = 1;
+            quadVertices[1].vertID1 = 0;
 
             quadVertices[2].Position = new Vector3(0.5f, -0.5f, 0);
             quadVertices[2].TextureCoordinate = new Vector2(1, 1);
             quadVertices[2].Normal = new Vector3(0, 0, -1);
             quadVertices[2].Tangent = new Vector3(0, 1, 0);
+            quadVertices[2].vertID = 2;
+            quadVertices[2].vertID1 = 0;
 
             quadVertices[3].Position = new Vector3(-0.5f, -0.5f, 0);
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
             quadVertices[3].Normal = new Vector3(0, 0, -1);
             quadVertices[3].Tangent = new Vector3(0, 1, 0);
+            quadVertices[3].vertID = 3;
+            quadVertices[3].vertID1 = 0;
             isVertsInited = true;
         }
 
@@ -77,7 +85,7 @@ namespace monogameMinecraftShared.Rendering.Particle
                 quadVertexBuffer.Dispose();
                 return;
             }
-            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTangentTexture), 6, BufferUsage.None);
+            quadVertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTangentTextureVertID), 6, BufferUsage.None);
 
             quadVertexBuffer.SetData(quadVertices);
             quadIndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 6, BufferUsage.None);

@@ -371,7 +371,7 @@ namespace monogameMinecraftNetworking.World
             {
 
                 map = new BlockData[Chunk.chunkWidth,Chunk.chunkHeight, Chunk.chunkWidth];
-                if (VoxelWorld.currentWorld.worldGenType == 0)
+                if (curWorld.worldGenType == 0)
                 {
                     bool isFrontLeftChunkUpdated = false;
                     bool isFrontRightChunkUpdated = false;
@@ -926,7 +926,7 @@ namespace monogameMinecraftNetworking.World
 
                     isMapGenCompleted = true;
                 }
-                else if (VoxelWorld.currentWorld.worldGenType == 1)
+                else if (curWorld.worldGenType == 1)
                 {
                     for (int i = 0; i < Chunk.chunkWidth; i++)
                     {
@@ -942,7 +942,7 @@ namespace monogameMinecraftNetworking.World
                         }
                     }
                 }
-                else if (VoxelWorld.currentWorld.worldGenType == 2)
+                else if (curWorld.worldGenType == 2)
                 {
                     for (int i = 0; i < Chunk.chunkWidth; i++)
                     {

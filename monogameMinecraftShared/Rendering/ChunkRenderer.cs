@@ -271,7 +271,7 @@ namespace monogameMinecraftShared.Rendering
         {
             if (isLOD)
             {
-                if ((c.indicesOpqLOD1Array.Length <= 0 || c.VBOpqLOD1 == null || c.IBOpqLOD1 == null) && c.isOpqBuffersValid == false)
+                if ((c.indicesOpqLOD1Array.Length <= 0 || c.VBOpqLOD1 == null || c.IBOpqLOD1 == null) || c.isOpqBuffersValid == false)
                 {
                     return;
                 }
@@ -293,7 +293,7 @@ namespace monogameMinecraftShared.Rendering
             }
             else
             {
-                if ((c.indicesOpqArray.Length <= 0 || c.VBOpq == null || c.IBOpq == null) && c.isOpqBuffersValid == false)
+                if ((c.indicesOpqArray.Length <= 0 || c.VBOpq == null || c.IBOpq == null) || c.isOpqBuffersValid == false)
                 {
                     return;
                 }

@@ -69,7 +69,8 @@ namespace monogameMinecraftDX
       //  public GameTimeManager gameTimeManager;
      //   public IRenderPipelineManager renderPipelineManager { get; set; }
         public ParticleManager particleManager;
-    //    public PlayerInputManager playerInputManager;
+        public MouseMovementManager mouseMovementManager;
+        //    public PlayerInputManager playerInputManager;
         /*
         public EntityRenderer entityRenderer;
         public ChunkRenderer chunkRenderer;
@@ -94,15 +95,15 @@ namespace monogameMinecraftDX
         public HiZBufferRenderer hiZBufferRenderer;
         public MotionBlurRenderer motionBlurRenderer;
         HDRCubemapRenderer hdrCubemapRenderer;*/
-       // public EffectsManager effectsManager = new EffectsManager();
-      //  public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
-    /* 
-        Texture2D terrainTex;
-        Texture2D terrainTexNoMip;
-        Texture2D terrainNormal;
-        Texture2D terrainDepth;
-        Texture2D terrainMER;*/
-        
+        // public EffectsManager effectsManager = new EffectsManager();
+        //  public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
+        /* 
+            Texture2D terrainTex;
+            Texture2D terrainTexNoMip;
+            Texture2D terrainNormal;
+            Texture2D terrainDepth;
+            Texture2D terrainMER;*/
+
         public MinecraftGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -120,6 +121,7 @@ namespace monogameMinecraftDX
             effectsManager=new EffectsManager();
             gamePlayerR = new GamePlayerReference();
             renderPipelineManager = new HighDefRenderPipelineManager(this, effectsManager);
+          
             gamePlatformType = GamePlatformType.HighDefDX;
             //    TargetElapsedTime = System.TimeSpan.FromMilliseconds(10);
             //         TargetElapsedTime = System.TimeSpan.FromMilliseconds(33);
@@ -135,6 +137,7 @@ namespace monogameMinecraftDX
        public override void OnResize(Object sender, EventArgs e)
         {
             UIElement.ScreenRect = this.Window.ClientBounds;
+            Debug.WriteLine("screenRect:"+UIElement.ScreenRect);
             foreach (UIElement element in UIElement.menuUIs)
             {
                 element.OnResize();
@@ -252,7 +255,7 @@ namespace monogameMinecraftDX
             status = GameStatus.Started;
             gamePlayerR.gamePlayer = new monogameMinecraftShared.Updateables.GamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this);
             playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
-          
+            mouseMovementManager = new MouseMovementManager(playerInputManager);
             //  GamePlayer.ReadPlayerData(gamePlayer, this);
             VoxelWorld.currentWorld.InitWorld(this);
             particleManager = new ParticleManager();
@@ -367,6 +370,7 @@ namespace monogameMinecraftDX
             EntityManager.SpawnEntityFromData(this);
 
             isGamePaused = false;
+            mouseMovementManager.isMouseLocked = true;
         }
 
         public override void QuitGameplay()
@@ -414,6 +418,7 @@ namespace monogameMinecraftDX
 
 
             status = GameStatus.Menu;
+            mouseMovementManager.isMouseLocked = false;
             // updateWorldThread.Abort();
             //   tryRemoveChunksThread.Abort();
         }
@@ -476,6 +481,7 @@ namespace monogameMinecraftDX
         {
             isGamePaused = false;
             IsMouseVisible = false;
+            mouseMovementManager.isMouseLocked = true;
         }
 
         public override void CloseStructureOperationsUI()
@@ -551,11 +557,12 @@ namespace monogameMinecraftDX
                        
                         isInventoryOpen=!isInventoryOpen;
                         if (isInventoryOpen == true)
-                        {
+                        {mouseMovementManager.isMouseLocked = false;
                             IsMouseVisible = true;
                         }
                         else
                         {
+                            mouseMovementManager.isMouseLocked = true;
                             IsMouseVisible = false;
                         }
                       
@@ -570,10 +577,12 @@ namespace monogameMinecraftDX
                         isStructureOperationsUIOpened = true;
                         if (isStructureOperationsUIOpened == true)
                         {
+                            mouseMovementManager.isMouseLocked = false;
                             IsMouseVisible = true;
                         }
                         else
                         {
+                            mouseMovementManager.isMouseLocked = true;
                             IsMouseVisible = false;
                         }
 
@@ -681,6 +690,7 @@ namespace monogameMinecraftDX
                         //  QuitGameplay();
                         //  Exit();
                         //   Environment.Exit(0);
+                        mouseMovementManager.isMouseLocked = false;
                         isGamePaused = true;
                         IsMouseVisible = true;
                     }
@@ -717,14 +727,14 @@ namespace monogameMinecraftDX
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     GlobalMaterialParamsManager.instance.Update(gameTime);
                     gameposition = gamePlayerR.gamePlayer.position;
-
-
+                    mouseMovementManager.windowBounds = Window.ClientBounds;
+                    mouseMovementManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                     /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
                           float deltaFps = Math.Abs(curFps - prevFPS);
                           Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
                           prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;*/
-                 
-                
+
+
                     break;
             }
 

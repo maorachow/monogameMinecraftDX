@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -87,8 +88,20 @@ namespace monogameMinecraftShared.World
         private OnChunkUpdated onUpdated;
 
         public OnChunkUpdated onUpdatedOneShot;
+
+        public ConcurrentQueue<Action> chunkRebuildActions= new ConcurrentQueue<Action>();
         public void MainThreadUpdate(float deltaTime)
         {
+            while (chunkRebuildActions.Count > 0)
+            {
+               
+                Action result;
+                var item = chunkRebuildActions.TryDequeue(out result);
+                if (result != null&&item==true)
+                {
+                    result();
+                }
+            }
             delayedTime += deltaTime;
             if (delayedTime > maxDelayedTime)
             {
@@ -100,35 +113,35 @@ namespace monogameMinecraftShared.World
                         //     Debug.WriteLine("rebuild");
                         foreach (var chunk in chunksNeededRebuild)
                         {
-                            if (chunk != null && chunk.isReadyToRender == true)
+                            if (chunk != null && chunk.isMapGenCompleted == true)
                             {
-                                chunk.BuildChunkAsync();
+                                chunk.BuildChunkAsyncWithActionOnCompleted(chunkRebuildActions);
 
 
 
 
 
 
-                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x - Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsync();
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x - Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsyncWithActionOnCompleted(chunkRebuildActions);
 
 
                                 // if (chunkNeededUpdate.rightChunk != null && chunkNeededUpdate.rightChunk.isMapGenCompleted == true)
 
                                 //  chunkNeededUpdate.rightChunk.BuildChunk();
-                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x + Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsync();
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x + Chunk.chunkWidth, chunk.chunkPos.y))?.BuildChunkAsyncWithActionOnCompleted(chunkRebuildActions);
 
                                 //  if (chunkNeededUpdate.backChunk != null && chunkNeededUpdate.backChunk.isMapGenCompleted == true)
                                 //       {
                                 //         chunkNeededUpdate.backChunk.BuildChunk();
                                 //     }
-                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y - Chunk.chunkWidth))?.BuildChunkAsync();
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y - Chunk.chunkWidth))?.BuildChunkAsyncWithActionOnCompleted(chunkRebuildActions);
 
                                 //   if (chunkNeededUpdate.frontChunk != null && chunkNeededUpdate.frontChunk.isMapGenCompleted == true)
                                 //     {
                                 //      chunkNeededUpdate.frontChunk.BuildChunk();
                                 //     }
 
-                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsync();
+                                ChunkHelper.GetChunk(new Vector2Int(chunk.chunkPos.x, chunk.chunkPos.y + Chunk.chunkWidth))?.BuildChunkAsyncWithActionOnCompleted(chunkRebuildActions);
 
                             }
 
@@ -143,8 +156,12 @@ namespace monogameMinecraftShared.World
                     }
 
                     chunksNeededRebuild.Clear();
+                    
                 }
+
+              
             }
+         
             if (onUpdatedOneShot != null)
             {
                 onUpdatedOneShot();

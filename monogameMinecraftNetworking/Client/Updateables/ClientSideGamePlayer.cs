@@ -346,6 +346,13 @@ namespace monogameMinecraftNetworking.Client.Updateables
 
 
             Vector3Int setBlockPointInt = ClientSideChunkHelper.Vec3ToBlockPos(setBlockPoint);
+            BoundingBox box = BlockBoundingBoxUtility.GetBoundingBox(setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, inventoryData[currentSelectedHotbar]);
+            box.Max -= new Vector3(0.01f, 0.01f, 0.01f);
+            box.Min += new Vector3(0.01f, 0.01f, 0.01f);
+            if (bounds.Intersects(box))
+            {
+                return;
+            }
             switch (Chunk.blockInfosNew[inventoryData[currentSelectedHotbar]].shape)
             {
                 case BlockShape.Solid:
@@ -673,27 +680,17 @@ namespace monogameMinecraftNetworking.Client.Updateables
         }
 
         float playerTeleportingCD = 0f;
-        public void PlayerTryTeleportToEnderWorld(ClientGameBase game, float deltaTime)
+        public void PlayerTryTeleportToEnderWorld( float deltaTime)
         {
-      /*      if (playerTeleportingCD >= 4f)
+           if (playerTeleportingCD >= 4f)
             {
-                switch (VoxelWorld.currentWorld.worldID)
+                switch (ClientSideVoxelWorld.singleInstance.worldID)
                 {
                     case 0:
-                        VoxelWorld.voxelWorlds[1].actionOnSwitchedWorld = () =>
-                        {
-                            Debug.WriteLine("action teleport to world 1");
-                            MoveToPosition(new Vector3(0f, 150f, 0f));
-                        };
-                        VoxelWorld.SwitchToWorld(1, game);
+                    game.ClientSwitchToWorld(1);
                         break;
                     case 1:
-                        VoxelWorld.voxelWorlds[0].actionOnSwitchedWorld = () =>
-                        {
-                            Debug.WriteLine("action teleport to world 0");
-                            MoveToPosition(new Vector3(0f, 150f, 0f));
-                        };
-                        VoxelWorld.SwitchToWorld(0, game);
+                        game.ClientSwitchToWorld(0);
                         break;
                     default:
                         break;
@@ -704,7 +701,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             {
                 playerTeleportingCD += deltaTime;
             }
-      */
+      
 
 
 
@@ -787,7 +784,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             if (blockOnFootID == 13)
             {
 
-                PlayerTryTeleportToEnderWorld(game, deltaTime);
+                PlayerTryTeleportToEnderWorld( deltaTime);
             }
         }
         public void GetBlockOnFoot(ClientGameBase game, float deltaTime)

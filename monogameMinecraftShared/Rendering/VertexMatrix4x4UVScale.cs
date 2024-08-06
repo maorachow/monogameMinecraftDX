@@ -17,7 +17,6 @@ namespace monogameMinecraftShared.Rendering
         public Vector4 row3;
         public Vector4 uvWidthCorner;
         public float scale;
-
         public static readonly VertexDeclaration VertexDeclaration;
         public VertexMatrix4x4UVScale(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3, Vector4 uvWidthCorner, float scale)
         {

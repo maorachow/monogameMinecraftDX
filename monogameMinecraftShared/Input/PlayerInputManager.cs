@@ -16,6 +16,7 @@ namespace monogameMinecraftShared.Input
     {
         public IGamePlayer gamePlayer;
         public bool isTouchEnabled;
+        public bool suppressMouseMovement=false;
         public PlayerInputManager(IGamePlayer gamePlayer, bool isTouchEnabled)
         {
             this.gamePlayer = gamePlayer;
@@ -23,18 +24,24 @@ namespace monogameMinecraftShared.Input
         }
 
 
-        MouseState lastMouseState;
-        KeyboardState lastKeyboardState;
+      public  MouseState lastMouseState;
+      public KeyboardState lastKeyboardState;
 
         public Vector2 mouseDelta;
         public TouchCollection prevTouches;
         void ProcessPlayerMouseInput(MouseState curMouseState,bool isTouchEnabled = false)
         {
-            
-            mouseDelta=new Vector2(curMouseState.X - lastMouseState.X, lastMouseState.Y - curMouseState.Y);
-          
-            
 
+            mouseDelta=new Vector2(curMouseState.X - lastMouseState.X, lastMouseState.Y - curMouseState.Y);
+
+
+
+            if (suppressMouseMovement == true)
+            {
+                mouseDelta = new Vector2();
+                suppressMouseMovement = false;
+
+            }
             if (isTouchEnabled)
             {
 

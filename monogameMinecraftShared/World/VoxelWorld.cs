@@ -558,7 +558,7 @@ namespace monogameMinecraftShared.World
             Debug.WriteLine("main thread is threads stopping:"+isThreadsStopping);
             SaveWorldData();
             structureOperationsManager.SaveAllStructures();
-        Task.Run(() => DestroyAllChunks()) ;
+            Task.Run(DestroyAllChunks) ;
           //       chunks.Clear();
          //      isGoingToQuitWorld = true;
 
