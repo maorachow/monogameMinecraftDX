@@ -277,7 +277,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ClientSideChunkHelper.GetBlockData(blockPoint)));
             //  ClientSideChunkHelper.BreakBlock(blockPoint);
             ClientSideChunkHelper.SendBreakBlockOperation(blockPoint, ClientSideVoxelWorld.singleInstance.worldID, ClientSideVoxelWorld.gameInstance.networkingClient.socket);
-            Debug.WriteLine("client break block");
+         //   Debug.WriteLine("client break block");
             GetBlocksAround(bounds);
 
             return true;

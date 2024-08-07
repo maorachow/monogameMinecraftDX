@@ -16,6 +16,7 @@ using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
 using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
 using EntityData = monogameMinecraftNetworking.Data.EntityData;
@@ -33,8 +34,18 @@ namespace monogameMinecraftNetworking.Client
 
         public List<UserData> allUserDatas { get; set; }
 
-        public List<EntityData> allEntityDatas { get; set; }
+        public List<EntityData> allEntityDatas {
+            get
+            {
+                return _allEntityDatas;
+            }
 
+            set
+            {
+                _allEntityDatas = value;
+            }
+        }
+        public List<EntityData> _allEntityDatas;
         public IMultiplayerClient.OnAllEntitiesDataUpdated allEntitiesUpdatedAction
         {
 
@@ -43,7 +54,16 @@ namespace monogameMinecraftNetworking.Client
 
             set { _allEntitiesUpdatedAction = value; }
         }
+        public IMultiplayerClient.OnAllEntitiesDataUpdated allEntitiesPreUpdatedAction
+        {
+
+
+            get { return _allEntitiesPreUpdatedAction; }
+
+            set { _allEntitiesPreUpdatedAction = value; }
+        }
         public IMultiplayerClient.OnAllEntitiesDataUpdated _allEntitiesUpdatedAction;
+        public IMultiplayerClient.OnAllEntitiesDataUpdated _allEntitiesPreUpdatedAction;
         public Socket socket { get; set; }
         public bool isLoggedIn { get; set; }
         public bool isGoingToQuitGame { get; set; }=false;
@@ -60,6 +80,16 @@ namespace monogameMinecraftNetworking.Client
 
         }
         public IMultiplayerClient.OnAllUsersDataUpdated _allUsersUpdatedAction;
+
+        public IMultiplayerClient.OnAllUsersDataUpdated prevAllUsersUpdatedAction
+        {
+            get { return _prevAllUsersUpdatedAction; }
+
+            set { _prevAllUsersUpdatedAction = value; }
+
+
+        }
+        public IMultiplayerClient.OnAllUsersDataUpdated _prevAllUsersUpdatedAction;
         public IPAddress address;
         public int port;
 
@@ -233,6 +263,11 @@ namespace monogameMinecraftNetworking.Client
                             //  NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserDataUpdate, MessagePackSerializer.Serialize(playerData)), socket);
                             break;
                         case MessageCommandType.UserDataBroadcast:
+
+                            if (_prevAllUsersUpdatedAction != null)
+                            {
+                                _prevAllUsersUpdatedAction();
+                            }
                             allUserDatas = MessagePackSerializer.Deserialize<List<UserData>>(item.messageData);
                             if (_allUsersUpdatedAction != null)
                             {
@@ -241,7 +276,11 @@ namespace monogameMinecraftNetworking.Client
                             break;
 
                         case MessageCommandType.EntityDataBroadcast:
-                            allEntityDatas = EntityDataSerializingUtility.DeserializeEntityDatas(item.messageData);
+                            if (_allEntitiesPreUpdatedAction != null)
+                            {
+                                _allEntitiesPreUpdatedAction();
+                            }
+                            _allEntityDatas = EntityDataSerializingUtility.DeserializeEntityDatas(item.messageData);
                             if (_allEntitiesUpdatedAction != null)
                             {
                                 _allEntitiesUpdatedAction();
@@ -254,6 +293,17 @@ namespace monogameMinecraftNetworking.Client
                             BlockSoundBroadcastData data4 =
                                 MessagePackSerializer.Deserialize<BlockSoundBroadcastData>(item.messageData);
                             SoundsUtility.PlaySound(gamePlayer.position,new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID],20f);
+                            break;
+                        case MessageCommandType.BlockParticleBroadcast:
+                 //           Debug.WriteLine("particle broadcast");
+                            BlockParticleEffectBroadcastData data5 =
+                                MessagePackSerializer.Deserialize<BlockParticleEffectBroadcastData>(item.messageData);
+                    //        SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID], 20f);
+                            ClientSideParticleEmittingHelper.EmitParticleWithParamCustomUV(new Vector3(data5.posX, data5.posY, data5.posZ), ParticleEmittingHelper.allParticles["blockbreakingclientside"],
+                                new Vector4(Chunk.blockInfosNew[data5.blockID].uvCorners[0].X,
+                                    Chunk.blockInfosNew[data5.blockID].uvCorners[0].Y,
+                                    Chunk.blockInfosNew[data5.blockID].uvSizes[0].X / 4.0f,
+                                    Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y / 4.0f), new Vector2(Chunk.blockInfosNew[data5.blockID].uvSizes[0].X * 0.75f, Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y * 0.75f));
                             break;
                     }
                 }

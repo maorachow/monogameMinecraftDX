@@ -175,44 +175,46 @@ namespace monogameMinecraftNetworking.Updateables
             {
 
                 hasReachedCurStep = true;
+
+
             }
             else
             {
 
-                Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
-                float movePosY = movePos.Y;
-                if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
-                {
-                    movePos = new Vector3(0.00f, 0.001f, 0.00f);
-                }
-
-                Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f,
-                    targetPos.Z - position.Z);
-                lookPos.Normalize();
-                Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
-
-                entityVec = movePosN;
-                //              Debug.WriteLine(movePos);
-                if (isGround != false || !(entityGravity < 0f))
-                {
-                    Vector3 entityRot = LookRotation(lookPos);
-                    rotationX = entityRot.X;
-                    rotationY = entityRot.Y;
-                    rotationZ = entityRot.Z;
-                }
-                else
-                {
-                }
-
-
-                Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(rotationY), 0, 0);
-                bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
+              
 
                 hasReachedCurStep = false;
                 timeSpentToNextStep += deltaTime;
 
             }
+            Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
+            float movePosY = movePos.Y;
+            if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
+            {
+                movePos = new Vector3(0.00f, 0.001f, 0.00f);
+            }
 
+            Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f,
+                targetPos.Z - position.Z);
+            lookPos.Normalize();
+            Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
+
+            entityVec = movePosN;
+            //              Debug.WriteLine(movePos);
+            if (isGround != false || !(entityGravity < 0f))
+            {
+                Vector3 entityRot = LookRotation(lookPos);
+                rotationX = entityRot.X;
+                rotationY = entityRot.Y;
+                rotationZ = entityRot.Z;
+            }
+            else
+            {
+            }
+
+
+            Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(rotationY), 0, 0);
+            bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
             if (hasReachedCurStep && isPathValid)
             {
                 if (entityPath.curStep < entityPath.steps.Count - 1)
@@ -284,15 +286,16 @@ namespace monogameMinecraftNetworking.Updateables
                 }
 
 
-                if (entityMotionVec.Length() < 2f)
-                {
-                    EntityMove(entityVec.X, 0, entityVec.Z);
-                }
+               
 
 
 
 
 
+            } 
+            if (entityMotionVec.Length() < 2f)
+            {
+                EntityMove(entityVec.X, 0, entityVec.Z);
             }
             entityVec.Y = entityGravity * deltaTime;
 

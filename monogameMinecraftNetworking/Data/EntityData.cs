@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace monogameMinecraftNetworking.Data
 {
     [MessagePackObject]
-    public class EntityData
+    public struct EntityData
     {
        
         [Key(0)]

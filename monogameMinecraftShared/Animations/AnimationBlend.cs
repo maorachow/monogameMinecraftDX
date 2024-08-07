@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -134,7 +135,7 @@ namespace monogameMinecraftShared.Animations
                         effect.Parameters["Projection"]?.SetValue(projection);
                     }
 
-                   mesh.Draw();
+                    mesh.Draw();
                 }
             }
 
@@ -178,11 +179,11 @@ namespace monogameMinecraftShared.Animations
                         if (optionalParams.ContainsKey(modelBone.Name))
                         {
                             //     Debug.WriteLine("optional params loaded");
-                            localTransSum = optionalParams[modelBone.Name];
+                            localTransSum = localTransSum* optionalParams[modelBone.Name];
                         }
 
                     }
-
+                  
                     if (modelBone.Parent == null)
                     {
                         destinationBoneTransforms[i] = localTransSum * modelBone.Transform;
@@ -190,7 +191,8 @@ namespace monogameMinecraftShared.Animations
                     }
 
                     int index = modelBone.Parent.Index;
-                    Matrix transformedMat;
+                 Matrix transformedMat;
+
                     MultiplyMatrix(localTransSum, modelBone.Transform, out transformedMat);
                     MultiplyMatrix(transformedMat, destinationBoneTransforms[index], out destinationBoneTransforms[i]);
                 }

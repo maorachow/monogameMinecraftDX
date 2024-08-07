@@ -218,6 +218,7 @@ namespace monogameMinecraftNetworking.World
             lock (ServerSideWorldUpdater.chunksNeededRebuildListLock)
             {
                 ServerSideWorldUpdater.soundDatasToSend.Add(new BlockSoundBroadcastData(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f, prevBlockData.blockID));
+                ServerSideWorldUpdater.particleDatasToSend.Add(new BlockParticleEffectBroadcastData(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f, prevBlockData.blockID));
             }
             //send break block particle command to client
             BlockShape? shapeRight =
@@ -232,6 +233,13 @@ namespace monogameMinecraftNetworking.World
             BlockShape? shapeThis =
                 ServerSideChunkHelper.GetBlockShape(prevBlockData);
 
+            BlockShape? shapeUp =
+                ServerSideChunkHelper.GetBlockShape(ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 1, 0), worldID));
+
+            if (shapeUp is BlockShape.CrossModel)
+            {
+                ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(0, 1, 0),ServerSideWorldUpdater, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 1, 0), worldID),worldID));
+            }
             if (shapeThis is BlockShape.Door)
             {
                 Debug.WriteLine("break door");

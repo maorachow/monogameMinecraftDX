@@ -35,6 +35,7 @@ namespace monogameMinecraftNetworking.Client
         public PlayerInputManager playerInputManager;
 
         public ClientSideEntityManager clientSideEntityManager;
+        public ClientSidePlayersManager clientSidePlayersManager;
         public IEffectsManager effectsManager;
 
         public INetworkClientRenderPipelineManager renderPipelineManager;

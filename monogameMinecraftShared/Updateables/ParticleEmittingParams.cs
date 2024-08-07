@@ -45,5 +45,6 @@ namespace monogameMinecraftShared.Updateables
     {
         TexturedGravityParticle = 0,
         TexturedMotionParticle = 1,
+        ClientSideTexturedGravityParticle=2
     }
 }

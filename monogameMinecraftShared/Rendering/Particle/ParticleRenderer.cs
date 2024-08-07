@@ -109,8 +109,8 @@ namespace monogameMinecraftShared.Rendering.Particle
             this.gamePlayer = gamePlayer;
         }
 
-        RasterizerState rasterizerState = new RasterizerState { CullMode = CullMode.None };
-        public void DrawGBuffer()
+       protected RasterizerState rasterizerState = new RasterizerState { CullMode = CullMode.None };
+        public virtual void DrawGBuffer()
         {
             if (isEnabled==false)
             {

@@ -22,21 +22,30 @@ namespace monogameMinecraftShared.Updateables
             instance = this;
         }
 
+        public object allParticlesLock = new object();
         public IParticle[] allParticles = new IParticle[200];
 
         public Dictionary<Vector3Int, BoundingBox> cachedBlockColliders;
         public void Initialize()
         {
-            allParticles = new IParticle[200];
-            cachedBlockColliders = new Dictionary<Vector3Int, BoundingBox>();
+            lock (allParticlesLock)
+            {
+                allParticles = new IParticle[200];
+                cachedBlockColliders = new Dictionary<Vector3Int, BoundingBox>();
+            }
+           
         }
 
         public void ReleaseResources()
         {
-            allParticles = null;
-            cachedBlockColliders = null;
+            lock (allParticlesLock)
+            {
+                allParticles = null;
+                cachedBlockColliders = null;
+            }
+        
         }
-        public BoundingBox GetOrFetchBoundingBox(Vector3Int pos)
+        public BoundingBox GetOrFetchBoundingBox(Vector3Int pos,BlockData? blockData)
         {
             if (cachedBlockColliders.ContainsKey(pos))
             {
@@ -44,12 +53,15 @@ namespace monogameMinecraftShared.Updateables
             }
             else
             {
-                BlockData blockData = ChunkHelper.GetBlockData(pos);
-                if (blockData.blockID != 0 && Chunk.blockInfosNew.ContainsKey(blockData.blockID) &&
-                    BlockBoundingBoxUtility.IsBlockWithBoundingBox(Chunk.blockInfosNew[blockData.blockID].shape) ==
+                if (blockData == null)
+                {
+                    return new BoundingBox();
+                }
+                if (blockData.Value.blockID != 0 && Chunk.blockInfosNew.ContainsKey(blockData.Value.blockID) &&
+                    BlockBoundingBoxUtility.IsBlockWithBoundingBox(Chunk.blockInfosNew[blockData.Value.blockID].shape) ==
                     true)
                 {
-                    cachedBlockColliders.Add(pos, BlockBoundingBoxUtility.GetBoundingBox(pos.x, pos.y, pos.z, blockData));
+                    cachedBlockColliders.Add(pos, BlockBoundingBoxUtility.GetBoundingBox(pos.x, pos.y, pos.z, blockData.Value));
                     return cachedBlockColliders[pos];
                 }
             }
@@ -59,6 +71,8 @@ namespace monogameMinecraftShared.Updateables
 
         public void Update(float deltaTime)
         {
+            lock (allParticlesLock)
+            {
             cachedBlockColliders.Clear();
             //    Debug.WriteLine(allParticles[0]?.position);
             for (int i = 0; i < allParticles.Length; i++)
@@ -69,13 +83,16 @@ namespace monogameMinecraftShared.Updateables
                 }
 
             }
+            }
+          
             // RemoveDeadParticles();
         }
 
         public void SpawnNewParticleTexturedGravity(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime,
             Vector3 initalMotionVector, float friction)
         {
-
+            lock (allParticlesLock)
+            {
             TexturedGravityParticle particle = new TexturedGravityParticle(position, size, uvCorner, uvWidth, lifeTime, initalMotionVector, friction);
             int firstUnusedParticle = FindFirstDeadParticle();
             if (firstUnusedParticle != -1)
@@ -83,6 +100,8 @@ namespace monogameMinecraftShared.Updateables
                 allParticles[firstUnusedParticle] = particle;
             }
 
+            }
+           
         }
 
         public int FindFirstDeadParticle()

@@ -301,7 +301,7 @@ namespace monogameMinecraftShared.Animations
             }
 
 
-            if (!repeats && (stepIndex >= animation.StepsCount))
+            if (!repeats && (stepIndex >= animation.StepsCount||stepIndex<0))
             {
                 didFinish = true;
                 stepsFinished = 0;
@@ -338,6 +338,28 @@ namespace monogameMinecraftShared.Animations
                 // get new step
                 curStep = animation.GetStep(stepIndex);
                 nextStep = animation.GetStep(stepIndex + 1, repeats);
+            }
+
+            while (elapsedTimeInStep < 0)
+            {
+                // advance step
+              
+                stepIndex--;
+                stepsFinished--;
+                if (stepIndex < 0)
+                {
+                    didFinish = true;
+                    if (!repeats) { return; }
+                    stepIndex = animation.StepsCount - 1;
+                }
+                curStep = animation.GetStep(stepIndex);
+                nextStep = animation.GetStep(stepIndex + 1, repeats);
+                elapsedTimeInStep = stepDuration+elapsedTimeInStep;
+                // wrap animation
+               
+
+                // get new step
+                
             }
         }
 

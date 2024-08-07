@@ -31,6 +31,7 @@ namespace monogameMinecraftNetworking.World
             queuedChunkUpdatePoints = new ConcurrentQueue<IChunkUpdateOperation>();
             chunksNeededRebuild = new List<ServerSideChunk>();
             soundDatasToSend = new List<BlockSoundBroadcastData>();
+            particleDatasToSend = new List<BlockParticleEffectBroadcastData>();
             tryUpdateWorldBlocksThread = new Thread(UpdateWorldBlocksThread);
             tryUpdateWorldBlocksThread.IsBackground = true;
             tryUpdateWorldBlocksThread.Start();
@@ -66,7 +67,13 @@ namespace monogameMinecraftNetworking.World
                             continue;
                         }
                         updateOper.Update();
-                        chunksNeededRebuild.Add(ServerSideChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position),world.worldID));
+                        if (!chunksNeededRebuild.Contains(
+                                ServerSideChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position),
+                                    world.worldID)))
+                        {
+                            chunksNeededRebuild.Add(ServerSideChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position), world.worldID));
+                        }
+                        
                     }
                 }
 
@@ -121,8 +128,12 @@ namespace monogameMinecraftNetworking.World
                 {
                     NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.BlockSoundBroadcast,MessagePackSerializer.Serialize(item)));
                 }
-
-                soundDatasToSend.Clear();
+                foreach (var item in particleDatasToSend)
+                {
+                    NetworkingUtility.CastToAllClients(ServerSideVoxelWorld.serverInstance, new MessageProtocol((byte)MessageCommandType.BlockParticleBroadcast, MessagePackSerializer.Serialize(item)));
+                }
+                    soundDatasToSend.Clear();
+                    particleDatasToSend.Clear();
                 chunksNeededRebuild.Clear();
                 }
 
@@ -138,6 +149,7 @@ namespace monogameMinecraftNetworking.World
         public List<ServerSideChunk> chunksNeededRebuild;
 
         public List<BlockSoundBroadcastData> soundDatasToSend;
+        public List<BlockParticleEffectBroadcastData> particleDatasToSend;
         public readonly float maxDelayedTime = 0.2f;
         public float delayedTime = 0f;
 

@@ -1,31 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
- 
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared.Rendering;
+using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.World;
- 
- 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using monogameMinecraftNetworking.Client.World;
 
-namespace monogameMinecraftShared.Updateables
+namespace monogameMinecraftNetworking.Client.Updateables
 {
-    public interface IParticle
-    {
-        public void Update(float deltaTime);
-        public Vector3 position { get; set; }
-        public bool isAlive { get; set; }
-
-
-    }
-
-    public struct TexturedGravityParticle : IParticle
+    public struct ClientSideTexturedGravityParticle : IParticle
     {
         public void Update(float deltaTime)
         {
@@ -76,7 +64,7 @@ namespace monogameMinecraftShared.Updateables
                     {
 
 
-                        blocksAround.Add(ParticleManager.instance.GetOrFetchBoundingBox(new Vector3Int(x, y, z),ChunkHelper.GetBlockData(new Vector3Int(x,y,z))));
+                        blocksAround.Add(ParticleManager.instance.GetOrFetchBoundingBox(new Vector3Int(x, y, z), ClientSideChunkHelper.GetBlockData(new Vector3Int(x, y, z))));
 
                     }
                 }
@@ -135,7 +123,7 @@ namespace monogameMinecraftShared.Updateables
             bounds = BlockCollidingBoundingBoxHelper.offset(bounds, 0, 0, dz);
             position = new Vector3((bounds.Min.X + bounds.Max.X) / 2f, bounds.Min.Y, (bounds.Min.Z + bounds.Max.Z) / 2f);
         }
-        public TexturedGravityParticle(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime, Vector3 initalMotionVector, float friction)
+        public ClientSideTexturedGravityParticle(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime, Vector3 initalMotionVector, float friction)
         {
             this.position = position;
             this.size = size;

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftShared.Animations;
@@ -31,9 +32,9 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public GraphicsDevice device;
         public SpriteBatch spriteBatch;
         public SpriteFont spriteFont;
-        public List<(UserData data, AnimationBlend animState)> allUsersCache;
-        public List<UserData> latestAllUserDatas;
-        public IMultiplayerClient client;
+       // public List<(UserData data, AnimationBlend animState)> allUsersCache;
+   //     public List<UserData> latestAllUserDatas;
+     //   public IMultiplayerClient client;
         public static Animation playerAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -50,24 +51,27 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 { "leftArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
             }, 0.5f)
         }, true);
+
+        public ClientGameBase game;
         public ClientSidePlayersRenderer(Model playerModel, Effect gBufferEffect, IGamePlayer gamePlayer,
-            Texture2D playerTex,IMultiplayerClient client, GraphicsDevice device, SpriteBatch spriteBatch, SpriteFont spriteFont)
+            Texture2D playerTex,IMultiplayerClient client, GraphicsDevice device, SpriteBatch spriteBatch, SpriteFont spriteFont,ClientGameBase game)
         {
             this.curGamePlayer = gamePlayer;
             curUserName = client.gamePlayer.playerName;
             this.playerTex = playerTex;
             this.gBufferEffect = gBufferEffect;
             ClientSidePlayersRenderer.playerModel = playerModel;
-            this.client = client;
-            client.allUsersUpdatedAction += Update;
-            allUsersCache = new List<(UserData data, AnimationBlend animState)>();
-            latestAllUserDatas = new List<UserData>();
+            //this.client = client;
+         //   client.allUsersUpdatedAction += Update;
+           // allUsersCache = new List<(UserData data, AnimationBlend animState)>();
+          //  latestAllUserDatas = new List<UserData>();
             this.device = device;
             this.spriteBatch = spriteBatch;
             this.spriteFont = spriteFont;
+            this.game= game;
         }
 
-        public void Update()
+     /*   public void Update()
         {
             lock (allUsersCacheLock)
             {
@@ -113,8 +117,8 @@ namespace monogameMinecraftNetworking.Client.Rendering
                         Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
                             item1.rotZ);
 
-                        Vector3 lerpPos = Vector3.Lerp(curPos, targetPos, 10f * deltaTime);
-                        Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 10f * deltaTime);
+                        Vector3 lerpPos = Vector3.Lerp(curPos, targetPos, 1f * deltaTime);
+                        Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 1f * deltaTime);
                         float moveLength =
                             (new Vector3(curPos.X, 0, curPos.Z) - new Vector3(targetPos.X, 0, targetPos.Z)).Length();
                         allUsersCache[idx].data.posX=lerpPos.X;
@@ -124,25 +128,45 @@ namespace monogameMinecraftNetworking.Client.Rendering
                         allUsersCache[idx].data.rotY = lerpRot.Y;
                         allUsersCache[idx].data.rotZ = lerpRot.Z;
                        // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
-                        allUsersCache[idx].animState.Update(deltaTime,(moveLength));
+
+                       if ((moveLength / deltaTime) / 5f < 0.1f)
+                       {
+                           float lerpValue =
+                               MathHelper.Lerp(
+                                   allUsersCache[idx].animState.animationStates[0].elapsedTimeInStep, 0.25f,
+                                   deltaTime * 10f);
+                           float animationUpdateDelta = lerpValue - allUsersCache[idx].animState
+                               .animationStates[0].elapsedTimeInStep;
+                           allUsersCache[idx].animState.Update(animationUpdateDelta, 1);
+                       }
+                       else
+                       {
+                           Debug.WriteLine("player speed:"+(moveLength / deltaTime) / 5f);
+                           allUsersCache[idx].animState.Update(deltaTime, (moveLength / deltaTime) / 5f);
+                       }
+                       
                     }
                 }
             }
           
-        }
+        }*/
 
         public void DrawGBuffer()
         {
             BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
-            foreach (var entity in allUsersCache)
+            foreach (var entity in game.clientSidePlayersManager. allUsersCache)
             {
                 if (entity.data.userName == curUserName)
                 {
                     continue;
                 }
-                   
-                      
-                            gBufferEffect.Parameters["TextureE"].SetValue(playerTex);
+
+                if (entity.data.curWorldID != ClientSideVoxelWorld.singleInstance.worldID)
+                {
+                    continue;
+                }
+
+                gBufferEffect.Parameters["TextureE"].SetValue(playerTex);
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -167,7 +191,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             float screenWidth = device.PresentationParameters.BackBufferWidth;
             float screenHeight = device.PresentationParameters.BackBufferHeight;
             spriteBatch.Begin(blendState:BlendState.AlphaBlend,samplerState:SamplerState.PointClamp);
-            foreach (var entity in allUsersCache)
+            foreach (var entity in game.clientSidePlayersManager.allUsersCache)
             {
 
                 if (entity.data.userName == curUserName)

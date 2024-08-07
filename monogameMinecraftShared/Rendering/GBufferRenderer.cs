@@ -128,10 +128,17 @@ namespace monogameMinecraftShared.Rendering
             chunkRenderer.RenderAllChunksGBuffer(RenderingChunks, player, gBufferEffect);
             if (!chunksOnly)
             {
-                entityRenderer.DrawGBuffer(gBufferEntityEffect);
-                particleRenderer.DrawGBuffer();
+              
+              
                
             }
+
+            if (entityRenderer != null)
+            {
+                entityRenderer.DrawGBuffer(gBufferEntityEffect);
+            }
+        
+            particleRenderer.DrawGBuffer();
             if (optionalRenderer != null)
             {
                 optionalRenderer.DrawGBuffer();

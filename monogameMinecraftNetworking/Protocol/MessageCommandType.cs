@@ -22,6 +22,7 @@ namespace monogameMinecraftNetworking.Protocol
         ChunkUpdateData=(byte)142,
         EntityDataBroadcast=(byte)143,
         HurtEntityRequest=(byte)144,
-        BlockSoundBroadcast=(byte)145
+        BlockSoundBroadcast=(byte)145,
+        BlockParticleBroadcast = (byte)146
     }
 }

@@ -18,7 +18,8 @@ namespace monogameMinecraftShared.Updateables
             new Dictionary<string, ParticleEmittingParams>
             {
 
-                {"blockbreaking",new ParticleEmittingParams(ParticleType.TexturedGravityParticle,new Vector4(0,0,0,0),30,0.2f,0.15f,2f,5f,2f)}
+                {"blockbreaking",new ParticleEmittingParams(ParticleType.TexturedGravityParticle,new Vector4(0,0,0,0),30,0.2f,0.15f,2f,5f,2f)},
+                {"blockbreakingclientside",new ParticleEmittingParams(ParticleType.ClientSideTexturedGravityParticle,new Vector4(0,0,0,0),30,0.2f,0.15f,2f,5f,2f)}
             };
         public static void EmitParticleWithParam(Vector3 position, ParticleEmittingParams param)
         {

@@ -28,4 +28,27 @@ namespace monogameMinecraftNetworking.Data
             this.blockID = blockID;
         }
     }
+
+
+    [MessagePackObject]
+    public class BlockParticleEffectBroadcastData
+    {
+        [Key(0)]
+        public float posX;
+        [Key(1)]
+        public float posY;
+        [Key(2)]
+        public float posZ;
+
+        [Key(3)]
+        public short blockID;
+
+        public BlockParticleEffectBroadcastData(float posX, float posY, float posZ, short blockID)
+        {
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+            this.blockID = blockID;
+        }
+    }
 }

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using monogameMinecraftNetworking.Client.Rendering.Particle;
 using monogameMinecraftNetworking.Client.UI;
 using monogameMinecraftNetworking.Client.World;
 
@@ -65,12 +66,12 @@ namespace monogameMinecraftNetworking.Client.Rendering
             BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
-            particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
+            particleRenderer = new ClientSideParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
                 effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer, true);
             BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
             clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
-                game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf);
+                game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf,game);
             clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice,game);
@@ -124,7 +125,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public void RenderWorld(GameTime gameTime, SpriteBatch sb)
         {
 
-            clientSidePlayersRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+         //   clientSidePlayersRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
           //  clientSideEntitiesRenderer.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 

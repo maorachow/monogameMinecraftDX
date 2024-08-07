@@ -28,7 +28,7 @@ namespace Project1
     //    private SpriteBatch _spriteBatch;
         public RandomTextureGenerator randomTextureGenerator;
         public MouseMovementManager mouseMovementManager;
-
+        public ParticleManager particleManager;
         public MinecraftGameClient()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -183,6 +183,7 @@ namespace Project1
 
         public override void QuitGameplay()
         {
+            particleManager.ReleaseResources();
             networkingClient.Disconnect();
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
@@ -190,6 +191,7 @@ namespace Project1
         }
         public  void QuitGameplayDirectly()
         {
+            particleManager.ReleaseResources();
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
             mouseMovementManager.isMouseLocked = false;
@@ -280,6 +282,9 @@ namespace Project1
             networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
 
             clientSideEntityManager = new ClientSideEntityManager(this.networkingClient);
+            clientSidePlayersManager=new ClientSidePlayersManager(networkingClient);
+            particleManager = new ParticleManager();
+            particleManager.Initialize();
             renderPipelineManager.InitRenderPipeline();
         
            
@@ -312,10 +317,10 @@ namespace Project1
 
         protected override void Update(GameTime gameTime)
         {
-            if (!IsActive)
+       /*     if (!IsActive)
             {
                 return;
-            }
+            }*/
      /*       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();*/
             
@@ -364,6 +369,8 @@ namespace Project1
                     {
                         QuitGameplayDirectly();
                     }
+                    clientSideEntityManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    clientSidePlayersManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                     if (isGamePaused)
                     {
 
@@ -425,8 +432,9 @@ namespace Project1
                     PauseGame(null);
                     }
                     playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
-                   clientSideEntityManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+                  
                     ClientSideVoxelWorld.singleInstance.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                  (gamePlayerR.gamePlayer as ClientSideGamePlayer)  .UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
 
@@ -461,10 +469,10 @@ namespace Project1
 
         protected override void Draw(GameTime gameTime)
         {
-            if (!IsActive)
+        /*    if (!IsActive)
             {
                 return;
-            }
+            }*/
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             /*      gamePlayer.cam.updateCameraVectors();

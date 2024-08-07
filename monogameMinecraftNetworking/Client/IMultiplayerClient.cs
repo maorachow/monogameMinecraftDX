@@ -43,9 +43,9 @@ namespace monogameMinecraftNetworking.Client
 
         public delegate void OnAllEntitiesDataUpdated();
         public OnAllUsersDataUpdated allUsersUpdatedAction { get; set; }
-
+        public OnAllUsersDataUpdated prevAllUsersUpdatedAction { get; set; }
         public OnAllEntitiesDataUpdated allEntitiesUpdatedAction { get; set; }
-      
+         public OnAllEntitiesDataUpdated allEntitiesPreUpdatedAction { get; set; }
         //   public void MessageParsingThread(Socket s);
     }
 }
