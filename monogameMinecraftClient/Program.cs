@@ -1,3 +1,3 @@
 ﻿
-using var game = new Project1.MinecraftGameClient();
+using var game = new monogameMinecraftClient.MinecraftGameClient();
 game.Run();

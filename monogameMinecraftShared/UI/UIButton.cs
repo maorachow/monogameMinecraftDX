@@ -87,9 +87,9 @@ namespace monogameMinecraftShared.UI
             DrawString(null);
         }
 
-        public void DrawString(string text)
+        public void DrawString(string text1)
         {
-            this.text = text;
+          //  this.text = text;
             text = text == null ? " " : text;
             // ButtonRect.Center;
             if (texture != null)
@@ -126,14 +126,16 @@ namespace monogameMinecraftShared.UI
                 textSize = font.MeasureString(text) / 2f;
             }
             float textSizeScaling = UIElement.ScreenRect.Height / (float)UIElement.ScreenRectInital.Height * 2f * textScale;
-            textSize *= textSizeScaling;
+
+            float horizontalTextSizeScaling = (ButtonRect.Width / (float)(textSize.X*2));
+            textSize *= MathF.Min(textSizeScaling, horizontalTextSizeScaling) ;
 
             //   Debug.WriteLine(textSize/2f);
             // textSize.Y = 0;
             // spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x,textPixelPos.y), Color.White);
             if (font != null)
             {
-                spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x - textSize.X, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
+                spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x - textSize.X, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), MathF.Min(horizontalTextSizeScaling,textSizeScaling), SpriteEffects.None, 1);
             }
 
 

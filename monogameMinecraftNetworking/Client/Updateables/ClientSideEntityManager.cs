@@ -149,7 +149,8 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         allEntitiesCache[idx].data.rotZ = targetRot.Z;
                         allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
                         allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
-                        allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
+                        allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
+                    allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
                         if (float.IsInfinity(moveLength) == true)
                         {
                             Debug.WriteLine("inf move length");
@@ -199,7 +200,8 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         allEntitiesCache[idx].data.rotY = targetRot.Y;
                         allEntitiesCache[idx].data.rotZ = targetRot.Z;
                         allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
-                        allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
+                        allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
+                    allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
                         allEntitiesCache[idx].entitySpeed =0f;
                         if (allEntitiesCache[idx].data.isEntityDying == false)
                         {

@@ -20,7 +20,7 @@ namespace monogameMinecraftShared.Rendering
         int width;
         int height;
         public GameTimeManager gameTimeManager;
-        public EntityRenderer entityRenderer;
+       // public EntityRenderer entityRenderer;
 
         public VolumetricLightRenderer(GraphicsDevice device, GBufferRenderer gBufferRenderer, SpriteBatch sb, Effect blendEffect, Effect lightShaftEffect, IGamePlayer player, GameTimeManager gameTimeManager)
         {

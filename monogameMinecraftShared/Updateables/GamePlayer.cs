@@ -749,6 +749,12 @@ namespace monogameMinecraftShared.Updateables
             PlayerBlockOnFootChanged(game, deltaTime);
             prevBlockOnFootID = blockOnFootID;
         }
+
+        public void ResetPlayerInputValues()
+        {
+            finalMoveVec = new Vector3();
+        }
+
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState,bool isFlyingPressed,bool isSpeedUpPressed,bool isLMBPressed,bool isRMBPressed,float scrollDelta)
         {
 

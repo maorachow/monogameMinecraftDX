@@ -120,7 +120,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         allUsersCache[idx].data.rotX = lerpRot.X;
                         allUsersCache[idx].data.rotY = lerpRot.Y;
                         allUsersCache[idx].data.rotZ = lerpRot.Z;
-                        
+                        allUsersCache[idx].data.curWorldID = item1.curWorldID;
+                        allUsersCache[idx].data.isAttacking = item1.isAttacking;
+                        allUsersCache[idx].data.userName = item1.userName;
                         // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
 
                         if ((moveLength / deltaTime) / 5f < 0.1f)
@@ -152,6 +154,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         allUsersCache[idx].data.rotX = curRot.X;
                         allUsersCache[idx].data.rotY = curRot.Y;
                         allUsersCache[idx].data.rotZ = curRot.Z;
+                        allUsersCache[idx].data.curWorldID = item1.curWorldID;
+                        allUsersCache[idx].data.isAttacking = item1.isAttacking;
+                        allUsersCache[idx].data.userName = item1.userName;
                         allUsersCache[idx].animState.Update(deltaTime,0.1f);
                     }
                 }

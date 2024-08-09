@@ -63,6 +63,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
         {
             SetBoundPosition(new Vector3(0,100,0));
             position = new Vector3(0, 100, 0);
+            _inventoryData=new short[9];
         }
       /*  public static int ReadPlayerData(GamePlayer player, Game game, bool ExludePlayerInWorldIDData = false)
         {
@@ -287,11 +288,6 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public bool isGetBlockNeeded = false;
         public void PlaceBlock()
         {
-
-            if (inventoryData[currentSelectedHotbar] == 0)
-            {
-                return;
-            }
             monogameMinecraftShared.Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
 
@@ -304,6 +300,17 @@ namespace monogameMinecraftNetworking.Client.Updateables
             Vector3 setBlockPoint = new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f);
 
             Vector3 castBlockPoint = new Vector3(blockPoint.x, blockPoint.y, blockPoint.z);
+            if (ClientSideChunkHelper.GetBlockShape(ClientSideChunkHelper.GetBlockData(castBlockPoint)) is BlockShape.Door)
+            {
+                //  VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorInteractingOperation((Vector3Int)castBlockPoint));
+                ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorInteractingUpdate, blockPoint.x, blockPoint.y, blockPoint.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
+                return;
+            }
+            if (inventoryData[currentSelectedHotbar] == 0)
+            {
+                return;
+            }
+       
 
             // ParticleManager.instance.SpawnNewParticle(setBlockPoint,1f,new Vector2(0f,0f),new Vector2(1f,1f),1f,new Vector3(1f,1f,1f),1f);
 
@@ -336,12 +343,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             }
             //interactable blocks
 
-            if (ClientSideChunkHelper.GetBlockShape(ClientSideChunkHelper.GetBlockData(castBlockPoint)) is BlockShape.Door)
-            {
-                //  VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorInteractingOperation((Vector3Int)castBlockPoint));
-                ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorInteractingUpdate,blockPoint.x,blockPoint.y,blockPoint.z,0,0,ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
-                return;
-            }
+         
 
 
 
@@ -714,6 +716,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             GetBlockOnFoot(game, deltaTime);
             UpdatePlayerMovement(deltaTime);
             ApplyGravity(deltaTime);
+           
             if (isGetBlockNeeded == true)
             {
                 GetBlocksAround(this.bounds);
@@ -728,7 +731,12 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public bool isRightMouseButtonDown = false;
         public void UpdatePlayerMovement(float deltaTime)
         {
-
+            playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
+            if (playerCurIntPos != playerLastIntPos)
+            {
+                GetBlocksAround(bounds);
+            }
+            playerLastIntPos = playerCurIntPos;
             if (breakBlockCD > 0f)
             {
                 breakBlockCD -= deltaTime;
@@ -775,6 +783,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 breakBlockCD = 0.15f;
             }
 
+
         }
         public short prevBlockOnFootID = 0;
         public short blockOnFootID = 0;
@@ -793,15 +802,14 @@ namespace monogameMinecraftNetworking.Client.Updateables
             PlayerBlockOnFootChanged(game, deltaTime);
             prevBlockOnFootID = blockOnFootID;
         }
+        public void ResetPlayerInputValues()
+        {
+            finalMoveVec =Vector3.Zero;
+        }
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState, bool isFlyingPressed, bool isSpeedUpPressed, bool isLMBPressed, bool isRMBPressed, float scrollDelta)
         {
 
-            playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
-            if (playerCurIntPos != playerLastIntPos)
-            {
-                GetBlocksAround(bounds);
-            }
-            playerLastIntPos = playerCurIntPos;
+          
 
             finalMoveVec = deltaTime * moveVelocity * new Vector3(dir.X, dir.Y, dir.Z);
             //    Debug.WriteLine(finalMoveVec);

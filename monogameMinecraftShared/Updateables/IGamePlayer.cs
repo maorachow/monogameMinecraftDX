@@ -15,6 +15,9 @@ namespace monogameMinecraftShared.Updateables
 
         public int currentSelectedHotbar { get; }
         public short[] inventoryData { get; }
+
+        public void ResetPlayerInputValues();
+        
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState, bool isFlyingPressed, bool isSpeedUpPressed, bool isLMBPressed, bool isRMBPressed, float scrollDelta);
     }
 }

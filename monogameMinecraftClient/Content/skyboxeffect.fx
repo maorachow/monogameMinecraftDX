@@ -61,9 +61,11 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
  
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-     
-    return lerp(texCUBE(SkyBoxSampler, input.TextureCoordinate.xyz).xyzw, texCUBE(SkyBoxNightSampler, input.TextureCoordinate.xyz).xyzw,mixValue);
-    
+    #if OPENGL
+    return lerp(texCUBE(SkyBoxSampler,float3( input.TextureCoordinate.x,-input.TextureCoordinate.y,input.TextureCoordinate.z)).xyzw, texCUBE(SkyBoxNightSampler,float3( input.TextureCoordinate.x,-input.TextureCoordinate.y,input.TextureCoordinate.z)).xyzw,mixValue);
+    #else
+    return lerp(texCUBE(SkyBoxSampler, input.TextureCoordinate.xyz).xyzw, texCUBE(SkyBoxNightSampler, input.TextureCoordinate.xyz).xyzw, mixValue);
+    #endif
 }
 technique Skybox
 {

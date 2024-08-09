@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using monogameMinecraftNetworking.Client.World;
+using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Physics;
+using monogameMinecraftShared.World;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
@@ -58,6 +62,30 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     break;
             }
 
+        }
+    }
+
+    public class ClientSideParticleHelper
+    {
+        public static BoundingBox GetOrFetchBoundingBox(Vector3Int pos)
+        {
+            if (ParticleManager.instance. cachedBlockColliders.ContainsKey(pos))
+            {
+                return ParticleManager.instance.cachedBlockColliders[pos];
+            }
+            else
+            {
+                BlockData data = ClientSideChunkHelper.GetBlockData(pos);
+                if (data.blockID != 0 && Chunk.blockInfosNew.ContainsKey(data.blockID) &&
+                    BlockBoundingBoxUtility.IsBlockWithBoundingBox(Chunk.blockInfosNew[data.blockID].shape) ==
+                    true)
+                {
+                    ParticleManager.instance.cachedBlockColliders.TryAdd(pos, BlockBoundingBoxUtility.GetBoundingBox(pos.x, pos.y, pos.z, data));
+                    return ParticleManager.instance.cachedBlockColliders[pos];
+                }
+            }
+
+            return new BoundingBox();
         }
     }
 }

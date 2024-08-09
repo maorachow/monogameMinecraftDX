@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Text;
 using monogameMinecraftShared.Updateables;
@@ -17,6 +18,8 @@ namespace monogameMinecraftShared.UI
         public Texture2D selectedHotbarTex;
         public Vector2[] hotbarItemNodes;
         public float hotbarItemWidth;
+
+        
         //   public static List<UIElement> UIElements = new List<UIElement>();
         string UIElement.text { get; set; }
         public InGameUI(SpriteFont sf, GameWindow gw, SpriteBatch sb, GamePlayerReference gamePlayer, Texture2D hotbarTex, Texture2D selectedHotbar)

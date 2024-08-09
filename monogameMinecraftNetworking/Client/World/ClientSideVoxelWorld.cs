@@ -48,7 +48,6 @@ namespace monogameMinecraftNetworking.Client.World
         {
             get
             {
-                _renderingChunks.Clear();
                 foreach (var kvp in chunks)
                 {
                     if (!_renderingChunks.ContainsKey(kvp.Key))
@@ -56,7 +55,13 @@ namespace monogameMinecraftNetworking.Client.World
                         _renderingChunks.TryAdd(kvp.Key, (IRenderableChunkBuffers)kvp.Value);
                     }
                 }
-               
+                foreach (var kvp in _renderingChunks)
+                {
+                    if (!chunks.ContainsKey(kvp.Key))
+                    {
+                        _renderingChunks.TryRemove(kvp.Key, out IRenderableChunkBuffers _);
+                    }
+                }
 
                 return _renderingChunks;
             }
@@ -387,6 +392,7 @@ namespace monogameMinecraftNetworking.Client.World
             // InitChunkPool();
 
             chunks = new ConcurrentDictionary<Vector2Int, ClientSideChunk>();
+            _renderingChunks = new ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers>();
 
           //  ReadJson();
          //   structureOperationsManager.ReadStructureDatas();

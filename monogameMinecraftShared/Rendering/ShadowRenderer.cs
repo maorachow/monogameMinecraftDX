@@ -2,8 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
 using monogameMinecraftShared.Updateables;
@@ -13,7 +15,7 @@ namespace monogameMinecraftShared.Rendering
     public class ShadowRenderer
     {
 
-        public MinecraftGameBase game;
+   //     public MinecraftGameBase game;
         public GraphicsDevice device;
         public RenderTarget2D shadowMapTarget;
         public RenderTarget2D shadowMapTargetFar;
@@ -21,6 +23,7 @@ namespace monogameMinecraftShared.Rendering
         public ChunkRenderer chunkRenderer;
         public EntityRenderer entityRenderer;
         public GameTimeManager gameTimeManager;
+        public GamePlayerReference gamePlayerR;
         public Model zombieModel;
         public Matrix lightView = Matrix.CreateLookAt(new Vector3(100, 100, 100), new Vector3(0, 0, 0),
                        Vector3.Up);
@@ -33,9 +36,11 @@ namespace monogameMinecraftShared.Rendering
 
         public RenderTargetBinding[] shadowMapBinding;
         public float shadowBias;
-        public ShadowRenderer(MinecraftGameBase game, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, EntityRenderer er, GameTimeManager gtr)
+        public IShadowDrawableRenderer optionalRenderer1;
+        public IShadowDrawableRenderer optionalRenderer2;
+        public ShadowRenderer(GamePlayerReference gamePlayerR, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, EntityRenderer er, GameTimeManager gtr, IShadowDrawableRenderer optionalRenderer1 =null, IShadowDrawableRenderer optionalRenderer2 = null)
         {
-            this.game = game;
+            this.gamePlayerR = gamePlayerR;
             this.device = device;
             this.shadowMapShader = shadowMapShader;
             entityRenderer = er;
@@ -47,6 +52,8 @@ namespace monogameMinecraftShared.Rendering
 
             shadowMapBinding[1] = new RenderTargetBinding(shadowMapTargetFar);
             gameTimeManager = gtr;
+            this.optionalRenderer1 = optionalRenderer1;
+            this.optionalRenderer2 = optionalRenderer2;
         }
         public void UpdateLightMatrices(IGamePlayer player)
         {
@@ -151,7 +158,7 @@ namespace monogameMinecraftShared.Rendering
             return lightView1 * lightProjection1;
         }
         public bool isRenderingFarShadow = true;
-        public void RenderShadow(IGamePlayer player)
+        public void RenderShadow(IGamePlayer player,ConcurrentDictionary<Vector2Int,IRenderableChunkBuffers> renderingChunks=null)
         {
             //   UpdateLightMatrices(player);
             Vector4 world0 = new Vector4(player.position.X, player.position.Y, player.position.Z, 1);
@@ -168,16 +175,24 @@ namespace monogameMinecraftShared.Rendering
                 shadowBias = MathF.Abs(transformedWorld0.Z - transformedWorld1.Z);
             }
             UpdateLightMatrices(player);
-            BoundingFrustum frustum = new BoundingFrustum(game.gamePlayerR.gamePlayer.cam.viewMatrix * game.gamePlayerR.gamePlayer.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayerR.gamePlayer.cam.viewMatrix * gamePlayerR.gamePlayer.cam.projectionMatrix);
             if (GameOptions.renderShadow)
             {
                 device.SetRenderTarget(shadowMapTarget);
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
-                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 96, false);
+                if (renderingChunks != null)
+                {
+                    chunkRenderer.RenderShadow(renderingChunks, player, lightSpaceMat, shadowMapShader, 96, false);
+                }
+                else
+                {
+                    chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 96, false);
+                }
+              
 
 
-                foreach (var entity in EntityManager.worldEntities)
+         /*       foreach (var entity in EntityManager.worldEntities)
                 {
                     switch (entity.typeID)
                     {
@@ -192,7 +207,22 @@ namespace monogameMinecraftShared.Rendering
                     //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
 
 
+                }*/
+                 if (entityRenderer != null)
+                 {
+                     entityRenderer.DrawShadow(lightSpaceMat, shadowMapShader);
+                 }
+
+                if (optionalRenderer1 != null)
+                {
+                    optionalRenderer1.DrawShadow(lightSpaceMat, shadowMapShader);
                 }
+                if (optionalRenderer2 != null)
+                {
+                    optionalRenderer2.DrawShadow(lightSpaceMat, shadowMapShader);
+                }
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
             }
 
             if (GameOptions.renderFarShadow)
@@ -200,26 +230,45 @@ namespace monogameMinecraftShared.Rendering
                 device.SetRenderTarget(shadowMapTargetFar);
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
-                chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256, false);
-
-
-                foreach (var entity in EntityManager.worldEntities)
+                //  chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256, false);
+                if (renderingChunks != null)
                 {
-                    switch (entity.typeID)
-                    {
-                        case 0:
-                            if (frustum.Intersects(entity.bounds))
-                            {
-                                entityRenderer.DrawZombieShadow(entity, lightSpaceMatFar, shadowMapShader);
-                            }
-
-                            break;
-                    }
-                    //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
-
-
+                    chunkRenderer.RenderShadow(renderingChunks, player, lightSpaceMatFar, shadowMapShader, 192, false);
+                }
+                else
+                {
+                    chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 192, false);
                 }
             }
+            /*     foreach (var entity in EntityManager.worldEntities)
+                 {
+                     switch (entity.typeID)
+                     {
+                         case 0:
+                             if (frustum.Intersects(entity.bounds))
+                             {
+                                 entityRenderer.DrawZombieShadow(entity, lightSpaceMatFar, shadowMapShader);
+                             }
+
+                             break;
+                     }
+                     //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
+
+
+                 }*/
+            if (entityRenderer != null)
+                {
+                    entityRenderer.DrawShadow(lightSpaceMatFar, shadowMapShader);
+                }
+                if (optionalRenderer1 != null)
+                {
+                    optionalRenderer1.DrawShadow(lightSpaceMatFar, shadowMapShader);
+                }
+                if (optionalRenderer2 != null)
+                {
+                    optionalRenderer2.DrawShadow(lightSpaceMatFar, shadowMapShader);
+                }
+           
 
             device.SetRenderTarget(null);
             device.Clear(Color.CornflowerBlue);

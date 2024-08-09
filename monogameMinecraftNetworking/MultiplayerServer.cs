@@ -125,12 +125,15 @@ namespace monogameMinecraftNetworking
         {
             while (true)
             {
-               
                 if (isGoingToQuit == true)
                 {
-                    Console.WriteLine("quit execute todo list thread:"+Thread.CurrentThread.ManagedThreadId);
+                    Console.WriteLine("quit execute todo list thread:" + Thread.CurrentThread.ManagedThreadId);
                     return;
                 }
+
+                try
+                {
+   
             //    Thread.Sleep(0);
                 lock (serverTodoLists[listIndex].queueLock)
                 {
@@ -238,10 +241,27 @@ namespace monogameMinecraftNetworking
                                     MessagePackSerializer.Deserialize<HurtEntityRequestData>(item.message.messageData);
                                 ServerSideEntityManager.HurtEntity(data3.entityID,data3.hurtValue,new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ));
                                 break;
+                            case MessageCommandType.ChatMessage:
+                                if (item.sourceClient.isUserDataLoaded == false)
+                                {
+                                    break;
+                                }
+                                string data6 = MessagePackSerializer.Deserialize<string>(item.message.messageData);
+
+                                string broadcastMessage = "<" + item.sourceClient.curUserData.userName + "> " + data6;
+                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast,MessagePackSerializer.Serialize(broadcastMessage)));
+                                break;
                         }
                     }
 
                 }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("execute todo list thread exception:"+ex);
+                    continue;
+                }
+          
                   
                            
                     

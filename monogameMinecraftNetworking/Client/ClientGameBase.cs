@@ -51,7 +51,7 @@ namespace monogameMinecraftNetworking.Client
           //  throw new NotImplementedException();
         }
 
-        public virtual void GoToSettings(UIButton obj)
+        public virtual void GoToSettings(object obj)
         {
           //  throw new NotImplementedException();
         }
@@ -74,6 +74,28 @@ namespace monogameMinecraftNetworking.Client
         }
 
         public virtual void ClientSwitchToWorld(int worldID)
+        {
+
+        }
+
+        public virtual void GoToMenuFromSettings(object obj)
+        {
+           
+        }
+
+        public virtual void SendChatMessage(object obj, string text)
+        {
+
+        }
+
+
+        
+
+        public virtual void OpenChatUI()
+        {
+            
+        }
+        public virtual void CloseChatUI()
         {
 
         }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace monogameMinecraftShared.Rendering
 {
-    public class EntityRenderer
+    public class EntityRenderer:IShadowDrawableRenderer
     {
         public Effect basicShader;
         public Effect shadowMapShader;
@@ -446,6 +446,26 @@ namespace monogameMinecraftShared.Rendering
         }
         //      basicShader.Parameters["World"].SetValue(world * bone.Transform);
 
+        public void DrawShadow(Matrix shadowMat, Effect shadowMapShader1)
+        {
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
+            foreach (var entity in EntityManager.worldEntities)
+            {
+                switch (entity.typeID)
+                {
+                    case 0:
+                        if (frustum.Intersects(entity.bounds))
+                        {
+                            DrawZombieShadow(entity, shadowMat, shadowMapShader1);
+                        }
+
+                        break;
+                }
+                //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
+
+
+            }
+        }
     }
 }
 

@@ -86,8 +86,8 @@ namespace monogameMinecraftShared.Rendering
             SSREffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSREffect.Parameters["LUTTex"]?.SetValue(BRDFLUTRenderer.instance.renderTargetLUT);
             SSREffect.Parameters["binarySearch"]?.SetValue(binarySearch);
-            SSREffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
-            SSREffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
+         //   SSREffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
+        //    SSREffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             if (SSREffect.Parameters["NoiseTex"] != null) { SSREffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             //  SSREffect.Parameters["matInverseView"].SetValue(Matrix.Invert(player.cam.viewMatrix));
             //  SSREffect.Parameters["matInverseProjection"].SetValue(Matrix.Invert(player.cam.projectionMatrix));

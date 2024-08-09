@@ -99,7 +99,8 @@ namespace monogameMinecraftShared.Rendering
             skyboxVertexBuffer = new VertexBuffer(device, typeof(VertexPosition), 36, BufferUsage.None);
             skyboxVertexBuffer.SetData(skyboxVertices.ToArray());
         }
-
+        RasterizerState rasterizerState = new RasterizerState{CullMode = CullMode.None};
+        RasterizerState rasterizerState1 = new RasterizerState { CullMode = CullMode.CullCounterClockwiseFace };
         public void Render(RenderTargetCube targetColl, int renderSourceTexID = 0)
         {
 
@@ -112,8 +113,8 @@ namespace monogameMinecraftShared.Rendering
             Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 1.0f, 0.0f), new Vector3(0.0f, 0.0f, 1.0f)),
             Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 0.0f, 1.0f), new Vector3(0.0f, -1.0f, 0.0f)),
              Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 0.0f, -1.0f), new Vector3(0.0f, -1.0f, 0.0f))};
-            RasterizerState rasterizerState = new RasterizerState();
-            rasterizerState.CullMode = CullMode.None;
+          
+         
             device.RasterizerState = rasterizerState;
             device.DepthStencilState = DepthStencilState.None;
             for (int i = 0; i < 6; i++)
@@ -302,8 +303,7 @@ namespace monogameMinecraftShared.Rendering
             targetColl.resultSpecularCubemapMip4.GetData(CubeMapFace.NegativeZ, data3);
             targetColl.resultSpecularCubemapMip0.SetData(CubeMapFace.NegativeZ, 4, null, data3, 0, width3 * width3);*/
             device.DepthStencilState = DepthStencilState.Default;
-            RasterizerState rasterizerState1 = new RasterizerState();
-            rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
+             
             device.RasterizerState = rasterizerState1;
 
         }

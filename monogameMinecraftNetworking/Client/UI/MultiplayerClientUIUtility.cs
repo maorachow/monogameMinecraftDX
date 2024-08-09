@@ -141,8 +141,10 @@ namespace monogameMinecraftNetworking.Client.UI
             }
              monogameMinecraftNetworking.Client.Asset. BlockResourcesManager.LoadDefaultUIResources(game.Content, game);
 
+            
+            
             UIElement.menuUIs = new List<UIElement> {
-
+               
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
 
 
@@ -151,19 +153,20 @@ namespace monogameMinecraftNetworking.Client.UI
 
                 new InputField(new Vector2(0.3f, 0.4f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window, (field =>game.inputPort=field.TryParseInt() ) ,"",1,10,false),
                 new InputField(new Vector2(0.3f, 0.55f), 0.4f, 0.1f, UIElement.UITextures["inputfield"],UIElement.UITextures["inputfieldhighlighted"],sf,game._spriteBatch,game.Window,  (field =>game.inputUserName=field.text ) ,"",1,10,false),
-                new UIButton(new Vector2(0.3f, 0.7f), 0.4f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.InitGameplay ,"Start Game",null,1),
-
+                new UIButton(new Vector2(0.3f, 0.7f), 0.2f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.InitGameplay ,"Start Game",null,1),
+                new UIButton(new Vector2(0.5f, 0.7f), 0.2f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.GoToSettings ,"Settings",null,1),
                 new UIButton(new Vector2(0.3f, 0.85f), 0.4f, 0.1f, UIElement.UITextures["menubackgroundtransparent"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, null ,"Connection Result : ",null,0.5f,false,false,null,false),
+       //         testElement,
            //     new UIButton(new Vector2(0.3f, 0.6f), 0.4f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, game.GoToSettings ,"Game Settings",null,1)
 
             };
 
-     /*       if (game.gamePlatformType == GamePlatformType.HighDefDX)
+            if (game.gamePlatformType == GamePlatformType.HighDefDX)
             {
                 UIElement.settingsUIsPage1 = new List<UIElement> {
 
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
-                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeRenderDistance ,"Render Distance : "+GameOptions.renderDistance,GameOptions.UpdateRenderDistanceUIText,1),
+                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, null ,"Render Distance : 128",null,1,false,false),
                  new UIButton(new Vector2(0.25f, 0.25f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeRenderShadow ,"Render Shadow : "+GameOptions.renderShadow,GameOptions.UpdateRenderShadowUIText,1),
                   new UIButton(new Vector2(0.25f, 0.4f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeRenderFarShadow ,"Render Far Shadow : "+GameOptions.renderFarShadow,GameOptions.UpdateRenderFarShadowUIText,1),
                   new UIButton(new Vector2(0.25f, 0.55f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,GameOptions.ChangeRenderSSAO ,"Render SSAO: "+GameOptions.renderSSAO,GameOptions.UpdateRenderSSAOUIText ,1),
@@ -190,7 +193,7 @@ namespace monogameMinecraftNetworking.Client.UI
                 UIElement.settingsUIsPage1 = new List<UIElement> {
 
                 new UIImage(new Vector2(0f,0f),1f,1f,UIElement.UITextures["menubackground"],game._spriteBatch),
-                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, GameOptions.ChangeRenderDistance ,"Render Distance : "+GameOptions.renderDistance,GameOptions.UpdateRenderDistanceUIText,1),
+                new UIButton(new Vector2(0.25f, 0.1f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, null ,"Render Distance : 128",null,1,false,false),
 
 
                 new UIButton(new Vector2(0.25f, 0.25f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,GameOptions.ChangeRenderSSAO ,"Render SSAO: "+GameOptions.renderSSAO,GameOptions.UpdateRenderSSAOUIText ,1),
@@ -207,7 +210,7 @@ namespace monogameMinecraftNetworking.Client.UI
                   new UIButton(new Vector2(0.1f, 0.4f), 0.1f, 0.2f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,(obj)=>{UIElement.settingsUIsPageID-=1; } ,"Previous Page" ,null,0.5f),
             };
             }
-            else if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
+        /*    else if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
             {
 
                 UIElement.settingsUIsPage1 = new List<UIElement> {
@@ -233,7 +236,9 @@ namespace monogameMinecraftNetworking.Client.UI
             UIPanel leftUpPanel = new UIPanel(new Vector2(0.05f, 0.05f), 0.3f, 0.3f, true);
 
             UIPanel middleDownPanel = new UIPanel(new Vector2(0.2f, 0.85f), 0.6f, 0.15f, false);
-
+            TextListUI chatMessageListElement = new TextListUI(new Vector2(0f, 0.1f), 0.4f, 0.2f,
+                UIElement.UITextures["menubackgroundtransparent"], sf, game._spriteBatch, 1f, 8);
+          
             if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
             {
                 UIElement.inGameUIs = new List<UIElement>
@@ -293,7 +298,7 @@ namespace monogameMinecraftNetworking.Client.UI
                 UIElement.inGameUIs = new List<UIElement>
                 {
                     new InGameUI(sf,game.Window,game._spriteBatch, game.gamePlayerR,UIElement.UITextures["hotbartexture"],UIElement.UITextures["selectedhotbar"]),
-
+                    chatMessageListElement,
                 };
             }
             UIElement.pauseMenuUIs = new List<UIElement>
@@ -312,6 +317,33 @@ namespace monogameMinecraftNetworking.Client.UI
 
                     },"Reload Custom Postprocessing Shaders",null,0.6f),
                new UIButton(new Vector2(0.25f, 0.7f), 0.5f, 0.15f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window, (ub)=>monogameMinecraftNetworking.Client.Asset. BlockResourcesManager.LoadResources(Directory.GetCurrentDirectory() + "/customresourcespack",game.Content,game.GraphicsDevice,game.renderPipelineManager.chunkRenderer,game.renderPipelineManager.particleRenderer,game) ,"Reload Custom Resource Packs",null,0.6f)
+            };
+            InputField chatMessageField = new InputField(new Vector2(0.0f, 0.95f), 0.8f, 0.05f,
+                UIElement.UITextures["inputfield"], UIElement.UITextures["inputfieldhighlighted"], sf,
+                game._spriteBatch, game.Window,null, "", 0.7f, 64, false,true,0.01f);
+            UIButton sendChatMessageButton = new UIButton(new Vector2(0.8f, 0.95f), 0.2f, 0.05f,
+                UIElement.UITextures["buttontexture"], new Vector2(0.4f, 0.55f), sf, game._spriteBatch,
+                game.Window, (ub) =>
+                {
+                    if (chatMessageField.text.Length > 0)
+                    {
+                        game.SendChatMessage(ub, chatMessageField.text);
+                        chatMessageField.text = "";
+                    }
+                 
+                }, "Send Message", null, 0.7f, false, true);
+            UIButton closeChatUIButton = new UIButton(new Vector2(0.8f, 0.85f), 0.2f, 0.05f,
+                UIElement.UITextures["buttontexture"], new Vector2(0.4f, 0.55f), sf, game._spriteBatch,
+                game.Window, (ub) =>
+                {
+                game.CloseChatUI();
+
+                }, "Close", null, 0.7f, false, true);
+            UIElement.chatMessagesUIs = new List<UIElement>()
+            {
+                chatMessageField,
+                sendChatMessageButton,
+                closeChatUIButton
             };
             InitInventoryUI(game, sf);
          //   InitStructureOperationsUI(game, sf);

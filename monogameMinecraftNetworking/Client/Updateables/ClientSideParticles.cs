@@ -64,7 +64,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     {
 
 
-                        blocksAround.Add(ParticleManager.instance.GetOrFetchBoundingBox(new Vector3Int(x, y, z), ClientSideChunkHelper.GetBlockData(new Vector3Int(x, y, z))));
+                        blocksAround.Add(ClientSideParticleHelper.GetOrFetchBoundingBox(new Vector3Int(x,y,z)));
 
                     }
                 }

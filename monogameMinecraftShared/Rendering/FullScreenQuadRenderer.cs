@@ -168,7 +168,7 @@ namespace monogameMinecraftShared.Rendering
             device.Indices = quadIndexBuffer;
             //     RasterizerState rasterizerState = new RasterizerState();
             //  rasterizerState.CullMode = CullMode.None;
-            device.RasterizerState = rasterizerState;
+         //   device.RasterizerState = rasterizerState;
             device.BlendState = BlendState.AlphaBlend;
             foreach (var pass in quadEffect.CurrentTechnique.Passes)
             {
@@ -208,7 +208,7 @@ namespace monogameMinecraftShared.Rendering
           
             //     RasterizerState rasterizerState = new RasterizerState();
             //  rasterizerState.CullMode = CullMode.None;
-            device.RasterizerState = rasterizerState;
+         //   device.RasterizerState = rasterizerState;
             device.BlendState = BlendState.AlphaBlend;
             foreach (var pass in quadEffect.CurrentTechnique.Passes)
             {
@@ -243,7 +243,7 @@ namespace monogameMinecraftShared.Rendering
             device.SetVertexBuffer(quadVertexBuffer);
             device.Indices = quadIndexBuffer;
 
-            device.RasterizerState = rasterizerState;
+        //    device.RasterizerState = rasterizerState;
             device.BlendState = BlendState.AlphaBlend;
             foreach (var pass in quadEffect.CurrentTechnique.Passes)
             {

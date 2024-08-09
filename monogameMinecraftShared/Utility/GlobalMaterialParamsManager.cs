@@ -1,7 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace monogameMinecraftShared.Utility
 {
+    [Obsolete]
     public class GlobalMaterialParamsManager
     {
         public static GlobalMaterialParamsManager instance;

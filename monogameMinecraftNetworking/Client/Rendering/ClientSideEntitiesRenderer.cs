@@ -18,7 +18,7 @@ using EntityData = monogameMinecraftNetworking.Data.EntityData;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
-    public class ClientSideEntitiesRenderer:IGBufferDrawableRenderer
+    public class ClientSideEntitiesRenderer:IGBufferDrawableRenderer,IShadowDrawableRenderer
     {
         public static Model zombieModel;
         public Texture2D zombieTex;
@@ -197,6 +197,82 @@ namespace monogameMinecraftNetworking.Client.Rendering
            
         }
 
-     
+
+        public void DrawZombieShadow(ClientSideEntityCacheObject entity, Matrix lightSpaceMat, Effect shadowMapShader)
+        {
+
+            Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
+            //   zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
+            //      zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+            //   zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+            //   zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+            //  DrawModelShadow(zombieModel, world, lightSpaceMat,shadowMapShader);
+            Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+            {
+                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY), -MathHelper.ToRadians(entity.data.rotX), 0) },
+                {"body", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY),0,0)}
+            };
+
+            entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
+        }
+        public void DrawShadow(Matrix shadowMat,Effect shadowMapShader)
+        {
+            BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
+            if (game.clientSideEntityManager == null)
+            {
+                return;
+            }
+            lock (game.clientSideEntityManager.allEntitiesCacheLock)
+            {
+
+                foreach (var entity in game.clientSideEntityManager.allEntitiesCache)
+                {
+
+
+                    if (entity.data.entityInWorldID == ClientSideVoxelWorld.singleInstance.worldID)
+                    {
+                        switch (entity.data.typeid)
+                        {
+                            case 0:
+                                /* shadowMapShader.Parameters["TextureE"].SetValue(zombieTex);
+                                 //    DrawZombie(entity,gBufferShader);
+                                 Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
+                                 Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                                 {
+                                     {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY), -MathHelper.ToRadians(entity.data.rotX) ,0) },
+                                     {"body", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY),0,0)}
+                                 };
+
+                                 entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
+                                 {
+                                     if (entity.data.isEntityHurt)
+                                     {
+
+
+                                         gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+
+                                     }
+                                     else
+                                     {
+
+                                         gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+
+                                     }
+                                 });*/
+                                DrawZombieShadow(entity, shadowMat, shadowMapShader);
+                                break;
+
+                        }
+                    }
+
+
+
+
+
+                }
+            }
+
+        }
+
     }
 }

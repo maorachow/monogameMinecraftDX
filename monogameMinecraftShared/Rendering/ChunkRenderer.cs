@@ -580,8 +580,47 @@ namespace monogameMinecraftShared.Rendering
                   device.Clear(Color.CornflowerBlue);
                   basicShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);*/
         }
+        public void RenderShadow(ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> RenderingChunks, IGamePlayer player, Matrix lightSpaceMat, Effect shadowmapShader, int maxRenderDistance, bool useFrustumCulling = true)
+        {
 
-        void RenderSingleChunkShadow(Chunk c, Effect shadowmapShader)
+            shadowmapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);
+
+            BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
+            lock (VoxelWorld.currentWorld.worldUpdater.chunksNeededRebuildListLock)
+            {
+                foreach (var chunk in RenderingChunks)
+                {
+                    IRenderableChunkBuffers c = chunk.Value;
+                    if (c == null)
+                    {
+                        continue;
+                    }
+                    if (MathF.Abs(c.chunkPos.x - player.position.X) < maxRenderDistance && MathF.Abs(c.chunkPos.y - player.position.Z) < maxRenderDistance)
+                    {
+                        if (frustum.Intersects(c.chunkBounds) || useFrustumCulling == false)
+                        {
+                            if (c.isReadyToRender == true && c.disposed == false)
+                            {
+                                RenderSingleChunkShadow(c, shadowmapShader);
+                            }
+                        }
+
+
+
+                    }
+
+                }
+            }
+
+            /*      foreach(var entity in EntityBeh.worldEntities)
+                  {
+                      EntityRenderer.DrawModelShadow(EntityRenderer.zombieModel, Matrix.CreateTranslation(entity.position),lightSpaceMat);
+                  }
+                  device.SetRenderTarget(null);
+                  device.Clear(Color.CornflowerBlue);
+                  basicShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat);*/
+        }
+        void RenderSingleChunkShadow(IRenderableChunkBuffers c, Effect shadowmapShader)
         {
             /*     if (c.isTaskCompleted == false)
                  {

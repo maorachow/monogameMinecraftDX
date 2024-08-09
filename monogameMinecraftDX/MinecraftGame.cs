@@ -444,6 +444,19 @@ namespace monogameMinecraftDX
 
         }
         SpriteFont sf;
+
+        public override void OpenInventory(object obj)
+        {
+            isInventoryOpen = !isInventoryOpen;
+            if (isInventoryOpen == true)
+            {
+                IsMouseVisible = true;
+            }
+            else
+            {
+                IsMouseVisible = false;
+            }
+        }
         protected override void Initialize()
         {
 
@@ -725,7 +738,7 @@ namespace monogameMinecraftDX
                     EntityManager.FixedUpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
                     ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
-                    GlobalMaterialParamsManager.instance.Update(gameTime);
+              //      GlobalMaterialParamsManager.instance.Update(gameTime);
                     gameposition = gamePlayerR.gamePlayer.position;
                     mouseMovementManager.windowBounds = Window.ClientBounds;
                     mouseMovementManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);

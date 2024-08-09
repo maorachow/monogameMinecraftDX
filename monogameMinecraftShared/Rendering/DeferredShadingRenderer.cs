@@ -71,7 +71,7 @@ namespace monogameMinecraftShared.Rendering
             blockDeferredEffect.Parameters["fogStart"]?.SetValue(256.0f);
             blockDeferredEffect.Parameters["fogRange"]?.SetValue(1024.0f);
             blockDeferredEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
-            blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
+      //      blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
             blockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             blockDeferredEffect.Parameters["TextureMER"].SetValue(gBufferRenderer.renderTargetMER);

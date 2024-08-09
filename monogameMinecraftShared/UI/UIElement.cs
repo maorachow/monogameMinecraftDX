@@ -31,6 +31,7 @@ namespace monogameMinecraftShared.UI
         public static List<UIElement> structureOperationsPlacingUIs = new List<UIElement>();
         public static int structureOperationsUIsPageID;
         public static Dictionary<string, SoundEffect> uiSounds = new Dictionary<string, SoundEffect>();
+        public static List<UIElement> chatMessagesUIs = new List<UIElement>();
 
     }
 }

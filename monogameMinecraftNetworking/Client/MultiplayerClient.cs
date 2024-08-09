@@ -19,6 +19,7 @@ using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
+using static System.Net.Mime.MediaTypeNames;
 using EntityData = monogameMinecraftNetworking.Data.EntityData;
 namespace monogameMinecraftNetworking.Client
 {
@@ -90,6 +91,18 @@ namespace monogameMinecraftNetworking.Client
 
         }
         public IMultiplayerClient.OnAllUsersDataUpdated _prevAllUsersUpdatedAction;
+
+        public IMultiplayerClient.OnChatMessageReceived chatMessageReceivedAction
+        {
+            get { return _chatMessageReceivedAction; }
+
+            set { _chatMessageReceivedAction = value; }
+
+
+        }
+
+        public IMultiplayerClient.OnChatMessageReceived _chatMessageReceivedAction;
+
         public IPAddress address;
         public int port;
 
@@ -221,7 +234,7 @@ namespace monogameMinecraftNetworking.Client
                                                 }
                                              
                                             }
-                                            gamePlayer.isGetBlockNeeded=true;
+                                         gamePlayer.isGetBlockNeeded=true;
                                         }
                                  
 
@@ -305,6 +318,14 @@ namespace monogameMinecraftNetworking.Client
                                     Chunk.blockInfosNew[data5.blockID].uvSizes[0].X / 4.0f,
                                     Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y / 4.0f), new Vector2(Chunk.blockInfosNew[data5.blockID].uvSizes[0].X * 0.75f, Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y * 0.75f));
                             break;
+                        case MessageCommandType.ChatMessageBroadcast:
+                            string message = MessagePackSerializer.Deserialize<string>(item.messageData);
+                      //      Debug.WriteLine("chat message received:"+message);
+                            if (_chatMessageReceivedAction != null)
+                            {
+                                _chatMessageReceivedAction(message);
+                            }
+                            break;
                     }
                 }
                 
@@ -367,6 +388,13 @@ namespace monogameMinecraftNetworking.Client
             isGoingToQuitGame = true;
             messageParser.Stop();
             socket.Close(5000);
+        }
+
+        public void SendChatMessage(string message)
+        {
+            Debug.WriteLine("send message:" + message);
+            NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.ChatMessage,
+                MessagePackSerializer.Serialize(message)),socket);
         }
     }
 }

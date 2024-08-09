@@ -75,8 +75,8 @@ namespace monogameMinecraftShared.Rendering
             SSIDEffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
             SSIDEffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSIDEffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
-            SSIDEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
-            SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
+         //   SSIDEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
+        //    SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             if (SSIDEffect.Parameters["NoiseTex"] != null) { SSIDEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
 
             SSIDEffect.Parameters["View"].SetValue(player.cam.viewMatrix);

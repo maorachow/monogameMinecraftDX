@@ -52,11 +52,13 @@ namespace monogameMinecraftShared.UI
         public bool numbersOnly = false;
         //  public bool keepsAspectRatio = false;
         public string text { get; set; }
-
+        public bool leftAligned=false;
+        public float leftAlignedOffset = 0;
+        public int pixelOffset = 0;
         public bool isSelected = false;
         public int maxAllowedCharacters;
         public Action<InputField> onTextChangedAction;
-        public InputField(Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly)
+        public InputField(Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly,bool leftAligned=false,float leftAlignedOffset = 0)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -75,6 +77,8 @@ namespace monogameMinecraftShared.UI
             this.text = text;
             this.textScale = textScale;
             this.maxAllowedCharacters = maxAllowedCharacters;
+            this.leftAligned= leftAligned;
+            this.leftAlignedOffset = leftAlignedOffset;
             OnResize();
 
 
@@ -85,7 +89,7 @@ namespace monogameMinecraftShared.UI
             DrawString(null);
         }
 
-        public void DrawString(string text)
+        public void DrawString(string text1)
         {
             //  this.text = text;
             this.text = text == null ? " " : text;
@@ -126,7 +130,15 @@ namespace monogameMinecraftShared.UI
             // spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x,textPixelPos.y), Color.White);
             if (font != null)
             {
-                spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x - textSize.X, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
+                if (leftAligned == true)
+                {
+                    spriteBatch.DrawString(font, text, new Vector2(inputFieldRect.X+ pixelOffset, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
+                }
+                else
+                {
+                    spriteBatch.DrawString(font, text, new Vector2(textPixelPos.x - textSize.X, textPixelPos.y - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
+                }
+              
             }
 
 
@@ -242,9 +254,17 @@ namespace monogameMinecraftShared.UI
                             {
                                 if (key >= (Keys)48 && key <= (Keys)57)
                                 {
-                                    string keyString = key.ToString();
-                                    keyString = keyString.Remove(0, 1);
-                                    text += keyString;
+                                    if (key == Keys.D1&&(keyboardState.IsKeyDown(Keys.LeftShift)|| keyboardState.IsKeyDown(Keys.RightShift)))
+                                    {
+                                        text += "!";
+                                    }
+                                    else
+                                    {
+                                        string keyString = key.ToString();
+                                        keyString = keyString.Remove(0, 1);
+                                        text += keyString;
+                                    }
+                                   
                                 }
 
                                 if (key == Keys.Subtract || key == Keys.OemMinus)
@@ -256,6 +276,13 @@ namespace monogameMinecraftShared.UI
                                 if (key == Keys.OemPeriod)
                                 {
                                     string keyString = ".";
+
+                                    text += keyString;
+                                }
+
+                                if (key == Keys.OemComma)
+                                {
+                                    string keyString = ",";
 
                                     text += keyString;
                                 }
@@ -325,6 +352,7 @@ namespace monogameMinecraftShared.UI
                  //        element01Pos = new Vector2(element00Pos.X, element00Pos.Y  +initalWidthHeight.Y*(initalWidthHeight.X/ initalWidthHeight.Y));
              }*/
             inputFieldRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
+            this.pixelOffset = (int)((float)inputFieldRect.Width * (float)leftAlignedOffset);
             Debug.WriteLine(inputFieldRect.X + " " + inputFieldRect.Y + " " + inputFieldRect.Width + " " + inputFieldRect.Height);
 
             //      this.textPixelPos = new Vector2Int((int)(textPos.X * UIElement.ScreenRect.Width), (int)(textPos.Y * UIElement.ScreenRect.Height));

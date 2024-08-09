@@ -42,10 +42,16 @@ namespace monogameMinecraftNetworking.Client
         public delegate void OnAllUsersDataUpdated();
 
         public delegate void OnAllEntitiesDataUpdated();
+
+        public delegate void OnChatMessageReceived(string  message);
+        public OnChatMessageReceived chatMessageReceivedAction { get; set; }
         public OnAllUsersDataUpdated allUsersUpdatedAction { get; set; }
         public OnAllUsersDataUpdated prevAllUsersUpdatedAction { get; set; }
         public OnAllEntitiesDataUpdated allEntitiesUpdatedAction { get; set; }
          public OnAllEntitiesDataUpdated allEntitiesPreUpdatedAction { get; set; }
-        //   public void MessageParsingThread(Socket s);
+
+         public void SendChatMessage(string text);
+
+         //   public void MessageParsingThread(Socket s);
     }
 }

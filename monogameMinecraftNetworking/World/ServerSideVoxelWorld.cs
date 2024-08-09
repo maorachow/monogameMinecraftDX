@@ -358,7 +358,7 @@ namespace monogameMinecraftNetworking.World
                                 c.SaveSingleChunk();
                                 c.isUnused = true;
                             //    c.Dispose();
-                            Console.WriteLine("remove chunk");
+                      //      Console.WriteLine("remove chunk");
                                 chunks.TryRemove(c.chunkPos, out _);
                             }
                         }
