@@ -17,7 +17,8 @@ namespace monogameMinecraftShared.World
         Stairs=4,
         Water=5,
         Fence=6,
-        Door=7
+        Door=7,
+        WallAttachment=8
 
     }
         [MessagePackObject]

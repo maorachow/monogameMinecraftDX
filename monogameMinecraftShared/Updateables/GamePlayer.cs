@@ -482,6 +482,33 @@ namespace monogameMinecraftShared.Updateables
 
 
                     break;
+                case BlockShape.WallAttachment:
+                    if (ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(castBlockPoint)) is not BlockShape.Solid)
+                    {
+                        return;
+                    } 
+                    byte optionalDataVal1 = 0;
+                    switch (blockFaces)
+                    {
+
+                        case BlockFaces.NegativeX:
+                            optionalDataVal1 = 1;
+                            break;
+
+                        case BlockFaces.PositiveX:
+                            optionalDataVal1 = 0;
+                            break;
+                        case BlockFaces.PositiveZ:
+                            optionalDataVal1 = 2;
+                            break;
+
+
+                        case BlockFaces.NegativeZ:
+                            optionalDataVal1 = 3;
+                            break;
+                    }
+                    ChunkHelper.SendPlaceBlockOperation(setBlockPointInt,new BlockData(inventoryData[currentSelectedHotbar],optionalDataVal1));
+                    break;
                 default:
                     ChunkHelper.SendPlaceBlockOperation(setBlockPointInt, inventoryData[currentSelectedHotbar]);
                     break;

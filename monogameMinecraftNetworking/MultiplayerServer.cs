@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
 using System.Net;
@@ -10,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Xna.Framework;
+using monogameMinecraftNetworking.Asset;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Updateables;
@@ -99,6 +101,7 @@ namespace monogameMinecraftNetworking
         public IPEndPoint ipEndPoint{ get; set; }
         public void Initialize(string ipAddress1, int port)
         {
+            ServerSideBlockResourcesManager.LoadBlockInfo(Directory.GetCurrentDirectory()+"/customblockinfodata");
             isGoingToQuit= false;
             foreach (var world in ServerSideVoxelWorld.voxelWorlds)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Windows.Markup;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.World;
@@ -687,6 +688,38 @@ namespace monogameMinecraftShared.Rendering
 
 
                         break;
+
+
+                case BlockShape.WallAttachment:
+                    //0left 1right 2back 3front
+
+                    if (Chunk.blockInfosNew[blockData.blockID].uvCorners.Count <1 || Chunk.blockInfosNew[blockData.blockID].uvSizes.Count < 1)
+                    {
+                        return;
+                    }
+
+                    switch (blockData.optionalDataValue)
+                    {
+                        case 0:
+                            BuildFaceComplex(new Vector3(x+0.0625f, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], true, NSVerts, NSIndices);
+                            BuildFaceComplex(new Vector3(x + 0.0625f, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                            break;
+                        case 1:
+                            BuildFaceComplex(new Vector3(x +1-0.0625f, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                            BuildFaceComplex(new Vector3(x + 1 - 0.0625f, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], true, NSVerts, NSIndices);
+                            break;
+                        case 2:
+                            BuildFaceComplex(new Vector3(x, y, z+0.0625f), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                            BuildFaceComplex(new Vector3(x, y, z + 0.0625f), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], true, NSVerts, NSIndices);
+                            break;
+                        case 3:
+                            BuildFaceComplex(new Vector3(x, y, z +1f- 0.0625f), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], true, NSVerts, NSIndices);
+                            BuildFaceComplex(new Vector3(x, y, z + 1f - 0.0625f), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, NSVerts, NSIndices);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
 
                 }
 

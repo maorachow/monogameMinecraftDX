@@ -21,6 +21,11 @@ namespace monogameMinecraftNetworking.Utility
             {
                 lock (sendToClientsLock)
                 {
+                    if (remoteClient.socket.Connected == false)
+                    {
+                        Debug.WriteLine("sending message failed: socket disconnected");
+                        return;
+                    }
                     remoteClient.socket.Send(msg.GetBytes());
                 }
               
@@ -191,6 +196,7 @@ namespace monogameMinecraftNetworking.Utility
                 {
                     server.remoteClients.Remove(client);
                 }
+             
                 client.Close();
            
 

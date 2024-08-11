@@ -30,7 +30,9 @@ namespace monogameMinecraftNetworking
         public void Close()
         {
             isUserDataLoaded = false;
+          
             messageParser.Stop();
+            socket.Shutdown(SocketShutdown.Both);
             socket.Close();
            
         }

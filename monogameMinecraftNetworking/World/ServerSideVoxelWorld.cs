@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -288,6 +289,7 @@ namespace monogameMinecraftNetworking.World
                     {
                         (RemoteClient remoteClient,Vector2Int chunkPos) item = chunkBuildingQueue.Dequeue();
                         
+                       
                         if (item.chunkPos.x % Chunk.chunkWidth != 0 || item.chunkPos.y % Chunk.chunkWidth != 0)
                         {
                             continue;

@@ -541,10 +541,43 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                         //   ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal));
                         //    VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorUpperPartPlacingOperation(setBlockPointInt));
-                        ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorUpperPartPlacingUpdate, setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
+                   //     ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorUpperPartPlacingUpdate, setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                     }
 
 
+                    break;
+
+                case BlockShape.WallAttachment:
+                    if (ClientSideChunkHelper.GetBlockShape(ClientSideChunkHelper.GetBlockData(castBlockPoint)) is not BlockShape.Solid)
+                    {
+                        return;
+                    }
+
+                    if (blockFaces == BlockFaces.PositiveY || blockFaces == BlockFaces.NegativeY)
+                    {
+                        return;
+                    }
+                    byte optionalDataVal1 = 0;
+                    switch (blockFaces)
+                    {
+
+                        case BlockFaces.NegativeX:
+                            optionalDataVal1 = 1;
+                            break;
+
+                        case BlockFaces.PositiveX:
+                            optionalDataVal1 = 0;
+                            break;
+                        case BlockFaces.PositiveZ:
+                            optionalDataVal1 = 2;
+                            break;
+
+
+                        case BlockFaces.NegativeZ:
+                            optionalDataVal1 = 3;
+                            break;
+                    }
+                    ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal1), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                     break;
                 default:
                     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);

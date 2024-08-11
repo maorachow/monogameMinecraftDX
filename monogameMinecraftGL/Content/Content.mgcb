@@ -200,6 +200,18 @@
 /processorParam:TextureFormat=Color
 /build:blocksprites/iron_block.png
 
+#begin blocksprites/ladder.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blocksprites/ladder.png
+
 #begin blocksprites/leaves_oak_carried.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -307,6 +319,42 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:blocksprites/woodendoor.png
+
+#begin blocksprites/wool_colored_blue.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blocksprites/wool_colored_blue.png
+
+#begin blocksprites/wool_colored_green.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blocksprites/wool_colored_green.png
+
+#begin blocksprites/wool_colored_red.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:blocksprites/wool_colored_red.png
 
 #begin buttontexture.png
 /importer:TextureImporter
@@ -905,6 +953,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:skyboxeffect.fx
+
+#begin sounds/clothdig.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/clothdig.ogg
 
 #begin sounds/dirtdig.wav
 /importer:WavImporter

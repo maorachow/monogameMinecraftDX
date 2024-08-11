@@ -25,6 +25,8 @@ namespace monogameMinecraftShared.Physics
                     return true;
                 case BlockShape.Stairs:
                     return true;
+                case BlockShape.WallAttachment:
+                    return false;
                 default:
                     return false;
             }
@@ -50,6 +52,8 @@ namespace monogameMinecraftShared.Physics
                     return true;
                 case BlockShape.Stairs:
                     return true;
+                case BlockShape.WallAttachment:
+                    return false;
                 default:
                     return false;
             }
@@ -206,6 +210,11 @@ namespace monogameMinecraftShared.Physics
                 return new BoundingBox(boxMin, boxMax);
 
             }
+
+            if (shape == BlockShape.WallAttachment)
+            {
+                return new BoundingBox();
+            }
             return new BoundingBox();
 
         }
@@ -258,6 +267,10 @@ namespace monogameMinecraftShared.Physics
                 return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1f, y + 1f, z + 1f));
             }
             if (shape == BlockShape.Door)
+            {
+                return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1f, y + 1f, z + 1f));
+            }
+            if (shape == BlockShape.WallAttachment)
             {
                 return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1f, y + 1f, z + 1f));
             }

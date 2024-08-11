@@ -43,11 +43,16 @@ namespace monogameMinecraftNetworking.Client.Asset
                 { 15, "blocksprites/iron_block" },
                 { 16, "blocksprites/cobblestone" },
                 { 17, "blocksprites/planks_oak" },
+                { 18, "blocksprites/wool_colored_red" },
+                { 19, "blocksprites/wool_colored_green" },
+                { 20, "blocksprites/wool_colored_blue" },
+                { 21, "blocksprites/planks_oak" },
                 { 100, "blocksprites/water" },
                 { 101, "blocksprites/grass" },
                 { 102, "blocksprites/torch_on" },
                 { 103, "blocksprites/fences" },
-                { 104, "blocksprites/woodendoor" }
+                { 104, "blocksprites/woodendoor" },
+                { 105, "blocksprites/ladder" }
             };
             foreach (var item in blockSpriteInfoData)
             {

@@ -138,26 +138,39 @@ namespace monogameMinecraftNetworking.World
         static Dictionary<Vector2Int, ServerSideChunk> tempReadChunks = new Dictionary<Vector2Int, ServerSideChunk>();
         public static BlockData[,,] GetBlocks(Vector3Int origin, int lengthX, int lengthY, int lengthZ,int worldID)
         {
-            tempReadChunks.Clear();
-            BlockData[,,] blockData = new BlockData[lengthX, lengthY, lengthZ];
-            for (int x = origin.x; x < origin.x + blockData.GetLength(0); x++)
+            lock (ServerSideVoxelWorld.voxelWorlds[worldID].deleteChunkThreadLock)
             {
-                for (int z = origin.z; z < origin.z + blockData.GetLength(2); z++)
+                try
                 {
-                    ServerSideChunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)), worldID);
-                    if (c == null)
+                    tempReadChunks.Clear();
+                    BlockData[,,] blockData = new BlockData[lengthX, lengthY, lengthZ];
+                    for (int x = origin.x; x < origin.x + blockData.GetLength(0); x++)
                     {
-                        continue;
+                        for (int z = origin.z; z < origin.z + blockData.GetLength(2); z++)
+                        {
+                            ServerSideChunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)), worldID);
+                            if (c == null)
+                            {
+                                continue;
+                            }
+                            tempReadChunks.TryAdd(c.chunkPos, c);
+                        }
                     }
-                    tempReadChunks.TryAdd(c.chunkPos, c);
-                }
-            }
-            foreach (var c in tempReadChunks)
-            {
-                GetBlocksSingleChunk(origin, ref blockData, c.Value);
+                    foreach (var c in tempReadChunks)
+                    {
+                        GetBlocksSingleChunk(origin, ref blockData, c.Value);
 
+                    }
+                    return blockData;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("get block failed:0"+e);
+                    return  new BlockData[lengthX, lengthY, lengthZ];
+                }
+               
             }
-            return blockData;
+        
         }
 
 
@@ -212,7 +225,7 @@ namespace monogameMinecraftNetworking.World
         public static void GetBlocksSingleChunk(Vector3Int origin, ref BlockData[,,] blockDataIn, ServerSideChunk c)
         {
             Vector3Int chunkOffset = new Vector3Int(c.chunkPos.x, 0, c.chunkPos.y) - origin;
-
+           
 
             for (int i = 0; i < Chunk.chunkWidth; i++)
             {

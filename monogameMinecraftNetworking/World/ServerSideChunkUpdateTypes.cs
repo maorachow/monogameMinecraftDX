@@ -77,10 +77,23 @@ namespace monogameMinecraftNetworking.World
             BlockShape? shapeBack =
                ServerSideChunkHelper.GetBlockShape(ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1), worldID));
 
+            if (!Chunk.blockInfosNew.ContainsKey(placingBlockData.blockID))
+            {
+                Console.WriteLine("placing block failed: unknown block ID");
+                return;
+            }
+            BlockShape? shapePlacing =
+                ServerSideChunkHelper.GetBlockShape( placingBlockData);
+            
             ServerSideChunkHelper.SetBlockWithoutUpdateWithSaving(position, placingBlockData, worldID);
             lock (ServerSideWorldUpdater.chunksNeededRebuildListLock)
             {
                 ServerSideWorldUpdater.soundDatasToSend.Add(new BlockSoundBroadcastData(position.x+0.5f,position.y+0.5f,position.z+0.5f,placingBlockData.blockID));
+            }
+
+            if (shapePlacing is BlockShape.Door)
+            {
+                ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorUpperPartPlacingOperation(position + new Vector3Int(0, 0, 0),  this.worldID));
             }
             if (shapeLeft != null && shapeLeft.Value == BlockShape.Fence)
             {
@@ -279,7 +292,42 @@ namespace monogameMinecraftNetworking.World
                 ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, -1), ServerSideWorldUpdater, new Vector3Int(0, 0, 1), 1, worldID));
             }
 
-
+            if (shapeLeft != null && shapeLeft.Value == BlockShape.WallAttachment)
+            {
+                if (ServerSideChunkHelper.GetBlockData(position + new Vector3Int(-1, 0, 0), worldID)
+                        .optionalDataValue == 1)
+                {
+                    ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(-1, 0, 0), ServerSideWorldUpdater, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(-1, 0, 0), worldID), worldID));
+                }
+                 
+            }
+            if (shapeRight != null && shapeRight.Value == BlockShape.WallAttachment)
+            {
+                if (ServerSideChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0), worldID).optionalDataValue ==
+                    0)
+                {
+                    ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(1, 0, 0), ServerSideWorldUpdater, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0), worldID), worldID));
+                }
+                
+            }
+            if (shapeFront != null && shapeFront.Value == BlockShape.WallAttachment)
+            {
+                if (ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 1), worldID).optionalDataValue ==
+                    2)
+                {
+                    ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(0, 0, 1), ServerSideWorldUpdater, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 1), worldID), worldID));
+                }
+                  
+            }
+            if (shapeBack != null && shapeBack.Value == BlockShape.WallAttachment)
+            {
+                if (ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1), worldID)
+                        .optionalDataValue == 3)
+                {
+                    ServerSideWorldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(0, 0, -1), ServerSideWorldUpdater, ServerSideChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1), worldID), worldID));
+                }
+                   
+            }
 
         }
 

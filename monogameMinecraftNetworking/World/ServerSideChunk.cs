@@ -25,6 +25,7 @@ namespace monogameMinecraftNetworking.World
         public bool isUnused = false;
         public bool isModifiedInGame=false;
         public ServerSideVoxelWorld curWorld;
+        public object chunkBuildingLock=new object();
         public ServerSideChunk(Vector2Int chunkPos, ServerSideVoxelWorld world)
         {
 
@@ -45,7 +46,11 @@ namespace monogameMinecraftNetworking.World
 
         public void BuildChunk()
         {
-            InitMap(chunkPos);
+            lock (chunkBuildingLock)
+            {
+                InitMap(chunkPos);
+            }
+           
         }
 
         public ChunkData ChunkToChunkData()

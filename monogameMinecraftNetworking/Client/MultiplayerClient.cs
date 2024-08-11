@@ -305,7 +305,11 @@ namespace monogameMinecraftNetworking.Client
                         case MessageCommandType.BlockSoundBroadcast:
                             BlockSoundBroadcastData data4 =
                                 MessagePackSerializer.Deserialize<BlockSoundBroadcastData>(item.messageData);
-                            SoundsUtility.PlaySound(gamePlayer.position,new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID],20f);
+                            if (Chunk.blockSoundInfo.ContainsKey(data4.blockID))
+                            {
+                                SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID], 20f);
+                            }
+                         
                             break;
                         case MessageCommandType.BlockParticleBroadcast:
                  //           Debug.WriteLine("particle broadcast");
@@ -387,6 +391,7 @@ namespace monogameMinecraftNetworking.Client
             NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogout, new byte[]{}), socket);
             isGoingToQuitGame = true;
             messageParser.Stop();
+            socket.Shutdown(SocketShutdown.Both);
             socket.Close(5000);
         }
 

@@ -248,7 +248,42 @@ namespace monogameMinecraftShared.World
                 worldUpdater.queuedChunkUpdatePoints.Enqueue(new FenceUpdatingOperation(position + new Vector3Int(0, 0, -1), worldUpdater, new Vector3Int(0, 0, 1), 1));
             }
 
-
+            if (shapeLeft != null && shapeLeft.Value == BlockShape.WallAttachment)
+            {
+                if (ChunkHelper.GetBlockData(position + new Vector3Int(-1, 0, 0)).optionalDataValue == 1)
+                {
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(-1, 0, 0), worldUpdater, ChunkHelper.GetBlockData(position + new Vector3Int(-1, 0, 0))));
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(new Vector3Int(position.x - 1, position.y, position.z), worldUpdater, 0));
+                }
+              
+            }
+            if (shapeRight != null && shapeRight.Value == BlockShape.WallAttachment)
+            {
+                if (ChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0)).optionalDataValue == 0)
+                {
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(1, 0, 0), worldUpdater, ChunkHelper.GetBlockData(position + new Vector3Int(1, 0, 0))));
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(new Vector3Int(position.x + 1, position.y, position.z), worldUpdater, 0));
+                }
+              
+            }
+            if (shapeFront != null && shapeFront.Value == BlockShape.WallAttachment)
+            {
+                if (ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 1)).optionalDataValue == 2)
+                {
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(0, 0, 1), worldUpdater, ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, 1))));
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(new Vector3Int(position.x, position.y, position.z + 1), worldUpdater, 0));
+                }
+                
+            }
+            if (shapeBack != null && shapeBack.Value == BlockShape.WallAttachment)
+            {
+                if (ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1)).optionalDataValue == 3)
+                {
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(position + new Vector3Int(0, 0, -1), worldUpdater, ChunkHelper.GetBlockData(position + new Vector3Int(0, 0, -1))));
+                    worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(new Vector3Int(position.x, position.y, position.z - 1), worldUpdater, 0));
+                }
+               
+            }
 
         }
 

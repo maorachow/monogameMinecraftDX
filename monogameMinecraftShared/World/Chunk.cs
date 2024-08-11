@@ -75,10 +75,14 @@ namespace monogameMinecraftShared.World
             {11,new BlockInfo( new List<Vector2> { new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f), new Vector2(0.625f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {12,new BlockInfo(new List<Vector2> { new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.6875f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {13,new BlockInfo( new List<Vector2> { new Vector2(0.75f, 0f), new Vector2(0.75f, 0f), new Vector2(0.6875f, 0f), new Vector2(0.8125f, 0f), new Vector2(0.75f, 0f), new Vector2(0.75f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
-            {14,new BlockInfo( new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Slabs) },
+            {14,new BlockInfo( new List<Vector2> { new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f), new Vector2(0.1875f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {15,new BlockInfo(new List<Vector2> { new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f), new Vector2(0.875f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {16,new BlockInfo( new List<Vector2> { new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f), new Vector2(0.9375f, 0f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {17,new BlockInfo(new List<Vector2> { new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {18,new BlockInfo(new List<Vector2> { new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {19,new BlockInfo(new List<Vector2> { new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {20,new BlockInfo(new List<Vector2> { new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+            {21,new BlockInfo(new List<Vector2> { new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Slabs) },
            {100,new BlockInfo( new List<Vector2> { new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Water) },
 
          {101,new BlockInfo(new List<Vector2> { new Vector2(0.0625f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.CrossModel) },
@@ -126,6 +130,21 @@ namespace monogameMinecraftShared.World
                       new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.01171875f, 0.0625f),
                       new Vector2(0.01171875f, 0.0625f), new Vector2(0.01171875f, 0.0625f), new Vector2(0.01171875f, 0.0625f)
                   }, BlockShape.Door)
+          },
+          {
+              105,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.875f, 0.0625f)
+                  
+
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f)
+                   
+                  }, BlockShape.WallAttachment)
           },
 
     };
