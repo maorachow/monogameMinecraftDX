@@ -51,8 +51,55 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
                 { "leftArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
             }, 0.5f)
+            
         }, true);
 
+        public static Animation playerAttackAnim = new Animation(new List<AnimationStep>
+        {
+           
+          
+           
+          
+           
+
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 1f)) },
+               
+            }, 0.05f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(-20f,30f , 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.05f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(-40f,110f , 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.05f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3( 50f,80f, 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.05f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3( 60f,30f, 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.05f),
+            new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+            }, 0.05f),
+
+        }, true);
         public ClientGameBase game;
         public ClientSidePlayersRenderer(Model playerModel, Effect gBufferEffect, IGamePlayer gamePlayer,
             Texture2D playerTex,IMultiplayerClient client, GraphicsDevice device, SpriteBatch spriteBatch, SpriteFont spriteFont,ClientGameBase game)

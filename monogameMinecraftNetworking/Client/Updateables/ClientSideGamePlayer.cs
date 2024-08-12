@@ -30,6 +30,8 @@ namespace monogameMinecraftNetworking.Client.Updateables
         float fastPlayerSpeed = 20f;
         float slowPlayerSpeed = 5f;
         public bool isLanded = false;
+
+        public bool isAttacking = false;
         public int currentSelectedHotbar { get; set; } = 0;
 
         public short[] inventoryData
@@ -55,7 +57,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public string playerName;
         public UserData ToUserData()
         {
-            return new UserData(footPosition.X, footPosition.Y, footPosition.Z, cam.Yaw-90f, cam.Pitch, 0, playerName, false,
+            return new UserData(footPosition.X, footPosition.Y, footPosition.Z, cam.Yaw-90f, cam.Pitch, 0, playerName, this.isAttacking,
                 ClientSideVoxelWorld.singleInstance.worldID);
         }
 
@@ -263,7 +265,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             monogameMinecraftShared. Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
             BlockFaces blockFaces = BlockFaces.PositiveY;
-            VoxelCast.CastClientSide(ray, 3, out blockPoint, out blockFaces, this);
+            VoxelCast.CastClientSide(ray, 4, out blockPoint, out blockFaces, this);
 
             /*    for (int i = 0; i < 30; i++)
                 {
@@ -286,7 +288,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
         }
 
         public bool isGetBlockNeeded = false;
-        public void PlaceBlock()
+        public bool PlaceBlock()
         {
             monogameMinecraftShared.Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
@@ -295,7 +297,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             VoxelCast.CastClientSide(ray, 3, out blockPoint, out blockFaces, this);
             if (blockPoint.y < 0)
             {
-                return;
+                return false;
             }
             Vector3 setBlockPoint = new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f);
 
@@ -304,11 +306,11 @@ namespace monogameMinecraftNetworking.Client.Updateables
             {
                 //  VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorInteractingOperation((Vector3Int)castBlockPoint));
                 ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorInteractingUpdate, blockPoint.x, blockPoint.y, blockPoint.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
-                return;
+                return true;
             }
             if (inventoryData[currentSelectedHotbar] == 0)
             {
-                return;
+                return false;
             }
        
 
@@ -353,7 +355,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             box.Min += new Vector3(0.01f, 0.01f, 0.01f);
             if (bounds.Intersects(box))
             {
-                return;
+                return false;
             }
             switch (Chunk.blockInfosNew[inventoryData[currentSelectedHotbar]].shape)
             {
@@ -362,7 +364,8 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     // ClientSideChunkHelper.SetBlockWithUpdate(setBlockPoint, inventoryData[currentSelectedHotbar]);
                     //    ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, inventoryData[currentSelectedHotbar]);
                     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt,ClientSideVoxelWorld.singleInstance.worldID, inventoryData[currentSelectedHotbar], ClientSideVoxelWorld.gameInstance.networkingClient.socket);
-                    break;
+                    return true;
+                    
                 case BlockShape.Torch:
 
 
@@ -395,36 +398,36 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         case BlockFaces.PositiveX:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar],2), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.PositiveY:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar],0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             
                             //     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
 
                         case BlockFaces.PositiveZ:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 4), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //       ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 4));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.NegativeX:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 1), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //      ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 1));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.NegativeY:
-                            return;
+                            return false;
 
                         case BlockFaces.NegativeZ:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 3), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //       ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 3));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                     }
                     break;
@@ -435,38 +438,38 @@ namespace monogameMinecraftNetworking.Client.Updateables
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar],0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //      ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.PositiveY:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //    ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
 
                         case BlockFaces.PositiveZ:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //      ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.NegativeX:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //       ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.NegativeY:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 1), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //    ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 1));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                         case BlockFaces.NegativeZ:
                             ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                             //   ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], 0));
                             GetBlocksAround(bounds);
-                            return;
+                            return true;
 
                     }
                     break;
@@ -479,7 +482,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                     ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.FenceUpdatingUpdate, setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                     GetBlocksAround(bounds);
-                    break;
+                    return true;
 
 
                 case BlockShape.Door:
@@ -489,7 +492,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     switch (blockFaces)
                     {
                         case BlockFaces.PositiveX:
-                            return;
+                            return false;
 
                         case BlockFaces.PositiveY:
                             if (MathF.Abs(ray.direction.X) > MathF.Abs(ray.direction.Z))
@@ -522,16 +525,16 @@ namespace monogameMinecraftNetworking.Client.Updateables
 
 
                         case BlockFaces.PositiveZ:
-                            return;
+                            return false;
 
                         case BlockFaces.NegativeX:
-                            return;
+                            return false;
 
                         case BlockFaces.NegativeY:
-                            return;
+                            return false;
 
                         case BlockFaces.NegativeZ:
-                            return;
+                            return false;
 
                     }
 
@@ -542,6 +545,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         //   ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal));
                         //    VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new DoorUpperPartPlacingOperation(setBlockPointInt));
                    //     ClientSideChunkHelper.SendCustomChunkUpdateOperation(new ChunkUpdateData((byte)ChunkUpdateDataTypes.DoorUpperPartPlacingUpdate, setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, 0, 0, ClientSideVoxelWorld.singleInstance.worldID), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
+                   return true;
                     }
 
 
@@ -550,12 +554,12 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 case BlockShape.WallAttachment:
                     if (ClientSideChunkHelper.GetBlockShape(ClientSideChunkHelper.GetBlockData(castBlockPoint)) is not BlockShape.Solid)
                     {
-                        return;
+                        return false;
                     }
 
                     if (blockFaces == BlockFaces.PositiveY || blockFaces == BlockFaces.NegativeY)
                     {
-                        return;
+                        return false;
                     }
                     byte optionalDataVal1 = 0;
                     switch (blockFaces)
@@ -578,15 +582,16 @@ namespace monogameMinecraftNetworking.Client.Updateables
                             break;
                     }
                     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], optionalDataVal1), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
-                    break;
+                   return true;
                 default:
                     ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, ClientSideVoxelWorld.singleInstance.worldID, new BlockData(inventoryData[currentSelectedHotbar], 0), ClientSideVoxelWorld.gameInstance.networkingClient.socket);
                     //  ClientSideChunkHelper.SendPlaceBlockOperation(setBlockPointInt, inventoryData[currentSelectedHotbar]);
-                    break;
+                    return true;
             }
 
 
             GetBlocksAround(bounds);
+            return false;
         }
         public void Move(Vector3 moveVec, bool isClipable)
         {
@@ -774,6 +779,10 @@ namespace monogameMinecraftNetworking.Client.Updateables
             {
                 breakBlockCD -= deltaTime;
             }
+            else
+            {
+                isAttacking = false;
+            }
             if (jumpCD >= 0f)
             {
                 jumpCD -= deltaTime;
@@ -804,16 +813,27 @@ namespace monogameMinecraftNetworking.Client.Updateables
             if (breakBlockCD <= 0f && isLeftMouseButtonDown == true)
             {
                 bool isEntityHit = TryHitEntity();
+                bool isBlockBroke = false;
                 if (!isEntityHit)
                 {
-                    BreakBlock();
+                    isBlockBroke= BreakBlock();
                 }
-                breakBlockCD = 0.15f;
+
+                if (isBlockBroke || isEntityHit)
+                {
+                    isAttacking= true;
+                }
+                breakBlockCD = 0.3f;
             }
             if (breakBlockCD <= 0f && isRightMouseButtonDown == true)
             {
-                PlaceBlock();
-                breakBlockCD = 0.15f;
+              bool isBlockPlaced=  PlaceBlock();
+              if (isBlockPlaced == true)
+              {
+                  isAttacking = true;
+              }
+                breakBlockCD = 0.3f;
+
             }
 
 

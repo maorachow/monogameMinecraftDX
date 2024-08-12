@@ -46,9 +46,11 @@ namespace monogameMinecraftShared.Animations
                 }
                 return first;
             }
+            
             return new AnimationTransformation()
             {
                 Offset = Vector3.Lerp(first.Offset, second.Offset, amount),
+                
                 Rotation = Vector3.Lerp(first.Rotation, second.Rotation, amount),
                 Scale = Vector3.Lerp(first.Scale, second.Scale, amount)
             };

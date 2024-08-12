@@ -44,6 +44,10 @@ namespace monogameMinecraftNetworking.Client
         public delegate void OnAllEntitiesDataUpdated();
 
         public delegate void OnChatMessageReceived(string  message);
+
+        public delegate void OnClientDisconnected(string optionalErrorMessage);
+
+        public OnClientDisconnected clientDisconnectedAction { get; set; }
         public OnChatMessageReceived chatMessageReceivedAction { get; set; }
         public OnAllUsersDataUpdated allUsersUpdatedAction { get; set; }
         public OnAllUsersDataUpdated prevAllUsersUpdatedAction { get; set; }

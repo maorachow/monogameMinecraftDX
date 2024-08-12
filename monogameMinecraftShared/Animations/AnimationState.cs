@@ -22,6 +22,20 @@ namespace monogameMinecraftShared.Animations
 
         public float elapsedTimeInStep { get; private set; }
 
+        public float totalElapsedTime
+        {
+            get
+            {
+                float returnVal = 0f;
+                for (int i = 0; i < stepIndex; i++)
+                {
+                    returnVal += animation.steps[i].Duration;
+                }
+
+                returnVal += elapsedTimeInStep;
+                return returnVal;
+            }
+        }
         public int stepsCount => animation.StepsCount;
         public string name => animation.name;
 

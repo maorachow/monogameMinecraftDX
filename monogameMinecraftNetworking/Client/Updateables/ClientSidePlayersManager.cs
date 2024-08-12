@@ -53,7 +53,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 {
                     if (allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; }) == -1)
                     {
-                        allUsersCache.Add(new ClientSidePlayersCacheObject(item1, new AnimationBlend(new AnimationState[] { new AnimationState(ClientSidePlayersRenderer. playerAnim, ClientSidePlayersRenderer.playerModel) }, ClientSidePlayersRenderer.playerModel)));
+                        allUsersCache.Add(new ClientSidePlayersCacheObject(item1, new AnimationBlend(new AnimationState[] { new AnimationState(ClientSidePlayersRenderer. playerAnim, ClientSidePlayersRenderer.playerModel), new AnimationState(ClientSidePlayersRenderer.playerAttackAnim, ClientSidePlayersRenderer.playerModel) }, ClientSidePlayersRenderer.playerModel)));
                     }
                 }
 
@@ -133,15 +133,31 @@ namespace monogameMinecraftNetworking.Client.Updateables
                                     deltaTime * 10f);
                             float animationUpdateDelta = lerpValue - allUsersCache[idx].animState
                                 .animationStates[0].elapsedTimeInStep;
-                            allUsersCache[idx].animState.Update(animationUpdateDelta, 1);
+                            allUsersCache[idx].animState.Update(animationUpdateDelta, 1,0);
                         }
                         else
                         {
                         //    Debug.WriteLine("player speed:" + (moveLength / deltaTime) / 5f);
-                            allUsersCache[idx].animState.Update(deltaTime, (moveLength / deltaTime) / 5f);
+                            allUsersCache[idx].animState.Update(deltaTime, (moveLength / deltaTime) / 5f,0f);
                         }
 
-                    }else if(idx != -1 && idxInPreviousDatas == -1)
+                        if (allUsersCache[idx].data.isAttacking == true)
+                        {
+                            allUsersCache[idx].animState.Update(deltaTime, 0f,1f);
+                        }
+                        else
+                        {
+                            float lerpValue =
+                                MathHelper.Lerp(
+                                    allUsersCache[idx].animState.animationStates[1].totalElapsedTime, 0.001f,
+                                    deltaTime * 10f);
+                            float animationUpdateDelta1 = lerpValue - allUsersCache[idx].animState
+                                .animationStates[1].totalElapsedTime;
+                            allUsersCache[idx].animState.Update(animationUpdateDelta1, 0f,1f);
+                        }
+                      
+                    }
+                    else if(idx != -1 && idxInPreviousDatas == -1)
 
                     {
                         Vector3 curPos = new Vector3(item1.posX, item1.posY,

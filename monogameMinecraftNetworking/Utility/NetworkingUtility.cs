@@ -254,6 +254,7 @@ namespace monogameMinecraftNetworking.Utility
         {
             if (list.Count > 0)
             {
+                toDoListIndex = Math.Clamp(toDoListIndex, 0, list.Count - 1);
                 lock (list[toDoListIndex].queueLock)
                 {
                     int priority = 0;

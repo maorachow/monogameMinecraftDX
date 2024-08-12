@@ -243,18 +243,20 @@ namespace monogameMinecraftClient
 
         public override void QuitGameplay()
         {
-            particleManager.ReleaseResources();
+         
             networkingClient.Disconnect();
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
             mouseMovementManager.isMouseLocked = false;
+            particleManager.ReleaseResources();
         }
         public  void QuitGameplayDirectly()
         {
-            particleManager.ReleaseResources();
+         
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
             mouseMovementManager.isMouseLocked = false;
+            particleManager.ReleaseResources();
         }
         public UIButton errorLogButton;
 
@@ -294,7 +296,7 @@ namespace monogameMinecraftClient
                 return false;
 
             });
-            errorLogButton = (UIButton)(buttonIndex == -1 ? null : UIElement.menuUIs[buttonIndex]);
+            errorLogButton = (UIButton)(buttonIndex == -1 ? (UIElement.menuUIs.Count>=8? UIElement.menuUIs[7]:null) : UIElement.menuUIs[buttonIndex]);
             IPAddress address;
             int port;
             string name;
@@ -332,8 +334,9 @@ namespace monogameMinecraftClient
 
            (gamePlayerR.gamePlayer as ClientSideGamePlayer).playerName = name;
            (gamePlayerR.gamePlayer as ClientSideGamePlayer).Reset();
-            
-           //  MultiplayerClientUIUtility.InitGameUI(this);
+
+            //  MultiplayerClientUIUtility.InitGameUI(this);
+            ClientSideVoxelWorld.singleInstance.worldID = 0;
            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
            mouseMovementManager = new MouseMovementManager(playerInputManager);
            mouseMovementManager.windowBounds = Window.ClientBounds;
@@ -341,6 +344,7 @@ namespace monogameMinecraftClient
             effectsManager.LoadEffects(Content);
          
             networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
+            networkingClient.clientDisconnectedAction += (string s) => { errorLogButton.text = s;};
             TextListUI chatMessageListElement = (UIElement.inGameUIs.Find((item) => { return item is TextListUI; })) as TextListUI;
             if (chatMessageListElement != null)
             {
@@ -434,12 +438,17 @@ namespace monogameMinecraftClient
                     if (networkingClient.isGoingToQuitGame == true)
                     {
                         QuitGameplayDirectly();
+                        return;
                     }
                     clientSideEntityManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                     clientSidePlayersManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                     ClientSideVoxelWorld.singleInstance.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-                    ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    if (ParticleManager.instance.isResourcesReleased == false)
+                    {
+                        ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+                 
                     (gamePlayerR.gamePlayer as ClientSideGamePlayer).UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     playerInputManager.ResetPlayerInputValues();
                     if (isGamePaused)

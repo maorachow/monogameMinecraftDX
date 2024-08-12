@@ -173,7 +173,7 @@ namespace monogameMinecraftNetworking.Protocol
         public void Stop()
         {
             isThreadsStopping = true;
-            //   messageParsingThread.Join();
+               messageParsingThread.Join();
         }
         public void MessageParsingThread(Socket s)
         {

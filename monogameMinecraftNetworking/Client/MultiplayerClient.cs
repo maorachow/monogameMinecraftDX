@@ -65,6 +65,16 @@ namespace monogameMinecraftNetworking.Client
         }
         public IMultiplayerClient.OnAllEntitiesDataUpdated _allEntitiesUpdatedAction;
         public IMultiplayerClient.OnAllEntitiesDataUpdated _allEntitiesPreUpdatedAction;
+
+        public IMultiplayerClient.OnClientDisconnected clientDisconnectedAction
+        {
+
+
+            get { return _clientDisconnectedAction; }
+
+            set { _clientDisconnectedAction = value; }
+        }
+        public IMultiplayerClient.OnClientDisconnected _clientDisconnectedAction;
         public Socket socket { get; set; }
         public bool isLoggedIn { get; set; }
         public bool isGoingToQuitGame { get; set; }=false;
@@ -257,6 +267,11 @@ namespace monogameMinecraftNetworking.Client
                             }else if (result == "Failed")
                             {
                                 isGoingToQuitGame = true;
+                                if (_clientDisconnectedAction != null)
+                                {
+                                    _clientDisconnectedAction(
+                                        "User Login Failed: A Player With The Same Username Has Joined The Server.");
+                                }
                             }
                             break;
                         case MessageCommandType.UserDataRequest:
@@ -348,8 +363,14 @@ namespace monogameMinecraftNetworking.Client
             {
                 Debug.WriteLine("connecting failed:"+e);
                 isGoingToQuitGame = true;
+                if (_clientDisconnectedAction != null)
+                {
+                    _clientDisconnectedAction("Connecting Failed:" + e);
+                }
                 return false;
             }
+
+            isLoggedIn = false;
           executeTodoListThread=new Thread(ExecuteTodoList);
           executeTodoListThread.IsBackground = true;
           executeTodoListThread.Start();
@@ -372,10 +393,13 @@ namespace monogameMinecraftNetworking.Client
                     return;
                 }
                 Thread.Sleep(2000);
-                if (messageParser.isMessageParsingThreadRunning == false)
+                if (messageParser.isMessageParsingThreadRunning == false&&isGoingToQuitGame==false)
                 {
                     isGoingToQuitGame = true;
-               
+                    if (_clientDisconnectedAction != null)
+                    {
+                        _clientDisconnectedAction("Client Disconnected: Server Closed");
+                    }
                 }
             }
         }
@@ -390,6 +414,10 @@ namespace monogameMinecraftNetworking.Client
         {
             NetworkingUtility.SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogout, new byte[]{}), socket);
             isGoingToQuitGame = true;
+            if (_clientDisconnectedAction != null)
+            {
+                _clientDisconnectedAction("Client Logged Out");
+            }
             messageParser.Stop();
             socket.Shutdown(SocketShutdown.Both);
             socket.Close(5000);

@@ -15,7 +15,7 @@ namespace monogameMinecraftShared.Updateables
     public class ParticleManager
     {
         public static ParticleManager instance;
-
+        public bool isResourcesReleased = false;
 
 
         public ParticleManager()
@@ -33,6 +33,7 @@ namespace monogameMinecraftShared.Updateables
             {
                 allParticles = new IParticle[200];
                 cachedBlockColliders = new Dictionary<Vector3Int, BoundingBox>();
+                isResourcesReleased = false;
             }
            
         }
@@ -43,6 +44,7 @@ namespace monogameMinecraftShared.Updateables
             {
                 allParticles = null;
                 cachedBlockColliders = null;
+                isResourcesReleased=true;
             }
         
         }
