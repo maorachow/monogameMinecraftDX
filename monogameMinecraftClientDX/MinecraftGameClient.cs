@@ -359,8 +359,10 @@ namespace monogameMinecraftClientDX
             particleManager = new ParticleManager();
             particleManager.Initialize();
             renderPipelineManager.InitRenderPipeline();
-        
-           
+            ClientSideEntityManager.LoadEntitySounds(Content);
+
+
+
            bool succeeded= networkingClient.Connect();
           
             ClientSideVoxelWorld.singleInstance.InitWorld(this);
@@ -578,74 +580,53 @@ namespace monogameMinecraftClientDX
             /*      gamePlayer.cam.updateCameraVectors();
                     renderPipelineManager.RenderWorld(gameTime,_spriteBatch);
 
-                    _spriteBatch.Begin();
+                   */
+           
+    switch (status)
+    {
+        case GameStatus.Started:
 
+            //            Debug.WriteLine("started");
 
-                    if (renderPipelineManager is LowDefNetworkingClientRenderPipelineManager)
-                    {
-                        LowDefNetworkingClientRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as LowDefNetworkingClientRenderPipelineManager;
-                        /*    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
-                            for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
-                            {
-                                _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
-                            }
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+            // Debug.WriteLine(ChunkManager.chunks.Count);
+            gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
+            renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
+            //        _spriteBatch.Begin(blendState:BlendState.Additive);
+            //        _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth , GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+            //       _spriteBatch.End();
 
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+            _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
-
-                    }
-                    _spriteBatch.End();*/
-            switch (status)
+            foreach (var el in UIElement.inGameUIs)
             {
-                case GameStatus.Started:
+                el.DrawString(el.text);
+            }
+            _spriteBatch.End();
 
-                    //            Debug.WriteLine("started");
-
-                    GraphicsDevice.Clear(Color.CornflowerBlue);
-                    // Debug.WriteLine(ChunkManager.chunks.Count);
-                    gamePlayerR.gamePlayer.cam.updateCameraVectors();
-
-                    renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
-                    //        _spriteBatch.Begin(blendState:BlendState.Additive);
-                    //        _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth , GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                    //       _spriteBatch.End();
-
-                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
-
-                    foreach (var el in UIElement.inGameUIs)
-                    {
-                        el.DrawString(el.text);
-                    }
-                    _spriteBatch.End();
-
-                    _spriteBatch.Begin();
+            _spriteBatch.Begin();
 
 
-                    if (renderPipelineManager is HighDefNetworkingRenderPipelineManager)
-                    {
-                        HighDefNetworkingRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefNetworkingRenderPipelineManager;
-                        /*    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
-                            for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
-                            {
-                                _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
-                            }*/
+            if (renderPipelineManager is HighDefNetworkingRenderPipelineManager)
+            {
+                HighDefNetworkingRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefNetworkingRenderPipelineManager;
+                _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
+                _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
+                for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                {
+                    _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
+                }
 
 
-                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+                //    _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
 
-                //        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                //        _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                 //       _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
+                //      _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.re, new Rectangle(400, 200, 200, 200), Color.White);
+                //    _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
+                   _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedoTrans0, new Rectangle(200, 600, 200, 200), Color.White);
+                _spriteBatch.Draw(renderPipelineManagerLowDef.deferredShadingRenderer.renderTargetLumTransparent, new Rectangle(1600, 400, 400, 400), Color.White);
 
-                    }
+            }
                     _spriteBatch.End();
 
                         if (isInventoryOpen)

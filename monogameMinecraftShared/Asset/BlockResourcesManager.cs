@@ -204,9 +204,24 @@ namespace monogameMinecraftShared.Asset
                     { 15, "blocksprites/iron_block" },
                     { 16, "blocksprites/cobblestone" },
                     { 17, "blocksprites/planks_oak" },
+                    { 18, "blocksprites/wool_colored_red" },
+                    { 19, "blocksprites/wool_colored_green" },
+                    { 20, "blocksprites/wool_colored_blue" },
+                    { 21, "blocksprites/planks_oak" },
+                    { 22, "blocksprites/wool_colored_white" },
+                    { 23, "blocksprites/wool_colored_black" },
                     { 100, "blocksprites/water" },
                     { 101, "blocksprites/grass" },
-                    { 102, "blocksprites/torch_on" }
+                    { 102, "blocksprites/torch_on" },
+                    { 103, "blocksprites/fences" },
+                    { 104, "blocksprites/woodendoor" },
+                    { 105, "blocksprites/ladder" },
+                    { 106, "blocksprites/glass_green" },
+                    { 107, "blocksprites/glass_blue" },
+                    { 108, "blocksprites/glass_black" },
+                    { 109, "blocksprites/glass" },
+                    { 110, "blocksprites/glass_white" },
+                    { 111, "blocksprites/glass_red" },
                 };
                 string blockInfoDataString = JsonSerializer.Serialize(blockInfoData);
 
@@ -297,12 +312,20 @@ namespace monogameMinecraftShared.Asset
                     { 19, "clothdig" },
                     { 20, "clothdig" },
                     { 21, "wooddig" },
+                    { 22, "clothdig" },
+                    { 23, "clothdig" },
                     { 100, "waterdig" },
                     { 101, "grassdig" },
                     { 102, "wooddig" },
                     { 103, "wooddig" },
                     { 104, "wooddig" },
-                    { 105, "wooddig" }
+                    { 105, "wooddig" },
+                    { 106, "stonedig" },
+                    { 107, "stonedig" },
+                    { 108, "stonedig" },
+                    { 109, "stonedig" },
+                    { 110, "stonedig" },
+                    { 111, "wooddig" }
 
                 };
 
@@ -352,12 +375,20 @@ namespace monogameMinecraftShared.Asset
                     { 19, "blocksprites/wool_colored_green" },
                     { 20, "blocksprites/wool_colored_blue" },
                     { 21, "blocksprites/planks_oak" },
+                    { 22, "blocksprites/wool_colored_white" },
+                    { 23, "blocksprites/wool_colored_black" },
                     { 100, "blocksprites/water" },
                     { 101, "blocksprites/grass" },
                     { 102, "blocksprites/torch_on" },
                     { 103, "blocksprites/fences" },
                     { 104, "blocksprites/woodendoor" },
-                    { 105, "blocksprites/ladder" }
+                    { 105, "blocksprites/ladder" },
+                    { 106, "blocksprites/glass_green" },
+                    { 107, "blocksprites/glass_blue" },
+                    { 108, "blocksprites/glass_black" },
+                    { 109, "blocksprites/glass" },
+                    { 110, "blocksprites/glass_white" },
+                    { 111, "blocksprites/glass_red" },
                 };
                 foreach (var item in blockSpriteInfoData)
                 {

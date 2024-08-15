@@ -225,11 +225,14 @@ namespace monogameMinecraftShared.Rendering
         }
         public static RasterizerState rasterizerState = new RasterizerState { CullMode = CullMode.None };
 
-        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, RenderTarget2D target2, Effect quadEffect, bool clearColor = true)
+        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, RenderTarget2D target2, Effect quadEffect, bool clearColor = true,bool changeRenderTargets=true)
         {
 
-
-            device.SetRenderTargets(target, target2);
+            if (changeRenderTargets)
+            {
+                device.SetRenderTargets(target, target2);
+            }
+          
             if (clearColor == true)
             {
                 device.Clear(Color.Transparent);
@@ -251,9 +254,12 @@ namespace monogameMinecraftShared.Rendering
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
             }
             //    graphicsDevice.Clear(Color.White);
-
-            device.SetRenderTarget(null);
-            device.Clear(Color.CornflowerBlue);
+            if (changeRenderTargets)
+            {
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+            }
+            
 
 
         }

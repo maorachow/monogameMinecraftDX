@@ -10,6 +10,8 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using monogameMinecraftNetworking.Client.Rendering;
 using monogameMinecraftNetworking.Protocol;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
@@ -45,6 +47,15 @@ namespace monogameMinecraftNetworking.Client.Updateables
             isFirstUpdatePassed = false;
             client.allEntitiesUpdatedAction += Update;
             client.allEntitiesPreUpdatedAction += PreUpdate;
+        }
+
+        public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
+
+
+        public static void LoadEntitySounds(ContentManager cm)
+        {
+            entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
+            entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
         }
 
         public bool isFirstUpdatePassed = false;

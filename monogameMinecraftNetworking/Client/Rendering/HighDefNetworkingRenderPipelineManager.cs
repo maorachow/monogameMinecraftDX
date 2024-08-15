@@ -91,7 +91,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice, game);
             //   entityRenderer = new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, null, particleRenderer, true, clientSidePlayersRenderer, clientSideEntitiesRenderer);
+            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, null, particleRenderer, true, clientSidePlayersRenderer, clientSideEntitiesRenderer);
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
@@ -103,7 +103,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(game.GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
             motionBlurRenderer = new MotionBlurRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);
-            deferredShadingRenderer = new DeferredShadingRenderer(game.GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, game.gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer, null, null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer, fxaaRenderer, motionBlurRenderer, hdrCubemapRenderer);
+            deferredShadingRenderer = new DeferredShadingRenderer(game.GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], effectsManager.gameEffects["transparentdeferredblockeffect"], shadowRenderer, ssaoRenderer, game.gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer, null, null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer, fxaaRenderer, motionBlurRenderer, hdrCubemapRenderer);
 
 
             customPostProcessors.Add(new CustomPostProcessor(game.GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess0"));
@@ -208,10 +208,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             contactShadowRenderer.contactShadowRenderTarget = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
 
             motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            deferredShadingRenderer.renderTargetLum = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            deferredShadingRenderer.finalImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
-            deferredShadingRenderer.renderTargetLumSpec = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            deferredShadingRenderer.renderTargetLumAllDiffuse = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            deferredShadingRenderer.Resize(width, height);
             motionBlurRenderer.processedImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
             hiZBufferRenderer.ResizeTarget();
             ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);

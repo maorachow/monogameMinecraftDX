@@ -243,6 +243,7 @@ namespace monogameMinecraftNetworking.Updateables
         public void GetEntitiesAround()
         {
             entitiyBoundsAround = new List<BoundingBox>();
+            GetPlayersAround();
             foreach (var entity in ServerSideEntityManager.worldEntities)
             {
                 if (entity != this)
@@ -252,6 +253,23 @@ namespace monogameMinecraftNetworking.Updateables
                         entitiyBoundsAround.Add(new BoundingBox(entity.bounds.Min, entity.bounds.Max));
                     }
                 }
+            }
+        }
+        public void GetPlayersAround()
+        {
+           
+            foreach (var player in server.allUserDatas)
+            {
+                Vector3 playerPos = new Vector3(player.posX, player.posY, player.posZ);
+              
+               
+                    if (MathF.Abs(playerPos.X - position.X) < 10f && MathF.Abs(playerPos.Y - position.Y) < 10f && MathF.Abs(playerPos.Z - position.Z) < 10f)
+                    {
+                        BoundingBox playerBounds = new BoundingBox(playerPos + new Vector3(-0.3f, 0f, -0.3f),
+                            playerPos + new Vector3(0.3f, 1.8f, 0.3f));
+                        entitiyBoundsAround.Add(playerBounds);
+                    }
+                
             }
         }
         public List<BoundingBox> GetBlocksAround(BoundingBox aabb)

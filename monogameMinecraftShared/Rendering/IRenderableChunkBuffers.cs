@@ -20,15 +20,19 @@ namespace monogameMinecraftShared.Rendering
         public bool isNSBuffersValid { get; set; }
         public bool isWTBuffersValid { get; set; }
 
+
+        public bool isTSBuffersValid { get; set; }
         public BoundingBox chunkBounds { get; set; }
         public VertexPositionNormalTangentTexture[] verticesOpqArray { get; }
         public VertexPositionNormalTangentTexture[] verticesOpqLOD1Array { get; }
         public VertexPositionNormalTangentTexture[] verticesNSArray { get; }
         public VertexPositionNormalTangentTexture[] verticesWTArray { get; }
+        public VertexPositionNormalTangentTexture[] verticesTSArray { get; }
         public ushort[] indicesOpqArray { get; }
         public ushort[] indicesOpqLOD1Array { get; }
         public ushort[] indicesNSArray { get; }
         public ushort[] indicesWTArray { get; }
+        public ushort[] indicesTSArray { get; }
         public IndexBuffer IBOpq { get; }
         public VertexBuffer VBOpq { get; }
         public IndexBuffer IBOpqLOD1 { get; }
@@ -37,5 +41,8 @@ namespace monogameMinecraftShared.Rendering
         public VertexBuffer VBWT { get; }
         public IndexBuffer IBNS { get; }
         public VertexBuffer VBNS { get; }
+
+        public IndexBuffer IBTS { get; }
+        public VertexBuffer VBTS { get; }
     }
 }

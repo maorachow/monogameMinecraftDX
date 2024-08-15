@@ -942,7 +942,7 @@ namespace monogameMinecraftGL
                             _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
-                    
+                            _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedoTrans0, new Rectangle(1600, 800, 400, 400), Color.White);
                         }
                        
                     }

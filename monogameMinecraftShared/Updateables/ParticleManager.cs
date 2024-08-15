@@ -24,14 +24,14 @@ namespace monogameMinecraftShared.Updateables
         }
 
         public object allParticlesLock = new object();
-        public IParticle[] allParticles = new IParticle[200];
+        public ConcurrentDictionary<int,IParticle> allParticles = new ConcurrentDictionary<int, IParticle>();
 
         public Dictionary<Vector3Int, BoundingBox> cachedBlockColliders;
         public void Initialize()
         {
             lock (allParticlesLock)
             {
-                allParticles = new IParticle[200];
+                allParticles = new ConcurrentDictionary<int, IParticle>();
                 cachedBlockColliders = new Dictionary<Vector3Int, BoundingBox>();
                 isResourcesReleased = false;
             }
@@ -74,49 +74,46 @@ namespace monogameMinecraftShared.Updateables
 
         public void Update(float deltaTime)
         {
-            lock (allParticlesLock)
-            {
+            
             cachedBlockColliders.Clear();
             //    Debug.WriteLine(allParticles[0]?.position);
-            for (int i = 0; i < allParticles.Length; i++)
+            foreach (var particle in allParticles)
             {
-                if (allParticles[i] != null && allParticles[i].isAlive == true)
+                if (particle.Value != null && particle.Value.isAlive == true)
                 {
-                    allParticles[i].Update(deltaTime);
+                    particle.Value.Update(deltaTime);
                 }
 
             }
-            }
+            
           
             // RemoveDeadParticles();
         }
-
+        public Random rand=new Random();
         public void SpawnNewParticleTexturedGravity(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime,
             Vector3 initalMotionVector, float friction)
         {
-            lock (allParticlesLock)
-            {
+            
             TexturedGravityParticle particle = new TexturedGravityParticle(position, size, uvCorner, uvWidth, lifeTime, initalMotionVector, friction);
-            int firstUnusedParticle = FindFirstDeadParticle();
-            if (firstUnusedParticle != -1)
-            {
-                allParticles[firstUnusedParticle] = particle;
-            }
+                FindAndRemoveDeadParticle();
+          
+                allParticles.TryAdd(rand.Next(),particle) ;
+           
 
-            }
+            
            
         }
 
-        public int FindFirstDeadParticle()
+        public void FindAndRemoveDeadParticle()
         {
-            for (int i = 0; i < allParticles.Length; i++)
+            foreach (var particle in allParticles)
             {
-                if (allParticles[i] == null || allParticles[i] != null && allParticles[i].isAlive == false)
+                if (particle.Value != null && particle.Value.isAlive == false)
                 {
-                    return i;
+                    allParticles.Remove(particle.Key, out _);
                 }
+
             }
-            return -1;
         }
         /* public void RemoveDeadParticles()
          {

@@ -345,6 +345,15 @@ namespace monogameMinecraftNetworking.Client
                                 _chatMessageReceivedAction(message);
                             }
                             break;
+
+                        case MessageCommandType.EntitySoundBroadcast:
+                            EntitySoundBroadcastData data6 =
+                                MessagePackSerializer.Deserialize<EntitySoundBroadcastData>(item.messageData);
+                            if (ClientSideEntityManager.entitySounds .ContainsKey(data6.soundID))
+                            {
+                                SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data6.posX, data6.posY, data6.posZ), ClientSideEntityManager.entitySounds[data6.soundID], 20f);
+                            }
+                            break;
                     }
                 }
                 

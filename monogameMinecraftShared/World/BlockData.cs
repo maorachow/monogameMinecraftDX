@@ -18,7 +18,8 @@ namespace monogameMinecraftShared.World
         Water=5,
         Fence=6,
         Door=7,
-        WallAttachment=8
+        WallAttachment=8,
+        SolidTransparent=9
 
     }
         [MessagePackObject]

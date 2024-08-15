@@ -355,9 +355,9 @@ namespace monogameMinecraftClient
             particleManager = new ParticleManager();
             particleManager.Initialize();
             renderPipelineManager.InitRenderPipeline();
-        
-           
-           bool succeeded= networkingClient.Connect();
+            ClientSideEntityManager.LoadEntitySounds(Content);
+
+            bool succeeded= networkingClient.Connect();
           
             ClientSideVoxelWorld.singleInstance.InitWorld(this);
             if (succeeded == false)

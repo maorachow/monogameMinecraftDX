@@ -18,6 +18,8 @@ using monogameMinecraftNetworking.Client;
 using monogameMinecraftNetworking.Pathfinding;
 using monogameMinecraftNetworking.World;
 using EntityData=monogameMinecraftNetworking.Data.EntityData;
+using NetworkingUtility = monogameMinecraftNetworking.Utility.NetworkingUtility;
+
 namespace monogameMinecraftNetworking.Updateables
 {
     public class ServerSideEntityManager
@@ -209,7 +211,7 @@ namespace monogameMinecraftNetworking.Updateables
         }
 
 
-        public static void HurtEntity(string entityID, float hurtValue, Vector3 sourcePos)
+        public static bool HurtEntity(string entityID, float hurtValue, Vector3 sourcePos,out ServerSideEntityBeh resultEntity)
         {
             ServerSideEntityBeh ServerSideEntityBeh;
             int index = worldEntities.FindIndex((e) => { return entityID == e.entityID; });
@@ -219,11 +221,13 @@ namespace monogameMinecraftNetworking.Updateables
             }
             else
             {
-                return;
+                resultEntity=null;
+                return false;
             }
             if (ServerSideEntityBeh.isEntityHurt == true)
             {
-                return;
+                resultEntity = null;
+                return false;
             }
         /*    if (entitySounds.ContainsKey(ServerSideEntityBeh.typeID + "hurt"))
             {
@@ -233,6 +237,8 @@ namespace monogameMinecraftNetworking.Updateables
             ServerSideEntityBeh.entityHealth -= hurtValue;
             ServerSideEntityBeh.entityHurtCD = 0.2f;
             ServerSideEntityBeh.entityMotionVec = Vector3.Normalize(ServerSideEntityBeh.position - sourcePos) * 15f;
+            resultEntity = ServerSideEntityBeh;
+            return true;
         }
     }
 

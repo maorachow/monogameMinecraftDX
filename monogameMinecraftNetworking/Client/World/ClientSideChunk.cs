@@ -86,7 +86,8 @@ namespace monogameMinecraftNetworking.Client.World
         public List<ushort> indicesNS;
         public List<VertexPositionNormalTangentTexture> verticesWT;// = new List<VertexPositionNormalTexture>();
         public List<ushort> indicesWT;
-
+        public List<VertexPositionNormalTangentTexture> verticesTS;// = new List<VertexPositionNormalTexture>();
+        public List<ushort> indicesTS;
 
 
 
@@ -134,6 +135,17 @@ namespace monogameMinecraftNetworking.Client.World
                 _verticesWTArray = value;
             }
         }
+        public VertexPositionNormalTangentTexture[] verticesTSArray
+        {
+            get
+            {
+                return _verticesTSArray;
+            }
+            set
+            {
+                _verticesTSArray = value;
+            }
+        }
         public ushort[] indicesOpqArray
         {
             get
@@ -178,17 +190,30 @@ namespace monogameMinecraftNetworking.Client.World
                 _indicesWTArray = value;
             }
         }
-
+        public ushort[] indicesTSArray
+        {
+            get
+            {
+                return _indicesTSArray;
+            }
+            set
+            {
+                _indicesTSArray = value;
+            }
+        }
 
 
         public VertexPositionNormalTangentTexture[] _verticesOpqArray;
         public VertexPositionNormalTangentTexture[] _verticesOpqLOD1Array;
         public VertexPositionNormalTangentTexture[] _verticesNSArray;
         public VertexPositionNormalTangentTexture[] _verticesWTArray;
+        public VertexPositionNormalTangentTexture[] _verticesTSArray;
         public ushort[] _indicesOpqArray;
         public ushort[] _indicesOpqLOD1Array;
         public ushort[] _indicesNSArray;
         public ushort[] _indicesWTArray;
+
+        public ushort[] _indicesTSArray;
         public IndexBuffer IBOpq
         {
             get { return _IBOpq; }
@@ -254,7 +279,22 @@ namespace monogameMinecraftNetworking.Client.World
             }
         }
 
-
+        public IndexBuffer IBTS
+        {
+            get { return _IBTS; }
+            set
+            {
+                _IBTS = value;
+            }
+        }
+        public VertexBuffer VBTS
+        {
+            get { return _VBTS; }
+            set
+            {
+                _VBTS = value;
+            }
+        }
         public IndexBuffer _IBOpq;
         public VertexBuffer _VBOpq;
         public IndexBuffer _IBOpqLOD1;
@@ -263,6 +303,9 @@ namespace monogameMinecraftNetworking.Client.World
         public VertexBuffer _VBWT;
         public IndexBuffer _IBNS;
         public VertexBuffer _VBNS;
+
+        public IndexBuffer _IBTS;
+        public VertexBuffer _VBTS;
         public BoundingBox chunkBounds { get; set; }
         public BoundingBox CalculateBounds()
         {
@@ -300,6 +343,8 @@ namespace monogameMinecraftNetworking.Client.World
             indicesWT = new List<ushort>();
             verticesOpqLOD = new List<VertexPositionNormalTangentTexture>();
             indicesOpqLOD = new List<ushort>();
+            verticesTS = new List<VertexPositionNormalTangentTexture>();
+            indicesTS = new List<ushort>();
             frontLeftChunk = ClientSideChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y + chunkWidth));
             frontRightChunk = ClientSideChunkHelper.GetChunk(new Vector2Int(chunkPos.x + chunkWidth, chunkPos.y + chunkWidth));
             backLeftChunk = ClientSideChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y - chunkWidth));
@@ -390,7 +435,7 @@ namespace monogameMinecraftNetworking.Client.World
 
                 this.chunkBounds = this.CalculateBounds();
                 GenerateHeightMap();
-                GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT, generateRenderBuffers);
+                GenerateMesh(verticesOpq, verticesNS, verticesWT, verticesTS,indicesOpq, indicesNS, indicesWT, indicesTS, generateRenderBuffers);
                 ReleaseChunkUsage();
 
                 //     semaphore.Release();
@@ -506,7 +551,7 @@ namespace monogameMinecraftNetworking.Client.World
               
             }
         }
-        public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices, bool generateRenderingBuffers = true)
+        public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<VertexPositionNormalTangentTexture> TSVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices, List<ushort> TSIndices, bool generateRenderingBuffers = true)
         {
            // lightPoints = new List<Vector3>();
 
@@ -522,7 +567,7 @@ namespace monogameMinecraftNetworking.Client.World
                         {
                             return;
                         }
-                        BlockMeshBuildingHelper.BuildSingleBlock(this, x, y, z, this.map[x, y, z], ref OpqVerts, ref NSVerts, ref WTVerts, ref OpqIndices, ref NSIndices, ref WTIndices);
+                        BlockMeshBuildingHelper.BuildSingleBlock(this, x, y, z, this.map[x, y, z], ref OpqVerts, ref NSVerts, ref WTVerts, ref OpqIndices, ref NSIndices, ref WTIndices,ref TSVerts,ref TSIndices);
                         continue;
                 
 
@@ -533,12 +578,13 @@ namespace monogameMinecraftNetworking.Client.World
             verticesNSArray = verticesNS.ToArray();
             verticesWTArray = verticesWT.ToArray();
             verticesOpqArray = verticesOpq.ToArray();
+            verticesTSArray = verticesTS.ToArray();
             indicesOpqArray = indicesOpq.ToArray();
             indicesNSArray = indicesNS.ToArray();
             indicesWTArray = indicesWT.ToArray();
+            indicesTSArray = indicesTS.ToArray();
 
 
-        
             if (generateRenderingBuffers)
             {
                 GenerateRenderBuffers();
@@ -569,7 +615,7 @@ if (disposed == true)
             isNSBuffersValid = false;
             isWTBuffersValid = false;
             isOpqBuffersValid = false;
-
+            isTSBuffersValid=false;
             VBOpq?.Dispose();
             IBOpq?.Dispose();
             if (verticesOpqArray.Length > 0 || indicesOpqArray.Length > 0)
@@ -643,9 +689,31 @@ if (disposed == true)
                 isNSBuffersValid = true;
             }
 
+            VBTS?.Dispose();
+            IBTS?.Dispose();
+            if (verticesTSArray.Length > 0 || indicesTSArray.Length > 0)
+            {
 
 
-            isVertexBufferDirty = false;
+                if (verticesTSArray.Length > 0)
+                {
+                    VBTS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesTSArray.Length + 1, BufferUsage.WriteOnly);
+                    VBTS.SetData(verticesTSArray);
+                }
+
+
+
+
+                if (indicesTSArray.Length > 0)
+                {
+                    IBTS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesTSArray.Length, BufferUsage.WriteOnly);
+                    IBTS.SetData(indicesTSArray);
+                }
+
+                isTSBuffersValid = true;
+            }
+
+                isVertexBufferDirty = false;
             }
             
         }
@@ -782,10 +850,10 @@ if (disposed == true)
         public bool isNSBuffersValid { get; set; }
         public bool isWTBuffersValid { get; set; }
         public bool isOpqBuffersValid {get; set; }
+        public bool isTSBuffersValid { get; set; }
 
 
-
-    public void GenerateMeshOpqLOD(List<VertexPositionNormalTangentTexture> verts, List<ushort> indices, ref VertexPositionNormalTangentTexture[] vertsArray, ref ushort[] indicesArray, ref VertexBuffer vb, ref IndexBuffer ib, int lodBlockSkipCount = 2)
+        public void GenerateMeshOpqLOD(List<VertexPositionNormalTangentTexture> verts, List<ushort> indices, ref VertexPositionNormalTangentTexture[] vertsArray, ref ushort[] indicesArray, ref VertexBuffer vb, ref IndexBuffer ib, int lodBlockSkipCount = 2)
         {
 
           
@@ -1195,6 +1263,23 @@ if (disposed == true)
                 }
 
             }
+            if (shape == BlockShape.SolidTransparent)
+            {
+                if (shape1 == BlockShape.SolidTransparent)
+                {
+                    return false;
+                }
+                else
+                if (shape1 == BlockShape.Water)
+                {
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
+
+            }
             if (shape == BlockShape.Water)
             {
                 if (shape1 == BlockShape.Solid)
@@ -1293,6 +1378,23 @@ if (disposed == true)
             if (shape == BlockShape.Solid)
             {
                 if (shape1 == BlockShape.Solid)
+                {
+                    return false;
+                }
+                else
+                if (shape1 == BlockShape.Water)
+                {
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
+
+            }
+            if (shape == BlockShape.SolidTransparent)
+            {
+                if (shape1 == BlockShape.SolidTransparent)
                 {
                     return false;
                 }

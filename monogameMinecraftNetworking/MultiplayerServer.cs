@@ -242,8 +242,19 @@ namespace monogameMinecraftNetworking
                             case MessageCommandType.HurtEntityRequest:
                                 HurtEntityRequestData data3 =
                                     MessagePackSerializer.Deserialize<HurtEntityRequestData>(item.message.messageData);
-                                ServerSideEntityManager.HurtEntity(data3.entityID,data3.hurtValue,new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ));
-                                break;
+                                ServerSideEntityBeh entity;
+                              bool isEntityHurt=  ServerSideEntityManager.HurtEntity(data3.entityID,data3.hurtValue,new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ),out entity);
+                                if (isEntityHurt)
+                                {
+                                    if (entity is ServerSideZombieEntityBeh)
+                                    {
+                                        NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
+                                            entity.position.X, entity.position.Y, entity.position.Z,"0hurt"
+                                            ))));
+                                        }
+                                  
+                                }
+                                    break;
                             case MessageCommandType.ChatMessage:
                                 if (item.sourceClient.isUserDataLoaded == false)
                                 {

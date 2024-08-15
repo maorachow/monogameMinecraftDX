@@ -26,11 +26,10 @@ namespace monogameMinecraftNetworking.Client.Updateables
             }
            
                 ClientSideTexturedGravityParticle particle = new ClientSideTexturedGravityParticle(position, size, uvCorner, uvWidth, lifeTime, initalMotionVector, friction);
-                int firstUnusedParticle = ParticleManager.instance.FindFirstDeadParticle();
-                if (firstUnusedParticle != -1)
-                {
-                    ParticleManager.instance.allParticles[firstUnusedParticle] = particle;
-                }
+                ParticleManager.instance.FindAndRemoveDeadParticle();
+               
+                    ParticleManager.instance.allParticles.TryAdd(rand.Next(),particle);
+               
 
             
 

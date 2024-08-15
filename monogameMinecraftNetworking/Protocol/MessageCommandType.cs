@@ -25,6 +25,7 @@ namespace monogameMinecraftNetworking.Protocol
         BlockSoundBroadcast=(byte)145,
         BlockParticleBroadcast = (byte)146,
         ChatMessageBroadcast = (byte)147,
-        ChatMessage = (byte)148
+        ChatMessage = (byte)148,
+        EntitySoundBroadcast = (byte)149
     }
 }

@@ -82,6 +82,38 @@ namespace monogameMinecraftShared.World
             {18,new BlockInfo(new List<Vector2> { new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f), new Vector2(0.3125f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {19,new BlockInfo(new List<Vector2> { new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f), new Vector2(0.375f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
             {20,new BlockInfo(new List<Vector2> { new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f), new Vector2(0.4375f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Solid) },
+
+
+            {
+                23,
+                new BlockInfo(
+                    new List<Vector2>
+                    {
+                        new Vector2(0.5f, 0.0625f), new Vector2(0.5f, 0.0625f), new Vector2(0.5f, 0.0625f),
+                        new Vector2(0.5f, 0.0625f), new Vector2(0.5f, 0.0625f), new Vector2(0.5f, 0.0625f)
+                    },
+                    new List<Vector2>
+                    {
+                        new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                        new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                    }, BlockShape.Solid)
+            },
+
+
+            {
+                22,
+                new BlockInfo(
+                    new List<Vector2>
+                    {
+                        new Vector2(0.5625f, 0.0625f), new Vector2(0.5625f, 0.0625f), new Vector2(0.5625f, 0.0625f),
+                        new Vector2(0.5625f, 0.0625f), new Vector2(0.5625f, 0.0625f), new Vector2(0.5625f, 0.0625f)
+                    },
+                    new List<Vector2>
+                    {
+                        new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                        new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                    }, BlockShape.Solid)
+            },
             {21,new BlockInfo(new List<Vector2> { new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f), new Vector2(0.25f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Slabs) },
            {100,new BlockInfo( new List<Vector2> { new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f), new Vector2(0f, 0.0625f) },new List<Vector2>{ new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f),new Vector2(0.0625f, 0.0625f) },BlockShape.Water) },
 
@@ -146,7 +178,92 @@ namespace monogameMinecraftShared.World
                    
                   }, BlockShape.WallAttachment)
           },
+          {
+              106,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0f, 0.125f), new Vector2(0f, 0.125f), new Vector2(0f, 0.125f),
+                      new Vector2(0f, 0.125f), new Vector2(0f, 0.125f), new Vector2(0f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
 
+          {
+              107,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.125f), new Vector2(0.0625f, 0.125f), new Vector2(0.0625f, 0.125f),
+                      new Vector2(0.0625f, 0.125f), new Vector2(0.0625f, 0.125f), new Vector2(0.0625f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
+          {
+              108,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.125f, 0.125f), new Vector2(0.125f, 0.125f), new Vector2(0.125f, 0.125f),
+                      new Vector2(0.125f, 0.125f), new Vector2(0.125f, 0.125f), new Vector2(0.125f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
+
+          {
+              109,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.1875f, 0.125f), new Vector2(0.1875f, 0.125f), new Vector2(0.1875f, 0.125f),
+                      new Vector2(0.1875f, 0.125f), new Vector2(0.1875f, 0.125f), new Vector2(0.1875f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
+          {
+              110,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.25f, 0.125f), new Vector2(0.25f, 0.125f), new Vector2(0.25f, 0.125f),
+                      new Vector2(0.25f, 0.125f), new Vector2(0.25f, 0.125f), new Vector2(0.25f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
+          {
+              111,
+              new BlockInfo(
+                  new List<Vector2>
+                  {
+                      new Vector2(0.3125f, 0.125f), new Vector2(0.3125f, 0.125f), new Vector2(0.3125f, 0.125f),
+                      new Vector2(0.3125f, 0.125f), new Vector2(0.3125f, 0.125f), new Vector2(0.3125f, 0.125f)
+                  },
+                  new List<Vector2>
+                  {
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f),
+                      new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f), new Vector2(0.0625f, 0.0625f)
+                  }, BlockShape.SolidTransparent)
+          },
     };
             [Obsolete]
         public static Dictionary<int, List<Vector2>> blockInfo = new Dictionary<int, List<Vector2>> {
@@ -505,6 +622,8 @@ namespace monogameMinecraftShared.World
             indicesWT = new List<ushort>();
             verticesOpqLOD = new List<VertexPositionNormalTangentTexture>();
             indicesOpqLOD = new List<ushort>();
+            verticesTS = new List<VertexPositionNormalTangentTexture>();
+            indicesTS = new List<ushort>();
             frontLeftChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y + chunkWidth));
             frontRightChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x + chunkWidth, chunkPos.y + chunkWidth));
             backLeftChunk = ChunkHelper.GetChunk(new Vector2Int(chunkPos.x - chunkWidth, chunkPos.y - chunkWidth));
@@ -595,7 +714,7 @@ namespace monogameMinecraftShared.World
 
                 this.chunkBounds = this.CalculateBounds();
                 GenerateHeightMap();
-                    GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT,generateRenderBuffers);
+                    GenerateMesh(verticesOpq, verticesNS, verticesWT, verticesTS, indicesOpq, indicesNS, indicesWT, indicesTS,generateRenderBuffers);
                 ReleaseChunkUsage();
 
                 //     semaphore.Release();
@@ -608,7 +727,7 @@ namespace monogameMinecraftShared.World
                 map = (BlockData[,,])VoxelWorld.currentWorld.chunkDataReadFromDisk[chunkPos].map.Clone();
                 this.chunkBounds = this.CalculateBounds();
                 GenerateHeightMap();
-                    GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT, generateRenderBuffers);
+                    GenerateMesh(verticesOpq, verticesNS, verticesWT, verticesTS, indicesOpq, indicesNS, indicesWT, indicesTS, generateRenderBuffers);
                 isMapGenCompleted = true;
                 ReleaseChunkUsage();
 
@@ -623,7 +742,7 @@ namespace monogameMinecraftShared.World
             FreshGenMap(chunkPos);
             GenerateHeightMap();
                 isMapGenCompleted = true;
-            GenerateMesh(verticesOpq, verticesNS, verticesWT, indicesOpq, indicesNS, indicesWT);
+            GenerateMesh(verticesOpq, verticesNS, verticesWT, verticesTS, indicesOpq, indicesNS, indicesWT, indicesTS, generateRenderBuffers);
             ReleaseChunkUsage();
 
             //    semaphore.Release();
@@ -1386,6 +1505,9 @@ namespace monogameMinecraftShared.World
         public List<ushort> indicesNS;
         public List<VertexPositionNormalTangentTexture> verticesWT;// = new List<VertexPositionNormalTexture>();
         public List<ushort> indicesWT;
+
+        public List<VertexPositionNormalTangentTexture> verticesTS;// = new List<VertexPositionNormalTexture>();
+        public List<ushort> indicesTS;
         public BoundingBox chunkBounds
         {
             get;
@@ -1531,7 +1653,7 @@ namespace monogameMinecraftShared.World
             }
         }
 
-        public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices,bool generateRenderingBuffers=true)
+        public void GenerateMesh(List<VertexPositionNormalTangentTexture> OpqVerts, List<VertexPositionNormalTangentTexture> NSVerts, List<VertexPositionNormalTangentTexture> WTVerts, List<VertexPositionNormalTangentTexture> TSVerts, List<ushort> OpqIndices, List<ushort> NSIndices, List<ushort> WTIndices, List<ushort> TSIndices, bool generateRenderingBuffers=true)
         {
             lightPoints = new List<Vector3>();
 
@@ -1548,7 +1670,7 @@ namespace monogameMinecraftShared.World
                         {
                             return;
                         }
-                        BlockMeshBuildingHelper.BuildSingleBlock(this, x, y, z, this.map[x, y, z], ref OpqVerts, ref NSVerts, ref WTVerts, ref OpqIndices, ref NSIndices, ref WTIndices);
+                        BlockMeshBuildingHelper.BuildSingleBlock(this, x, y, z, this.map[x, y, z], ref OpqVerts, ref NSVerts, ref WTVerts, ref OpqIndices, ref NSIndices, ref WTIndices,ref TSVerts,ref TSIndices);
                         continue;
                       /*  int typeid = this.map[x, y, z];
                         //    Debug.WriteLine(typeid);
@@ -1793,73 +1915,75 @@ namespace monogameMinecraftShared.World
             verticesNSArray = verticesNS.ToArray();
             verticesWTArray = verticesWT.ToArray();
             verticesOpqArray = verticesOpq.ToArray();
+            verticesTSArray = verticesTS.ToArray();
             indicesOpqArray = indicesOpq.ToArray();
             indicesNSArray = indicesNS.ToArray();
             indicesWTArray = indicesWT.ToArray();
 
-             
-                //   if (VBOpq == null)
-                //   {
-                /*       VBOpq?.Dispose();
+            indicesTSArray = indicesTS.ToArray();
+            
+            //   if (VBOpq == null)
+            //   {
+            /*       VBOpq?.Dispose();
 
-                       if (verticesOpqArray.Length > 0)
-                       {
-                           VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
-                           //   }
+                   if (verticesOpqArray.Length > 0)
+                   {
+                       VBOpq = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesOpqArray.Length + 1, BufferUsage.WriteOnly);
+                       //   }
 
-                           VBOpq.SetData(verticesOpqArray);
-                       }
+                       VBOpq.SetData(verticesOpqArray);
+                   }
 
-                       //  if(IBOpq == null)
-                       //  {
-                       IBOpq?.Dispose();
-                       if (indicesOpqArray.Length > 0)
-                       {
-                           IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
-                           IBOpq.SetData(indicesOpqArray);
-                       }
-
-
-
-
-                       VBWT?.Dispose();
-
-                       if (verticesWTArray.Length > 0)
-                       {
-                           VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
-                           VBWT.SetData(verticesWTArray);
-                       }
-
-
-                       IBWT?.Dispose();
-                       if (indicesWTArray.Length > 0)
-                       {
-                           IBWT = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesWTArray.Length, BufferUsage.WriteOnly);
-                           IBWT.SetData(indicesWTArray);
-                       }
+                   //  if(IBOpq == null)
+                   //  {
+                   IBOpq?.Dispose();
+                   if (indicesOpqArray.Length > 0)
+                   {
+                       IBOpq = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesOpqArray.Length, BufferUsage.WriteOnly);
+                       IBOpq.SetData(indicesOpqArray);
+                   }
 
 
 
 
+                   VBWT?.Dispose();
 
-                       VBNS?.Dispose();
-
-                       if (verticesNSArray.Length > 0)
-                       {
-                           VBNS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesNSArray.Length + 1, BufferUsage.WriteOnly);
-                           VBNS.SetData(verticesNSArray);
-                       }
-
-                       IBNS?.Dispose();
+                   if (verticesWTArray.Length > 0)
+                   {
+                       VBWT = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesWTArray.Length + 1, BufferUsage.WriteOnly);
+                       VBWT.SetData(verticesWTArray);
+                   }
 
 
-                       if (indicesNSArray.Length > 0)
-                       {
-                           IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
-                           IBNS.SetData(indicesNSArray);
-                       }*/
+                   IBWT?.Dispose();
+                   if (indicesWTArray.Length > 0)
+                   {
+                       IBWT = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesWTArray.Length, BufferUsage.WriteOnly);
+                       IBWT.SetData(indicesWTArray);
+                   }
 
-                if (generateRenderingBuffers)
+
+
+
+
+                   VBNS?.Dispose();
+
+                   if (verticesNSArray.Length > 0)
+                   {
+                       VBNS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesNSArray.Length + 1, BufferUsage.WriteOnly);
+                       VBNS.SetData(verticesNSArray);
+                   }
+
+                   IBNS?.Dispose();
+
+
+                   if (indicesNSArray.Length > 0)
+                   {
+                       IBNS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesNSArray.Length, BufferUsage.WriteOnly);
+                       IBNS.SetData(indicesNSArray);
+                   }*/
+
+            if (generateRenderingBuffers)
                 {
                     GenerateRenderBuffers();
                 }
@@ -1881,7 +2005,7 @@ namespace monogameMinecraftShared.World
                 isNSBuffersValid = false;
                 isWTBuffersValid = false;
                 isOpqBuffersValid = false;
-
+            isTSBuffersValid=false;
                 VBOpq?.Dispose();
                 IBOpq?.Dispose();
                 if (verticesOpqArray.Length > 0 || indicesOpqArray.Length > 0)
@@ -1955,7 +2079,29 @@ namespace monogameMinecraftShared.World
                     isNSBuffersValid = true;
                 }
 
-           
+                VBTS?.Dispose();
+                IBTS?.Dispose();
+                if (verticesTSArray.Length > 0 || indicesTSArray.Length > 0)
+                {
+
+
+                    if (verticesTSArray.Length > 0)
+                    {
+                        VBTS = new VertexBuffer(this.device, typeof(VertexPositionNormalTangentTexture), verticesTSArray.Length + 1, BufferUsage.WriteOnly);
+                        VBTS.SetData(verticesTSArray);
+                    }
+
+
+
+
+                    if (indicesTSArray.Length > 0)
+                    {
+                        IBTS = new DynamicIndexBuffer(this.device, IndexElementSize.SixteenBits, indicesTSArray.Length, BufferUsage.WriteOnly);
+                        IBTS.SetData(indicesTSArray);
+                    }
+
+                    isTSBuffersValid = true;
+                }
 
             isVertexBufferDirty = false;
         }
@@ -2278,7 +2424,26 @@ namespace monogameMinecraftShared.World
                     }
 
                 }
-                if(shape==BlockShape.Water) { 
+
+
+                if (shape == BlockShape.SolidTransparent)
+                {
+                    if (shape1 == BlockShape.SolidTransparent)
+                    {
+                        return false;
+                    }
+                    else
+                    if (shape1 == BlockShape.Water)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
+                }
+            if (shape==BlockShape.Water) { 
                     if(shape1==BlockShape.Solid)
                     {
                         return false;
@@ -2793,8 +2958,28 @@ namespace monogameMinecraftShared.World
                 _indicesWTArray = value;
             }
         }
-
-
+        public VertexPositionNormalTangentTexture[] verticesTSArray
+        {
+            get
+            {
+                return _verticesTSArray;
+            }
+            set
+            {
+                _verticesTSArray = value;
+            }
+        }
+        public ushort[] indicesTSArray
+        {
+            get
+            {
+                return _indicesTSArray;
+            }
+            set
+            {
+                _indicesTSArray = value;
+            }
+        }
 
         public VertexPositionNormalTangentTexture[] _verticesOpqArray;
         public VertexPositionNormalTangentTexture[] _verticesOpqLOD1Array;
@@ -2804,6 +2989,10 @@ namespace monogameMinecraftShared.World
         public ushort[] _indicesOpqLOD1Array;
         public ushort[] _indicesNSArray;
         public ushort[] _indicesWTArray;
+
+
+        public VertexPositionNormalTangentTexture[] _verticesTSArray;
+        public ushort[] _indicesTSArray;
         public  IndexBuffer IBOpq
         {
             get { return _IBOpq;}
@@ -2868,7 +3057,22 @@ namespace monogameMinecraftShared.World
             }
         }
 
-
+        public IndexBuffer IBTS
+        {
+            get { return _IBTS; }
+            set
+            {
+                _IBTS = value;
+            }
+        }
+        public VertexBuffer VBTS
+        {
+            get { return _VBTS; }
+            set
+            {
+                _VBTS = value;
+            }
+        }
         public IndexBuffer _IBOpq;
         public VertexBuffer _VBOpq;
         public IndexBuffer _IBOpqLOD1;
@@ -2877,6 +3081,9 @@ namespace monogameMinecraftShared.World
         public VertexBuffer _VBWT;
         public IndexBuffer _IBNS;
         public VertexBuffer _VBNS;
+
+        public IndexBuffer _IBTS;
+        public VertexBuffer _VBTS;
         public int GetHighestPoint()
         {
             int returnValue = 0;
@@ -2903,7 +3110,9 @@ namespace monogameMinecraftShared.World
         public bool isWTBuffersValid { get; set; } = false;
 
         public bool isOpqBuffersValid { get; set; } = false;
-            public void BuildChunk()
+
+        public bool isTSBuffersValid { get; set; } = false;
+        public void BuildChunk()
         {
             isTaskCompleted = false;
 

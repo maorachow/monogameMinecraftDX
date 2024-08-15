@@ -103,6 +103,7 @@ namespace monogameMinecraftShared.Asset
 
             gameEffects.Clear();
             gameEffects.TryAdd("blockforwardeffect", Content.Load<Effect>("blockeffect"));
+            gameEffects.TryAdd("gbufferdepthpeelingeffect", Content.Load<Effect>("gbufferdepthpeelingeffect"));
             gameEffects.TryAdd("createshadowmapeffect", Content.Load<Effect>("createshadowmapeffect"));
             gameEffects.TryAdd("entityeffect", Content.Load<Effect>("entityeffect"));
 
@@ -113,6 +114,7 @@ namespace monogameMinecraftShared.Asset
             gameEffects.TryAdd("skyboxeffect", Content.Load<Effect>("skyboxeffect"));
             gameEffects.TryAdd("ssreffect", Content.Load<Effect>("ssreffect"));
             gameEffects.TryAdd("ssideffect", Content.Load<Effect>("ssideffect"));
+            gameEffects.TryAdd("transparentdeferredblockeffect", Content.Load<Effect>("transparentdeferredblockeffect"));
             gameEffects.TryAdd("deferredblockeffect", Content.Load<Effect>("deferredblockeffect"));
             gameEffects.TryAdd("contactshadoweffect", Content.Load<Effect>("contactshadoweffect"));
             gameEffects.TryAdd("deferredblendeffect", Content.Load<Effect>("deferredblendeffect"));

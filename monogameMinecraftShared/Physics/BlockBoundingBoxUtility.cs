@@ -23,6 +23,8 @@ namespace monogameMinecraftShared.Physics
                     return true;
                 case BlockShape.Solid:
                     return true;
+                case BlockShape.SolidTransparent:
+                    return true;
                 case BlockShape.Stairs:
                     return true;
                 case BlockShape.WallAttachment:
@@ -50,6 +52,8 @@ namespace monogameMinecraftShared.Physics
                     return true;
                 case BlockShape.Solid:
                     return true;
+                case BlockShape.SolidTransparent:
+                    return true;
                 case BlockShape.Stairs:
                     return true;
                 case BlockShape.WallAttachment:
@@ -66,6 +70,11 @@ namespace monogameMinecraftShared.Physics
             }
             BlockShape shape = Chunk.blockInfosNew[blockData].shape;
             if (shape == BlockShape.Solid)
+            {
+                return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
+
+            }
+            if (shape == BlockShape.SolidTransparent)
             {
                 return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
 
@@ -215,6 +224,7 @@ namespace monogameMinecraftShared.Physics
             {
                 return new BoundingBox();
             }
+
             return new BoundingBox();
 
         }
@@ -227,6 +237,11 @@ namespace monogameMinecraftShared.Physics
             }
             BlockShape shape = Chunk.blockInfosNew[blockData].shape;
             if (shape == BlockShape.Solid)
+            {
+                return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
+
+            }
+            if (shape == BlockShape.SolidTransparent)
             {
                 return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
 

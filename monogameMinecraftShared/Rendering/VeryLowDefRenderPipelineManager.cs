@@ -68,7 +68,7 @@ using monogameMinecraftShared.World;
                   null, game.gamePlayerR.gamePlayer,false);
                 BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
                 entityRenderer = new EntityRenderer( game.GraphicsDevice, game.gamePlayerR.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-                gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
+                gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbuffereffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
                 skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                    game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                    );
@@ -117,7 +117,7 @@ using monogameMinecraftShared.World;
                 game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
                 //  GraphicsDevice.RasterizerState = rasterizerState;
-                game.GraphicsDevice.BlendState = BlendState.Opaque;
+                game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
              //   gBufferRenderer.Draw();
              //   ssaoRenderer.Draw();
 

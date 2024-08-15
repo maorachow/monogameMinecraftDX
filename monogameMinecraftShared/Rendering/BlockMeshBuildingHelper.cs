@@ -7,13 +7,12 @@ using monogameMinecraftShared.World;
 namespace monogameMinecraftShared.Rendering
 {
 
-
    
-        //commit
-        public static partial class BlockMeshBuildingHelper
+    //commit
+    public static partial class BlockMeshBuildingHelper
         {
 
-            public static void BuildSingleBlock(IChunkFaceBuildingChecks curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> OpqVerts, ref List<VertexPositionNormalTangentTexture> NSVerts, ref List<VertexPositionNormalTangentTexture> WTVerts, ref List<ushort> OpqIndices, ref List<ushort> NSIndices, ref List<ushort> WTIndices)
+            public static void BuildSingleBlock(IChunkFaceBuildingChecks curChunk, int x, int y, int z, BlockData blockData, ref List<VertexPositionNormalTangentTexture> OpqVerts, ref List<VertexPositionNormalTangentTexture> NSVerts, ref List<VertexPositionNormalTangentTexture> WTVerts, ref List<ushort> OpqIndices, ref List<ushort> NSIndices, ref List<ushort> WTIndices, ref List<VertexPositionNormalTangentTexture> TSVerts,ref List<ushort> TSIndices)
             {
                 if (blockData.blockID == 0 || !Chunk.blockInfosNew.ContainsKey(blockData.blockID))
                 {
@@ -721,7 +720,33 @@ namespace monogameMinecraftShared.Rendering
                     }
                     break;
 
-                }
+                case BlockShape.SolidTransparent:
+                    if (Chunk.blockInfosNew[blockData.blockID].uvCorners.Count < 6 || Chunk.blockInfosNew[blockData.blockID].uvSizes.Count < 6)
+                    {
+                        return;
+                    }
+                    if (curChunk.CheckNeedBuildFace(x - 1, y, z, blockData))
+                        BuildFaceComplex(new Vector3(x, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[0], Chunk.blockInfosNew[blockData.blockID].uvSizes[0], false, TSVerts, TSIndices);
+                    //Right
+                    if (curChunk.CheckNeedBuildFace(x + 1, y, z, blockData))
+                        BuildFaceComplex(new Vector3(x + 1, y, z), new Vector3(0, 1, 0), new Vector3(0, 0, 1), Chunk.blockInfosNew[blockData.blockID].uvCorners[1], Chunk.blockInfosNew[blockData.blockID].uvSizes[1], true, TSVerts, TSIndices);
+
+                    //Bottom
+                    if (curChunk.CheckNeedBuildFace(x, y - 1, z, blockData))
+                        BuildFaceComplex(new Vector3(x, y, z), new Vector3(0, 0, 1), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[2], Chunk.blockInfosNew[blockData.blockID].uvSizes[2], false, TSVerts, TSIndices);
+                    //Top
+                    if (curChunk.CheckNeedBuildFace(x, y + 1, z, blockData))
+                        BuildFaceComplex(new Vector3(x, y + 1, z), new Vector3(0, 0, 1), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[3], Chunk.blockInfosNew[blockData.blockID].uvSizes[3], true, TSVerts, TSIndices);
+
+                    //Back
+                    if (curChunk.CheckNeedBuildFace(x, y, z - 1, blockData))
+                        BuildFaceComplex(new Vector3(x, y, z), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[4], Chunk.blockInfosNew[blockData.blockID].uvSizes[4], true, TSVerts, TSIndices);
+                    //Front
+                    if (curChunk.CheckNeedBuildFace(x, y, z + 1, blockData))
+                        BuildFaceComplex(new Vector3(x, y, z + 1), new Vector3(0, 1, 0), new Vector3(1, 0, 0), Chunk.blockInfosNew[blockData.blockID].uvCorners[5], Chunk.blockInfosNew[blockData.blockID].uvSizes[5], false, TSVerts, TSIndices);
+                    break;
+
+            }
 
             }
 

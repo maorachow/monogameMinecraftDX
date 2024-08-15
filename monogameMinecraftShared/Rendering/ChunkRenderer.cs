@@ -172,7 +172,44 @@ namespace monogameMinecraftShared.Rendering
 
         }
 
+        public void RenderAllChunksGBufferDepthPeeling(ConcurrentDictionary<Vector2Int, IRenderableChunkBuffers> RenderingChunks, IGamePlayer player, Effect gBufferEffect,Texture2D depthTexOpq,Texture2D prevDepthTex=null, Texture2D prevDepthTex1=null)
+        {
 
+            gBufferEffect.Parameters["blockTex"].SetValue(atlas);
+            gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
+            gBufferEffect.Parameters["merTex"]?.SetValue(atlasMER);
+            gBufferEffect.Parameters["depthTexOpq"]?.SetValue(depthTexOpq);
+            gBufferEffect.Parameters["depthTex"]?.SetValue(prevDepthTex);
+            gBufferEffect.Parameters["depthTex1"]?.SetValue(prevDepthTex1);
+            gBufferEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
+            gBufferEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
+            BoundingFrustum frustum = new BoundingFrustum(player.cam.viewMatrix * player.cam.projectionMatrix);
+ 
+            foreach (var chunk in RenderingChunks)
+            {
+                IRenderableChunkBuffers c = chunk.Value;
+                if (c == null)
+                {
+                    continue;
+                }
+
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
+                {
+
+                    if (frustum.Intersects(c.chunkBounds))
+                    {
+                        RenderSingleChunkGBufferDepthPeeling(c, player, gBufferEffect);
+
+                    }
+
+
+
+
+                }
+            }
+
+
+        }
 
         public void RenderAllChunksLowDefForward(ConcurrentDictionary<Vector2Int, Chunk> RenderingChunks, IGamePlayer player, Effect forwardEffect)
         {
@@ -265,6 +302,29 @@ namespace monogameMinecraftShared.Rendering
                 }
             }
 
+            foreach (var chunk in RenderingChunks)
+            {
+                Chunk c = chunk.Value;
+                if (c == null)
+                {
+                    continue;
+                }
+
+                if (c.isReadyToRender == true && c.disposed == false && c.isUnused == false)
+                {
+
+                    if (frustum.Intersects(c.chunkBounds))
+                    {
+                        RenderSingleChunkGBufferDepthPeeling(c, player, forwardEffect);
+
+                    }
+
+
+
+
+                }
+            }
+
 
         }
         public void RenderSingleChunkGBuffer(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect, bool isLOD = false)
@@ -347,7 +407,30 @@ namespace monogameMinecraftShared.Rendering
 
         }
 
+        public void RenderSingleChunkGBufferDepthPeeling(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect)
+        {
+            if (c.indicesTSArray.Length > 0 && c.isTSBuffersValid == true)
+            {
+                Matrix world = Matrix.CreateTranslation(new Vector3(c.chunkPos.x, 0, c.chunkPos.y));
+                gBufferEffect.Parameters["World"].SetValue(world);
+                //    gBufferEffect.Parameters["TransposeInverseView"].SetValue(Matrix.Transpose(Matrix.Invert(world * player.cam.viewMatrix)));
+                //   gBufferEffect.Parameters["roughness"].SetValue(1f);
 
+                device.SetVertexBuffer(c.VBTS);
+
+                device.Indices = c.IBTS;
+
+                foreach (EffectPass pass in gBufferEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, c.indicesTSArray.Length / 3);
+
+                }
+            }
+
+
+
+        }
         public void RenderSingleChunkGBufferAlphaTest(IRenderableChunkBuffers c, IGamePlayer player, Effect gBufferEffect)
         {
             if (c.indicesNSArray.Length > 0 && c.isNSBuffersValid == true)

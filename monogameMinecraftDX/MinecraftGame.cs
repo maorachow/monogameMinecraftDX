@@ -911,19 +911,27 @@ namespace monogameMinecraftDX
                             }
 
 
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);
+                            //   _spriteBatch.Draw(renderPipelineManagerHighDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+
+                            /*     _spriteBatch.Draw(renderPipelineManagerHighDef.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.ssidRenderer.renderTargetSSID, new Rectangle(2000, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.blendVolumetricMap, new Rectangle(800, 200, 200, 200), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);*/
+
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumTransparent, new Rectangle(400, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumSpecTransparent, new Rectangle(400, 1200, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans0, new Rectangle(0, 400, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans1, new Rectangle(0, 800, 400, 400), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans2, new Rectangle(0, 1200, 400, 400), Color.White);
+                        
                         }
                        
                     }

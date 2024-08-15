@@ -27,7 +27,7 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
             }
             instancingDataGravityTextured = new List<VertexMatrix4x4UVScale>();
             //   Debug.WriteLine(ParticleManager.instance.allParticles.Count);
-            foreach (var item in ParticleManager.instance.allParticles)
+            foreach (var item in ParticleManager.instance.allParticles.Values)
             {
                 if (item is ClientSideTexturedGravityParticle)
                 {

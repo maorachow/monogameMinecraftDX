@@ -169,7 +169,7 @@ namespace monogameMinecraftNetworking.Updateables
                 isNeededUpdateBlock = false;
             }
             GetEntitiesAround();
-
+           
 
             if (Vector3.Distance(position, targetPos) < 0.6f || BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds, targetPos))
             {
