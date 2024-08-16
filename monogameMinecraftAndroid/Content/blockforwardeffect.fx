@@ -23,7 +23,9 @@ sampler textureSampler = sampler_state
     AddressV = CLAMP;
    
     Filter = Point;
-    Mipfilter = Linear;
+    MagFilter = Point;
+    MinFilter = Point;
+    Mipfilter = Point;
     MipLODBias = -3;
     MaxLOD = 8;
    

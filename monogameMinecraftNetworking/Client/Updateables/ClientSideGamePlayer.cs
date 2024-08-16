@@ -265,7 +265,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             monogameMinecraftShared. Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
             BlockFaces blockFaces = BlockFaces.PositiveY;
-            VoxelCast.CastClientSide(ray, 4, out blockPoint, out blockFaces, this);
+            VoxelCast.CastClientSide(ray,5, out blockPoint, out blockFaces, this);
 
             /*    for (int i = 0; i < 30; i++)
                 {
@@ -294,7 +294,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
 
             BlockFaces blockFaces = BlockFaces.PositiveY;
-            VoxelCast.CastClientSide(ray, 3, out blockPoint, out blockFaces, this);
+            VoxelCast.CastClientSide(ray, 5, out blockPoint, out blockFaces, this);
             if (blockPoint.y < 0)
             {
                 return false;

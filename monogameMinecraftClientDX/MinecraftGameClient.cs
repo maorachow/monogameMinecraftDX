@@ -394,10 +394,10 @@ namespace monogameMinecraftClientDX
 
         protected override void Update(GameTime gameTime)
         {
-       /*     if (!IsActive)
+           if (!IsActive)
             {
                 return;
-            }*/
+            }
      /*       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();*/
             
@@ -571,10 +571,10 @@ namespace monogameMinecraftClientDX
 
         protected override void Draw(GameTime gameTime)
         {
-        /*    if (!IsActive)
+            if (!IsActive)
             {
                 return;
-            }*/
+            }
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             /*      gamePlayer.cam.updateCameraVectors();
@@ -607,26 +607,30 @@ namespace monogameMinecraftClientDX
 
             _spriteBatch.Begin();
 
-
-            if (renderPipelineManager is HighDefNetworkingRenderPipelineManager)
+            if (GameOptions.showGraphicsDebug == true)
             {
-                HighDefNetworkingRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefNetworkingRenderPipelineManager;
-                _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
-                _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
-                for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                if (renderPipelineManager is HighDefNetworkingRenderPipelineManager)
                 {
-                    _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
+                    HighDefNetworkingRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefNetworkingRenderPipelineManager;
+                    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
+                    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
+                    for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
+                    {
+                        _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
+                    }
+
+
+                    //    _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+
+                    //      _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.re, new Rectangle(400, 200, 200, 200), Color.White);
+                    //    _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
+                    _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedoTrans0, new Rectangle(200, 600, 200, 200), Color.White);
+                    _spriteBatch.Draw(renderPipelineManagerLowDef.deferredShadingRenderer.renderTargetLumTransparent, new Rectangle(1600, 400, 400, 400), Color.White);
+
                 }
+                    }
 
-
-                //    _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
-
-                //      _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.re, new Rectangle(400, 200, 200, 200), Color.White);
-                //    _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                   _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedoTrans0, new Rectangle(200, 600, 200, 200), Color.White);
-                _spriteBatch.Draw(renderPipelineManagerLowDef.deferredShadingRenderer.renderTargetLumTransparent, new Rectangle(1600, 400, 400, 400), Color.White);
-
-            }
+          
                     _spriteBatch.End();
 
                         if (isInventoryOpen)

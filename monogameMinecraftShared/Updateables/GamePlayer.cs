@@ -596,6 +596,7 @@ namespace monogameMinecraftShared.Updateables
         }
         public Vector3Int playerCurIntPos;
         public Vector3Int playerLastIntPos;
+        
         public float curGravity;
         public void ApplyGravity(float deltaTime)
         {

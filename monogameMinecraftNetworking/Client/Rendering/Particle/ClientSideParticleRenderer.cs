@@ -15,7 +15,7 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
     {
         public ClientSideParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer, bool isEnabled): base(atlas, atlasNormal, atlasMER, device, gBufferParticleEffect, gamePlayer, isEnabled)
         {
-            instancingBufferGravityTextured = new DynamicVertexBuffer(device, typeof(VertexMatrix4x4UVScale),
+            instancingBufferGravityTextured = new VertexBuffer(device, typeof(VertexMatrix4x4UVScale),
               300, BufferUsage.WriteOnly);
         }
 
@@ -38,7 +38,11 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
                         VertexMatrix4x4UVScale vertex = new VertexMatrix4x4UVScale();
                         item1.Value.GetInstancingElement(gamePlayer, out vertex);
                         //     Debug.WriteLine(vertex.row3);
-                        instancingDataGravityTextured.Add(vertex);
+                        if (instancingDataGravityTextured.Count < 200)
+                        {
+                            instancingDataGravityTextured.Add(vertex);
+                        }
+                       
                     }
 
 
@@ -50,7 +54,7 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
                 return;
             }
          //   instancingBufferGravityTextured?.Dispose();
-       
+          //  instancingBufferGravityTextured=new VertexBuffer()
             instancingBufferGravityTextured.SetData(instancingDataGravityTextured.ToArray());
 
             device.SetVertexBuffers(new VertexBufferBinding(instancingBufferGravityTextured, 0, 1), new VertexBufferBinding(quadVertexBuffer, 0));

@@ -37,10 +37,11 @@ namespace monogameMinecraftShared.Utility
         public Texture2D GenerateMipmap(in Texture2D sourceTex, bool isNormalMap = false)
         {
             //   Texture2D sourceTex1 = sourceTex;
-            Texture2D mipmapSourceTex = new Texture2D(device, sourceTex.Width, sourceTex.Height, true, sourceTex.Format);
+            Texture2D mipmapSourceTex = new Texture2D(device, sourceTex.Width, sourceTex.Height, true, SurfaceFormat.Color);
             terrainMip1 = new RenderTarget2D(device, sourceTex.Width / 2, sourceTex.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip2 = new RenderTarget2D(device, terrainMip1.Width / 2, terrainMip1.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip3 = new RenderTarget2D(device, terrainMip2.Width / 2, terrainMip2.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
+           
             terrainMip4 = new RenderTarget2D(device, terrainMip3.Width / 2, terrainMip3.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip5 = new RenderTarget2D(device, terrainMip4.Width / 2, terrainMip4.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip6 = new RenderTarget2D(device, terrainMip5.Width / 2, terrainMip5.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
@@ -48,28 +49,36 @@ namespace monogameMinecraftShared.Utility
             terrainMip8 = new RenderTarget2D(device, terrainMip7.Width / 2, terrainMip7.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip9 = new RenderTarget2D(device, terrainMip8.Width / 2, terrainMip8.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
             terrainMip10 = new RenderTarget2D(device, terrainMip9.Width / 2, terrainMip9.Height / 2, true, sourceTex.Format, DepthFormat.Depth16);
+            int texturePixelWidth= sourceTex.Width;
+            int texturePixelHeight = sourceTex.Height;
             textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / sourceTex.Width, 1f / sourceTex.Height));
+           
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip1, textureCopyEffect);
-
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip1);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip1.Width, 1f / terrainMip1.Height));
+            texturePixelWidth /= 2;
+            texturePixelHeight /= 2;
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelWidth));
             RenderQuad(device, terrainMip2, textureCopyEffect);
-
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip2);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip2.Width, 1f / terrainMip2.Height));
+            texturePixelWidth /= 2;
+            texturePixelHeight /= 2;
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip3, textureCopyEffect);
-
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip3);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip3.Width, 1f / terrainMip3.Height));
+            texturePixelWidth /= 2;
+            texturePixelHeight /= 2;
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip4, textureCopyEffect);
-
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip4);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip4.Width, 1f / terrainMip4.Height));
+            texturePixelWidth /= 2;
+            texturePixelHeight /= 2;
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip5, textureCopyEffect);
-
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(terrainMip5);
-            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / terrainMip5.Width, 1f / terrainMip5.Height));
+            texturePixelWidth /= 2;
+            texturePixelHeight /= 2;
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip6, textureCopyEffect);
             if (isNormalMap)
             {

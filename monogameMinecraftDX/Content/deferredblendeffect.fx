@@ -310,14 +310,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     float3 ambient = (reflection /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
     float3 final = color + ambient ;
-    float3 finalSolid = final;
+   
     float3 finalTrans = tex2D(deferredLumSpecTransSampler, input.TexCoords).xyz + tex2D(deferredLumTransSampler, input.TexCoords).xyz;
     finalTrans = finalTrans / (finalTrans + float3(1.0, 1.0, 1.0));
     finalTrans = pow(finalTrans, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
     final = final / (final + float3(1.0, 1.0, 1.0));
     final = pow(final, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
     final = lerp(final, finalTrans, tex2D(deferredLumTransSampler, input.TexCoords).a);
-    return float4(final.xyz, length(finalSolid) > 0.0001 ? 1 : tex2D(deferredLumTransSampler, input.TexCoords).a);
+    return float4(final.xyz, tex2D(albedoSampler, input.TexCoords).a  > 0.0001 ? 1 : tex2D(deferredLumTransSampler, input.TexCoords).a);
 }
 
 technique DeferredBlend

@@ -63,8 +63,8 @@ namespace monogameMinecraftShared.Rendering
             //    lightViewFar = GetLightSpaceMatrix(50f, 300f, player, lightDir);// Matrix.CreateLookAt(player.position + lightDirFar, player.position, Vector3.UnitY);
             //    lightSpaceMat = lightView  *lightProjection;
 
-            lightSpaceMat = GetLightSpaceMatrix(0.1f, 30f, player, lightDir);//lightView*lightProjection;
-            lightSpaceMatFar = GetLightSpaceMatrix(30f, 100f, player, lightDirFar); ;// GetLightSpaceMatrix(30f, 300f, player, lightDir);//lightViewFar * lightProjectionFar;
+            lightSpaceMat = GetLightSpaceMatrixAllBounded(64f, 64f, player, lightDir);//lightView*lightProjection;
+            lightSpaceMatFar = GetLightSpaceMatrixAllBounded(192f, 192f, player, lightDirFar); ;// GetLightSpaceMatrix(30f, 300f, player, lightDir);//lightViewFar * lightProjectionFar;
 
         }
 
@@ -121,6 +121,9 @@ namespace monogameMinecraftShared.Rendering
             float maxY = float.MinValue;
             float minZ = float.MaxValue;
             float maxZ = float.MinValue;
+
+            float minHeight= float.MaxValue;
+            float maxHeight = float.MinValue;
             foreach (var v in corners)
             {
                 Vector3 trf = Vector3.Transform(new Vector3(v.X, v.Y, v.Z), lightView1);
@@ -130,10 +133,14 @@ namespace monogameMinecraftShared.Rendering
                 maxY = MathF.Max(maxY, trf.Y);
                 minZ = MathF.Min(minZ, trf.Z);
                 maxZ = MathF.Max(maxZ, trf.Z);
+                Vector3 trfMinH= Vector3.Transform(new Vector3(v.X, -1, v.Z), lightView1);
+                Vector3 trfMaxH = Vector3.Transform(new Vector3(v.X, Chunk.chunkHeight+1, v.Z), lightView1);
+                minHeight = MathF.Min(minHeight, trfMinH.Z);
+                maxHeight = MathF.Max(maxHeight, trfMaxH.Z);
             }
-
+            
             // Tune this parameter according to the scene
-            float zMult = 3.0f;
+            float zMult = 1f;
             if (minZ < 0)
             {
                 minZ *= zMult;
@@ -151,8 +158,74 @@ namespace monogameMinecraftShared.Rendering
                 maxZ *= zMult;
             }
             //   Debug.WriteLine(MathF.Abs(minX - maxX));
-            //   Debug.WriteLine("max:"+(-minZ));
-            //    Debug.WriteLine("min:"+(-maxZ));
+           //    Debug.WriteLine("max:"+(-minZ));
+          //      Debug.WriteLine("min:"+(-maxZ));
+            Matrix lightProjection1 = Matrix.CreateOrthographicOffCenter(minX, maxX, minY, maxY, -maxHeight, -minHeight);
+            //     Debug.WriteLine(MathF.Abs(minX - maxX)+"  "+MathF.Abs(minY - maxY));
+            return lightView1 * lightProjection1;
+        }
+
+
+
+        Matrix GetLightSpaceMatrixAllBounded(float xRadius, float zRadius, IGamePlayer player, Vector3 lightDir)
+        {
+            
+         
+
+            Vector3 center = player.position;
+           
+            //   zombieModel.Draw(Matrix.CreateTranslation(center.X,center.Y,center.Z),player.cam.viewMatrix, player.cam.projectionMatrix);
+            //         Debug.WriteLine(center);
+
+            BoundingBox sceneBounds=new BoundingBox(new Vector3(center.X-xRadius,-1f,center.Z-zRadius), new Vector3(center.X + xRadius, Chunk.chunkHeight+1f, center.Z + zRadius));
+            var corners = sceneBounds.GetCorners();
+            Matrix lightView1 = Matrix.CreateLookAt(center + Vector3.Normalize(lightDir), center, Vector3.UnitY);
+            //       Debug.WriteLine(center.ToString());
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+            float minZ = float.MaxValue;
+            float maxZ = float.MinValue;
+
+            float minHeight = float.MaxValue;
+            float maxHeight = float.MinValue;
+            foreach (var v in corners)
+            {
+                Vector3 trf = Vector3.Transform(new Vector3(v.X, v.Y, v.Z), lightView1);
+                minX = MathF.Min(minX, trf.X);
+                maxX = MathF.Max(maxX, trf.X);
+                minY = MathF.Min(minY, trf.Y);
+                maxY = MathF.Max(maxY, trf.Y);
+                minZ = MathF.Min(minZ, trf.Z);
+                maxZ = MathF.Max(maxZ, trf.Z);
+                Vector3 trfMinH = Vector3.Transform(new Vector3(v.X, -1, v.Z), lightView1);
+                Vector3 trfMaxH = Vector3.Transform(new Vector3(v.X, Chunk.chunkHeight + 1, v.Z), lightView1);
+                minHeight = MathF.Min(minHeight, trfMinH.Z);
+                maxHeight = MathF.Max(maxHeight, trfMaxH.Z);
+            }
+
+            // Tune this parameter according to the scene
+            float zMult = 1f;
+            if (minZ < 0)
+            {
+                minZ *= zMult;
+            }
+            else
+            {
+                minZ /= zMult;
+            }
+            if (maxZ < 0)
+            {
+                maxZ /= zMult;
+            }
+            else
+            {
+                maxZ *= zMult;
+            }
+            //   Debug.WriteLine(MathF.Abs(minX - maxX));
+            //    Debug.WriteLine("max:"+(-minZ));
+            //      Debug.WriteLine("min:"+(-maxZ));
             Matrix lightProjection1 = Matrix.CreateOrthographicOffCenter(minX, maxX, minY, maxY, -maxZ, -minZ);
             //     Debug.WriteLine(MathF.Abs(minX - maxX)+"  "+MathF.Abs(minY - maxY));
             return lightView1 * lightProjection1;
@@ -162,7 +235,7 @@ namespace monogameMinecraftShared.Rendering
         {
             //   UpdateLightMatrices(player);
             Vector4 world0 = new Vector4(player.position.X, player.position.Y, player.position.Z, 1);
-            Vector4 world1 = new Vector4(player.position.X, player.position.Y + 0.3f, player.position.Z, 1);
+            Vector4 world1 = new Vector4(player.position.X, player.position.Y + 0.4f, player.position.Z, 1);
             Vector4 transformedWorld0 = Vector4.Transform(world0, lightSpaceMat);
             Vector4 transformedWorld1 = Vector4.Transform(world1, lightSpaceMat);
             //    Debug.WriteLine(transformedWorld0.Z - transformedWorld1.Z);
@@ -183,11 +256,11 @@ namespace monogameMinecraftShared.Rendering
                 //    Debug.WriteLine(lightSpaceMat.ToString());
                 if (renderingChunks != null)
                 {
-                    chunkRenderer.RenderShadow(renderingChunks, player, lightSpaceMat, shadowMapShader, 96, false);
+                    chunkRenderer.RenderShadow(renderingChunks, player, lightSpaceMat, shadowMapShader, 64, false);
                 }
                 else
                 {
-                    chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 96, false);
+                    chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMat, shadowMapShader, 64, false);
                 }
               
 

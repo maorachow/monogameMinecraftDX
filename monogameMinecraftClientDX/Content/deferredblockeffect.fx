@@ -40,27 +40,25 @@ sampler2D texNoise = sampler_state
     AddressU = Wrap;
     AddressV = Wrap;
 };
-#define SHADOW_MAP_BIAS 0.45
-float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
+#define SHADOW_MAP_BIAS 0.75
+float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias, in float3 worldPos, in float4x4 lightSpaceMat1, in float3x3 TBN, in float2 TexCoords)
 {
-   
-    float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    float shadow = 0;
+    bool isOutBounds = false;
+  /*  float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     float distb = sqrt(projCoords.x * projCoords.x + projCoords.y * projCoords.y);
     float distortFactor = (1.0 - SHADOW_MAP_BIAS) + distb * SHADOW_MAP_BIAS;
     projCoords.xy /= distortFactor;
     projCoords.xy = projCoords * 0.5 + 0.5;
     projCoords.y = 1 - projCoords.y;
-    bool isOutBounds = false;
-    if (projCoords.x < 0 || projCoords.x > 1 || projCoords.y < 0 || projCoords.y > 1)
-    {
-        isOutBounds = true;
-    }
+   
+  
     float closestDepth = tex2D(sp, projCoords.xy).r;
    
     float currentDepth = projCoords.z;
     float shadow=0;
      
-    float2 texelSize = 1.0 / 2048.0;
+    float2 texelSize = 1.0 / 2048.0;*/
      
     float shadowLerpBias = shadowBias*6.0;
     
@@ -69,22 +67,49 @@ float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
   
    
     
-   for (int x = 0; x < 4;x++)
+    for (int j = 0; j < 2; j++)
     {
-       
-        float pcfDepth = tex2D(sp, projCoords.xy + texelSize * (tex2D(texNoise, projCoords.xy + float2(x / 10.0, x / 10.0)).xy * 2 - 1)).r;
-       //     float softShadowVal = clamp(((pcfDepth) - (currentDepth - shadowBias)) / shadowLerpBias, 0, 1);
-            if (pcfDepth > currentDepth - shadowBias)
-            {
-                shadow += 1;
-            }
-            else
-            {
-                shadow += 0;
-            }
-        
+        float3 sampleDir = float3(tex2D(texNoise, TexCoords * 5 + float2(j / 32.0, j / 32.0)).r * 2 - 1, tex2D(texNoise, TexCoords * 5 + float2(0.5, 0.5) - float2(j / 32.0, j / 32.0) - 1 * 4.0).g * 2 - 1, 0);
+        sampleDir *= 0.05f;
+        float3 sampleWorldPos=worldPos+ mul(sampleDir, TBN);
+        float4 projCoords1 = mul(float4(sampleWorldPos, 1), lightSpaceMat1);
+        float3 
+        projCoords2 = projCoords1.xyz / projCoords1.w;
+      //  float distb = sqrt(projCoords2.x * projCoords2.x + projCoords2.y * projCoords2.y);
+    //    float distortFactor = (1.0 - SHADOW_MAP_BIAS) + distb * SHADOW_MAP_BIAS;
+     //   projCoords2.xy /= distortFactor;
+        projCoords2.xy = projCoords2 * 0.5 + 0.5;
+        projCoords2.y = 1 - projCoords2.y;
+        float pcfDepth1 = tex2D(sp, projCoords2.xy).r;
+         
+        if (projCoords2.x < 0 || projCoords2.x > 1 || projCoords2.y < 0 || projCoords2.y > 1)
+        {
+            isOutBounds = true;
+        }
+        float currentDepth1 = projCoords2.z;
+    
+        if (pcfDepth1 <= 0.0003)
+        {
+            shadow += 1.0;
+        }
+        else if (isOutBounds == true)
+        {
+            shadow += 1.0;
+        }
+        else if (pcfDepth1 > currentDepth1 - shadowBias)
+        {
+            shadow += 1;
+        }
+        else
+        {
+            shadow += 0;
+        }
     }
-    shadow /= (4.0);
+       
+    shadow /= 2.0;
+        
+    
+  //  shadow /= (4.0);
     /*if (closestDepth - shadowBias < currentDepth)
     {
         shadow = 0;
@@ -93,16 +118,16 @@ float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias)
     {
         shadow = 1;
     }*/
-    if (closestDepth <= 0.03)
-    {
-        shadow = 1.0;
-    }
+   // if (closestDepth <= 0.0003)
+  //  {
+  //      shadow = 1.0;
+  //  }
  //   float shadow = currentDepth/closestDepth ;
    
-    if (projCoords.z > 1.0)
-    {
-        shadow = 1.0;
-    }
+   // if (projCoords.z > 1.0)
+  //  {
+   //     shadow = 1.0;
+   // }
     if (isOutBounds == true)
     {
         shadow = 1.0;
@@ -533,7 +558,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 float3 LightPositions[16];
 PixelShaderOutput MainPS(VertexShaderOutput input)
 {
-    if (tex2D(AlbedoSampler, input.TexCoords).a < 0.1)
+    if (tex2D(AlbedoSampler, input.TexCoords).a < 0.2)
     {
         discard;
     }
@@ -625,13 +650,18 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     ambientEnv.xyz *= tex2D(AOSampler, input.TexCoords).x;
     float shadow;
     float shadow1;
+    
+    float3 randomVec = float3(tex2D(texNoise, input.TexCoords * 5).r * 2 - 1, tex2D(texNoise, input.TexCoords * 5).g * 2 - 1 + 0.0001, 0);
+    float3 tangent = normalize(randomVec - N * dot(randomVec, N));
+    float3 bitangent = cross(N, tangent);
+    float3x3 TBN = float3x3(tangent, bitangent, N);
     if (receiveShadow == true)
     {
-        shadow = ShadowCalculation(LightSpacePosition, ShadowMapSampler, 0);
+        shadow = ShadowCalculation(LightSpacePosition, ShadowMapSampler, 0, worldPos, LightSpaceMat, TBN,input.TexCoords);
         float viewZ = -mul(float4(worldPos, 1), View).z;
         if (viewZ > 30)
         {
-            shadow1 = ShadowCalculation(LightSpacePositionFar, ShadowMapFarSampler, 0);
+            shadow1 = ShadowCalculation(LightSpacePositionFar, ShadowMapFarSampler, 0, worldPos, LightSpaceMatFar, TBN, input.TexCoords);
         }
         else
         {

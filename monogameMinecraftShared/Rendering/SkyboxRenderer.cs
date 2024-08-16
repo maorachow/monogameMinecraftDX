@@ -77,7 +77,7 @@ new VertexPosition(   new Vector3(   1.0f, -1.0f,  1.0f)),
             int width = skyboxTexPX.Width;
             int height = skyboxTexPX.Height;
             Color[] data = new Color[width * height];
-            skyboxTexture = new TextureCube(device, 128, false, SurfaceFormat.Color);
+        /*    skyboxTexture = new TextureCube(device, 128, false, SurfaceFormat.Color);
             skyboxTexPX.GetData(data);
             skyboxTexture.SetData(CubeMapFace.PositiveX, data);
             skyboxTexPY.GetData(data);
@@ -103,7 +103,7 @@ new VertexPosition(   new Vector3(   1.0f, -1.0f,  1.0f)),
             skyboxTexNYN.GetData(data);
             skyboxTextureNight.SetData(CubeMapFace.NegativeY, data);
             skyboxTexNZN.GetData(data);
-            skyboxTextureNight.SetData(CubeMapFace.NegativeZ, data);
+            skyboxTextureNight.SetData(CubeMapFace.NegativeZ, data);*/
 
         }
         RasterizerState rasterizerState = new RasterizerState { CullMode = CullMode.None };
