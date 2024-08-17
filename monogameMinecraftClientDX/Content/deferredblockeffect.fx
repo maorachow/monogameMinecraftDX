@@ -291,9 +291,9 @@ sampler2D ssidSampler = sampler_state
 {
     Texture = <TextureIndirectDiffuse>;
  
-    MipFilter = Point;
-    MagFilter = Point;
-    MinFilter = Point;
+    MipFilter = LINEAR;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
     AddressU = Wrap;
     AddressV = Wrap;
 };
@@ -609,7 +609,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
-    float3 emission = albedo / PI * mer.y*20;
+    float3 emission = albedo / PI * mer.y*50;
     float roughness = mer.z;
     LoDirLight += CalculateLightDiffuseP(worldPos, worldPos + LightDir, N, V, albedo, roughness, F0, true, mer.x);
     

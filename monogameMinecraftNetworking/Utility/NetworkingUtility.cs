@@ -167,8 +167,23 @@ namespace monogameMinecraftNetworking.Utility
                     if (server.remoteClients[i].messageParser.isMessageParsingThreadRunning == false)
                     {
                         Console.WriteLine("removed client" + server.remoteClients[i].socket.RemoteEndPoint);
+                        if (server.remoteClients[i].isUserDataLoaded == true)
+                        {
+                            string broadcastMessage1 = server.remoteClients[i].curUserData.userName + " Disconnected.";
+                            NetworkingUtility.CastToAllClients(server, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
+                        }
+                        else
+                        {
+                            string broadcastMessage1 = server.remoteClients[i].socket.RemoteEndPoint + " Disconnected.";
+                            NetworkingUtility.CastToAllClients(server, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
+                        }
+                
                         server.remoteClients.RemoveAt(i);
+
                         i--;
+                       
+                         
+                        
                     }
                 }
             }
@@ -192,6 +207,11 @@ namespace monogameMinecraftNetworking.Utility
               //  allUserData.RemoveAt(index);
                 Console.WriteLine(client.socket.RemoteEndPoint.ToString() + "  logged out");
                 CastToAllClients( server ,new MessageProtocol(135, MessagePackSerializer.Serialize(server.allUserDatas)));
+                if (client.isUserDataLoaded == true)
+                {
+                    string broadcastMessage1 = client.curUserData.userName + " Logged out.";
+                    NetworkingUtility.CastToAllClients(server, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
+                }
                 lock (server.remoteClientsLock)
                 {
                     server.remoteClients.Remove(client);
@@ -239,7 +259,7 @@ namespace monogameMinecraftNetworking.Utility
 
                 client.curUserData = u;
                 client.isUserDataLoaded=true;
-                Console.WriteLine(client.socket.RemoteEndPoint + "Logged in");
+                Console.WriteLine(client.socket.RemoteEndPoint + " Logged in");
                 SendToClient(client, new MessageProtocol((byte)MessageCommandType.UserLoginReturn, MessagePackSerializer.Serialize("Success")));
              //   allClientSocketsOnline.Add(s);
               //  allUserData.Add(u);
@@ -250,8 +270,11 @@ namespace monogameMinecraftNetworking.Utility
         }
 
         public static int toDoListIndex = 0;
+        public static object enqueueTodoListLock=new object();
         public static void EnqueueTodoList(List<ServerTodoList> list, ValueTuple<RemoteClient, MessageProtocol> message)
         {
+            lock (enqueueTodoListLock)
+            {
             if (list.Count > 0)
             {
                 toDoListIndex = Math.Clamp(toDoListIndex, 0, list.Count - 1);
@@ -287,6 +310,8 @@ namespace monogameMinecraftNetworking.Utility
 
                
             }
+            }
+           
         }
     }
 }

@@ -221,7 +221,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
 
 
         }
-        public bool TryHitEntity()
+        public bool TryHitEntity(bool doHitEntity,out float hitDistance)
         {
             Microsoft.Xna.Framework.Ray ray = new Microsoft.Xna.Framework.Ray(cam.position, cam.front);
             float rayHitDis = 10000f;
@@ -253,10 +253,16 @@ namespace monogameMinecraftNetworking.Client.Updateables
             }
             if (finalIndex >= 0)
             {
+                if (doHitEntity)
+                {
+                    game.clientSideEntityManager.SendHurtEntityRequest(game.clientSideEntityManager.allEntitiesCache[finalIndex].data.entityID, 4f, cam.position);
+                }
                
-                game.clientSideEntityManager.SendHurtEntityRequest(game.clientSideEntityManager.allEntitiesCache[finalIndex].data.entityID, 4f, cam.position);
+                hitDistance = rayHitDis;
                 return true;
             }
+
+            hitDistance = -1f;
             return false;
         }
         Random rand = new Random();
@@ -286,7 +292,32 @@ namespace monogameMinecraftNetworking.Client.Updateables
             return true;
 
         }
+        public float TryCastBlocks()
+        {
+            monogameMinecraftShared.Physics.Ray ray = new monogameMinecraftShared.Physics.Ray(cam.position, cam.front);
+            Vector3Int blockPoint = new Vector3Int(-1, -1, -1);
+            BlockFaces blockFaces = BlockFaces.PositiveY;
+            VoxelCast.CastClientSide(ray, 5, out blockPoint, out blockFaces, this,out float raycastDis);
 
+            /*    for (int i = 0; i < 30; i++)
+                {
+                    ParticleManager.instance.SpawnNewParticleTexturedGravity(new Vector3(blockPoint.x + 0.5f, blockPoint.y + 0.5f, blockPoint.z + 0.5f), 0.2f, new Vector2(0f, 0f), new Vector2(1f, 1f), 3f, new Vector3(rand.NextSingle()*4f-2f, rand.NextSingle() * 4f - 2f, rand.NextSingle() * 4f - 2f), 3f);
+                 }*/
+
+            if ((blockPoint.x < 0 && blockPoint.y < 0 && blockPoint.z < 0)||raycastDis<-0.1f)
+            {
+                return -1f;
+
+            }
+            //     VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new BreakBlockOperation(blockPoint, VoxelWorld.currentWorld.worldUpdater,ClientSideChunkHelper.GetBlockData(blockPoint)));
+            //  ClientSideChunkHelper.BreakBlock(blockPoint);
+          //  ClientSideChunkHelper.SendBreakBlockOperation(blockPoint, ClientSideVoxelWorld.singleInstance.worldID, ClientSideVoxelWorld.gameInstance.networkingClient.socket);
+            //   Debug.WriteLine("client break block");
+            //GetBlocksAround(bounds);
+
+            return raycastDis;
+
+        }
         public bool isGetBlockNeeded = false;
         public bool PlaceBlock()
         {
@@ -696,7 +727,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
         {
 
 
-            if (isLanded == true)
+            if (isLanded == true || ChunkHelper.GetBlockShape(blockOnFootID) is BlockShape.WallAttachment)
             {
 
 
@@ -793,7 +824,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 isJumping = false;
             }
             float finalY = 0f;
-            if (isPlayerFlying == true)
+            if (isPlayerFlying == true )
             {
                 finalY = finalMoveVec.Y;
             }
@@ -812,13 +843,30 @@ namespace monogameMinecraftNetworking.Client.Updateables
             Move(new Vector3(0f, finalY, 0f), false);
             if (breakBlockCD <= 0f && isLeftMouseButtonDown == true)
             {
-                bool isEntityHit = TryHitEntity();
+                float entityTryHitDist;
+                bool isEntityHit = TryHitEntity(false,out entityTryHitDist);
+
+                float blockTryCastDist = TryCastBlocks();
                 bool isBlockBroke = false;
-                if (!isEntityHit)
+                if (isEntityHit && blockTryCastDist > 0f)
+                {
+                    if (entityTryHitDist < blockTryCastDist)
+                    {
+                        TryHitEntity(true, out _);
+                    }
+                    else
+                    {
+                        isBlockBroke = BreakBlock();
+                    }
+                }else if (!isEntityHit)
                 {
                     isBlockBroke= BreakBlock();
+                }else if (isEntityHit && blockTryCastDist <= 0f)
+                {
+                    TryHitEntity(true, out _);
                 }
 
+                
                 if (isBlockBroke || isEntityHit)
                 {
                     isAttacking= true;

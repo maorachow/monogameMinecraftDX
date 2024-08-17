@@ -75,7 +75,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         // tangent space to world
             float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-            irradiance += texCUBE(HDRImageSampler, sampleVec).rgb * cos(theta) * sin(theta);
+            irradiance += texCUBE(HDRImageSampler, sampleVec).rgb * cos(theta) * sin(theta);//
             nrSamples++;
         }
     }

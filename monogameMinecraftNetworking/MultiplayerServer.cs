@@ -171,7 +171,15 @@ namespace monogameMinecraftNetworking
                             case MessageCommandType.UserLogin:
                                 Console.WriteLine("login");
                                 NetworkingUtility.UserLogin(item.sourceClient,item.message.messageData,this);
-                                break;
+
+                                if (item.sourceClient.isUserDataLoaded == true)
+                                {
+                                    string broadcastMessage1 = item.sourceClient.curUserData.userName+" Logged in.";
+                                    NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
+                                }
+                               
+                              
+                                    break;
 
                             case MessageCommandType.UserLogout:
                                 NetworkingUtility.UserLogout(item.sourceClient,this);

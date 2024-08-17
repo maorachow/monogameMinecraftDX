@@ -57,27 +57,28 @@ namespace monogameMinecraftShared.Utility
             RenderQuad(device, terrainMip1, textureCopyEffect);
             texturePixelWidth /= 2;
             texturePixelHeight /= 2;
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(isNormalMap? terrainMip1 : sourceTex);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelWidth));
             RenderQuad(device, terrainMip2, textureCopyEffect);
             texturePixelWidth /= 2;
             texturePixelHeight /= 2;
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(isNormalMap ? terrainMip2 : sourceTex);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip3, textureCopyEffect);
             texturePixelWidth /= 2;
             texturePixelHeight /= 2;
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(isNormalMap ? terrainMip3 : sourceTex);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip4, textureCopyEffect);
             texturePixelWidth /= 2;
             texturePixelHeight /= 2;
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(isNormalMap ? terrainMip4 : sourceTex);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip5, textureCopyEffect);
             texturePixelWidth /= 2;
             texturePixelHeight /= 2;
-            textureCopyEffect.Parameters["TextureCopy"].SetValue(sourceTex);
+            textureCopyEffect.Parameters["TextureCopy"].SetValue(isNormalMap ? terrainMip5 : sourceTex);
             textureCopyEffect.Parameters["pixelSize"].SetValue(new Vector2(1f / texturePixelWidth, 1f / texturePixelHeight));
             RenderQuad(device, terrainMip6, textureCopyEffect);
             if (isNormalMap)

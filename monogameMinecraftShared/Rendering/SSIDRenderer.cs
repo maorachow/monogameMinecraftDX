@@ -31,8 +31,7 @@ namespace monogameMinecraftShared.Rendering
             this.gBufferRenderer = gBufferRenderer;
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            renderTargetSSID = new RenderTarget2D(device, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            renderTargetSSIDPrev = new RenderTarget2D(device, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+           
             this.player = player;
             InitializeVertices();
             InitializeQuadBuffers(device);
@@ -40,6 +39,8 @@ namespace monogameMinecraftShared.Rendering
             this.textureCopyEffect = textureCopyEffect;
             this.motionVectorRenderer = motionVectorRenderer;
             this.hiZBufferRenderer = hiZBufferRenderer;
+            renderTargetSSID = new RenderTarget2D(device, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            renderTargetSSIDPrev = new RenderTarget2D(device, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             this.hdrCubemapRenderer = hdrCubemapRenderer;
             gameTimeManager = gtm;
         }
@@ -55,13 +56,12 @@ namespace monogameMinecraftShared.Rendering
             SetCameraFrustum(player.cam, SSIDEffect);
             SSIDEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSIDEffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
-            /*      SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
+                  SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
-                  SSIDEffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
-                  SSIDEffect.Parameters["ProjectionDepthTexMip7"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[7]);*/
+            
 
             SSIDEffect.Parameters["HDRIrradianceTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultIrradianceCubemap);
             SSIDEffect.Parameters["HDRIrradianceTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultIrradianceCubemap);
@@ -75,8 +75,9 @@ namespace monogameMinecraftShared.Rendering
             SSIDEffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
             SSIDEffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSIDEffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
-         //   SSIDEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
-        //    SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
+            SSIDEffect.Parameters["PI"]?.SetValue(3.1415926f);
+            //   SSIDEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
+            //    SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             if (SSIDEffect.Parameters["NoiseTex"] != null) { SSIDEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
 
             SSIDEffect.Parameters["View"].SetValue(player.cam.viewMatrix);

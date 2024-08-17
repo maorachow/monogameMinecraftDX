@@ -274,7 +274,52 @@ sampler gProjectionDepthM0 = sampler_state
     Mipfilter = Point;
 };
 
- 
+sampler gProjectionDepthM1 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip1);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = Point;
+};
+sampler gProjectionDepthM2 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip2);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = Point;
+};
+sampler gProjectionDepthM3 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip3);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = Point;
+};
+sampler gProjectionDepthM4 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip4);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = Point;
+};
+sampler gProjectionDepthM5 = sampler_state
+{
+    Texture = (ProjectionDepthTexMip5);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = Point;
+};
+
 sampler2D MERSampler = sampler_state
 {
     Texture = <TextureMER>;
@@ -324,7 +369,7 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float linearDepth = 0;
-    linearDepth = tex2D(gProjectionDepth, input.TexCoords).x;
+    linearDepth = tex2D(gProjectionDepthM0, input.TexCoords).x;
     if (linearDepth >= 900 || linearDepth <= 0.1)
     {
         discard;
@@ -355,7 +400,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     kD *= 1.0 - mer.x;
     
     float finalMixVal = 0;
-    for (int i = 0; i <2; i++)
+    [unroll(1)]
+    for (int i = 0; i <1; i++)
     {
         float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
         sampleDir.z = clamp(sampleDir.z, 0.03, 1);
@@ -369,7 +415,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5*i + GameTime * 2.5).r - 0.5;
         marchPos = rayOrigin + sampleDir * 0.01;
         float3 preMarchPos = marchPos;
-        for (int j = 0; j < 16; j++)
+        [loop]
+        for (int j = 0; j < 12; j++)
         {
             if (dot(normal, sampleDir) < 0)
             {
@@ -387,9 +434,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float testDepth = GetViewDepthFromWorldPos(marchPos);
             
             
-            float sampleDepthM0 = tex2D(gProjectionDepth, uv.xy).x;
+            float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy).x;
 
-        /*    float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
+           float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
            
             float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
 
@@ -398,10 +445,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
 
             float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
-            float sampleDepthM6 = tex2D(gProjectionDepthM6, uv.xy).x;
-            float sampleDepthM7 = tex2D(gProjectionDepthM7, uv.xy).x;
-            float sampleDepthArray[8] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5, sampleDepthM6, sampleDepthM7 };*/ /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
-            float sampleDepth = sampleDepthM0;
+          
+            float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5};
+            /*GetViewDepthFromWorldPos(worldPosSampled)*/ //tex2D(gProjectionDepth,uv.xy).x;
+            float sampleDepth = sampleDepthArray[mipLevel];
             
             if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
             {
@@ -412,14 +459,31 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
            
                 
-                
-            if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen && mipLevel <= 0)
+            if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen)
             {
-                uv = GetScreenCoordFromWorldPos(marchPos);
-                isHit = true;
+            
+                if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen && mipLevel <= 0)
+                {
+                    uv = GetScreenCoordFromWorldPos(marchPos);
+                    isHit = true;
            
-                break; //   return float4(0, 0, 0, 1);
-            }  
+                    break; //   return float4(0, 0, 0, 1);
+                }
+                mipLevel--;
+                marchPos -= (sampleDir) * 0.15 * (1 + strideNoiseVal) * strideLen;
+                strideLen /= 2.0;
+            }
+            else
+            {
+                if (mipLevel < 4)
+                {
+                    mipLevel++;
+                    strideLen *= 2;
+                     
+
+                }
+            }
+          
             
            
           
@@ -444,8 +508,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             finalMixVal += 0;
         }
     }      
-    finalColor /=2;
-    finalMixVal /= 2;
+    finalColor /= clamp(finalMixVal, 1,1);
+    finalMixVal /= 1;
    // finalColor = finalColor*0.01+prevColor;
            
   //      finalColor = finalColor * 0.01 + prevColor;

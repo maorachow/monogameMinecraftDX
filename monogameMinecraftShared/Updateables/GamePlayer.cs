@@ -486,8 +486,13 @@ namespace monogameMinecraftShared.Updateables
                     if (ChunkHelper.GetBlockShape(ChunkHelper.GetBlockData(castBlockPoint)) is not BlockShape.Solid)
                     {
                         return;
-                    } 
+                    }
+                    if (blockFaces == BlockFaces.PositiveY || blockFaces == BlockFaces.NegativeY)
+                    {
+                        return;
+                    }
                     byte optionalDataVal1 = 0;
+                   
                     switch (blockFaces)
                     {
 
@@ -619,7 +624,7 @@ namespace monogameMinecraftShared.Updateables
         {
 
 
-            if (isLanded == true)
+            if (isLanded == true || ChunkHelper.GetBlockShape(blockOnFootID) is BlockShape.WallAttachment)
             {
 
 

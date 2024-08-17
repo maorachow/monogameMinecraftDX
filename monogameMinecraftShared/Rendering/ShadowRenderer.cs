@@ -45,8 +45,8 @@ namespace monogameMinecraftShared.Rendering
             this.shadowMapShader = shadowMapShader;
             entityRenderer = er;
             chunkRenderer = cr;
-            shadowMapTarget = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            shadowMapTargetFar = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            shadowMapTarget = new RenderTarget2D(device, 3072, 3072, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            shadowMapTargetFar = new RenderTarget2D(device, 3072, 3072, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             shadowMapBinding = new RenderTargetBinding[2];
             shadowMapBinding[0] = new RenderTargetBinding(shadowMapTarget);
 
@@ -63,7 +63,7 @@ namespace monogameMinecraftShared.Rendering
             //    lightViewFar = GetLightSpaceMatrix(50f, 300f, player, lightDir);// Matrix.CreateLookAt(player.position + lightDirFar, player.position, Vector3.UnitY);
             //    lightSpaceMat = lightView  *lightProjection;
 
-            lightSpaceMat = GetLightSpaceMatrixAllBounded(64f, 64f, player, lightDir);//lightView*lightProjection;
+            lightSpaceMat = GetLightSpaceMatrixAllBounded(96f, 96f, player, lightDir);//lightView*lightProjection;
             lightSpaceMatFar = GetLightSpaceMatrixAllBounded(192f, 192f, player, lightDirFar); ;// GetLightSpaceMatrix(30f, 300f, player, lightDir);//lightViewFar * lightProjectionFar;
 
         }
@@ -231,11 +231,17 @@ namespace monogameMinecraftShared.Rendering
             return lightView1 * lightProjection1;
         }
         public bool isRenderingFarShadow = true;
+        public RasterizerState rasterizerState=new RasterizerState{CullMode = CullMode.CullCounterClockwiseFace};
+        public RasterizerState rasterizerState1 = new RasterizerState { CullMode = CullMode.None };
         public void RenderShadow(IGamePlayer player,ConcurrentDictionary<Vector2Int,IRenderableChunkBuffers> renderingChunks=null)
         {
+            if ((gameTimeManager.sunX > 170f || gameTimeManager.sunX <= 10f))
+            {
+                return;
+            }
             //   UpdateLightMatrices(player);
             Vector4 world0 = new Vector4(player.position.X, player.position.Y, player.position.Z, 1);
-            Vector4 world1 = new Vector4(player.position.X, player.position.Y + 0.4f, player.position.Z, 1);
+            Vector4 world1 = new Vector4(player.position.X, player.position.Y + 1.2f, player.position.Z, 1);
             Vector4 transformedWorld0 = Vector4.Transform(world0, lightSpaceMat);
             Vector4 transformedWorld1 = Vector4.Transform(world1, lightSpaceMat);
             //    Debug.WriteLine(transformedWorld0.Z - transformedWorld1.Z);
@@ -252,6 +258,7 @@ namespace monogameMinecraftShared.Rendering
             if (GameOptions.renderShadow)
             {
                 device.SetRenderTarget(shadowMapTarget);
+                device.RasterizerState = rasterizerState1;
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
                 if (renderingChunks != null)
@@ -294,6 +301,7 @@ namespace monogameMinecraftShared.Rendering
                 {
                     optionalRenderer2.DrawShadow(lightSpaceMat, shadowMapShader);
                 }
+                device.RasterizerState = rasterizerState;
                 device.SetRenderTarget(null);
                 device.Clear(Color.CornflowerBlue);
             }
@@ -301,6 +309,7 @@ namespace monogameMinecraftShared.Rendering
             if (GameOptions.renderFarShadow)
             {
                 device.SetRenderTarget(shadowMapTargetFar);
+                device.RasterizerState = rasterizerState1;
                 UpdateLightMatrices(player);
                 //    Debug.WriteLine(lightSpaceMat.ToString());
                 //  chunkRenderer.RenderShadow(VoxelWorld.currentWorld.chunks, player, lightSpaceMatFar, shadowMapShader, 256, false);
@@ -341,8 +350,8 @@ namespace monogameMinecraftShared.Rendering
                 {
                     optionalRenderer2.DrawShadow(lightSpaceMatFar, shadowMapShader);
                 }
-           
 
+                device.RasterizerState = rasterizerState;
             device.SetRenderTarget(null);
             device.Clear(Color.CornflowerBlue);
         }

@@ -140,8 +140,8 @@ float Random2DTo1D(float2 value)
 }
 float2 PixelSize;
 #define PI 3.1415926
-#define STEP_COUNT 8
-#define DIRECTION_COUNT 8
+#define STEP_COUNT 4
+#define DIRECTION_COUNT 4
 #define RADIUS 0.5
 float FallOff(float dist)
 {

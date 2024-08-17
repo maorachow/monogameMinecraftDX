@@ -205,8 +205,8 @@ namespace monogameMinecraftShared.Rendering
             deferredShadingRenderer.Resize(width,height);
             motionBlurRenderer.processedImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
             hiZBufferRenderer.ResizeTarget();
-            ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             ssrRenderer.renderTargetSSR = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             ssrRenderer.renderTargetSSRPrev = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             foreach (var processor in customPostProcessors)

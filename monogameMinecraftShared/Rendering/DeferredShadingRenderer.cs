@@ -83,7 +83,7 @@ namespace monogameMinecraftShared.Rendering
             blockDeferredEffect.Parameters["fogRange"]?.SetValue(1024.0f);
             blockDeferredEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
       //      blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
-            blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
+            blockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(15, 15, 15));
             blockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             blockDeferredEffect.Parameters["TextureMER"].SetValue(gBufferRenderer.renderTargetMER);
             //  basicShader.Parameters["LightPos"].SetValue(player.position + new Vector3(10, 50, 30));
@@ -141,7 +141,7 @@ namespace monogameMinecraftShared.Rendering
                        }
                        //    blockDeferredEffect.Parameters["receiveReflection"].SetValue(false);
                        //    blockDeferredEffect.Parameters["receiveBackLight"].SetValue(false);*/
-            if (gameTimeManager.sunX > 160f || gameTimeManager.sunX <= 20f)
+            if (gameTimeManager.sunX > 170f || gameTimeManager.sunX <= 10f)
             {
                 blockDeferredEffect.Parameters["receiveShadow"].SetValue(false);
 
@@ -172,7 +172,7 @@ namespace monogameMinecraftShared.Rendering
                 transparentBlockDeferredEffect.Parameters["fogRange"]?.SetValue(1024.0f);
                 transparentBlockDeferredEffect.Parameters["metallic"]?.SetValue(GlobalMaterialParamsManager.instance.metallic);
                 //      blockDeferredEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
-                transparentBlockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
+                transparentBlockDeferredEffect.Parameters["LightColor"].SetValue(new Vector3(15, 15, 15));
                 transparentBlockDeferredEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
                 transparentBlockDeferredEffect.Parameters["TextureMER"].SetValue(transparentBufferBindings[i][3].RenderTarget);
                 //  basicShader.Parameters["LightPos"].SetValue(player.position + new Vector3(10, 50, 30));
@@ -201,7 +201,7 @@ namespace monogameMinecraftShared.Rendering
                 transparentBlockDeferredEffect.Parameters["shadowBias"]?.SetValue(shadowRenderer.shadowBias);
                 transparentBlockDeferredEffect.Parameters["LightPositions"].SetValue(lightUpdater.lights.ToArray());
                
-                if (gameTimeManager.sunX > 160f || gameTimeManager.sunX <= 20f)
+                if (gameTimeManager.sunX > 170f || gameTimeManager.sunX <= 10f)
                 {
                     transparentBlockDeferredEffect.Parameters["receiveShadow"].SetValue(false);
 

@@ -114,6 +114,7 @@ namespace monogameMinecraftShared.Asset
             gameEffects.TryAdd("skyboxeffect", Content.Load<Effect>("skyboxeffect"));
             gameEffects.TryAdd("ssreffect", Content.Load<Effect>("ssreffect"));
             gameEffects.TryAdd("ssideffect", Content.Load<Effect>("ssideffect"));
+            gameEffects.TryAdd("ssdoeffect", Content.Load<Effect>("ssdoeffect"));
             gameEffects.TryAdd("transparentdeferredblockeffect", Content.Load<Effect>("transparentdeferredblockeffect"));
             gameEffects.TryAdd("deferredblockeffect", Content.Load<Effect>("deferredblockeffect"));
             gameEffects.TryAdd("contactshadoweffect", Content.Load<Effect>("contactshadoweffect"));

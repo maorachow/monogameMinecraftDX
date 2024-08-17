@@ -331,11 +331,15 @@ namespace monogameMinecraftNetworking.Client
                             BlockParticleEffectBroadcastData data5 =
                                 MessagePackSerializer.Deserialize<BlockParticleEffectBroadcastData>(item.messageData);
                     //        SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID], 20f);
-                            ClientSideParticleEmittingHelper.EmitParticleWithParamCustomUV(new Vector3(data5.posX, data5.posY, data5.posZ), ParticleEmittingHelper.allParticles["blockbreakingclientside"],
-                                new Vector4(Chunk.blockInfosNew[data5.blockID].uvCorners[0].X,
-                                    Chunk.blockInfosNew[data5.blockID].uvCorners[0].Y,
-                                    Chunk.blockInfosNew[data5.blockID].uvSizes[0].X / 4.0f,
-                                    Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y / 4.0f), new Vector2(Chunk.blockInfosNew[data5.blockID].uvSizes[0].X * 0.75f, Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y * 0.75f));
+                            if (Chunk.blockInfosNew.ContainsKey(data5.blockID))
+                            {
+                                ClientSideParticleEmittingHelper.EmitParticleWithParamCustomUV(new Vector3(data5.posX, data5.posY, data5.posZ), ParticleEmittingHelper.allParticles["blockbreakingclientside"],
+                                    new Vector4(Chunk.blockInfosNew[data5.blockID].uvCorners[0].X,
+                                Chunk.blockInfosNew[data5.blockID].uvCorners[0].Y,
+                                Chunk.blockInfosNew[data5.blockID].uvSizes[0].X / 4.0f,
+                                Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y / 4.0f), new Vector2(Chunk.blockInfosNew[data5.blockID].uvSizes[0].X * 0.75f, Chunk.blockInfosNew[data5.blockID].uvSizes[0].Y * 0.75f));
+                            }
+                         
                             break;
                         case MessageCommandType.ChatMessageBroadcast:
                             string message = MessagePackSerializer.Deserialize<string>(item.messageData);
