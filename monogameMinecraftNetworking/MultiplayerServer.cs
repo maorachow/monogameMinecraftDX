@@ -259,9 +259,19 @@ namespace monogameMinecraftNetworking
                                         NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
                                             entity.position.X, entity.position.Y, entity.position.Z,"0hurt"
                                             ))));
+                                    }
+
+                                    if (entity is ServerSidePigEntityBeh)
+                                    {
+                                        NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
+                                            entity.position.X, entity.position.Y, entity.position.Z, "1hurt"
+                                        ))));
                                         }
                                   
                                 }
+                                    break;
+                                case MessageCommandType.EntitySoundBroadcast:
+                                NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,item.message.messageData));
                                     break;
                             case MessageCommandType.ChatMessage:
                                 if (item.sourceClient.isUserDataLoaded == false)

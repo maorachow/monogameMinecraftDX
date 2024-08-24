@@ -276,6 +276,33 @@ namespace monogameMinecraftNetworking.World
             return 100;
 
         }
+        public static int GetChunkLandingPointColliding(float x, float z, int worldID)
+        {
+            Vector2Int intPos = new Vector2Int((int)x, (int)z);
+            ServerSideChunk locChunk = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)), worldID);
+            if (locChunk == null || locChunk.isMapGenCompleted == false)
+            {
+
+                return 100;
+            }
+            Vector2Int chunkSpacePos = intPos - locChunk.chunkPos;
+            chunkSpacePos.x = MathHelper.Clamp(chunkSpacePos.x, 0, Chunk.chunkWidth - 1);
+            chunkSpacePos.y = MathHelper.Clamp(chunkSpacePos.y, 0, Chunk.chunkWidth - 1);
+            for (int i = Chunk.chunkHeight - 1; i > 0; i--)
+            {
+                if (locChunk.map[chunkSpacePos.x, i - 1, chunkSpacePos.y] != 0)
+                {
+                    if (BlockBoundingBoxUtility.IsBlockWithBoundingBox(locChunk.map[chunkSpacePos.x, i - 1,
+                            chunkSpacePos.y]))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return 100;
+
+        }
         public static int GetSingleChunkLandingPoint(ServerSideChunk c, int x, int z)
         {
             if (c == null)
@@ -312,8 +339,8 @@ namespace monogameMinecraftNetworking.World
         {
             if (ServerSideVoxelWorld.voxelWorlds[worldID].worldGenType == 0)
             {
-                int biome = (int)(1f + ServerSideVoxelWorld.voxelWorlds[worldID].biomeNoiseGenerator.GetSimplex(x, y) * 3f);
-                return (int)(Chunk.chunkSeaLevel + ServerSideVoxelWorld.voxelWorlds[worldID].noiseGenerator.GetSimplex(x, y) * 20f + biome * 25f);
+                int biome = (int)(1f + ServerSideVoxelWorld.voxelWorlds[worldID].biomeNoiseGenerator.GetSimplexFractal(x, y) * 3f);
+                return (int)(Chunk.chunkSeaLevel + ServerSideVoxelWorld.voxelWorlds[worldID].noiseGenerator.GetSimplexFractal(x, y) * 20f + biome * 25f);
             }
             else if (ServerSideVoxelWorld.voxelWorlds[worldID].worldGenType == 2)
             {

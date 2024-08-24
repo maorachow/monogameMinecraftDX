@@ -18,6 +18,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
     public class ClientSideEntityCacheObject
     {
         public EntityData data;
+        public object entityOptionalData;
         public AnimationBlend animState;
         public float entitySpeed;
 
@@ -55,7 +56,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public static void LoadEntitySounds(ContentManager cm)
         {
             entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
-            entitySounds.TryAdd("0idle", cm.Load<SoundEffect>("sounds/zombiesay"));
+            entitySounds.TryAdd("0say", cm.Load<SoundEffect>("sounds/zombiesay"));
+            entitySounds.TryAdd("1hurt", cm.Load<SoundEffect>("sounds/pighurt"));
+            entitySounds.TryAdd("1say", cm.Load<SoundEffect>("sounds/pigsay"));
         }
 
         public bool isFirstUpdatePassed = false;
@@ -69,12 +72,26 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 {
                     if (allEntitiesCache.FindIndex((item) => { return item.data.entityID == item1.entityID; }) == -1)
                     {
-                        allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new AnimationBlend(new AnimationState[]
+                        switch (item1.typeid)
                         {
-                            new AnimationState(ClientSideEntitiesRenderer. zombieAnim, ClientSideEntitiesRenderer.zombieModel),
+                            case 0:
+                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new AnimationBlend(new AnimationState[]
+                                {
+                                    new AnimationState(ClientSideEntitiesRenderer. zombieAnim, ClientSideEntitiesRenderer.zombieModel),
 
-                            new AnimationState(ClientSideEntitiesRenderer. entityDieAnim, ClientSideEntitiesRenderer.zombieModel)
-                        }, ClientSideEntitiesRenderer.zombieModel),0f));
+                                    new AnimationState(ClientSideEntitiesRenderer. entityDieAnim, ClientSideEntitiesRenderer.zombieModel)
+                                }, ClientSideEntitiesRenderer.zombieModel), 0f));
+                                break;
+                            case 1:
+                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new AnimationBlend(new AnimationState[]
+                                {
+                                    new AnimationState(ClientSideEntitiesRenderer. pigWalkingAnim, ClientSideEntitiesRenderer.pigModel),
+
+                                    new AnimationState(ClientSideEntitiesRenderer. entityDieAnimRoot, ClientSideEntitiesRenderer.pigModel)
+                                }, ClientSideEntitiesRenderer.pigModel), 0f));
+                                break;
+                        }
+                    
                     }
                 }
 
@@ -126,104 +143,133 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 return;
 
             }
-           
-               
-                foreach (var item1 in lastAllEntitiesDatas)
+
+
+            foreach (var item1 in lastAllEntitiesDatas)
+            {
+                int idx = allEntitiesCache.FindIndex((item) => { return item.data.entityID == item1.entityID; });
+                int idxInPreviousData = lastPreviousAllEntitiesDatas.FindIndex((item) =>
                 {
-                   
-                    int idx = allEntitiesCache.FindIndex((item) => { return item.data.entityID == item1.entityID; });
-                    int idxInPreviousData= lastPreviousAllEntitiesDatas.FindIndex((item) => { return item.entityID == item1.entityID; });
-                    if (idx != -1&&idxInPreviousData!=-1)
-                    {
+                    return item.entityID == item1.entityID;
+                });
+                if (idx != -1 && idxInPreviousData != -1)
+                {
+                    Vector3 curPos = new Vector3(item1.posX, item1.posY,
+                        item1.posZ);
+                    Vector3 lastPos = new Vector3(lastPreviousAllEntitiesDatas[idxInPreviousData].posX,
+                        lastPreviousAllEntitiesDatas[idxInPreviousData].posY,
+                        lastPreviousAllEntitiesDatas[idxInPreviousData].posZ);
+                    /*   Vector3 targetPos = new Vector3(item1.posX, item1.posY,
+                           item1.posZ);*/
+                    Vector3 curRot = new Vector3(allEntitiesCache[idx].data.rotX, allEntitiesCache[idx].data.rotY,
+                        allEntitiesCache[idx].data.rotZ);
+                    Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
+                        item1.rotZ);
 
-                        Vector3 curPos = new Vector3(item1.posX, item1.posY,
-                            item1.posZ);
-                        Vector3 lastPos = new Vector3(lastPreviousAllEntitiesDatas[idxInPreviousData].posX, lastPreviousAllEntitiesDatas[idxInPreviousData].posY,
-                            lastPreviousAllEntitiesDatas[idxInPreviousData].posZ);
-                     /*   Vector3 targetPos = new Vector3(item1.posX, item1.posY,
-                            item1.posZ);*/
-                        Vector3 curRot = new Vector3(allEntitiesCache[idx].data.rotX, allEntitiesCache[idx].data.rotY,
-                            allEntitiesCache[idx].data.rotZ);
-                        Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
-                            item1.rotZ);
+                    Vector3 lerpPos = Vector3.Lerp(lastPos, curPos, timeSinceLastUpdate / previousTimeSinceLastUpdate);
+                    Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 10f * deltaTime);
+                    float moveLength =
+                        (new Vector3(allEntitiesCache[idx].data.posX, 0, allEntitiesCache[idx].data.posZ) -
+                         new Vector3(lerpPos.X, 0, lerpPos.Z)).Length();
 
-                        Vector3 lerpPos = Vector3.Lerp(lastPos, curPos, timeSinceLastUpdate/ previousTimeSinceLastUpdate);
-                        Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 10f * deltaTime);
-                        float moveLength =
-                            (new Vector3(allEntitiesCache[idx].data.posX, 0, allEntitiesCache[idx].data.posZ) - new Vector3(lerpPos.X, 0, lerpPos.Z)).Length();
+                    allEntitiesCache[idx].data.posX = lerpPos.X;
+                    allEntitiesCache[idx].data.posY = lerpPos.Y;
+                    allEntitiesCache[idx].data.posZ = lerpPos.Z;
 
-                        allEntitiesCache[idx].data.posX = lerpPos.X;
-                        allEntitiesCache[idx].data.posY = lerpPos.Y;
-                        allEntitiesCache[idx].data.posZ = lerpPos.Z;
-                        allEntitiesCache[idx].data.rotX = targetRot.X;
-                        allEntitiesCache[idx].data.rotY = targetRot.Y;
-                        allEntitiesCache[idx].data.rotZ = targetRot.Z;
-                        allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
-                        allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
-                        allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
-                    allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
-                        if (float.IsInfinity(moveLength) == true)
-                        {
-                            Debug.WriteLine("inf move length");
-                            moveLength = 0.1f;
-                            allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
-                    }
-                        // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
-                        if (allEntitiesCache[idx].data.isEntityDying == false)
-                        {
-                            if (allEntitiesCache[idx].entitySpeed / 5f < 0.1f)
-                            {
-                                float lerpValue =
-                                    MathHelper.Lerp(
-                                        allEntitiesCache[idx].animState.animationStates[0].elapsedTimeInStep, 0.25f,
-                                        deltaTime * 10f);
-                                float animationUpdateDelta = lerpValue - allEntitiesCache[idx].animState
-                                    .animationStates[0].elapsedTimeInStep;
-                                allEntitiesCache[idx].animState.Update(animationUpdateDelta, 1, 0);
-                            }
-                            else
-                            {
-                                allEntitiesCache[idx].animState
-                                    .Update(deltaTime, allEntitiesCache[idx].entitySpeed / 5f, 0);
-                            }
-                        }
-                        else
-                        {
-                            allEntitiesCache[idx].animState.Update(deltaTime, 0, 1);
-                        }
-                        
-                    }
-                    else if(idxInPreviousData==-1&& idx != -1)
-                    {
-                       // Debug.WriteLine("previous data not found"+ timeSinceLastUpdate);
-                        Vector3 targetPos = new Vector3(item1.posX, item1.posY,
-                            item1.posZ);
-                      
-                        Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
-                            item1.rotZ);
-
-                      
-
-                        allEntitiesCache[idx].data.posX = targetPos.X;
-                        allEntitiesCache[idx].data.posY = targetPos.Y;
-                        allEntitiesCache[idx].data.posZ = targetPos.Z;
-                        allEntitiesCache[idx].data.rotX = targetRot.X;
-                        allEntitiesCache[idx].data.rotY = targetRot.Y;
-                        allEntitiesCache[idx].data.rotZ = targetRot.Z;
-                        allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
-                        allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
+                    allEntitiesCache[idx].data.rotX = targetRot.X;
+                    allEntitiesCache[idx].data.rotY = targetRot.Y;
+                    allEntitiesCache[idx].data.rotZ = targetRot.Z;
+                    allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
                     allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
-                        allEntitiesCache[idx].entitySpeed =0f;
-                        if (allEntitiesCache[idx].data.isEntityDying == false)
+                    allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
+                    allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
+                    if (float.IsInfinity(moveLength) == true)
+                    {
+                        Debug.WriteLine("inf move length");
+                        moveLength = 0.1f;
+                        allEntitiesCache[idx].entitySpeed = moveLength / deltaTime;
+                    }
+
+                    // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
+                    if (allEntitiesCache[idx].data.isEntityDying == false)
+                    {
+                        if (allEntitiesCache[idx].entitySpeed / 5f < 0.1f)
                         {
-                            allEntitiesCache[idx].animState.Update(deltaTime,0f, 0);
+                            float lerpValue =
+                                MathHelper.Lerp(
+                                    allEntitiesCache[idx].animState.animationStates[0].elapsedTimeInStep, 0.25f,
+                                    deltaTime * 10f);
+                            float animationUpdateDelta = lerpValue - allEntitiesCache[idx].animState
+                                .animationStates[0].elapsedTimeInStep;
+                            allEntitiesCache[idx].animState.Update(animationUpdateDelta, 1, 0);
                         }
                         else
                         {
-                            allEntitiesCache[idx].animState.Update(deltaTime, 0, 1);
+                            allEntitiesCache[idx].animState
+                                .Update(deltaTime, allEntitiesCache[idx].entitySpeed / 5f, 0);
                         }
+                    }
+                    else
+                    {
+                        allEntitiesCache[idx].animState.Update(deltaTime, 0, 1);
+                    }
+
+                    allEntitiesCache[idx].data.optionalData = item1.optionalData;
+                    switch (allEntitiesCache[idx].data.typeid)
+                    {
+                        case 0:
+                            allEntitiesCache[idx].entityOptionalData =
+                                (Float4Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float4Data?);
+                            break;
+                        case 1:
+                            allEntitiesCache[idx].entityOptionalData =
+                                (Float3Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float3Data?);
+                            break;
+                    }
                 }
-                
+                else if (idxInPreviousData == -1 && idx != -1)
+                {
+                    // Debug.WriteLine("previous data not found"+ timeSinceLastUpdate);
+                    Vector3 targetPos = new Vector3(item1.posX, item1.posY,
+                        item1.posZ);
+
+                    Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
+                        item1.rotZ);
+
+
+                    allEntitiesCache[idx].data.posX = targetPos.X;
+                    allEntitiesCache[idx].data.posY = targetPos.Y;
+                    allEntitiesCache[idx].data.posZ = targetPos.Z;
+
+                    allEntitiesCache[idx].data.rotX = targetRot.X;
+                    allEntitiesCache[idx].data.rotY = targetRot.Y;
+                    allEntitiesCache[idx].data.rotZ = targetRot.Z;
+                    allEntitiesCache[idx].data.isEntityHurt = item1.isEntityHurt;
+                    allEntitiesCache[idx].data.entityInWorldID = item1.entityInWorldID;
+                    allEntitiesCache[idx].data.isEntityDying = item1.isEntityDying;
+                    allEntitiesCache[idx].entitySpeed = 0f;
+                    if (allEntitiesCache[idx].data.isEntityDying == false)
+                    {
+                        allEntitiesCache[idx].animState.Update(deltaTime, 0f, 0);
+                    }
+                    else
+                    {
+                        allEntitiesCache[idx].animState.Update(deltaTime, 0, 1);
+                    }
+
+                    allEntitiesCache[idx].data.optionalData = item1.optionalData;
+                    switch (allEntitiesCache[idx].data.typeid)
+                    {
+                        case 0:
+                            allEntitiesCache[idx].entityOptionalData =
+                                (Float4Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float4Data?);
+                            break;
+                        case 1:
+                            allEntitiesCache[idx].entityOptionalData =
+                                (Float3Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float3Data?);
+                            break;
+                    }
+                }
             }
 
         }

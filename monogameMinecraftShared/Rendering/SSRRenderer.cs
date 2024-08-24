@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 //using MonoGame.Extended.Timers;
 //using monogameMinecraftDX.Updateables;
@@ -60,8 +61,8 @@ namespace monogameMinecraftShared.Rendering
             //    Debug.WriteLine("binSearch:" + binarySearch);
             //  }
             //   SSREffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth);
-            int width = graphicsDevice.PresentationParameters.BackBufferWidth;
-            int height = graphicsDevice.PresentationParameters.BackBufferHeight;
+            int width = hiZBufferRenderer.hiZBufferTargetMips[0].Width;
+            int height = hiZBufferRenderer.hiZBufferTargetMips[0].Height;
             SetCameraFrustum(player.cam, SSREffect);
             SSREffect.Parameters["GameTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
             SSREffect.Parameters["PrevSSRTexture"]?.SetValue(renderTargetSSRPrev);
@@ -76,6 +77,7 @@ namespace monogameMinecraftShared.Rendering
             SSREffect.Parameters["ProjectionDepthTexMip3"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[3]);
             SSREffect.Parameters["ProjectionDepthTexMip4"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[4]);
             SSREffect.Parameters["ProjectionDepthTexMip5"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[5]);
+            SSREffect.Parameters["ProjectionDepthTexMip6"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[6]);
             SSREffect.Parameters["HDRPrefilteredTex"]?.SetValue(hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0);
             SSREffect.Parameters["HDRPrefilteredTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0);
             SSREffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
@@ -93,7 +95,12 @@ namespace monogameMinecraftShared.Rendering
             //  SSREffect.Parameters["matInverseProjection"].SetValue(Matrix.Invert(player.cam.projectionMatrix));
             //  SSREffect.Parameters["matView"].SetValue((player.cam.viewMatrix));
             //  SSREffect.Parameters["matProjection"].SetValue((player.cam.projectionMatrix));
-            SSREffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
+            SSREffect.Parameters["View"]?.SetValue((player.cam.viewMatrix));
+            SSREffect.Parameters["Projection"]?.SetValue((player.cam.projectionMatrix));
+            SSREffect.Parameters["matTransposeView"]?.SetValue(Matrix.Transpose( player.cam.viewMatrix));
+            SSREffect.Parameters["ViewOrigin"]?.SetValue((player.cam.viewMatrixOrigin));
+         //   Debug.WriteLine("transpose:"+Matrix.Transpose(player.cam.viewMatrix));
+        //    Debug.WriteLine("normal:"+(player.cam.viewMatrix));
             SSREffect.Parameters["CameraPos"]?.SetValue(player.cam.position);
             //   SSREffect.Parameters["RoughnessMap"].SetValue(gBufferRenderer.renderTargetPositionWS);
             RenderQuad(graphicsDevice, renderTargetSSR, SSREffect);

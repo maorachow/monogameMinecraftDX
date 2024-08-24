@@ -87,9 +87,9 @@ namespace monogameMinecraftNetworking.Client.Rendering
             clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice, game._spriteBatch, MultiplayerClientUIUtility.sf, game);
-            clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"),
+            clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"), game.Content.Load<Model>("pigfbx"),
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
-                game.Content.Load<Texture2D>("husk"), game.networkingClient, game.GraphicsDevice, game);
+                game.Content.Load<Texture2D>("husk"), game.Content.Load<Texture2D>("pig"),game.networkingClient, game.GraphicsDevice, game);
             //   entityRenderer = new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
             gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, null, particleRenderer, true, clientSidePlayersRenderer, clientSideEntitiesRenderer);
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
@@ -211,8 +211,8 @@ namespace monogameMinecraftNetworking.Client.Rendering
             deferredShadingRenderer.Resize(width, height);
             motionBlurRenderer.processedImage = new RenderTarget2D(game.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
             hiZBufferRenderer.ResizeTarget();
-            ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-            ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(game.GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            ssidRenderer.renderTargetSSID = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
+            ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             ssrRenderer.renderTargetSSR = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             ssrRenderer.renderTargetSSRPrev = new RenderTarget2D(game.GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
             foreach (var processor in customPostProcessors)

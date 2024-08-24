@@ -92,7 +92,7 @@ namespace monogameMinecraftNetworking.Pathfinding
                     return;
                 }
                 Thread.Sleep(10);
-                if (entityPathfindingQueue.Count > 0)
+                while (entityPathfindingQueue.Count > 0)
                 {
 
                     KeyValuePair<ServerSideEntityBeh, (Vector3Int pathStart, Vector3Int pathTarget)> item = entityPathfindingQueue.First();

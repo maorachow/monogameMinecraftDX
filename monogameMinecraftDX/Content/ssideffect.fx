@@ -365,7 +365,28 @@ float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
     viewPos *= zScale;
     return viewPos;
 }
-
+float3 ImportanceSampleGGX(float2 Xi, float3 N, float roughness)
+{
+    float a = roughness * roughness;
+	
+    float phi = 2.0 * PI * Xi.x;
+    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a * a - 1.0) * Xi.y));
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+	
+	// from spherical coordinates to cartesian coordinates - halfway vector
+    float3 H;
+    H.x = cos(phi) * sinTheta;
+    H.y = sin(phi) * sinTheta;
+    H.z = cosTheta;
+	
+	// from tangent-space H vector to world-space sample vector
+    float3 up = abs(N.z) < 0.999 ? float3(0.0, 0.0, 1.0) : float3(1.0, 0.0, 0.0);
+    float3 tangent = normalize(cross(up, N));
+    float3 bitangent = cross(N, tangent);
+	
+    float3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
+    return normalize(sampleVec);
+}
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float linearDepth = 0;
@@ -377,10 +398,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 worldPos = ReconstructViewPos(input.TexCoords, linearDepth) + CameraPos; //tex2D(gPositionWS, input.TexCoords).xyz;
     float3 normal = tex2D(gNormalWS, input.TexCoords).xyz * 2 - 1;
     worldPos = worldPos + normal * 0.1 * length(worldPos - CameraPos) / 150;
-    float3 randomVec = float3(tex2D(noiseTex, input.TexCoords * 5).r * 2 - 1 + 0.0001 + GameTime, tex2D(noiseTex, input.TexCoords * 5).g * 2 - 1 + 0.0001 + GameTime, 0);
-    float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
-    float3 bitangent = cross(normal, tangent);
-    float3x3 TBN = float3x3(tangent, bitangent, normal);
+  //  float3 randomVec = float3(tex2D(noiseTex, input.TexCoords * 5).r * 2 - 1 + 0.0001 + GameTime, tex2D(noiseTex, input.TexCoords * 5).g * 2 - 1 + 0.0001 + GameTime, 0);
+  //  float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
+   // float3 bitangent = cross(normal, tangent);
+  //  float3x3 TBN = float3x3(tangent, bitangent, normal);
     float3 mer = tex2D(MERSampler, input.TexCoords).xyz;
     float3 rayOrigin = worldPos + normalize(normal) * 0.01;
     float3 finalColor = 0;
@@ -400,13 +421,15 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     kD *= 1.0 - mer.x;
     
     float finalMixVal = 0;
-    [unroll(1)]
-    for (int i = 0; i <1; i++)
-    {
-        float3 sampleDir = float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
-        sampleDir.z = clamp(sampleDir.z, 0.03, 1);
+    
+    int i = 0;
+    //for (int i = 0; i <1; i++)
+    //{
+    float2 noiseValue2 = tex2D(noiseTex, input.TexCoords * 5.0 * (0 + 1 + 1) + GameTime * 8 * (0 + 1)).rg;
+    float3 sampleDir = ImportanceSampleGGX(noiseValue2, normal, 0.98); //float3(tex2D(noiseTex, input.TexCoords * 5 + float2(i / 10.0, i / 10.0) + GameTime*2.0).r * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 + float2(0.5, 0.5) - float2(i / 10.0, i / 10.0) - GameTime*4.0).g * 2 - 1, tex2D(noiseTex, input.TexCoords * 5 - float2(0.8, 0.8) - float2(i / 10.0, i / 10.0) + GameTime*5.0).b);
+       // sampleDir.z = clamp(sampleDir.z, 0.03, 1);
         sampleDir = normalize(sampleDir);
-        sampleDir = mul(sampleDir, TBN);
+    //    sampleDir = mul(sampleDir, TBN);
         bool isHit = false;
         float2 uv = 0;
         float3 marchPos = 0;
@@ -415,16 +438,16 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float strideNoiseVal = tex2D(noiseTex, input.TexCoords * 5*i + GameTime * 2.5).r - 0.5;
         marchPos = rayOrigin + sampleDir * 0.01;
         float3 preMarchPos = marchPos;
-        [loop]
+        [unroll(12)]
         for (int j = 0; j < 12; j++)
         {
-            if (dot(normal, sampleDir) < 0)
+       /*     if (dot(normal, sampleDir) < 0)
             {
              //   return float4(0, 1, 0, 1);
                 isHit = false;
            
                 break;
-            }
+            }*/
             marchPos += sampleDir * 0.15 * (1+strideNoiseVal) * strideLen;
              uv = GetScreenCoordFromWorldPos(marchPos);
             
@@ -459,7 +482,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
            
                 
-            if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen)
+            if (sampleDepth < testDepth)
             {
             
                 if (sampleDepth < testDepth && abs(sampleDepth - testDepth) < 0.3 * (1 + strideNoiseVal) * strideLen && mipLevel <= 0)
@@ -469,13 +492,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
            
                     break; //   return float4(0, 0, 0, 1);
                 }
-                mipLevel--;
+                mipLevel=clamp(mipLevel-1,0,5);
                 marchPos -= (sampleDir) * 0.15 * (1 + strideNoiseVal) * strideLen;
                 strideLen /= 2.0;
             }
             else
             {
-                if (mipLevel < 4)
+                if (mipLevel < 5)
                 {
                     mipLevel++;
                     strideLen *= 2;
@@ -507,7 +530,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
             finalColor += 0;
             finalMixVal += 0;
         }
-    }      
+  //  }      
     finalColor /= clamp(finalMixVal, 1,1);
     finalMixVal /= 1;
    // finalColor = finalColor*0.01+prevColor;

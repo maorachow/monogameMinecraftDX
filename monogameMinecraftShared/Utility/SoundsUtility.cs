@@ -16,8 +16,11 @@ namespace monogameMinecraftShared.Utility
             volume = MathHelper.Clamp(volume, 0, 1);
             volume = volume * volume;
             //     Debug.WriteLine("play sound" + volume);
-
-            effect.Play(volume, 0f, 0f);
+            if (effect != null)
+            {
+                effect.Play(volume, 0f, 0f);
+            }
+           
         }
     }
 }

@@ -64,8 +64,7 @@ namespace monogameMinecraftNetworking.Utility
                     return;
                 }
                 
-                lock (sendToClientsLock)
-                {
+               
                 
                    lock (server.remoteClientsLock)
                    {
@@ -99,7 +98,7 @@ namespace monogameMinecraftNetworking.Utility
                   
 
                    //   socket.Send(System.Text.Encoding.Default.GetBytes("&"));
-                }
+                
             }
             finally
             {

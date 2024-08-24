@@ -1,11 +1,11 @@
 
 #----------------------------- Global Properties ----------------------------#
 
-/outputDir:bin/$(Platform)
-/intermediateDir:obj/$(Platform)
+/outputDir:bin
+/intermediateDir:obj
 /platform:Windows
 /config:
-/profile:HiDef
+/profile:Reach
 /compress:False
 
 #-------------------------------- References --------------------------------#
@@ -828,8 +828,20 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=NoChange
+/processorParam:TextureFormat=Color
 /build:environmenthdri.png
+
+#begin environmenthdri2.hdr
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:environmenthdri2.hdr
 
 #begin environmenthdrinight.png
 /importer:TextureImporter
@@ -840,7 +852,7 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=NoChange
+/processorParam:TextureFormat=Color
 /build:environmenthdrinight.png
 
 #begin fxaaeffect.fx
@@ -1001,6 +1013,37 @@
 /processorParam:DebugMode=Auto
 /build:motionvectoreffect.fx
 
+#begin pig.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:pig.png
+
+#begin pigfbx.fbx
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=True
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=0
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:pigfbx.fbx
+
 #begin playermodel.fbx
 /importer:FbxImporter
 /processor:ModelProcessor
@@ -1050,6 +1093,18 @@
 /processorParam:TextureFormat=Color
 /build:randomnormal.jpg
 
+#begin sealanternnormal.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:sealanternnormal.png
+
 #begin selectedhotbar.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1061,6 +1116,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:selectedhotbar.png
+
+#begin skybox/environmenthdri.hdr
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:skybox/environmenthdri.hdr
 
 #begin skybox/skybox.png
 /importer:TextureImporter
@@ -1158,6 +1225,18 @@
 /processorParam:Quality=Best
 /build:sounds/grassdig.wav
 
+#begin sounds/pighurt.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/pighurt.wav
+
+#begin sounds/pigsay.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/pigsay.ogg
+
 #begin sounds/stonedig.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -1169,6 +1248,48 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sounds/uiclick.wav
+
+#begin sounds/unused/dirtdig.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/dirtdig.ogg
+
+#begin sounds/unused/grassdig.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/grassdig.ogg
+
+#begin sounds/unused/stonedig.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/stonedig.ogg
+
+#begin sounds/unused/uiclick.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/uiclick.ogg
+
+#begin sounds/unused/wooddig.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/wooddig.ogg
+
+#begin sounds/unused/zombiehurt.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/zombiehurt.ogg
+
+#begin sounds/unused/zombiesay.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:sounds/unused/zombiesay.ogg
 
 #begin sounds/waterdig.ogg
 /importer:OggImporter
@@ -1251,8 +1372,20 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
-/processorParam:TextureFormat=NoChange
+/processorParam:TextureFormat=Color
 /build:terrain.png
+
+#begin terrainemission.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:terrainemission.png
 
 #begin terrainheight.png
 /importer:TextureImporter
@@ -1265,6 +1398,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:terrainheight.png
+
+#begin terrainm.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:terrainm.png
 
 #begin terrainmer.png
 /importer:TextureImporter
@@ -1285,10 +1430,22 @@
 /processorParam:ColorKeyEnabled=True
 /processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=True
-/processorParam:MakeSquare=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:terrainnormal.png
+
+#begin terrainr.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:terrainr.png
 
 #begin testbillboardeffect.fx
 /importer:EffectImporter
@@ -1378,7 +1535,7 @@
 /processorParam:RotationY=0
 /processorParam:RotationZ=0
 /processorParam:Scale=1
-/processorParam:SwapWindingOrder=True
+/processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=Compressed
 /build:zombie.geo.fbx
 

@@ -130,12 +130,16 @@ samplerCUBE preFilteredSpecularSamplerNight = sampler_state
 };
 
 float4x4 matInverseView;
+
+float4x4 matTransposeView;
 float4x4 matInverseProjection;
 float4x4 matView;
 float4x4 matProjection;
  
 matrix ViewProjection;
 matrix View;
+matrix Projection;
+matrix ViewOrigin;
 bool binarySearch;
 struct VertexShaderInput
 {
@@ -311,6 +315,13 @@ float GetViewDepthFromWorldPos(float3 worldPos)
     marchDepthView.z = marchDepthView.z + marchDepthView.x * 0.00001 + marchDepthView.y * 0.000001;
     return -marchDepthView.z;
 }
+float4 TransformViewToHScreen(float3 vpos, float2 screenSize)
+{
+    float4 cpos = mul( float4(vpos, 1), Projection);
+    cpos.xy = float2(cpos.x, -cpos.y) * 0.5 + 0.5 * cpos.w;//
+    cpos.xy *= screenSize;
+    return cpos;
+}
 
 
 float Random2DTo1D(float2 value, float a, float2 b)
@@ -329,7 +340,12 @@ float Random2DTo1D(float2 value)
 		          
 	            );
 }
-
+void swap(inout float v0, inout float v1)
+{
+    float temp = v0;
+    v0 = v1;
+    v1 = temp;
+}
  float PI = 3.14159265359;
 
 float DistributionGGX(float3 N, float3 H, float roughness);
@@ -612,6 +628,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     
     float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
+    
   //  return float4(worldPos.xyz, 1);
     float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
     float3 mer = tex2D(MERSampler, input.TexCoord).xyz;
@@ -910,11 +927,796 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                 return float4(finalColor.xyz, 1);
    
 }
+
+
+
+
+
+
+
+
+
+
+float4 MainPSNew(VertexShaderOutput input) : COLOR
+{
+    
+    float linearDepth = 0;
+    linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
+    if (linearDepth >= 900 || linearDepth <= 0.1)
+    {
+        discard;
+    }
+    
+    
+    float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
+    
+  //  return float4(worldPos.xyz, 1);
+    float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
+    float3 mer = tex2D(MERSampler, input.TexCoord).xyz;
+    
+    
+    
+    
+
+  //  float noiseValue = worldPos.x;
+    worldPos = worldPos + normal * 0.5 * length(worldPos - CameraPos) / 100;
+    
+    
+    float3 vDir = normalize(worldPos - CameraPos);
+    float3 rDir = reflect(vDir, (normal));
+    
+    float3 rayOrigin = worldPos;
+    float NdotL =max(dot((normal), normalize(-vDir)), 0.0);
+    NdotL =1.0/NdotL;
+     
+    float rayLengthAmp = max(NdotL / 3.0, 1.0);
+   // return float4(rayLengthAmp.xxx, 1);
+    float ssrThickness = 0.2;
+   
+    bool isRayReturning = false;
+
+   
+  //  return float4(noiseValue1.xxx, 1);
+   
+    
+    
+    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float maxBlendDistance = length(PixelSize) * 2;
+    float deltaLength = length(prevTexCoord - input.TexCoord);
+    float blendFactor = clamp(deltaLength / maxBlendDistance, 0, 1);
+    float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
+    
+    
+    
+ 
+    //float2 brdf1 = tex2D(texBRDFLUT, input.TexCoord.xy).rg;
+   // return float4(brdf1, 0, 1);
+    
+  
+   
+             
+
+            
+    float3 N = normal;
+    float3 V = normalize(CameraPos - worldPos);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), mer.x);
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
+       //   Lo = Lo / (Lo + float3(1.0, 1.0, 1.0));
+       //    Lo = pow(Lo, float3(1.0 / 1, 1.0 / 1, 1.0 / 1));
+            
+    
+    
+    
+    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1 - mer.z)).rg;
+    
+    float3 finalColor = 0;
+   if (mer.z > 0.8f)
+    {
+        float3 R = reflect(-V, normal);
+        R = normalize(R);
+        const float MAX_REFLECTION_LOD = 4.0;
+        float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+       
+        float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+      //  finalColor += specularEnv;
+     
+   
+        return float4(specularEnv.xyz, 1);
+        
+        
+    }
+  
+    
+ 
+    
+     
+        
+    
+    float3 curRDir = rDir;
+    float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0 + GameTime * 5).g +0.9;
+    
+    
+    
+    
+    
+     
+        
+     
+     
+     //   float3 noiseValue4 = tex2D(texNoise, input.TexCoord * 6.0*(0+1) + GameTime * 9).rgb * 2 - 1;
+    
+  /*     float3 randomVec = float3(noiseValue2.rg, 0);
+        float3 tangent = normalize(randomVec - curRDir * dot(randomVec, curRDir));
+        float3 bitangent = cross(curRDir, tangent);
+        float3x3 TBN = float3x3(tangent, bitangent, curRDir);
+        float3 noiseValue3 = float3(noiseValue4.rg * mer.z * 0.1, noiseValue2.b * 0.5 + 0.5);
+        float3 rayRoughnessAmp = mul(noiseValue3, TBN);
+    
+     
+        curRDir = rayRoughnessAmp;
+        curRDir = normalize(curRDir);*/
+    float2 noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (0 + 1)).rg;
+    float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    
+    
+    curRDir = importanceSampleDir;
+    float3 marchPos = worldPos + curRDir * 0.01;
+    float3 preMarchPos = rayOrigin;
+ 
+    int k = 0;
+    while (dot(normal, curRDir) < 0 && k < 3)
+    {
+        //    float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
+        noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (k + 1)).rg;
+        float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    
+    
+        curRDir = importanceSampleDir;
+        marchPos = worldPos + curRDir * 0.01;
+        k++;
+      
+
+    }
+    float maxDist = 100.0f;
+    float3 viewRDir = normalize(mul(float4(rDir, 1), ViewOrigin).xyz);
+    
+    float3 viewPosOrigin = mul(float4(worldPos, 1), View);
+   
+   
+    float end = viewPosOrigin.z + viewRDir.z * maxDist;
+    if (end >-0.1)
+    {
+        maxDist = abs(-0.1 - viewPosOrigin.z) / viewRDir.z;
+    }
+     
+    float3 viewPosEnd = viewPosOrigin + viewRDir * maxDist;
+ //   float4 projPos = mul(float4(viewPosEnd, 1), Projection);
+   // return float4((projPos.xy / projPos.w) * 0.5 + 0.5, 0, 1);
+    float4 startHScreen = TransformViewToHScreen(viewPosOrigin, 1.0/(PixelSize.xy));
+    float4 endHScreen = TransformViewToHScreen(viewPosEnd, 1.0 / (PixelSize.xy));
+  //  return float4((endHScreen.xy / endHScreen.w) * PixelSize, 0, 1);
+    float startK = 1.0 / startHScreen.w;
+    float endK = 1.0 /endHScreen.w;
+    float2 startScreen = startHScreen.xy * startK;
+    float2 endScreen = endHScreen.xy * endK;
+    
+    float3 startQ = viewPosOrigin * startK;
+
+    float3 endQ =viewPosEnd * endK;
+    
+    
+    float2 diff = endScreen - startScreen;
+    bool permute = false;
+    if (abs(diff.x) < abs(diff.y))
+    {
+        permute = true;
+
+        diff = diff.yx;
+        startScreen = startScreen.yx;
+        endScreen = endScreen.yx;
+    }
+    float dir = sign(diff.x);
+    float invdx = dir / diff.x;
+    float2 dp = float2(dir, invdx * diff.y);
+    float3 dq = (endQ - startQ) * invdx;
+    float dk = (endK - startK) * invdx;
+    
+   // return float4(dq.z*10000, 0, 0, 1);
+    dp *= 1;
+    dq *= 1;
+    dk *= 1;
+    
+    float rayZMin = viewPosOrigin.z;
+    float rayZMax = viewPosOrigin.z;
+    float preZ = viewPosOrigin.z;
+
+    float2 P = startScreen;
+    P = floor(P);
+    float3 Q = startQ;
+    float K = startK;
+
+    end = endScreen.x * dir;
+   /* if ((endScreen.xy * PixelSize).x < 0 || (endScreen.xy * PixelSize).x > 1 || (endScreen.xy * PixelSize).y < 0 || (endScreen.xy *PixelSize).y > 1)
+    {
+        return float4(0, 0, 0, 1);
+    }
+    return float4(endScreen.xy*PixelSize, 0, 1);*/
+    int miplevel = 0;
+    float strideLen =1 ;
+    float3 result = 0;
+    bool isHit = false;
+    float traceStepCount = 0;
+    int unHitErrCode = 0;
+    float2 textureSize = 1.0 / PixelSize;
+    [loop]
+    for (int i = 0; i <35; i++)
+    {
+        traceStepCount++;
+        P += dp * strideLen ;
+        Q.z += dq.z * strideLen ;
+        K += dk * strideLen ;
+        rayZMin = preZ;
+        rayZMax = (dq.z * 0.5 + Q.z) / (dk * 0.5 + K);
+        preZ = rayZMax;
+        if (rayZMin > rayZMax)
+        {
+            swap(rayZMin, rayZMax);
+        }
+        
+        float2 hitUV = permute ? P.yx : P;
+        hitUV *= PixelSize;
+        
+        if ((hitUV.x < 0.0) || (hitUV.y < 0.0) || (hitUV.x > 1.0) || (hitUV.y > 1.0))
+        {
+           
+            isHit = false;
+            unHitErrCode = 1;
+            break;
+        }
+     
+        float sampleDepthM0 = -tex2D(gProjectionDepthM0, hitUV.xy).x;
+
+        float sampleDepthM1 = -tex2D(gProjectionDepthM1, hitUV.xy).x;
+
+        float sampleDepthM2 = -tex2D(gProjectionDepthM2, hitUV.xy).x;
+
+        float sampleDepthM3 = -tex2D(gProjectionDepthM3, hitUV.xy).x;
+
+        float sampleDepthM4 = -tex2D(gProjectionDepthM4, hitUV.xy).x;
+
+        float sampleDepthM5 = -tex2D(gProjectionDepthM5, hitUV.xy).x;
+   
+      
+        
+        
+        float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 };
+      
+        
+        float surfaceDepth = sampleDepthArray[miplevel];
+        if (abs(surfaceDepth) / 1000 > 0.99)
+        {
+           
+            isHit = false;
+            unHitErrCode = 2;
+            break;
+        }
+        bool isBehind = (rayZMin + 0.01 <= surfaceDepth);
+        if (isBehind)
+        {
+            bool intersecting = isBehind; //&& (abs(rayZMax - surfaceDepth) < 0.26 * rayLengthAmp);
+
+            if (intersecting&&miplevel<=0)
+            {
+                float3 lum = LumTex.Sample(defaultSampler, hitUV.xy).xyz;
+           
+                float3 specular = lum * (F * brdf.x + brdf.y);
+                isHit = true;
+                result = specular;
+                break;
+            }
+            P -= dp * strideLen ;
+            Q.z -= dq.z * strideLen ;
+            K -= dk * strideLen ;
+          
+            miplevel = clamp(miplevel-1, 0, 5);
+            strideLen /= 2.0;
+        }
+        else
+        {
+            if (miplevel <5)
+            {
+                miplevel++;
+                        
+                strideLen *= 2.0;
+            }
+        }
+        
+        
+        
+    /*    if (dot(normal, curRDir) < 0)
+        {
+            
+            isHit = false;
+            break;
+        }*/
+     //   marchPos += (curRDir) * 0.3 * /*(pow((i + 1), 1.41)*/noiseValue1 * rayLengthAmp * strideLen;
+     //   ssrThickness += (0.1);
+   /*     float4 offset = float4(marchPos, 1.0);
+        offset = mul(offset, ViewProjection);
+        offset.xyz /= offset.w;
+        offset.xy = offset.xy * 0.5 + 0.5 + (offset.z * 0.0000000001);
+        offset.y = 1 - offset.y;*/
+     /*   P += dp *1;
+        Q.z += dq.z * 1;
+        K += dk *1;
+    
+         
+       // rayZMin = (Q.z) / ( K);
+        rayZMin = preZ;
+        rayZMax = (dq.z * 0.5 + Q.z) / (dk * 0.5 + K);
+        preZ = rayZMax;
+        if (rayZMin > rayZMax)
+        {
+            swap(rayZMin, rayZMax);
+        }
+          
+        
+        float2 hitUV = permute ? P.yx : P;
+        hitUV *=PixelSize;
+        
+        if ((hitUV.x < 0.0) || (hitUV.y < 0.0) || (hitUV.x > 1.0) || (hitUV.y >1.0))
+        {
+            isHit = false;
+            
+            break;
+        }
+    
+        float sampleDepthM0 = -tex2D(gProjectionDepthM0, hitUV.xy).x;
+
+    
+      
+        
+        float surfaceDepth = sampleDepthM0;
+        if (-surfaceDepth / 1000 > 0.9)
+        {
+            isHit = false;
+            
+            break;
+        }
+        bool isBehind = (rayZMin + 0.05 <= surfaceDepth);
+        
+     //   float avgTestDepth = (rayZMin + rayZMax) / 2.0f;
+        bool intersecting = isBehind && (abs(surfaceDepth - rayZMax) < 0.25*rayLengthAmp);
+
+            if (intersecting)
+            {
+                float3 lum = LumTex.Sample(defaultSampler, hitUV.xy).xyz;
+           
+                float3 specular = lum * (F * brdf.x + brdf.y);
+                isHit = true;
+                result = specular;
+                break;
+            }
+      
+       */
+         
+      
+        
+   
+       
+
+    }
+    
+    float3 R = reflect(-V, normal);
+    R = normalize(R);
+    if (isHit == true)
+    {
+        finalColor +=result;
+
+    }
+    else
+    {
+   /*     if (unHitErrCode == 1)
+        {
+            return float4(0, 1, 0, 1);
+        }
+        else if (unHitErrCode == 2)
+        {
+            return float4(0,0, 1, 1);
+        }*/
+        const float MAX_REFLECTION_LOD = 4.0;
+        float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+         //   float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+        float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+        finalColor += specularEnv;
+
+    }
+    
+   
+    
+  //  finalColor /= 1;
+   finalColor = lerp(finalColor, prevColor, 0.75);
+   
+    return float4(finalColor.xyz, 1);
+   
+    
+   
+}
+
+
+
+
+
+
+
+float linearDepthToProjectionDepth(float linearDepth, float near, float far)
+{
+    return (1.0 / linearDepth - 1.0 / near) / (1.0 / far - 1.0 / near);
+}
+float ProjectionDepthToLinearDepth(float depth, float near, float far)
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+float3 IntersectDepthPlane(float3 RayOrigin, float3 RayDir, float t)
+{
+    return RayOrigin + RayDir * t;
+}
+
+float2 GetCellCount(float2 Size, float Level)
+{
+    return floor(Size / (Level > 0.0 ? exp2(Level) : 1.0));
+}
+
+float2 GetCell(float2 pos, float2 CellCount)
+{
+    return floor(pos * CellCount);
+}
+float GetMinimumDepthPlane(float2 p, int mipLevel)
+{
+    
+    float sampleDepthM0 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM0, p.xy).x, 0.1f, 1000.0f);
+
+    float sampleDepthM1 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM1, p.xy).x, 0.1f, 1000.0f);
+
+    float sampleDepthM2 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM2, p.xy).x, 0.1f, 1000.0f);
+
+    float sampleDepthM3 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM3, p.xy).x, 0.1f, 1000.0f);
+
+    float sampleDepthM4 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM4, p.xy).x, 0.1f, 1000.0f);
+
+    float sampleDepthM5 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM5, p.xy).x, 0.1f, 1000.0f);
+   
+      
+        
+        
+    float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 };
+    
+    return sampleDepthArray[clamp(mipLevel, 0, 5)];
+
+}
+float3 IntersectCellBoundary(float3 o, float3 d, float2 cell, float2 cell_count, float2 crossStep, float2 crossOffset)
+{
+    float3 intersection = 0;
+	
+    float2 index = cell + crossStep;
+    float2 boundary = index / cell_count;
+    boundary += crossOffset;
+	
+    float2 delta = boundary - o.xy;
+    delta /= d.xy;
+    float t = min(delta.x, delta.y);
+	
+    intersection = IntersectDepthPlane(o, d, t);
+	
+    return intersection;
+}
+
+bool CrossedCellBoundary(float2 CellIdxA, float2 CellIdxB)
+{
+    return CellIdxA.x != CellIdxB.x || CellIdxA.y != CellIdxB.y;
+}
+float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
+{
+    
+    float linearDepth = 0;
+    linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
+    if (linearDepth >= 900 || linearDepth <= 0.1)
+    {
+        discard;
+    }
+    
+    
+    float3 worldPos = ReconstructViewPos(input.TexCoord, linearDepth) + CameraPos; // PositionWSTex.Sample(defaultSampler, input.TexCoord).xyz;
+    
+  //  return float4(worldPos.xyz, 1);
+    float3 normal = NormalTex.Sample(defaultSampler, input.TexCoord).xyz * 2 - 1;
+    float3 mer = tex2D(MERSampler, input.TexCoord).xyz;
+    
+    
+    
+    
+
+  //  float noiseValue = worldPos.x;
+    worldPos = worldPos + normal * 0.3 * length(worldPos - CameraPos) / 100;
+    
+    
+    float3 vDir = normalize(worldPos - CameraPos);
+    float3 rDir = reflect(vDir, (normal));
+    
+    float3 rayOrigin = worldPos;
+    float NdotL = 2 - max(dot(normal, -vDir), 0.0) * 1.5;
+    NdotL = pow(NdotL, 2);
+     
+    float rayLengthAmp = 1 + NdotL;
+    float ssrThickness = 0.2;
+   
+    bool isRayReturning = false;
+
+
+    
+    
+    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float maxBlendDistance = length(PixelSize) * 2;
+    float deltaLength = length(prevTexCoord - input.TexCoord);
+    float blendFactor = clamp(deltaLength / maxBlendDistance, 0, 1);
+    float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
+    
+    
+    
+ 
+  
+   
+             
+
+            
+    float3 N = normal;
+    float3 V = normalize(CameraPos - worldPos);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, pow(tex2D(gAlbedo, input.TexCoord).xyz, 2.2), mer.x);
+    float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, mer.z);
+  
+    
+    
+    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1 - mer.z)).rg;
+    
+    float3 finalColor = 0;
+ 
+    if (mer.z > 0.8f)
+    {
+        float3 R = reflect(-V, normal);
+        R = normalize(R);
+        const float MAX_REFLECTION_LOD = 4.0;
+        float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+       
+        float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+      //  finalColor += specularEnv;
+     
+   
+        return float4(specularEnv.xyz, 1);
+        
+        
+    }
+  
+ 
+    
+     
+        
+    
+    float3 curRDir = rDir;
+    float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0 + GameTime * 5).g + 0.5;
+    
+    
+    
+    
+    
+     
+        
+  
+    float2 noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (0 + 1)).rg;
+    float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    
+    
+    curRDir = importanceSampleDir;
+  
+   
+    int miplevel = 0;
+   
+    float3 result = 0;
+   
+    int k = 0;
+    while (dot(normal, curRDir) < 0 && k < 3)
+    {
+        //    float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
+        noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (k + 1)).rg;
+        float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    
+    
+        curRDir = importanceSampleDir;
+     
+        k++;
+      
+
+    }
+    float2 textureSize = 1.0 / PixelSize;
+    float maxDist = 100.0f;
+    float3 viewRDir = normalize(mul(float4(curRDir, 1), ViewOrigin).xyz);
+    
+    float3 viewPosOrigin = mul(float4(worldPos, 1), View);
+   
+   
+    float end = viewPosOrigin.z + viewRDir.z * maxDist;
+    if (end > -0.1)
+    {
+        maxDist = abs(-0.1 - viewPosOrigin.z) / viewRDir.z;
+    }
+     
+    float3 viewPosEnd = viewPosOrigin + viewRDir * maxDist;
+    float4 startHScreen = TransformViewToHScreen(viewPosOrigin, 1.0 / (PixelSize.xy));
+    float4 endHScreen = TransformViewToHScreen(viewPosEnd, 1.0 / (PixelSize.xy));
+  //  return float4((endHScreen.xy / endHScreen.w) * PixelSize, 0, 1);
+    float startK = 1.0 / startHScreen.w;
+    float endK = 1.0 / endHScreen.w;
+    float3 startScreen = startHScreen.xyz * startK;
+    
+    float3 startScreenTextureSpace = float3(startScreen.xy * PixelSize, startScreen.z);
+    
+    float3 endScreen = endHScreen.xyz * endK;
+    float3 endScreenTextureSpace = float3(endScreen.xy * PixelSize, endScreen.z);
+    float3 reflectDirTextureSpace = normalize(endScreenTextureSpace - startScreenTextureSpace);
+    
+    
+    
+    float outMaxDistance = reflectDirTextureSpace.x >= 0 ? (1 - startScreenTextureSpace.x) / reflectDirTextureSpace.x : -startScreenTextureSpace.x / reflectDirTextureSpace.x;
+    outMaxDistance = min(outMaxDistance, reflectDirTextureSpace.y < 0 ? (-startScreenTextureSpace.y / reflectDirTextureSpace.y) : ((1 - startScreenTextureSpace.y) / reflectDirTextureSpace.y));
+    outMaxDistance = min(outMaxDistance, reflectDirTextureSpace.z < 0 ? (-startScreenTextureSpace.z / reflectDirTextureSpace.z) : ((1 - startScreenTextureSpace.z) / reflectDirTextureSpace.z));
+ 
+    
+ /*   float4 rayPosInTS = float4(startScreenTextureSpace.xyz + dp, 0);
+    float4 vRayDirInTS = float4(dp.xyz, 0);
+    float4 rayStartPos = rayPosInTS;*/
+  
+    int maxLevel = 5;
+    float2 crossStep = float2(reflectDirTextureSpace.x >= 0 ? 1 : -1, reflectDirTextureSpace.y >= 0 ? 1 : -1);
+    float2 crossOffset = crossStep / (1.0 / (PixelSize.xy)) / 128;
+    crossStep = saturate(crossStep);
+        
+    float3 ray = startScreenTextureSpace.xyz;
+    float minZ = ray.z;
+    float maxZ = ray.z + reflectDirTextureSpace.z * outMaxDistance;
+    
+    float deltaZ = (maxZ - minZ);
+
+    float3 o = ray;
+    float3 d = reflectDirTextureSpace * outMaxDistance;
+    
+    
+    int startLevel = 1;
+    int stopLevel = 0;
+    
+    
+    float2 startCellCount = GetCellCount(1.0 / (PixelSize.xy), startLevel);
+	
+    float2 rayCell = GetCell(ray.xy, startCellCount);
+    ray = IntersectCellBoundary(o, d, rayCell, startCellCount, crossStep, crossOffset);
+    
+    int level = startLevel;
+    uint iter = 0;
+    bool isBackwardRay = reflectDirTextureSpace.z < 0;
+    float rayDir = isBackwardRay ? -1 : 1;
+    bool isIntersecting = false;
+    [loop]
+    while (level >= stopLevel && ray.z * rayDir <= maxZ * rayDir && iter < 45)
+    {
+        
+        float2 cellCount = GetCellCount(1.0 / (PixelSize.xy),level);
+         float2 oldCellIdx = GetCell(ray.xy, cellCount);
+        
+        float cell_minZ = GetMinimumDepthPlane((oldCellIdx + 0.5f) / cellCount, level);
+        
+        float3 tmpRay = ((cell_minZ > ray.z) && !isBackwardRay) ? IntersectDepthPlane(o, d,(cell_minZ - minZ) / deltaZ) : ray;
+        
+         float2 newCellIdx = GetCell(tmpRay.xy, cellCount);
+        
+        float thickness = 0;
+        
+        if (level == 0)
+        {
+            thickness = abs(ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f)
+             - ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f));
+
+        }
+        else
+        {
+            thickness = 0;
+        }
+        
+        bool crossed = (isBackwardRay && (cell_minZ > ray.z))  || CrossedCellBoundary(oldCellIdx, newCellIdx);
+      
+        if (crossed == true)
+        {
+            ray = IntersectCellBoundary(o, d, oldCellIdx, cellCount, crossStep, crossOffset);
+            level = min((float) maxLevel, level + 1.0f);
+         
+
+        }
+        else
+        {
+            ray = tmpRay;
+            level = level - 1;
+          
+
+        }
+      [branch]
+        if (ray.x < 0 || ray.y < 0 || ray.x > 1 || ray.y > 1)
+        {
+            isIntersecting = false;
+            break;
+        }
+         
+        
+        if (level <= 0 )
+        {
+            float rayZLinear = ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f);
+            float cellMinZLinear = ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f);
+            
+            if (thickness < 0.2 && rayZLinear > cellMinZLinear - 0.02&&rayZLinear<900.0f&&cellMinZLinear<900.0f)
+            {
+                isIntersecting = true;
+            }
+            else
+            {
+                isIntersecting = false;
+            }
+          
+        }
+        ++iter;
+    }
+    float2 uv = ray.xy;
+    
+    float3 R = reflect(-V, normal);
+    R = normalize(R);
+    if (isIntersecting == true)
+    {
+        float3 lum = LumTex.Sample(defaultSampler, uv.xy).xyz;
+           
+        float3 specular = lum * (F * brdf.x + brdf.y);
+         
+        result = specular;
+        finalColor += result;
+
+    }
+    else
+    {
+        const float MAX_REFLECTION_LOD = 4.0;
+        float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+         //   float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+        float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
+    
+        finalColor += specularEnv;
+
+    }
+    
+   
+    
+  //  finalColor /= 1;
+    finalColor = lerp(finalColor, prevColor, 0.75);
+   
+        return float4(finalColor.xyz, 1);
+   
+   
+}
+
+
 technique SSR
 {
 	pass P0
 	{
 		VertexShader = compile VS_SHADERMODEL MainVS();
-		PixelShader = compile PS_SHADERMODEL MainPS();
-	}
+        PixelShader = compile PS_SHADERMODEL MainPSRealHiZ();
+    }
 };

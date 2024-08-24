@@ -1,41 +1,37 @@
 ﻿using Microsoft.Xna.Framework;
-using monogameMinecraftShared.Animations;
-using monogameMinecraftShared.Core;
-using monogameMinecraftShared.Physics;
-using monogameMinecraftShared.Rendering;
-using monogameMinecraftShared.Updateables;
-using monogameMinecraftShared.World;
-using monogameMinecraftShared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MessagePack;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.World;
-using EntityData = monogameMinecraftNetworking.Data.EntityData;
+using monogameMinecraftShared.Core;
+using monogameMinecraftShared.Physics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using MessagePack;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
 
 namespace monogameMinecraftNetworking.Updateables
 {
-    public class ServerSideZombieEntityBeh:ServerSideEntityBeh
+    public class ServerSidePigEntityBeh : ServerSideEntityBeh
     {
-        public ServerSideZombieEntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, string entityID, float entityHealth, bool isEntityHurt,int worldID, IMultiplayerServer server) : base(position, rotationX, rotationY, rotationZ, 0, entityID, entityHealth, isEntityHurt,worldID, server)
+        public ServerSidePigEntityBeh(Vector3 position, float rotationX, float rotationY, float rotationZ, string entityID, float entityHealth, bool isEntityHurt, int worldID, IMultiplayerServer server) : base(position, rotationX, rotationY, rotationZ, 1, entityID, entityHealth, isEntityHurt, worldID, server)
         {
             this.position = position;
             this.rotationX = rotationX;
             this.rotationY = rotationY;
             this.rotationZ = rotationZ;
-            typeID = 0;
+            typeID = 1;
             this.entityID = entityID;
             this.entityHealth = entityHealth;
             this.isEntityHurt = isEntityHurt;
             this.server = server;
             isEntityDying = false;
-            this.curWorldID=worldID;
-            entitySize = new Vector3(0.6f, 1.8f, 0.6f);
+            this.curWorldID = worldID;
+            entitySize = new Vector3(0.8f, 0.8f, 0.8f);
             InitBounds();
             ServerSideEntityManager.worldEntities.Add(this);
 
@@ -44,7 +40,7 @@ namespace monogameMinecraftNetworking.Updateables
         public Vector3 lastPos;
 
         public Vector3 headRot;
-
+        public Vector3 bodyRot;
 
         public bool hasReachedCurStep = false;
         public bool isPathfindingNeeded = false;
@@ -52,15 +48,16 @@ namespace monogameMinecraftNetworking.Updateables
         public float timeSpentToNextStep = 0f;
 
         public float timeInUnloadedChunks = 0f;
+        public Vector3 secondaryTargetPos;
         public override EntityData ToEntityData()
         {
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, headRot.X, headRot.Y, headRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying,Float4Data.ToBytes(new Float4Data(bodyQuat.X,bodyQuat.Y,bodyQuat.Z,bodyQuat.W)));
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, bodyRot.X, bodyRot.Y, bodyRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float3Data.ToBytes(new Float3Data(headRot.X, headRot.Y, headRot.Z)));
             return tmpData;
         }
         public override void SaveSingleEntity()
         {
 
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, rotationX, rotationY, rotationZ, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float4Data.ToBytes(new Float4Data(bodyQuat.X, bodyQuat.Y, bodyQuat.Z, bodyQuat.W)));
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, bodyRot.X, bodyRot.Y, bodyRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float3Data.ToBytes(new Float3Data(headRot.X, headRot.Y, headRot.Z)));
 
             foreach (EntityData ed in ServerSideEntityManager.entityDataReadFromDisk)
             {
@@ -76,8 +73,8 @@ namespace monogameMinecraftNetworking.Updateables
         }
         public Vector3 FindClosestPlayerPos(IMultiplayerServer server)
         {
-         
-            Vector3 returnVal= new Vector3(float.MaxValue);
+
+            Vector3 returnVal = new Vector3(float.MaxValue);
             foreach (var client in server.remoteClients)
             {
                 if (client.isUserDataLoaded)
@@ -101,20 +98,34 @@ namespace monogameMinecraftNetworking.Updateables
             }
             return returnVal;
         }
-        Random rand = new Random();
+        Random rand= new Random();
+        public Vector3 FindRandomLandingPos()
+        {
+            Vector2 landingPos = new Vector2((rand.NextSingle() * 2 - 1) * 20f+position.X, (rand.NextSingle() * 2 - 1) * 20f + position.Z);
+            Vector3 returnVal = new Vector3(landingPos.X,ServerSideChunkHelper.GetChunkLandingPointColliding(landingPos.X, landingPos.Y,curWorldID)+0.5f,landingPos.Y);
+            Debug.WriteLine(ServerSideChunkHelper.GetBlock(returnVal,curWorldID));
+
+            if (returnVal.X > float.MaxValue * 0.9f || returnVal.Y > float.MaxValue * 0.9f ||
+                returnVal.Z > float.MaxValue * 0.9f)
+            {
+                return position;
+            }
+            return returnVal;
+        }
         public override void OnFixedUpdate(float deltaTime)
         {
             if (rand.NextSingle() >= 1 - deltaTime * 0.1f)
             {
-                NetworkingUtility.EnqueueTodoList(server.serverTodoLists, (null, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(position.X, position.Y, position.Z, "0say")))));
+                NetworkingUtility.EnqueueTodoList(server.serverTodoLists,(null,new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,MessagePackSerializer.Serialize(new EntitySoundBroadcastData(position.X,position.Y,position.Z,"1say")))));
             }
-            if (isPathfindingNeeded == true)
+                if (isPathfindingNeeded == true)
             {
                 //  Debug.WriteLine("try find path");
                 //      bool isNewPathValid=false;
                 //      ServerSideEntityManager.pathfindingManager.GetThreeDimensionalMapPath(ServerSideChunkHelper.Vec3ToBlockPos(position+new Vector3(0f,0.1f,0f)), ServerSideChunkHelper.Vec3ToBlockPos(game.gamePlayer.position+new Vector3(0,-0.5f,0f)),
                 //          out isNewPathValid,ref entityPath);
-                ServerSideEntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ServerSideChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ServerSideChunkHelper.Vec3ToBlockPos(FindClosestPlayerPos(server) ), this);
+              //  Debug.WriteLine(ServerSideChunkHelper.Vec3ToBlockPos(FindRandomLandingPos()));
+                ServerSideEntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ServerSideChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ServerSideChunkHelper.Vec3ToBlockPos(FindRandomLandingPos()), this);
                 /*         if (entityPath == null)
                          {
                              isNewPathValid = false;
@@ -129,7 +140,7 @@ namespace monogameMinecraftNetworking.Updateables
             {
                 entityDyingTime += deltaTime;
                 isEntityHurt = true;
-              
+
 
                 if (entityDyingTime >= 1f && isEntityDying)
                 {
@@ -139,15 +150,27 @@ namespace monogameMinecraftNetworking.Updateables
                 }
                 return;
             }
-            
+
             entityLifetime += deltaTime;
             if (!isPathValid)
             {
-                targetPos = FindClosestPlayerPos(server);
+                isPathfindingNeeded = true;
+                targetPos = position;
+                
+                secondaryTargetPos = FindClosestPlayerPos(server)+new Vector3(0f,1f,0f);
+                if ((secondaryTargetPos - position).Length() > 10f)
+                {
+                    secondaryTargetPos = targetPos + new Vector3(0f, 1f, 0f);
+                }
             }
             else
             {
                 targetPos = entityPath.steps[entityPath.curStep];
+                secondaryTargetPos = FindClosestPlayerPos(server) + new Vector3(0f, 1f, 0f);
+                if ((secondaryTargetPos - position).Length() > 10f)
+                {
+                    secondaryTargetPos = targetPos + new Vector3(0f, 1f, 0f);
+                }
             }
 
             entityMotionVec = Vector3.Lerp(entityMotionVec, Vector3.Zero, 3f * deltaTime);
@@ -157,7 +180,7 @@ namespace monogameMinecraftNetworking.Updateables
             lastPos = position;
             Vector3Int intPos = Vector3Int.FloorToIntVec3(position);
 
-            curChunk = ServerSideChunkHelper.GetChunk(ServerSideChunkHelper.Vec3ToChunkPos(position),curWorldID);
+            curChunk = ServerSideChunkHelper.GetChunk(ServerSideChunkHelper.Vec3ToChunkPos(position), curWorldID);
             if (curChunk == null)
             {
                 timeInUnloadedChunks += deltaTime;
@@ -175,17 +198,17 @@ namespace monogameMinecraftNetworking.Updateables
             if (curChunk != null)
             {
 
-             
-                    isNeededUpdateBlock = true;
-                
+
+                isNeededUpdateBlock = true;
+
             }
 
-      /*      if (curChunk != null)
-            {
-                lastChunkIsReadyToRender = curChunk.isReadyToRender;
-            }
+            /*      if (curChunk != null)
+                  {
+                      lastChunkIsReadyToRender = curChunk.isReadyToRender;
+                  }
 
-            */
+                  */
 
 
 
@@ -200,9 +223,9 @@ namespace monogameMinecraftNetworking.Updateables
                 isNeededUpdateBlock = false;
             }
             GetEntitiesAround();
-           
 
-            if (Vector3.Distance(position, targetPos) < 0.6f || BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds, targetPos))
+
+            if (Vector3.Distance(position, targetPos) < 1.1f || BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds, targetPos))
             {
 
                 hasReachedCurStep = true;
@@ -212,7 +235,7 @@ namespace monogameMinecraftNetworking.Updateables
             else
             {
 
-              
+
 
                 hasReachedCurStep = false;
                 timeSpentToNextStep += deltaTime;
@@ -222,32 +245,54 @@ namespace monogameMinecraftNetworking.Updateables
             float movePosY = movePos.Y;
             if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
             {
-                movePos = new Vector3(0.00f, 0.001f, 0.00f);
+                movePos = new Vector3(0.00f, 0.000f, 0.001f);
             }
 
-            Vector3 lookPos = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y - 1f,
-                targetPos.Z - position.Z);
-            lookPos.Normalize();
+            Vector3 lookDir = new Vector3(secondaryTargetPos.X - position.X, secondaryTargetPos.Y - position.Y - 1f,
+                secondaryTargetPos.Z - position.Z);
+            lookDir.Normalize();
             Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
 
             entityVec = movePosN;
             //              Debug.WriteLine(movePos);
             if (isGround != false || !(entityGravity < 0f))
             {
-                Vector3 entityRot = LookRotation(lookPos);
-                headRot.X = entityRot.X;
-                headRot.Y = entityRot.Y;
-                headRot.Z = entityRot.Z;
+                Vector3 entityRot = LookRotation(lookDir);
+                Vector3 entityPrimaryRot=LookRotation(movePos);
+
+
+                //     Debug.WriteLine(headRot.Y);
+
+                bodyRot.Y = entityPrimaryRot.Y;
+                Vector3 forwardDir = Vector3.Normalize(movePosN) ;
+                
+                if (Vector3.Dot(forwardDir, lookDir) > -0.4f)
+                {
+                    headRot.X = entityRot.X;
+                    headRot.Y = entityRot.Y - bodyRot.Y;
+                    headRot.Z = entityRot.Z;
+                }
+                else
+                {
+                    headRot.X = 0f;
+                    headRot.Y = 0f;
+                    headRot.Z =0f;
+                }
+              
+                //       headRot.Y = MathHelper.Clamp(headRot.Y, -90f, 90f);
+
+
+
             }
             else
             {
             }
 
-            
-            Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), 0, 0);
-            bodyQuat =Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
 
+        //    Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), 0, 0);
+          //  bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
 
+      //      Debug.WriteLine("is pathfinding needed:"+isPathfindingNeeded);
             if (hasReachedCurStep && isPathValid)
             {
                 if (entityPath.curStep < entityPath.steps.Count - 1)
@@ -319,13 +364,13 @@ namespace monogameMinecraftNetworking.Updateables
                 }
 
 
-               
 
 
 
 
 
-            } 
+
+            }
             if (entityMotionVec.Length() < 2f)
             {
                 EntityMove(entityVec.X, 0, entityVec.Z);

@@ -18,16 +18,27 @@ namespace monogameMinecraftNetworking.Data
         public float noiseGeneratorFrequency;
         [Key(3)]
         public float frequentNoiseGeneratorFrequency;
+
         [Key(4)]
+        public int noiseGeneratorFractals;
+        [Key(5)]
+        public int biomeNoiseGeneratorFractals;
+
+        [Key(6)]
+        public int frequentNoiseGeneratorFractals;
+        [Key(7)]
         public int worldID;
         public WorldGenParamsData(int worldGenType, float biomeNoiseGeneratorFrequency, float noiseGeneratorFrequency,
-            float frequentNoiseGeneratorFrequency,int worldID)
+            float frequentNoiseGeneratorFrequency,int noiseGeneratorFractals,int biomeNoiseGeneratorFractals, int frequentNoiseGeneratorFractals, int worldID)
         {
             this.worldGenType= worldGenType;
             this.frequentNoiseGeneratorFrequency= frequentNoiseGeneratorFrequency;
             this.noiseGeneratorFrequency= noiseGeneratorFrequency;
             this.biomeNoiseGeneratorFrequency= biomeNoiseGeneratorFrequency;
             this.worldID= worldID;
+            this.biomeNoiseGeneratorFractals= biomeNoiseGeneratorFractals;
+            this.frequentNoiseGeneratorFractals= frequentNoiseGeneratorFractals;
+            this.noiseGeneratorFractals= noiseGeneratorFractals;
         }
     }
 }

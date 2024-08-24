@@ -223,7 +223,7 @@ namespace monogameMinecraftNetworking.Client.World
                     foreach (ClientSideChunk c in chunks.Values)
                     {
 
-                        if ((MathF.Abs(c.chunkPos.x - player.position.X) > (128 + Chunk.chunkWidth) || MathF.Abs(c.chunkPos.y - player.position.Z) > (128 + Chunk.chunkWidth))
+                        if ((MathF.Abs(c.chunkPos.x - player.position.X) > (128 + Chunk.chunkWidth) || MathF.Abs(c.chunkPos.y - player.position.Z) > (128 + Chunk.chunkWidth ))
                             && (c.isReadyToRender == true && c.isTaskCompleted == true) && c.usedByOthersCount <= 0
                             /*    && (c.Value.leftChunk==null||(c.Value.leftChunk!=null&&c.Value.leftChunk.isTaskCompleted == true))
                                 && (c.Value.rightChunk == null || (c.Value.rightChunk != null && c.Value.rightChunk.isTaskCompleted == true))
@@ -324,23 +324,25 @@ namespace monogameMinecraftNetworking.Client.World
         public Thread tryRemoveChunksThread;
         public Action actionOnSwitchedWorld;
 
-        public bool isWorldGenParamsInited=false;
-        public void SetupNoiseGenerators(float bngf, float ngf, float fngf)
+        public bool isWorldGenParamsInited=false; 
+        /*public void SetupNoiseGenerators(float bngf, float ngf, float fngf)
         {
             genParamsData = new WorldGenParamsData(worldGenType, bngf, ngf, fngf, worldID);
             noiseGenerator.SetFrequency(genParamsData.noiseGeneratorFrequency);
 
             frequentNoiseGenerator.SetFrequency(genParamsData.frequentNoiseGeneratorFrequency);
             biomeNoiseGenerator.SetFrequency(genParamsData.biomeNoiseGeneratorFrequency);
-        }
+        }*/
         public void SetupNoiseGenerators()
         {
             worldGenType = genParamsData.worldGenType;
 
             noiseGenerator.SetFrequency(genParamsData.noiseGeneratorFrequency);
-
+            noiseGenerator.SetFractalOctaves(genParamsData.noiseGeneratorFractals);
             frequentNoiseGenerator.SetFrequency(genParamsData.frequentNoiseGeneratorFrequency);
+            frequentNoiseGenerator.SetFractalOctaves(genParamsData.frequentNoiseGeneratorFractals);
             biomeNoiseGenerator.SetFrequency(genParamsData.biomeNoiseGeneratorFrequency);
+            biomeNoiseGenerator.SetFractalOctaves(genParamsData.biomeNoiseGeneratorFractals);
         }
         public void InitWorld(ClientGameBase game)
         {

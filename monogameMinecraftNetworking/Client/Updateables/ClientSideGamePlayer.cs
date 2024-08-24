@@ -235,6 +235,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     case 0:
                         bounds=new BoundingBox(new Vector3(entity.data.posX-0.3f,entity.data.posY,entity.data.posZ-0.3f), new Vector3(entity.data.posX + 0.3f, entity.data.posY+1.8f, entity.data.posZ + 0.3f));
                         break;
+                    case 1:
+                        bounds = new BoundingBox(new Vector3(entity.data.posX - 0.55f, entity.data.posY, entity.data.posZ - 0.55f), new Vector3(entity.data.posX + 0.55f, entity.data.posY +0.8f, entity.data.posZ + 0.55f));
+                        break;
                     default:
                         break;
                 }

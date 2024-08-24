@@ -44,10 +44,10 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float4 depth = float4(
-    tex2D(copyTexture, input.TexCoord.xy + float2(0.9, 0.9) * PixelSize).x > 0.01 ? tex2D(copyTexture, input.TexCoord.xy + float2(0.9, 0.9) * PixelSize).x : 1000,
-     tex2D(copyTexture, input.TexCoord.xy + float2(-0.9, -0.9) * PixelSize).x > 0.01 ? tex2D(copyTexture, input.TexCoord.xy + float2(-0.9, -0.9) * PixelSize).x : 1000,
-     tex2D(copyTexture, input.TexCoord.xy + float2(-0.9, 0.9) * PixelSize).x > 0.01 ? tex2D(copyTexture, input.TexCoord.xy + float2(-0.9, 0.9) * PixelSize).x : 1000,
-     tex2D(copyTexture, input.TexCoord.xy + float2(0.9, -0.9) * PixelSize).x > 0.01 ? tex2D(copyTexture, input.TexCoord.xy + float2(0.9, -0.9) * PixelSize).x : 1000);
+        tex2D(copyTexture, input.TexCoord.xy + float2(0.5, 0.5) * PixelSize).x > 0.1 ? tex2D(copyTexture, input.TexCoord.xy + float2(0.5, 0.5) * PixelSize).x : 1000,
+        tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, -0.5) * PixelSize).x > 0.1 ? tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, -0.5) * PixelSize).x : 1000,
+        tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, 0.5) * PixelSize).x > 0.1 ? tex2D(copyTexture, input.TexCoord.xy + float2(-0.5, 0.5) * PixelSize).x : 1000,
+        tex2D(copyTexture, input.TexCoord.xy + float2(0.5, -0.5) * PixelSize).x > 0.1 ? tex2D(copyTexture, input.TexCoord.xy + float2(0.5, -0.5) * PixelSize).x : 1000);
    
     return float4(min(min(depth.x, depth.y), min(depth.z, depth.w)).x, 0, 0, 1);
 }

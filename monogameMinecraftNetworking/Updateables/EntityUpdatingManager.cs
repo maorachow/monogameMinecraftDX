@@ -32,7 +32,7 @@ namespace monogameMinecraftNetworking.Updateables
                     return;
                 }
                 Thread.Sleep(50);
-                ServerSideEntityManager.TrySpawnNewZombie(server, 0.05f);
+                ServerSideEntityManager.TrySpawnNewEntity(server, 0.05f);
                 ServerSideEntityManager.UpdateAllEntity(0.05f);
                 ServerSideEntityManager.FixedUpdateAllEntity(0.05f);
                 ServerSideEntityManager.UpdateCurEntityData();

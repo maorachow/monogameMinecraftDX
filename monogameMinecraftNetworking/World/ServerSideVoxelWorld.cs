@@ -221,20 +221,25 @@ namespace monogameMinecraftNetworking.World
 
         }
 
-        public void SetupNoiseGenerators(float bngf,float ngf,float fngf)
+        public void SetupNoiseGenerators(float bngf,float ngf,float fngf,int ngfr,int bngfr,int fngfr)
         {
-            genParamsData = new WorldGenParamsData(worldGenType, bngf, ngf, fngf,worldID);
+            genParamsData = new WorldGenParamsData(worldGenType, bngf, ngf, fngf, ngfr,bngfr,fngfr,worldID);
             noiseGenerator.SetFrequency(genParamsData.noiseGeneratorFrequency);
-
+            noiseGenerator.SetFractalOctaves(genParamsData.noiseGeneratorFractals);
+           
             frequentNoiseGenerator.SetFrequency(genParamsData.frequentNoiseGeneratorFrequency);
+            frequentNoiseGenerator.SetFractalOctaves(genParamsData.frequentNoiseGeneratorFractals);
             biomeNoiseGenerator.SetFrequency(genParamsData.biomeNoiseGeneratorFrequency);
+         
+            biomeNoiseGenerator.SetFractalOctaves(genParamsData.biomeNoiseGeneratorFractals);
+            
         }
         public void InitWorld(IMultiplayerServer server)
         {
 
             Console.WriteLine("initializing world ID:" + worldID);
         
-            SetupNoiseGenerators(0.002f, 0.01f, 0.01f);
+            SetupNoiseGenerators(0.002f, 0.01f, 0.01f,5,5,3);
 
             
 

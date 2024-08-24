@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 //using monogameMinecraftDX.Updateables;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
@@ -39,13 +40,19 @@ namespace monogameMinecraftShared.Rendering
             }
             SetCameraFrustum(player.cam, contactShadowEffect);
             var cam = player.cam;
+            int width = gBufferRenderer. renderTargetProjectionDepth.Width;
+            int height = gBufferRenderer.renderTargetProjectionDepth.Height;
             if (contactShadowEffect.Parameters["ProjectionDepthTex"] != null) { contactShadowEffect.Parameters["ProjectionDepthTex"].SetValue(gBufferRenderer.renderTargetProjectionDepth); }
             if (contactShadowEffect.Parameters["NoiseTex"] != null) { contactShadowEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
             if (contactShadowEffect.Parameters["NormalTex"] != null) { contactShadowEffect.Parameters["NormalTex"].SetValue(gBufferRenderer.renderTargetNormalWS); }
+            contactShadowEffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f / width, 1f / height));
             //   if (contactShadowEffect.Parameters["PositionWSTex"] != null) { contactShadowEffect.Parameters["PositionWSTex"].SetValue(gBufferRenderer.renderTargetPositionWS); }
             if (contactShadowEffect.Parameters["View"] != null) { contactShadowEffect.Parameters["View"].SetValue(cam.viewMatrix); }
+            if (contactShadowEffect.Parameters["ViewOrigin"] != null) { contactShadowEffect.Parameters["ViewOrigin"].SetValue(cam.viewMatrixOrigin); }
+          
             if (contactShadowEffect.Parameters["CameraPos"] != null) { contactShadowEffect.Parameters["CameraPos"].SetValue(cam.position); }
             if (contactShadowEffect.Parameters["ViewProjection"] != null) { contactShadowEffect.Parameters["ViewProjection"].SetValue(cam.viewMatrix * cam.projectionMatrix); }
+            if (contactShadowEffect.Parameters["Projection"] != null) { contactShadowEffect.Parameters["Projection"].SetValue(cam.projectionMatrix); }
             if (contactShadowEffect.Parameters["LightDir"] != null) { contactShadowEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir); }
             RenderQuad(device, contactShadowRenderTarget, contactShadowEffect);
         }

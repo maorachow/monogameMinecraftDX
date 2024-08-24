@@ -34,14 +34,17 @@ sampler2D noiseTex = sampler_state
 sampler gProjectionDepth = sampler_state
 {
     Texture = (ProjectionDepthTex);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
+    AddressU = Border;
+    AddressV = Border;
     MagFilter = POINT;
     MinFilter = POINT;
     Mipfilter = NONE;
 };
 matrix View;
+matrix Projection;
 matrix ViewProjection;
+float2 PixelSize;
+matrix ViewOrigin;
 float3 LightDir;
 struct VertexShaderInput
 {
@@ -55,13 +58,25 @@ struct VertexShaderOutput
     float2 TexCoords : TEXCOORD0;
 };
 
+ 
 
+ 
 float4 ProjectionParams2;
 float4 CameraViewTopLeftCorner;
 float4 CameraViewXExtent;
 float4 CameraViewYExtent;
 
 float3 CameraPos;
+
+
+float4 TransformViewToHScreen(float3 vpos, float2 screenSize)
+{
+    float4 cpos = mul(float4(vpos, 1), Projection);
+    cpos.xy = float2(cpos.x, -cpos.y) * 0.5 + 0.5 * cpos.w; //
+    cpos.xy *= screenSize;
+    return cpos;
+}
+
 float3 ReconstructViewPos(float2 uv, float linearEyeDepth)
 {
   //  uv.y = 1.0 - uv.y;
@@ -113,7 +128,12 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 	return output;
 }
-
+void swap(inout float v0, inout float v1)
+{
+    float temp = v0;
+    v0 = v1;
+    v1 = temp;
+}
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 worldPos = ReconstructViewPos(input.TexCoords,tex2D(gProjectionDepth, input.TexCoords).x)+CameraPos;
@@ -129,11 +149,128 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     {
         return float4(1, 1, 1, 1);
     }
-        float3 rayOrigin = worldPos;
-    float noiseValue = tex2D(noiseTex, input.TexCoords*10).r*0.5;
+    float3 rayOrigin = worldPos;
+    float noiseValue = tex2D(noiseTex, input.TexCoords*10).r+0.5;
+    
+    
+    
+    
+    float maxDist = 40.0f;
+   
+
+    float3 viewRDir = normalize(mul(float4(marchDir, 1), ViewOrigin).xyz);
+    
+   // return float4(viewRDir.xyz, 1);
+    float3 viewPosOrigin = mul(float4(rayOrigin, 1), View);
+   
+   
+    float end = viewPosOrigin.z + viewRDir.z * maxDist;
+    if (end > -0.1)
+    {
+     //   return float4(0, 1, 0, 1);
+        maxDist = abs(-0.1 - viewPosOrigin.z) / viewRDir.z;
+    }
+    
+    float3 viewPosEnd = viewPosOrigin + viewRDir * maxDist;
+ //   float4 projPos = mul(float4(viewPosEnd, 1), Projection);
+   // return float4((projPos.xy / projPos.w) * 0.5 + 0.5, 0, 1);
+    float4 startHScreen = TransformViewToHScreen(viewPosOrigin, 1.0 / (PixelSize.xy));
+    float4 endHScreen = TransformViewToHScreen(viewPosEnd, 1.0 / (PixelSize.xy));
+  // return float4((startHScreen.xy / startHScreen.w) * PixelSize, 0, 1);
+    float startK = 1.0 / startHScreen.w;
+    float endK = 1.0 / endHScreen.w;
+    float2 startScreen = startHScreen.xy * startK;
+    float2 endScreen = endHScreen.xy * endK;
+    
+    float3 startQ = viewPosOrigin * startK;
+
+    float3 endQ = viewPosEnd * endK;
+    
+    
+    float2 diff = endScreen - startScreen;
+    bool permute = false;
+    if (abs(diff.x) < abs(diff.y))
+    {
+        permute = true;
+
+        diff = diff.yx;
+        startScreen = startScreen.yx;
+        endScreen = endScreen.yx;
+    }
+    float dir = sign(diff.x);
+    float invdx = dir / diff.x;
+    float2 dp = float2(dir, invdx * diff.y);
+    float3 dq = (endQ - startQ) * invdx;
+    float dk = (endK - startK) * invdx;
+    
+   // return float4(dq.z*10000, 0, 0, 1);
+    dp *= (30 + noiseValue*8) / (-viewPosOrigin.z);
+    dq *= (30 + noiseValue * 8) / (-viewPosOrigin.z);
+    dk *= (30 + noiseValue * 8) / (-viewPosOrigin.z);
+    
+    float rayZMin = viewPosOrigin.z;
+    float rayZMax = viewPosOrigin.z;
+    float preZ = viewPosOrigin.z;
+
+    float2 P = startScreen;
+    float3 Q = startQ;
+    float K = startK;
+    
     
     bool isHit = false;
-    [unroll(8)]
+    int marchingSteps = 0;
+     [loop]
+    for (int i = 0; i < 18; i++)
+    {
+        marchingSteps++;
+        float2 marchPos = P +dp;
+      /*  if (length(marchPos - P) < 1.0)
+        {
+            return float4(1, 1, 0, 1);
+        }*/
+        P += dp;
+        Q += dq;
+        K += dk;
+        
+      
+        rayZMax = (Q.z) / ( K);
+       
+        float2 hitUV = permute ? P.yx : P;
+        hitUV *= PixelSize;
+        if (hitUV.x < 0 || hitUV.x > 1 || hitUV.y < 0 || hitUV.y > 1)
+        {
+            isHit = false;
+           
+            break; // return float4(1, 1, 1, 1);
+        }
+        float sampleDepthM0 = -tex2D(gProjectionDepth, hitUV.xy).x;
+
+    
+      
+        
+        float surfaceDepth = sampleDepthM0;
+        if (-surfaceDepth / 1000 > 0.99 || (surfaceDepth)> 0  || (rayZMax)>0)
+        {
+          
+            isHit = false;
+            
+            break;
+        }
+        
+        bool isBehind = (rayZMax < surfaceDepth);
+        
+     //   float avgTestDepth = (rayZMin + rayZMax) / 2.0f;
+        bool intersecting = isBehind && (abs(rayZMax - surfaceDepth) < 0.1);
+
+        if (intersecting)
+        {
+            isHit = true;
+           
+            break; 
+        }
+
+    }
+  /*  [loop]
     for (int i = 0; i < 8; i++)
     {
         float3 marchPos = rayOrigin + marchDir * (0.1 * (i+0.1 + noiseValue) );
@@ -159,10 +296,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         }
         
         
-    }
+    }*/
 	
     if (isHit == true)
     {
+        
         return float4(0, 0, 0, 1);
     }
     else

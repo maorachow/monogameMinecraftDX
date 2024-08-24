@@ -836,7 +836,7 @@ if (disposed == true)
                     //           Debug.DrawLine(new Vector3(pos.x+(i-1)*8,60f,pos.y+(j-1)*8),new Vector3(pos.x+(i-1)*8,150f,pos.y+(j-1)*8),Color.green,1f);
                     //    if(RandomGenerator3D.GenerateIntFromVec3(new Vector3Int()))
 
-                    biomeMapInter[i, j] = (int)(1f + biomeNoiseGenerator.GetSimplex(pos.x + (i - 1) * 8, pos.y + (j - 1) * 8) * 3f);
+                    biomeMapInter[i, j] = (int)(1f + biomeNoiseGenerator.GetSimplexFractal(pos.x + (i - 1) * 8, pos.y + (j - 1) * 8) * 3f);
                 }
             }//32,32
 
@@ -912,7 +912,7 @@ if (disposed == true)
                     //           Debug.DrawLine(new Vector3(pos.x+(i-1)*8,60f,pos.y+(j-1)*8),new Vector3(pos.x+(i-1)*8,150f,pos.y+(j-1)*8),Color.green,1f);
                     //    if(RandomGenerator3D.GenerateIntFromVec3(new Vector3Int()))
 
-                    heightMap[i, j] = chunkSeaLevel + noiseGenerator.GetSimplex(pos.x + (i - 1) * 8, pos.y + (j - 1) * 8) * 20f + chunkBiomeMap[i, j] * 25f;
+                    heightMap[i, j] = chunkSeaLevel + noiseGenerator.GetSimplexFractal(pos.x + (i - 1) * 8, pos.y + (j - 1) * 8) * 20f + chunkBiomeMap[i, j] * 25f;
                 }
 
             }//32,32
@@ -979,7 +979,7 @@ if (disposed == true)
             float yLerpValue = MathHelper.Lerp(-1, 1, (MathF.Abs(y - chunkSeaLevel)) / 40f);
             float xzLerpValue = MathHelper.Lerp(-1, 1, (new Vector3(x, 0, z).Length() / 384f));
             float xyzLerpValue = MathHelper.Max(xzLerpValue, yLerpValue);
-            float noiseValue = frequentNoiseGenerator.GetSimplex(x, y, z);
+            float noiseValue = frequentNoiseGenerator.GetSimplexFractal(x, y, z);
             if (noiseValue > xyzLerpValue)
             {
                 return 1;
@@ -996,7 +996,7 @@ if (disposed == true)
             float yLerpValue = MathHelper.Lerp(-1, 1, (MathF.Abs(y - chunkSeaLevel)) / 40f);
             float xzLerpValue = MathHelper.Lerp(-1, 1, (new Vector3(x, 0, z).Length() / 384f));
             float xyzLerpValue = MathF.Max(xzLerpValue, yLerpValue);
-            float noiseValue = frequentNoiseGenerator.GetSimplex((int)(x / LODBlockSkipCount) * LODBlockSkipCount, y, (int)(z / LODBlockSkipCount) * LODBlockSkipCount);
+            float noiseValue = frequentNoiseGenerator.GetSimplexFractal((int)(x / LODBlockSkipCount) * LODBlockSkipCount, y, (int)(z / LODBlockSkipCount) * LODBlockSkipCount);
             if (noiseValue > xyzLerpValue)
             {
                 return 1;

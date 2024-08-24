@@ -45,15 +45,12 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
 	
-   /* if ((tex2D(copyTexture, input.TexCoord.xy).a) < 0.0001 && useBkgColor)
+    if ((length(tex2D(copyTexture, input.TexCoord.xy).xyz)) < 0.0001 && useBkgColor)
     {
         
         return float4(backgroundCol.xyz, 0);
-    }*/
-   /* if ((tex2D(copyTexture, input.TexCoord.xy).a) < 0.0001)
-    {
-        discard;
-    }*/
+    }
+ 
     return float4(tex2D(copyTexture, input.TexCoord.xy).xyzw);
 }
 

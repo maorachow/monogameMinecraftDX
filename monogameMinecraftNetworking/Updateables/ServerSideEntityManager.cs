@@ -52,9 +52,17 @@ namespace monogameMinecraftNetworking.Updateables
               
             }
         }
-        public static void TrySpawnNewZombie(IMultiplayerServer game, float deltaTime)
+        public static void TrySpawnNewEntity(IMultiplayerServer game, float deltaTime)
         {
-            if (randomGenerator.NextSingle() >= 1 - deltaTime * 0.15f && worldEntities.Count < 35)
+            int pigEntityCount = 0;
+            foreach (var item in worldEntities)
+            {
+                if (item.typeID == 1)
+                {
+                    pigEntityCount++;
+                }
+            }
+            if (randomGenerator.NextSingle() >= 1 - deltaTime * 0.15f && worldEntities.Count < 20)
             {
                 foreach (var client in game.remoteClients)
                 {
@@ -71,6 +79,25 @@ namespace monogameMinecraftNetworking.Updateables
                     }
                 }
              
+
+            }
+            if (randomGenerator.NextSingle() >= 1 - deltaTime * 0.15f && pigEntityCount < 15)
+            {
+                foreach (var client in game.remoteClients)
+                {
+
+                    if (client.isUserDataLoaded == true)
+                    {
+                        if (client.curUserData.curWorldID == 0)
+                        {
+                            Vector2 randSpawnPos = new Vector2(client.curUserData.posX + (randomGenerator.NextSingle() - 0.5f) * 60f, client.curUserData.posZ + (randomGenerator.NextSingle() - 0.5f) * 60f);
+                            Vector3 spawnPos = new Vector3(randSpawnPos.X, ServerSideChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y, client.curUserData.curWorldID), randSpawnPos.Y);
+                            SpawnNewEntity(spawnPos + new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 1, game, client.curUserData.curWorldID);
+                        }
+
+                    }
+                }
+
 
             }
         }
@@ -203,6 +230,9 @@ namespace monogameMinecraftNetworking.Updateables
                     ServerSideZombieEntityBeh tmp = new ServerSideZombieEntityBeh(new Vector3(position.X, position.Y, position.Z), rotationX, rotationY, rotationZ, Guid.NewGuid().ToString("N"),20f, false,worldID, server);
                     //   ZombieEntityBeh tmp = new ZombieEntityBeh(position, rotationX, rotationY, rotationZ, Guid.NewGuid().ToString("N"), 20f, false, game);
 
+                    break;
+                case 1:
+                    ServerSidePigEntityBeh tmp1 = new ServerSidePigEntityBeh(new Vector3(position.X, position.Y, position.Z), rotationX, rotationY, rotationZ, Guid.NewGuid().ToString("N"), 20f, false, worldID, server);
                     break;
                 default:
                     break;
