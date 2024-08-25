@@ -82,7 +82,7 @@ namespace monogameMinecraftShared.Rendering
         {
 
             gBufferEffect.Parameters["blockTex"].SetValue(atlas);
-        //    gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
+            gBufferEffect.Parameters["normalTex"]?.SetValue(atlasNormal);
             gBufferEffect.Parameters["merTex"]?.SetValue(atlasMER);
             gBufferEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
             gBufferEffect.Parameters["Projection"].SetValue(player.cam.projectionMatrix);

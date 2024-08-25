@@ -71,6 +71,7 @@ namespace monogameMinecraftShared.Rendering
             SSREffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSREffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
             SSREffect.Parameters["PixelSize"]?.SetValue(new Vector2(1f / width, 1f / height));
+            SSREffect.Parameters["TextureSize"]?.SetValue(new Vector2(width,height));
             SSREffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
             SSREffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
             SSREffect.Parameters["ProjectionDepthTexMip2"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[2]);

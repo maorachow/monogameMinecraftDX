@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 //using monogameMinecraftDX.Updateables;
 using monogameMinecraftShared.Updateables;
@@ -54,6 +55,9 @@ namespace monogameMinecraftShared.Rendering
             }
 
             SetCameraFrustum(player.cam, SSIDEffect);
+            float width = hiZBufferRenderer.hiZBufferTargetMips[0].Width;
+            float height= hiZBufferRenderer.hiZBufferTargetMips[0].Height;
+            Debug.WriteLine("width: "+width+"height: "+height);
             SSIDEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSIDEffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);
@@ -69,10 +73,12 @@ namespace monogameMinecraftShared.Rendering
             SSIDEffect.Parameters["PrevSSIDTexture"]?.SetValue(renderTargetSSIDPrev);
             SSIDEffect.Parameters["MotionVectorTex"]?.SetValue(motionVectorRenderer.renderTargetMotionVector);
             SSIDEffect.Parameters["GameTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+            SSIDEffect.Parameters["PixelSize"]?.SetValue(new Vector2(1.0f/width,1.0f/height));
             //    SSIDEffect.Parameters["PositionWSTex"]?.SetValue(gBufferRenderer.renderTargetPositionWS);
             SSIDEffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
             SSIDEffect.Parameters["NormalTex"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
             SSIDEffect.Parameters["ViewProjection"]?.SetValue(player.cam.viewMatrix * player.cam.projectionMatrix);
+            SSIDEffect.Parameters["Projection"]?.SetValue( player.cam.projectionMatrix);
             SSIDEffect.Parameters["AlbedoTex"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             SSIDEffect.Parameters["LumTex"]?.SetValue(deferredShadingRenderer.renderTargetLum);
             SSIDEffect.Parameters["PI"]?.SetValue(3.1415926f);
@@ -80,7 +86,8 @@ namespace monogameMinecraftShared.Rendering
             //    SSIDEffect.Parameters["roughness"]?.SetValue(GlobalMaterialParamsManager.instance.roughness);
             if (SSIDEffect.Parameters["NoiseTex"] != null) { SSIDEffect.Parameters["NoiseTex"].SetValue(RandomTextureGenerator.instance.randomTex); }
 
-            SSIDEffect.Parameters["View"].SetValue(player.cam.viewMatrix);
+            SSIDEffect.Parameters["View"]?.SetValue(player.cam.viewMatrix);
+            SSIDEffect.Parameters["ViewOrigin"]?.SetValue(player.cam.viewMatrixOrigin);
             SSIDEffect.Parameters["CameraPos"].SetValue(player.cam.position);
             RenderQuad(device, renderTargetSSID, SSIDEffect, false, false);
             textureCopyEffect.Parameters["backgroundCol"]?.SetValue(new Vector3(0f, 0f, 0f));

@@ -204,9 +204,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float dk = (endK - startK) * invdx;
     
    // return float4(dq.z*10000, 0, 0, 1);
-    dp *= (30 + noiseValue*8) / (-viewPosOrigin.z);
-    dq *= (30 + noiseValue * 8) / (-viewPosOrigin.z);
-    dk *= (30 + noiseValue * 8) / (-viewPosOrigin.z);
+    dp *= (25 + noiseValue*8) / (-viewPosOrigin.z);
+    dq *= (25 + noiseValue * 8) / (-viewPosOrigin.z);
+    dk *= (25 + noiseValue * 8) / (-viewPosOrigin.z);
     
     float rayZMin = viewPosOrigin.z;
     float rayZMax = viewPosOrigin.z;
@@ -220,7 +220,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     bool isHit = false;
     int marchingSteps = 0;
      [loop]
-    for (int i = 0; i < 18; i++)
+    for (int i = 0; i < 19; i++)
     {
         marchingSteps++;
         float2 marchPos = P +dp;
@@ -249,7 +249,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
       
         
         float surfaceDepth = sampleDepthM0;
-        if (-surfaceDepth / 1000 > 0.99 || (surfaceDepth)> 0  || (rayZMax)>0)
+        if (-surfaceDepth / 1000 > 0.99 || (surfaceDepth) > -0.1 || (rayZMax) > -0.1)
         {
           
             isHit = false;

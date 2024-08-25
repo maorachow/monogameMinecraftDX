@@ -577,6 +577,7 @@ sampler2D MERSampler = sampler_state
     AddressV = Border;
 };
 float2 PixelSize;
+float2 TextureSize;
 float mixValue;
 
 float RadicalInverse_VdC(uint bits)
@@ -1149,7 +1150,7 @@ float4 MainPSNew(VertexShaderOutput input) : COLOR
     bool isHit = false;
     float traceStepCount = 0;
     int unHitErrCode = 0;
-    float2 textureSize = 1.0 / PixelSize;
+    float2 textureSize =TextureSize;
     [loop]
     for (int i = 0; i <35; i++)
     {
@@ -1409,9 +1410,9 @@ float3 IntersectCellBoundary(float3 o, float3 d, float2 cell, float2 cell_count,
     float2 delta = boundary - o.xy;
     delta /= d.xy;
     float t = min(delta.x, delta.y);
-	
+   
     intersection = IntersectDepthPlane(o, d, t);
-	
+  //  intersection.xy += (delta.x < delta.y) ? float2(crossOffset.x, 0.0) : float2(0.0, crossOffset.y);
     return intersection;
 }
 
@@ -1441,7 +1442,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     
 
   //  float noiseValue = worldPos.x;
-    worldPos = worldPos + normal * 0.3 * length(worldPos - CameraPos) / 100;
+    worldPos = worldPos + normal * 0.8 * linearDepth / 100;
     
     
     float3 vDir = normalize(worldPos - CameraPos);
@@ -1542,10 +1543,10 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
       
 
     }
-    float2 textureSize = 1.0 / PixelSize;
+    float2 textureSize = TextureSize;
     float maxDist = 100.0f;
     float3 viewRDir = normalize(mul(float4(curRDir, 1), ViewOrigin).xyz);
-    
+  //  worldPos += rDir * 0.23f;
     float3 viewPosOrigin = mul(float4(worldPos, 1), View);
    
    
@@ -1556,8 +1557,8 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     }
      
     float3 viewPosEnd = viewPosOrigin + viewRDir * maxDist;
-    float4 startHScreen = TransformViewToHScreen(viewPosOrigin, 1.0 / (PixelSize.xy));
-    float4 endHScreen = TransformViewToHScreen(viewPosEnd, 1.0 / (PixelSize.xy));
+    float4 startHScreen = TransformViewToHScreen(viewPosOrigin, textureSize);
+    float4 endHScreen = TransformViewToHScreen(viewPosEnd, textureSize);
   //  return float4((endHScreen.xy / endHScreen.w) * PixelSize, 0, 1);
     float startK = 1.0 / startHScreen.w;
     float endK = 1.0 / endHScreen.w;
@@ -1582,7 +1583,8 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
   
     int maxLevel = 5;
     float2 crossStep = float2(reflectDirTextureSpace.x >= 0 ? 1 : -1, reflectDirTextureSpace.y >= 0 ? 1 : -1);
-    float2 crossOffset = crossStep / (1.0 / (PixelSize.xy)) / 128;
+    float2 crossOffset = float2(crossStep.x / (textureSize.x) / 128.0,
+    crossStep.y / (textureSize.y) / 128.0);
     crossStep = saturate(crossStep);
         
     float3 ray = startScreenTextureSpace.xyz;
@@ -1599,7 +1601,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     int stopLevel = 0;
     
     
-    float2 startCellCount = GetCellCount(1.0 / (PixelSize.xy), startLevel);
+    float2 startCellCount = GetCellCount(textureSize, startLevel);
 	
     float2 rayCell = GetCell(ray.xy, startCellCount);
     ray = IntersectCellBoundary(o, d, rayCell, startCellCount, crossStep, crossOffset);
@@ -1609,11 +1611,12 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     bool isBackwardRay = reflectDirTextureSpace.z < 0;
     float rayDir = isBackwardRay ? -1 : 1;
     bool isIntersecting = false;
+   
     [loop]
     while (level >= stopLevel && ray.z * rayDir <= maxZ * rayDir && iter < 45)
     {
         
-        float2 cellCount = GetCellCount(1.0 / (PixelSize.xy),level);
+        float2 cellCount = GetCellCount(textureSize, level);
          float2 oldCellIdx = GetCell(ray.xy, cellCount);
         
         float cell_minZ = GetMinimumDepthPlane((oldCellIdx + 0.5f) / cellCount, level);
@@ -1623,19 +1626,46 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
          float2 newCellIdx = GetCell(tmpRay.xy, cellCount);
         
         float thickness = 0;
-        
+        float rayZLinear = ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f);
+        float cellMinZLinear = ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f);
         if (level == 0)
         {
-            thickness = abs(ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f)
-             - ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f));
+            thickness = abs(rayZLinear
+             - cellMinZLinear);
 
         }
         else
         {
             thickness = 0;
+          
+        }
+        bool crossed = false;
+        bool crossedBehind = false;
+       // (isBackwardRay && ) ||
+        if (isBackwardRay)
+        {
+            if ((cellMinZLinear > rayZLinear))
+            {
+                crossed = true;
+            }
+          
+        }
+        else if ((cellMinZLinear - 0.02 < rayZLinear && thickness >= 0.3))
+        {
+            crossedBehind = true;//tracing ray behind downgrades into linear search
+      
+        }
+
+        else if (CrossedCellBoundary(oldCellIdx, newCellIdx))
+        {
+            crossed = true;
+        }
+        else
+        {
+            crossed = false;
         }
         
-        bool crossed = (isBackwardRay && (cell_minZ > ray.z))  || CrossedCellBoundary(oldCellIdx, newCellIdx);
+       
       
         if (crossed == true)
         {
@@ -1644,14 +1674,21 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
          
 
         }
+        else if (crossedBehind == true)
+        {
+            ray = IntersectCellBoundary(o, d, oldCellIdx, cellCount, crossStep, crossOffset);
+            level = min((float) maxLevel, level + 1.0f);
+          
+           
+        }
         else
         {
             ray = tmpRay;
-            level = level - 1;
+            level = max(level - 1, 0);
           
 
         }
-      [branch]
+        [branch]
         if (ray.x < 0 || ray.y < 0 || ray.x > 1 || ray.y > 1)
         {
             isIntersecting = false;
@@ -1661,19 +1698,21 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
         
         if (level <= 0 )
         {
-            float rayZLinear = ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f);
-            float cellMinZLinear = ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f);
-            
-            if (thickness < 0.2 && rayZLinear > cellMinZLinear - 0.02&&rayZLinear<900.0f&&cellMinZLinear<900.0f)
+             rayZLinear = ProjectionDepthToLinearDepth(ray.z, 0.1f, 1000.0f);
+             cellMinZLinear = ProjectionDepthToLinearDepth(cell_minZ, 0.1f, 1000.0f);
+            thickness = abs(rayZLinear
+             - cellMinZLinear);
+           
+            if (thickness < 0.1 && rayZLinear > cellMinZLinear - 0.02 && rayZLinear < 900.0f && cellMinZLinear < 900.0f)
             {
                 isIntersecting = true;
-            }
-            else
-            {
-                isIntersecting = false;
+                break;
             }
           
+            
+          
         }
+      
         ++iter;
     }
     float2 uv = ray.xy;
