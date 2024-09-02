@@ -193,6 +193,41 @@ namespace monogameMinecraftNetworking.Utility
                 //   socket.Send(System.Text.Encoding.Default.GetBytes("&"));
             
         }
+        public static void RemoveBannedClients(IMultiplayerServer server)
+        {
+
+            lock (server.remoteClientsLock)
+            {
+                for (int i = 0; i < server.remoteClients.Count; i++)
+                {
+
+                    if (server.remoteClients[i].isUserDataLoaded==true)
+                    {
+                       
+                        if (server.userAccessControllingManager.CheckIsUsernameBanned(server.remoteClients[i].curUserData.userName)  == true)
+                        {
+                            string broadcastMessage1 = server.remoteClients[i].curUserData.userName + " Was Banned And Disconnected.";
+                            NetworkingUtility.CastToAllClients(server, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
+                            server.KickUser(server.remoteClients[i]);
+
+                             i--;
+                        }
+                       
+
+                      
+
+
+
+                    }
+                }
+            }
+
+
+
+
+            //   socket.Send(System.Text.Encoding.Default.GetBytes("&"));
+
+        }
         public static void UserLogout(RemoteClient client,IMultiplayerServer server)
         {
             if (client == null||client.socket.Connected==false)
@@ -255,6 +290,21 @@ namespace monogameMinecraftNetworking.Utility
             }
             else
             {
+                if (server.userAccessControllingManager.CheckIsUsernameBanned(u.userName)==true)
+                {
+                    Console.WriteLine("banned username detected");
+                    SendToClient(client, new MessageProtocol((byte)MessageCommandType.UserLoginReturn, MessagePackSerializer.Serialize("Failed:Banned")));
+                    lock (server.remoteClientsLock)
+                    {
+                        server.remoteClients.Remove(client);
+                    }
+                    //      client.socket.Close();
+                    client.Close();
+
+
+                    //   client.Close();
+                    Console.WriteLine("current socket clients count:" + server.remoteClients.Count);
+                }
 
                 client.curUserData = u;
                 client.isUserDataLoaded=true;

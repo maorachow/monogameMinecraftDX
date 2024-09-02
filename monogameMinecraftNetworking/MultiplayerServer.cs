@@ -39,6 +39,7 @@ namespace monogameMinecraftNetworking
         private object _todoListLock = new object();
         public List<RemoteClient> remoteClients { get; set; }
         public List<ServerTodoList> serverTodoLists { get; set; }
+        public  UserAccessControllingManager userAccessControllingManager { get; set; }
         public bool isGoingToQuit { get; set; } = false;
         public List<IUpdatingManager> updatingManagers { get; set; }
         public List<UserData> allUserDatas
@@ -101,6 +102,7 @@ namespace monogameMinecraftNetworking
         public IPEndPoint ipEndPoint{ get; set; }
         public void Initialize(string ipAddress1, int port)
         {
+            userAccessControllingManager = new UserAccessControllingManager(Directory.GetCurrentDirectory() + "/bannedusers.json");
             ServerSideBlockResourcesManager.LoadBlockInfo(Directory.GetCurrentDirectory()+"/customblockinfodata");
             isGoingToQuit= false;
             foreach (var world in ServerSideVoxelWorld.voxelWorlds)
@@ -109,7 +111,7 @@ namespace monogameMinecraftNetworking
             }
 
             ServerSideVoxelWorld.serverInstance = this;
-            updatingManagers = new List<IUpdatingManager> { new UserUpdatingManager(this),new EntityUpdatingManager(this)};
+            updatingManagers = new List<IUpdatingManager> { new UserUpdatingManager(this),new EntityUpdatingManager(this),new WorldTimeUpdatingManager(this)};
             remoteClients =new List<RemoteClient>();
             serverTodoLists = new List<ServerTodoList>
             {
@@ -134,170 +136,193 @@ namespace monogameMinecraftNetworking
                     return;
                 }
 
-                try
-                {
-   
-            //    Thread.Sleep(0);
+
+                //    Thread.Sleep(0);
                 lock (serverTodoLists[listIndex].queueLock)
                 {
-
                     if (serverTodoLists[listIndex].value.Count > 0)
                     {
                         (RemoteClient sourceClient, MessageProtocol message) item;
-                            serverTodoLists[listIndex].value.TryDequeue(out item);
-                        if (item.message == null)
+                        serverTodoLists[listIndex].value.TryDequeue(out item);
+                        try
                         {
-                            Console.WriteLine("null message received");
-                            continue;
-                        }
+                            if (item.message == null)
+                            {
+                                Console.WriteLine("null message received");
+                                continue;
+                            }
 
-                        switch ((MessageCommandType)item.message.command )
-                        {
-                            case MessageCommandType.ChunkDataRequest:
-                                ChunkDataRequestData data =
-                                    MessagePackSerializer.Deserialize<ChunkDataRequestData>(item.message.messageData);
-                               
-                                if (ServerSideVoxelWorld.voxelWorlds[data.worldID] != null)
-                                {
-                                    lock (ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueueLock)
-                                    { 
-                                        ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueue.Enqueue((item.sourceClient,data.chunkPos));
+                            switch ((MessageCommandType)item.message.command)
+                            {
+                                case MessageCommandType.ChunkDataRequest:
+                                    ChunkDataRequestData data =
+                                        MessagePackSerializer.Deserialize<ChunkDataRequestData>(
+                                            item.message.messageData);
 
+                                    if (ServerSideVoxelWorld.voxelWorlds[data.worldID] != null)
+                                    {
+                                        lock (ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueueLock)
+                                        {
+                                            ServerSideVoxelWorld.voxelWorlds[data.worldID].chunkBuildingQueue
+                                                .Enqueue((item.sourceClient, data.chunkPos));
+                                        }
                                     }
-                                   
-                                }
-                                break;
 
-                            case MessageCommandType.UserLogin:
-                                Console.WriteLine("login");
-                                NetworkingUtility.UserLogin(item.sourceClient,item.message.messageData,this);
-
-                                if (item.sourceClient.isUserDataLoaded == true)
-                                {
-                                    string broadcastMessage1 = item.sourceClient.curUserData.userName+" Logged in.";
-                                    NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast, MessagePackSerializer.Serialize(broadcastMessage1)));
-                                }
-                               
-                              
                                     break;
 
-                            case MessageCommandType.UserLogout:
-                                NetworkingUtility.UserLogout(item.sourceClient,this);
-                                break;
+                                case MessageCommandType.UserLogin:
+                                    Console.WriteLine("login");
+                                    NetworkingUtility.UserLogin(item.sourceClient, item.message.messageData, this);
 
-
-                            case MessageCommandType.UserDataUpdate:
-                                UserData userData = MessagePackSerializer.Deserialize<UserData>(item.message.messageData);
-                                lock (remoteClientsLock)
-                                {
-                                    int idx = remoteClients.FindIndex((client =>
+                                    if (item.sourceClient.isUserDataLoaded == true)
                                     {
-                                        if (client.isUserDataLoaded == false)
+                                        string broadcastMessage1 =
+                                            item.sourceClient.curUserData.userName + " Logged in.";
+                                        NetworkingUtility.CastToAllClients(this,
+                                            new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast,
+                                                MessagePackSerializer.Serialize(broadcastMessage1)));
+                                    }
+
+
+                                    break;
+
+                                case MessageCommandType.UserLogout:
+                                    NetworkingUtility.UserLogout(item.sourceClient, this);
+                                    break;
+
+
+                                case MessageCommandType.UserDataUpdate:
+                                    UserData userData =
+                                        MessagePackSerializer.Deserialize<UserData>(item.message.messageData);
+                                    lock (remoteClientsLock)
+                                    {
+                                        int idx = remoteClients.FindIndex((client =>
                                         {
-                                            return false;
+                                            if (client.isUserDataLoaded == false)
+                                            {
+                                                return false;
+                                            }
+
+                                            return client.curUserData.userName == userData.userName;
+                                        }));
+                                        //   Console.WriteLine(userData.userName);
+                                        if (idx != -1)
+                                        {
+                                            remoteClients[idx].curUserData = userData;
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("unknown user data");
+                                            Console.WriteLine(userData.userName);
+                                        }
+                                    }
+
+                                    break;
+                                case MessageCommandType.UserDataRequest:
+                                    NetworkingUtility.CastToAllClients(this, item.message, true);
+                                    break;
+
+                                case MessageCommandType.UserDataBroadcast:
+                                    NetworkingUtility.CastToAllClients(this,
+                                        new MessageProtocol((byte)MessageCommandType.UserDataBroadcast,
+                                            MessagePackSerializer.Serialize(this.allUserDatas)), true);
+                                    break;
+
+                                case MessageCommandType.WorldGenParamsRequest:
+                                    int worldID = MessagePackSerializer.Deserialize<int>(item.message.messageData);
+                                    NetworkingUtility.SendToClient(item.sourceClient,
+                                        new MessageProtocol((byte)MessageCommandType.WorldGenParamsData,
+                                            MessagePackSerializer.Serialize(ServerSideVoxelWorld.voxelWorlds[worldID]
+                                                .genParamsData)));
+                                    break;
+                                case MessageCommandType.ChunkUpdateData:
+                                    ChunkUpdateData data2 =
+                                        MessagePackSerializer
+                                            .Deserialize<ChunkUpdateData>(item.message.messageData);
+                                    if (ServerSideVoxelWorld.voxelWorlds[data2.worldID] != null)
+                                    {
+                                        IChunkUpdateOperation? operation1 = IChunkUpdateOperation.ParseFromData(data2,
+                                            ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater);
+                                        if (operation1 != null)
+                                        {
+                                            ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater
+                                                .queuedChunkUpdatePoints.Enqueue(operation1);
+                                        }
+                                    }
+
+
+                                    break;
+
+                                case MessageCommandType.EntityDataBroadcast:
+
+                                    NetworkingUtility.CastToAllClients(this,
+                                        new MessageProtocol((byte)MessageCommandType.EntityDataBroadcast,
+                                            item.message.messageData));
+                                    break;
+
+                                case MessageCommandType.HurtEntityRequest:
+                                    HurtEntityRequestData data3 =
+                                        MessagePackSerializer.Deserialize<HurtEntityRequestData>(item.message
+                                            .messageData);
+                                    ServerSideEntityBeh entity;
+                                    bool isEntityHurt = ServerSideEntityManager.HurtEntity(data3.entityID,
+                                        data3.hurtValue,
+                                        new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ), out entity);
+                                    if (isEntityHurt)
+                                    {
+                                        if (entity is ServerSideZombieEntityBeh)
+                                        {
+                                            NetworkingUtility.CastToAllClients(this,
+                                                new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,
+                                                    MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
+                                                        entity.position.X, entity.position.Y, entity.position.Z, "0hurt"
+                                                    ))));
                                         }
 
-                                        return client.curUserData.userName == userData.userName;
-
-                                    }));
-                                 //   Console.WriteLine(userData.userName);
-                                    if (idx != -1)
-                                    {
-                                        remoteClients[idx] .curUserData=userData;
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("unknown user data");
-                                        Console.WriteLine(userData.userName);
-                                    }
-                                }
-                                    
-                                break;
-                            case MessageCommandType.UserDataRequest:
-                                NetworkingUtility.CastToAllClients(this,item.message,true);
-                                break;
-
-                            case MessageCommandType.UserDataBroadcast:
-                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.UserDataBroadcast, MessagePackSerializer.Serialize(this.allUserDatas)),true );
-                                break;
-
-                            case MessageCommandType.WorldGenParamsRequest:
-                                int worldID = MessagePackSerializer.Deserialize<int>(item.message.messageData);
-                                NetworkingUtility.SendToClient(item.sourceClient, new MessageProtocol((byte)MessageCommandType.WorldGenParamsData, MessagePackSerializer.Serialize(ServerSideVoxelWorld.voxelWorlds[worldID].genParamsData)));
-                                break;
-                            case MessageCommandType.ChunkUpdateData:
-                                ChunkUpdateData data2 =
-                                    MessagePackSerializer
-                                        .Deserialize<ChunkUpdateData>(item.message.messageData);
-                                if (ServerSideVoxelWorld.voxelWorlds[data2.worldID] != null)
-                                {
-                                    IChunkUpdateOperation? operation1 = IChunkUpdateOperation.ParseFromData(data2, ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater);
-                                    if (operation1 != null)
-                                    {
-                                        ServerSideVoxelWorld.voxelWorlds[data2.worldID].worldUpdater.queuedChunkUpdatePoints.Enqueue(operation1);
-                                    }
-                                 
-                                }
-                                    
-
-                                break;
-
-                            case MessageCommandType.EntityDataBroadcast:
-                             
-                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.EntityDataBroadcast,item.message.messageData));
-                                break;
-
-                            case MessageCommandType.HurtEntityRequest:
-                                HurtEntityRequestData data3 =
-                                    MessagePackSerializer.Deserialize<HurtEntityRequestData>(item.message.messageData);
-                                ServerSideEntityBeh entity;
-                              bool isEntityHurt=  ServerSideEntityManager.HurtEntity(data3.entityID,data3.hurtValue,new Vector3(data3.sourcePosX, data3.sourcePosY, data3.sourcePosZ),out entity);
-                                if (isEntityHurt)
-                                {
-                                    if (entity is ServerSideZombieEntityBeh)
-                                    {
-                                        NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
-                                            entity.position.X, entity.position.Y, entity.position.Z,"0hurt"
-                                            ))));
-                                    }
-
-                                    if (entity is ServerSidePigEntityBeh)
-                                    {
-                                        NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast, MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
-                                            entity.position.X, entity.position.Y, entity.position.Z, "1hurt"
-                                        ))));
+                                        if (entity is ServerSidePigEntityBeh)
+                                        {
+                                            NetworkingUtility.CastToAllClients(this,
+                                                new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,
+                                                    MessagePackSerializer.Serialize(new EntitySoundBroadcastData(
+                                                        entity.position.X, entity.position.Y, entity.position.Z, "1hurt"
+                                                    ))));
                                         }
-                                  
-                                }
+                                    }
+
                                     break;
                                 case MessageCommandType.EntitySoundBroadcast:
-                                NetworkingUtility.CastToAllClients(this, new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,item.message.messageData));
+                                    NetworkingUtility.CastToAllClients(this,
+                                        new MessageProtocol((byte)MessageCommandType.EntitySoundBroadcast,
+                                            item.message.messageData));
                                     break;
-                            case MessageCommandType.ChatMessage:
-                                if (item.sourceClient.isUserDataLoaded == false)
-                                {
-                                    break;
-                                }
-                                string data6 = MessagePackSerializer.Deserialize<string>(item.message.messageData);
+                                case MessageCommandType.ChatMessage:
+                                    if (item.sourceClient.isUserDataLoaded == false)
+                                    {
+                                        break;
+                                    }
 
-                                string broadcastMessage = "<" + item.sourceClient.curUserData.userName + "> " + data6;
-                                NetworkingUtility.CastToAllClients(this,new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast,MessagePackSerializer.Serialize(broadcastMessage)));
-                                break;
+                                    string data6 = MessagePackSerializer.Deserialize<string>(item.message.messageData);
+
+                                    string broadcastMessage =
+                                        "<" + item.sourceClient.curUserData.userName + "> " + data6;
+                                    Console.WriteLine("User chat message: "+broadcastMessage);
+                                    NetworkingUtility.CastToAllClients(this,
+                                        new MessageProtocol((byte)MessageCommandType.ChatMessageBroadcast,
+                                            MessagePackSerializer.Serialize(broadcastMessage)));
+                                    break;
+                                case MessageCommandType.WorldTimeDataBroadcast:
+                                    NetworkingUtility.CastToAllClients(this,
+                                       item.message);
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("execute todo list thread exception:" + ex);
+                            continue;
                         }
                     }
-
                 }
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("execute todo list thread exception:"+ex);
-                    continue;
-                }
-          
-                  
-                           
-                    
-                
             }
         }
 
@@ -313,9 +338,23 @@ namespace monogameMinecraftNetworking
                 }
                 Thread.Sleep(50);
                 NetworkingUtility.RemoveDisconnectedClients(this);
+                NetworkingUtility.RemoveBannedClients(this);
             }
         }
 
+        public void KickUser(RemoteClient user)
+        {
+            if (!remoteClients.Contains(user))
+            {
+                return;
+            }
+            if (user.messageParser.isMessageParsingThreadRunning==true)
+            {
+                user.Close();
+            }
+
+            remoteClients.Remove(user);
+        }
         public void Start()
         {
             socketWaitThread = new Thread(() => { SocketWait(serverSocket); });
@@ -355,6 +394,7 @@ namespace monogameMinecraftNetworking
             {
                 world.ShutDown();    
             }
+            userAccessControllingManager.SaveBannedUsersList(Directory.GetCurrentDirectory() + "/bannedusers.json");
             serverSocket.Close();
             Console.WriteLine("server shutdown");
         }

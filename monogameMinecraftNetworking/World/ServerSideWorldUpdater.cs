@@ -134,7 +134,7 @@ namespace monogameMinecraftNetworking.World
                 }
                     soundDatasToSend.Clear();
                     particleDatasToSend.Clear();
-                chunksNeededRebuild.Clear();
+                    chunksNeededRebuild.Clear();
                 }
 
 

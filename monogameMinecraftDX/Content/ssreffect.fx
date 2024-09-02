@@ -34,17 +34,28 @@ SamplerState defaultSampler
     AddressU = Border;
     AddressV = Border;
 };
-
-sampler2D motionVectorTex = sampler_state
+SamplerState pointClampSampler
 {
-    Texture = <MotionVectorTex>;
- 
+ //   Texture = (PositionWSTex);
+  
     MipFilter = Point;
     MagFilter = Point;
     MinFilter = Point;
     AddressU = Clamp;
     AddressV = Clamp;
 };
+SamplerState pointRepeatSampler
+{
+ //   Texture = (PositionWSTex);
+  
+    MipFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
+    AddressU = Wrap;
+    AddressV = Wrap;
+};
+
+Texture2D MotionVectorTex;
 sampler2D prevSSRTex = sampler_state
 {
     Texture = <PrevSSRTexture>;
@@ -510,61 +521,23 @@ float3 CalculateLightDiffuseP(float3 W, float3 LP, float3 N, float3 V, float3 al
     return Lo;
 }
 
-sampler gProjectionDepthM0 = sampler_state
+sampler depthPyramidSampler = sampler_state
 {
-    Texture = (ProjectionDepthTexMip0);
+  
     AddressU = CLAMP;
     AddressV = CLAMP;
     MagFilter = Point;
     MinFilter = Point;
     Mipfilter = Point;
 };
-
-sampler gProjectionDepthM1 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip1);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM2 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip2);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM3 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip3);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM4 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip4);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
-sampler gProjectionDepthM5 = sampler_state
-{
-    Texture = (ProjectionDepthTexMip5);
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    MagFilter = Point;
-    MinFilter = Point;
-    Mipfilter = Point;
-};
+ 
+Texture2D ProjectionDepthTexMip0;
+Texture2D ProjectionDepthTexMip1;
+Texture2D ProjectionDepthTexMip2;
+Texture2D ProjectionDepthTexMip3;
+Texture2D ProjectionDepthTexMip4;
+Texture2D ProjectionDepthTexMip5;
+Texture2D ProjectionDepthTexMip6;
 
 sampler2D MERSampler = sampler_state
 {
@@ -621,7 +594,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
     
     float linearDepth = 0;
-    linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
+    linearDepth = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x; // tex2D(gProjectionDepthM0, input.TexCoord);
     if (linearDepth >= 900||linearDepth<=0.1)
     {
         discard;
@@ -659,7 +632,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
    
     
     
-    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float2 prevTexCoord = input.TexCoord + MotionVectorTex.Sample(pointClampSampler, input.TexCoord).xy; //tex2D(motionVectorTex, input.TexCoord).xy;
     float maxBlendDistance = length(PixelSize) * 2;
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance,0,1);
@@ -787,17 +760,18 @@ float4 MainPS(VertexShaderOutput input) : COLOR
      /*   float4 sampleViewPosDepth = mul(float4(worldPosSampled, 1), View);
         sampleViewPosDepth.z = sampleViewPosDepth.z + sampleViewPosDepth.x * 0.000001 + sampleViewPosDepth.y * 0.0000001;*/
         
-            float sampleDepthM0 = tex2D(gProjectionDepthM0, uv.xy).x;
+        float sampleDepthM0 = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x;
+       
 
-            float sampleDepthM1 = tex2D(gProjectionDepthM1, uv.xy).x;
+        float sampleDepthM1 = ProjectionDepthTexMip1.Sample(depthPyramidSampler, input.TexCoord).x;
 
-            float sampleDepthM2 = tex2D(gProjectionDepthM2, uv.xy).x;
+        float sampleDepthM2 = ProjectionDepthTexMip2.Sample(depthPyramidSampler, input.TexCoord).x;
 
-            float sampleDepthM3 = tex2D(gProjectionDepthM3, uv.xy).x;
+        float sampleDepthM3 = ProjectionDepthTexMip3.Sample(depthPyramidSampler, input.TexCoord).x;
 
-            float sampleDepthM4 = tex2D(gProjectionDepthM4, uv.xy).x;
+        float sampleDepthM4 = ProjectionDepthTexMip4.Sample(depthPyramidSampler, input.TexCoord).x;
 
-            float sampleDepthM5 = tex2D(gProjectionDepthM5, uv.xy).x;
+        float sampleDepthM5 = ProjectionDepthTexMip5.Sample(depthPyramidSampler, input.TexCoord).x;
         
         
         
@@ -835,7 +809,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
                // worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth1 = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
                     
                     direction *= 0.5;
@@ -843,7 +817,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth1 = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
             
                     direction *= 0.5;
@@ -851,7 +825,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth1 = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
                 
                     direction *= 0.5;
@@ -859,7 +833,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
                     uv1 = GetScreenCoordFromWorldPos(finalPoint);
             //    worldPosSampled1 = PositionWSTex.Sample(defaultSampler, uv1.xy).xyz;
                     testDepth1 = GetViewDepthFromWorldPos(finalPoint);
-                    sampleDepth1 = tex2D(gProjectionDepthM0, uv1.xy).x; // GetViewDepthFromWorldPos(worldPosSampled1);
+                sampleDepth1 = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x; // GetViewDepthFromWorldPos(worldPosSampled1);
                     _sign = -sign(testDepth1 - sampleDepth1);
             
               
@@ -942,7 +916,7 @@ float4 MainPSNew(VertexShaderOutput input) : COLOR
 {
     
     float linearDepth = 0;
-    linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
+    linearDepth = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x;
     if (linearDepth >= 900 || linearDepth <= 0.1)
     {
         discard;
@@ -981,7 +955,7 @@ float4 MainPSNew(VertexShaderOutput input) : COLOR
    
     
     
-    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float2 prevTexCoord = input.TexCoord + MotionVectorTex.Sample(pointClampSampler, input.TexCoord).xy;
     float maxBlendDistance = length(PixelSize) * 2;
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance, 0, 1);
@@ -1177,17 +1151,17 @@ float4 MainPSNew(VertexShaderOutput input) : COLOR
             break;
         }
      
-        float sampleDepthM0 = -tex2D(gProjectionDepthM0, hitUV.xy).x;
+        float sampleDepthM0 = -ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord).x;
 
-        float sampleDepthM1 = -tex2D(gProjectionDepthM1, hitUV.xy).x;
+        float sampleDepthM1 = -ProjectionDepthTexMip1.Sample(depthPyramidSampler, input.TexCoord).x;
 
-        float sampleDepthM2 = -tex2D(gProjectionDepthM2, hitUV.xy).x;
+        float sampleDepthM2 = -ProjectionDepthTexMip2.Sample(depthPyramidSampler, input.TexCoord).x;
 
-        float sampleDepthM3 = -tex2D(gProjectionDepthM3, hitUV.xy).x;
+        float sampleDepthM3 = -ProjectionDepthTexMip3.Sample(depthPyramidSampler, input.TexCoord).x;
 
-        float sampleDepthM4 = -tex2D(gProjectionDepthM4, hitUV.xy).x;
+        float sampleDepthM4 = -ProjectionDepthTexMip4.Sample(depthPyramidSampler, input.TexCoord).x;
 
-        float sampleDepthM5 = -tex2D(gProjectionDepthM5, hitUV.xy).x;
+        float sampleDepthM5 = -ProjectionDepthTexMip5.Sample(depthPyramidSampler, input.TexCoord).x;
    
       
         
@@ -1379,19 +1353,20 @@ float2 GetCell(float2 pos, float2 CellCount)
 float GetMinimumDepthPlane(float2 p, int mipLevel)
 {
     
-    float sampleDepthM0 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM0, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM0 = linearDepthToProjectionDepth(ProjectionDepthTexMip0.Sample(depthPyramidSampler, p.xy).x,
+    0.1f, 1000.0f);
 
-    float sampleDepthM1 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM1, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM1 = linearDepthToProjectionDepth(ProjectionDepthTexMip1.Sample(depthPyramidSampler, p.xy).x, 0.1f, 1000.0f);
 
-    float sampleDepthM2 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM2, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM2 = linearDepthToProjectionDepth(ProjectionDepthTexMip2.Sample(depthPyramidSampler, p.xy).x, 0.1f, 1000.0f);
 
-    float sampleDepthM3 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM3, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM3 = linearDepthToProjectionDepth(ProjectionDepthTexMip3.Sample(depthPyramidSampler, p.xy).x, 0.1f, 1000.0f);
 
-    float sampleDepthM4 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM4, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM4 = linearDepthToProjectionDepth(ProjectionDepthTexMip4.Sample(depthPyramidSampler, p.xy).x, 0.1f, 1000.0f);
 
-    float sampleDepthM5 = linearDepthToProjectionDepth(tex2D(gProjectionDepthM5, p.xy).x, 0.1f, 1000.0f);
+    float sampleDepthM5 = linearDepthToProjectionDepth(ProjectionDepthTexMip5.Sample(depthPyramidSampler, p.xy).x, 0.1f, 1000.0f);
    
-      
+   
         
         
     float sampleDepthArray[6] = { sampleDepthM0, sampleDepthM1, sampleDepthM2, sampleDepthM3, sampleDepthM4, sampleDepthM5 };
@@ -1424,7 +1399,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
 {
     
     float linearDepth = 0;
-    linearDepth = tex2D(gProjectionDepthM0, input.TexCoord);
+    linearDepth = ProjectionDepthTexMip0.Sample(depthPyramidSampler, input.TexCoord.xy).x;
     if (linearDepth >= 900 || linearDepth <= 0.1)
     {
         discard;
@@ -1460,7 +1435,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
 
     
     
-    float2 prevTexCoord = input.TexCoord + tex2D(motionVectorTex, input.TexCoord).xy;
+    float2 prevTexCoord = input.TexCoord + MotionVectorTex.Sample(pointClampSampler, input.TexCoord).xy;
     float maxBlendDistance = length(PixelSize) * 2;
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance, 0, 1);
@@ -1581,7 +1556,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     float4 vRayDirInTS = float4(dp.xyz, 0);
     float4 rayStartPos = rayPosInTS;*/
   
-    int maxLevel = 5;
+    int maxLevel =5;
     float2 crossStep = float2(reflectDirTextureSpace.x >= 0 ? 1 : -1, reflectDirTextureSpace.y >= 0 ? 1 : -1);
     float2 crossOffset = float2(crossStep.x / (textureSize.x) / 128.0,
     crossStep.y / (textureSize.y) / 128.0);

@@ -49,14 +49,18 @@ public class Program
 
                 break;
             }
-            Console.WriteLine("Enter Message Type: 1 query user 2 query chunks 3 loaded client sockets X shutdown server");
-            char a = Console.ReadKey().KeyChar;
+            Console.WriteLine("Enter Operation Type: 1 query user, 2 query chunks, 3 loaded client sockets, 4 ban username, 5 unban username, 6 get banned players, X shutdown server");
+             char a = Console.ReadKey().KeyChar;
             switch (a)
             {
                 case '1':
                     Console.WriteLine(" ");
                     Console.WriteLine("loaded users");
                     Console.WriteLine(server.allUserDatas.Count);
+                    foreach (var item in server.allUserDatas)
+                    {
+                        Console.WriteLine(item.userName);
+                    }
                     /*        userData.posX = float.Parse(Console.ReadLine());
                             userData.posY = float.Parse(Console.ReadLine());
                             userData.posZ = float.Parse(Console.ReadLine());
@@ -81,7 +85,38 @@ public class Program
 
                     Console.WriteLine(server.remoteClients.Count);
                     break;
+                case '4':
+                    Console.WriteLine(" ");
+                    Console.WriteLine("ban username");
+                    string? userName = Console.ReadLine();
+                    if (userName != null)
+                    {
+                        server.userAccessControllingManager.BanUser(userName);
+                    }
 
+                  
+
+                    break;
+                case '5':
+                    Console.WriteLine(" ");
+                    Console.WriteLine("unban username");
+                    string? userName1 = Console.ReadLine();
+                    if (userName1 != null)
+                    {
+                        server.userAccessControllingManager.UnbanUser(userName1);
+                    }
+
+                    break;
+
+                case '6':
+                    Console.WriteLine(" ");
+                    Console.WriteLine("currently banned usernames:");
+                    foreach (var item in server.userAccessControllingManager.GetBannedUsers())
+                    {
+                        Console.WriteLine(item);
+                    }
+                   
+                    break;
                 case 'X':
                     Console.WriteLine(" ");
                     Console.WriteLine("are you sure you are shutting down the server? enter Y to confirm");

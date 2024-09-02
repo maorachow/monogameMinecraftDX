@@ -25,6 +25,7 @@ namespace monogameMinecraftNetworking
 
         public List<UserData> allUserDatas { get; }
 
+        public UserAccessControllingManager userAccessControllingManager { get;  }
         public IPEndPoint ipEndPoint { get; set; }
 
         public bool isGoingToQuit { get; set; }
@@ -33,6 +34,8 @@ namespace monogameMinecraftNetworking
         public void Start();
         public void ShutDown();
 
+        public void KickUser(RemoteClient user);
+         
 
     }
 }

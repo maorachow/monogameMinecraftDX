@@ -60,86 +60,12 @@ namespace monogameMinecraftClientDX
             {
                 mouseMovementManager.windowBounds = Window.ClientBounds;
             }
-            foreach (UIElement element in UIElement.menuUIs)
-            {
-                element.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.settingsUIsPage1)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.settingsUIsPage2)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.pauseMenuUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.inventoryUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.structureOperationsSavingUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.structureOperationsPlacingUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.inGameUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.chatMessagesUIs)
-            {
-                element1.OnResize();
-            }
+            MultiplayerClientUIResizingManager.Resize(this);
             switch (status)
             {
                 case GameStatus.Started:
-                    foreach (UIElement element1 in UIElement.pauseMenuUIs)
-                    {
-                        element1.OnResize();
-                    }
-                    foreach (UIElement element1 in UIElement.inventoryUIs)
-                    {
-                        element1.OnResize();
-                    }
-                    /*      int width = GraphicsDevice.PresentationParameters.BackBufferWidth;
-                          int height = GraphicsDevice.PresentationParameters.BackBufferHeight;
-                          Debug.WriteLine(width);
-                          Debug.WriteLine(height);
-                          gBufferRenderer.Resize(width, height, GraphicsDevice);
-
-
-
-                          ssaoRenderer.ssaoTarget = new RenderTarget2D(ssaoRenderer.graphicsDevice, width / 2, height / 2, false, SurfaceFormat.Color, DepthFormat.Depth24);
-                          volumetricLightRenderer.blendVolumetricMap = new RenderTarget2D(volumetricLightRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          volumetricLightRenderer.renderTargetLum = new RenderTarget2D(volumetricLightRenderer.device, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          //      ssrRenderer.renderTargetSSR=new RenderTarget2D(ssrRenderer.graphicsDevice, width,height,false,SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          volumetricLightRenderer.lightShaftTarget = new RenderTarget2D(GraphicsDevice, (int)((float)width / 2f), (int)((float)height / 2f), false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          contactShadowRenderer.contactShadowRenderTarget = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
-
-                          motionVectorRenderer.renderTargetMotionVector = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          deferredShadingRenderer.renderTargetLum = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          deferredShadingRenderer.finalImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
-                          deferredShadingRenderer.renderTargetLumSpec = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          motionBlurRenderer.processedImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
-                          hiZBufferRenderer.ResizeTarget();
-                          ssidRenderer.renderTargetSSID = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          ssidRenderer.renderTargetSSIDPrev = new RenderTarget2D(GraphicsDevice, width / 2, height / 2, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          ssrRenderer.renderTargetSSR = new RenderTarget2D(GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          ssrRenderer.renderTargetSSRPrev = new RenderTarget2D(GraphicsDevice, hiZBufferRenderer.hiZBufferTargetMips[0].Width, hiZBufferRenderer.hiZBufferTargetMips[0].Height, false, SurfaceFormat.Vector4, DepthFormat.Depth24);
-                          foreach (var processor in customPostProcessors)
-                          {
-                              processor.processedImage.Dispose();
-                              processor.processedImage = new RenderTarget2D(GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
-                          }
-                          float aspectRatio = GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height;
-                          gamePlayer.cam.aspectRatio = aspectRatio;
-                          gamePlayer.cam.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), aspectRatio, 0.1f, 1000f);*/
+                
+                  
                     renderPipelineManager.Resize();
                     break;
             }
@@ -341,7 +267,7 @@ namespace monogameMinecraftClientDX
            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
            mouseMovementManager = new MouseMovementManager(playerInputManager);
            mouseMovementManager.windowBounds = Window.ClientBounds;
-            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer,false);
             effectsManager.LoadEffects(Content);
          
             networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);

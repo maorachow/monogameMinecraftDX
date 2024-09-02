@@ -273,6 +273,15 @@ namespace monogameMinecraftNetworking.Client
                                         "User Login Failed: A Player With The Same Username Has Joined The Server.");
                                 }
                             }
+                            else if (result == "Failed:Banned")
+                            {
+                                isGoingToQuitGame = true;
+                                if (_clientDisconnectedAction != null)
+                                {
+                                    _clientDisconnectedAction(
+                                        "User Login Failed: Current Username Is Banned From The Server.");
+                                }
+                            }
                             break;
                         case MessageCommandType.UserDataRequest:
 
@@ -358,6 +367,10 @@ namespace monogameMinecraftNetworking.Client
                                 SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data6.posX, data6.posY, data6.posZ), ClientSideEntityManager.entitySounds[data6.soundID], 20f);
                             }
                             break;
+                        case MessageCommandType.WorldTimeDataBroadcast:
+                            float timeData = MessagePackSerializer.Deserialize<float>(item.messageData);
+                            game.gameTimeManager.SetDateTime(timeData);
+                            break;
                     }
                 }
                 
@@ -411,7 +424,7 @@ namespace monogameMinecraftNetworking.Client
                     isGoingToQuitGame = true;
                     if (_clientDisconnectedAction != null)
                     {
-                        _clientDisconnectedAction("Client Disconnected: Server Closed");
+                        _clientDisconnectedAction("Client Disconnected: Server Connection Lost");
                     }
                 }
             }

@@ -57,8 +57,10 @@ namespace monogameMinecraftShared.UI
         public int pixelOffset = 0;
         public bool isSelected = false;
         public int maxAllowedCharacters;
+        public bool useEnterActions=false;
         public Action<InputField> onTextChangedAction;
-        public InputField(Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly,bool leftAligned=false,float leftAlignedOffset = 0)
+        public Action<InputField> onEnterPressedAction;
+        public InputField(Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly,bool leftAligned=false,float leftAlignedOffset = 0,bool useEnterActions=false)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -79,6 +81,7 @@ namespace monogameMinecraftShared.UI
             this.maxAllowedCharacters = maxAllowedCharacters;
             this.leftAligned= leftAligned;
             this.leftAlignedOffset = leftAlignedOffset;
+            this.useEnterActions = useEnterActions;
             OnResize();
 
 
@@ -239,6 +242,17 @@ namespace monogameMinecraftShared.UI
                     foreach (var key in keyboardState.GetPressedKeys())
                     {
                         //   Debug.WriteLine(key);
+                        if (key == Keys.Enter)
+                        {
+                            if (lastKeyboardState.IsKeyDown(Keys.Enter) == false && text.Length > 0)
+                            {
+                                if (onEnterPressedAction != null)
+                                {
+                                    onEnterPressedAction(this);
+                                }
+                                break;
+                            }
+                        }
                         if (key == Keys.Back)
                         {
                             if (lastKeyboardState.IsKeyDown(Keys.Back) == false && text.Length > 0)
@@ -247,7 +261,7 @@ namespace monogameMinecraftShared.UI
                                 break;
                             }
                         }
-
+                   
                         if (lastKeyboardState.IsKeyDown(key) == false)
                         {
                             if (text.Length < maxAllowedCharacters)

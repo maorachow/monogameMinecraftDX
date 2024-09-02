@@ -93,7 +93,7 @@ public class Program
                                 server.serverTodoLists[0].value.Enqueue(new ValueTuple<RemoteClient, MessageProtocol>(remoteClient, new MessageProtocol(mp.command, (byte[])mp.messageData.Clone())), 0);
                             }
                         }*/
-                    Console.WriteLine("Message received:"+(MessageCommandType)mp.command);
+               //     Console.WriteLine("Message received:"+(MessageCommandType)mp.command);
 
                     if (mp.command == (byte)MessageCommandType.UserLoginReturn)
                     {
@@ -145,7 +145,7 @@ public class Program
             }
 
             //     Console.WriteLine("Enter Message");
-            Console.WriteLine("Enter Message Type: 1 update user 2 set block 3 update world");
+            Console.WriteLine("Enter Message Type: 1 update user 2 set block 3 update world 4 spam attack");
             char a = Console.ReadKey().KeyChar;
             switch (a)
             {
@@ -156,14 +156,10 @@ public class Program
                     userData.posY = float.Parse(Console.ReadLine());
                     userData.posZ = float.Parse(Console.ReadLine());
                     userData.rotY = float.Parse(Console.ReadLine());*/
-            if (!isLoggedIn)
-            {
-                SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogin, MessagePackSerializer.Serialize(userData)));
-                    }
-            else
-            {
-                Console.WriteLine("already logged in");
-            }
+             
+                SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogin, new byte[] {1,23,45,67 }));
+                    
+           
                    
                     break;
                 case '2':
@@ -176,6 +172,16 @@ public class Program
                 case '3':
                     Console.WriteLine("request chunk");
                     SendMessageToServer(new MessageProtocol((byte)MessageCommandType.ChunkDataRequest,MessagePackSerializer.Serialize(new ChunkDataRequestData(new Vector2Int(0,0),0))));
+                    break;
+                case '4':
+                    Console.WriteLine("spam attack");
+                    for (int i = 0; i < 99999; i++)
+                    {
+                        SendMessageToServer(new MessageProtocol((byte)MessageCommandType.ChunkDataRequest, MessagePackSerializer.Serialize(new ChunkDataRequestData(new Vector2Int(0, 0), 0))));
+                        SendMessageToServer(new MessageProtocol((byte)MessageCommandType.UserLogin, new byte[] { 1, 23, 45, 67 }));
+                        SendMessageToServer(new MessageProtocol((byte)MessageCommandType.ChunkUpdateData, new byte[] { 1, 23, 45, 67 }));
+                    }
+                 
                     break;
             }
             //    clientSocket.Send(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message(Console.ReadLine(), Console.ReadLine()))));

@@ -139,47 +139,12 @@ namespace monogameMinecraftGL
             {
                 mouseMovementManager.windowBounds = this.Window.ClientBounds;
             }
-           
-            Debug.WriteLine("bounds:"+this.Window.ClientBounds);
-            foreach (UIElement element in UIElement.menuUIs)
-            {
-                element.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.settingsUIsPage1)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.settingsUIsPage2)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.pauseMenuUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.inventoryUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.structureOperationsSavingUIs)
-            {
-                element1.OnResize();
-            }
-            foreach (UIElement element1 in UIElement.structureOperationsPlacingUIs)
-            {
-                element1.OnResize();
-            }
+            UIResizingManager.Resize(this);
+
             switch (status)
             {
                 case GameStatus.Started:
-                    foreach (UIElement element1 in UIElement.pauseMenuUIs)
-                    {
-                        element1.OnResize();
-                    }
-                    foreach (UIElement element1 in UIElement.inventoryUIs)
-                    {
-                        element1.OnResize();
-                    }
+                
                     /*      int width = GraphicsDevice.PresentationParameters.BackBufferWidth;
                           int height = GraphicsDevice.PresentationParameters.BackBufferHeight;
                           Debug.WriteLine(width);

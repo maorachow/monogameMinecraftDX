@@ -102,11 +102,19 @@ namespace monogameMinecraftNetworking.Protocol
                     }
                     else  // 缓存中的数据大于等于协议头的长度(dynamicReadBuffer.Length >= 6)
                     {
+                    
                         var headInfo = MessageProtocol.GetHeadInfo(dynamicReceiveBuffer);  // 解读协议头的信息
+                        int messagePackCount = 0;
                         while (dynamicReceiveBuffer.Length - MessageProtocol.HEADLENGTH >= headInfo.DataLength)  // 当缓存数据长度减去协议头长度大于等于实际数据的长度则进入循环进行拆包处理
                         {
                             mp = new MessageProtocol(dynamicReceiveBuffer);  // 拆包
-                                                                             //       mainForm.LogOnTextbox("Message:"+mp.Command);
+                            messagePackCount++;
+                            if (messagePackCount > 1000)
+                            {
+                                throw new Exception(
+                                    "Message spamming detected:more than 1000 messages in a single buffer.");
+                            }
+                            //       mainForm.LogOnTextbox("Message:"+mp.Command);
                             dynamicReceiveBuffer = mp.moreData;  // 将拆包后得出多余的字节付给缓存变量,以待下一次循环处理数据时使用,若下一次循环缓存数据长度不能构成一个完整的数据包则不进入循环跳到外层循环继续接收数据并将本次得出的多余数据与之合并重新拆包,依次循环。
                             headInfo = MessageProtocol.GetHeadInfo(dynamicReceiveBuffer);  // 从缓存中解读出下一次数据所需要的协议头信息,已准备下一次拆包循环,如果数据长度不能构成协议头所需的长度,拆包结果为0,下一次循环则不能成功进入,跳到外层循环继续接收数据合并缓存形成一个完整的数据包
                          //   Debug.WriteLine((MessageCommandType)mp.command);

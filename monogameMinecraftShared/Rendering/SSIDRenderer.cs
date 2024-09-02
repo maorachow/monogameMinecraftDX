@@ -57,7 +57,8 @@ namespace monogameMinecraftShared.Rendering
             SetCameraFrustum(player.cam, SSIDEffect);
             float width = hiZBufferRenderer.hiZBufferTargetMips[0].Width;
             float height= hiZBufferRenderer.hiZBufferTargetMips[0].Height;
-            Debug.WriteLine("width: "+width+"height: "+height);
+          
+        //    Debug.WriteLine("width: "+width+"height: "+height);
             SSIDEffect.Parameters["ProjectionDepthTex"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             SSIDEffect.Parameters["ProjectionDepthTexMip0"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[0]);
                   SSIDEffect.Parameters["ProjectionDepthTexMip1"]?.SetValue(hiZBufferRenderer.hiZBufferTargetMips[1]);

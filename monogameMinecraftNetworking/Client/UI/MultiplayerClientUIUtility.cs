@@ -320,7 +320,15 @@ namespace monogameMinecraftNetworking.Client.UI
             };
             InputField chatMessageField = new InputField(new Vector2(0.0f, 0.95f), 0.8f, 0.05f,
                 UIElement.UITextures["inputfield"], UIElement.UITextures["inputfieldhighlighted"], sf,
-                game._spriteBatch, game.Window,null, "", 0.7f, 64, false,true,0.01f);
+                game._spriteBatch, game.Window,null, "", 0.7f, 64, false,true,0.01f,true);
+            chatMessageField.onEnterPressedAction = (inputField) =>
+            {
+                if (chatMessageField.text.Length > 0)
+                {
+                    game.SendChatMessage(inputField, chatMessageField.text);
+                    chatMessageField.text = "";
+                }
+            };
             UIButton sendChatMessageButton = new UIButton(new Vector2(0.8f, 0.95f), 0.2f, 0.05f,
                 UIElement.UITextures["buttontexture"], new Vector2(0.4f, 0.55f), sf, game._spriteBatch,
                 game.Window, (ub) =>
