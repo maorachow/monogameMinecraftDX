@@ -18,14 +18,14 @@ namespace monogameMinecraftShared.UI
     public class UIConstructionManager:UIConstructionManagerBase
     {
        
-        public UIConstructionManager(UIStateManager uiStateManager, MinecraftGameBase game)
+        public UIConstructionManager(UIStateManager uiStateManager, MinecraftGameBase game):base(uiStateManager)
         {
 
-            this.uiStateManager = uiStateManager;
+         
             this.game = game;
         }
 
-        public void ConstructAll()
+        public override void ConstructAll()
         {
             ConstructStartMenu();
             ConstructSettings();

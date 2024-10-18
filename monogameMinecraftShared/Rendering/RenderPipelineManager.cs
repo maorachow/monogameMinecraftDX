@@ -17,7 +17,8 @@ namespace monogameMinecraftShared.Rendering
     public class HighDefRenderPipelineManager:IRenderPipelineManager
     {
         public List<IEntityRenderer>  entityRenderers { get; set; }
-       
+        public List<IPostRenderingRenderer> postRenderingRenderers { get; set; }
+
         public ShadowRenderer shadowRenderer;
         public SSAORenderer ssaoRenderer;
         public SkyboxRenderer skyboxRenderer;
@@ -64,6 +65,7 @@ namespace monogameMinecraftShared.Rendering
         public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction =null)
         {
             entityRenderers = new List<IEntityRenderer>();
+            postRenderingRenderers = new List<IPostRenderingRenderer>();
             if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
             {
                 curRenderingWorld = VoxelWorld.currentWorld;
@@ -106,7 +108,11 @@ namespace monogameMinecraftShared.Rendering
             skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0;
             skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0;
             contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayerR.gamePlayer);
-            shadowRenderer = new ShadowRenderer(game.gamePlayerR, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderers.Count>0? entityRenderers[0]:null, game.gameTimeManager);
+            shadowRenderer = new ShadowRenderer(game.gamePlayerR, game.GraphicsDevice,
+                effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer,
+                entityRenderers.Count > 0 ? entityRenderers[0] as IShadowDrawableRenderer : null, game.gameTimeManager,
+                entityRenderers.Count > 1 ? entityRenderers[1] as IShadowDrawableRenderer : null,
+                entityRenderers.Count > 2 ? entityRenderers[2] as IShadowDrawableRenderer : null);
             motionVectorRenderer = new MotionVectorRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, game.gamePlayerR.gamePlayer);
             ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(game.GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
@@ -209,7 +215,11 @@ namespace monogameMinecraftShared.Rendering
                     }
                 }
             }
-         
+
+            foreach (var item in postRenderingRenderers)
+            {
+                item.DrawPostRendering();
+            }
        
 
 

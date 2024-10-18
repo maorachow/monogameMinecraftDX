@@ -128,7 +128,7 @@ namespace monogameMinecraftShared.UI
             {
                 textSize = font.MeasureString(text) / 2f;
             }
-            float textSizeScaling = state.ScreenRect.Height / (float)state.ScreenRectInital.Height * 2f * textScale;
+            float textSizeScaling = ButtonRect.Height / (float)(textSize.Y * 2);
 
             float horizontalTextSizeScaling = (ButtonRect.Width / (float)(textSize.X*2));
             textSize *= MathF.Min(textSizeScaling, horizontalTextSizeScaling) ;

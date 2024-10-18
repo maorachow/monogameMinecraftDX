@@ -13,7 +13,7 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
 {
     public class ClientSideParticleRenderer:ParticleRenderer
     {
-        public ClientSideParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer, bool isEnabled): base(atlas, atlasNormal, atlasMER, device, gBufferParticleEffect, gamePlayer, isEnabled)
+        public ClientSideParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer, bool isEnabled): base(device, gBufferParticleEffect, gamePlayer, isEnabled)
         {
             instancingBufferGravityTextured = new VertexBuffer(device, typeof(VertexMatrix4x4UVScale),
               300, BufferUsage.WriteOnly);

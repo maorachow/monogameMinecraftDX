@@ -41,12 +41,12 @@ namespace monogameMinecraftNetworking.Client
       //  public INetworkClientRenderPipelineManager renderPipelineManager;
         public IMultiplayerClient networkingClient;
 
-        public virtual void OpenInventory(UIButton ub)
+        public override void OpenInventory(object ub)
         {
           //  throw new NotImplementedException();
         }
 
-        public virtual void InitGameplay(UIButton obj)
+        public override void InitGameplay(object obj)
         {
           //  throw new NotImplementedException();
         }
@@ -68,7 +68,7 @@ namespace monogameMinecraftNetworking.Client
           //  throw new NotImplementedException();
      //   }
 
-        public virtual void ResumeGame(object obj)
+        public override void ResumeGame()
         {
             
         }

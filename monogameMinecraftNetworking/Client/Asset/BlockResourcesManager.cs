@@ -22,7 +22,7 @@ namespace monogameMinecraftNetworking.Client.Asset
 {
     public class BlockResourcesManager
     {
-        public static void LoadDefaultUIResources(ContentManager content, Game game)
+        /*public static void LoadDefaultUIResources(ContentManager content, Game game)
         {
             Dictionary<int, string> blockSpriteInfoData = new Dictionary<int, string>
             {
@@ -226,6 +226,6 @@ namespace monogameMinecraftNetworking.Client.Asset
            // ClientSideChunkHelper.RebuildAllChunks();
 
             monogameMinecraftShared.Asset.BlockResourcesManager.LoadParticleResources(monogameMinecraftShared.Asset.BlockResourcesManager.contentManager, device, pr);
-        }
+        }*/
     }
 }

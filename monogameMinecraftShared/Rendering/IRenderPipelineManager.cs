@@ -30,6 +30,7 @@ namespace monogameMinecraftShared.Rendering
 
 
         public List<IEntityRenderer> entityRenderers { get; set; }
+        public List<IPostRenderingRenderer> postRenderingRenderers { get; set; }
 
         public IVoxelWorldWithRenderingChunkBuffers curRenderingWorld { get; set; }
 

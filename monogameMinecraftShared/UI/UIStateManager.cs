@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,13 +47,13 @@ namespace monogameMinecraftShared.UI
                 UIStateTypes.StructureOperations,new UIStateStructureOperations()
             },
             {
-                UIStateTypes.InGameChatMessages,new UIStateMenu()
+                UIStateTypes.InGameChatMessages,new UIStateInGameChatMessages()
             },
 
         };
 
         private MinecraftGameBase game;
-        private UIConstructionManager uiConstructionManager;
+        private UIConstructionManagerBase uiConstructionManager;
         public Rectangle ScreenRect = new Rectangle(0, 0, 800, 480);
         public Rectangle ScreenRectInital = new Rectangle(0, 0, 800, 480);
         public List<UIElement> menuUIs = new List<UIElement>();
@@ -96,18 +97,23 @@ namespace monogameMinecraftShared.UI
             curState.Update(deltaTime,this);
         }
 
-        public UIStateManager(MinecraftGameBase game, bool useCustomUIConstructor = false,UIConstructionManager customUIConstructionManager=null)
+        public UIStateManager(MinecraftGameBase game)
         {
             this.game= game;
-            if (useCustomUIConstructor == false)
-            {
+            
                 uiConstructionManager = new UIConstructionManager(this, game);
-            }
-            else
-            {
-                uiConstructionManager = customUIConstructionManager;
-            }
           
+          
+        }
+
+        public void SetUIConstructionManager(UIConstructionManagerBase customUIConstructionManager)
+        {
+            if (isValid == true)
+            {
+                Debug.WriteLine("cannot set construction manager after UI constructed");
+                return;
+            }
+            this.uiConstructionManager= customUIConstructionManager;
         }
 
         public void Initialize()

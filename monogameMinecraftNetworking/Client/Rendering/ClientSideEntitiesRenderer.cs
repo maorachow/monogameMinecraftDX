@@ -19,11 +19,15 @@ using EntityData = monogameMinecraftNetworking.Data.EntityData;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
-    public class ClientSideEntitiesRenderer:IEntityRenderer
+    public class ClientSideEntitiesRenderer:IEntityRenderer,IShadowDrawableRenderer,IGBufferDrawableRenderer
     {
+        [Obsolete]
         public static Model zombieModel;
+        [Obsolete]
         public static Model pigModel;
+        [Obsolete]
         public static Texture2D zombieTex;
+        [Obsolete]
         public static Texture2D pigTex;
         public IGamePlayer curGamePlayer;
        
@@ -34,6 +38,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
     //    public List<(EntityData data, AnimationBlend animState)> allEntitiesCache;
      //   public List<EntityData> lastAllEntitiesDatas;
         public IMultiplayerClient client;
+        [Obsolete]
         public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -48,7 +53,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
               
             }, 0.5f)
         }, true);
-
+        [Obsolete]
         public static Animation pigWalkingAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -67,6 +72,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
             }, 0.5f)
         }, true);
+        [Obsolete]
         public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -78,6 +84,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
             }, 0.1f)
         }, false);
+        [Obsolete]
         public static Animation entityDieAnimRoot = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -90,16 +97,16 @@ namespace monogameMinecraftNetworking.Client.Rendering
             }, 0.1f)
         }, false);
         public ClientGameBase game;
-        public ClientSideEntitiesRenderer(Model zombieModel,Model pigModel, Effect gBufferEffect, IGamePlayer gamePlayer,
-            Texture2D zombieTex, Texture2D pigTex, IMultiplayerClient client, GraphicsDevice device,ClientGameBase game)
+        public ClientSideEntitiesRenderer(Effect gBufferEffect, IGamePlayer gamePlayer,
+          IMultiplayerClient client, GraphicsDevice device,ClientGameBase game)
         {
             this.curGamePlayer = gamePlayer;
 
-            ClientSideEntitiesRenderer.zombieTex = zombieTex;
-            ClientSideEntitiesRenderer.pigTex = pigTex;
+         //   ClientSideEntitiesRenderer.zombieTex = zombieTex;
+       //     ClientSideEntitiesRenderer.pigTex = pigTex;
             this.gBufferEffect = gBufferEffect;
-            ClientSideEntitiesRenderer.zombieModel = zombieModel;
-            ClientSideEntitiesRenderer.pigModel = pigModel;
+        //    ClientSideEntitiesRenderer.zombieModel = zombieModel;
+        //    ClientSideEntitiesRenderer.pigModel = pigModel;
             this.client = client;
         //    client.allEntitiesUpdatedAction += Update;
         //    allEntitiesCache = new List<(EntityData data, AnimationBlend animState)>();
@@ -193,7 +200,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                         switch (entity.data.typeid)
                         {
                             case 0:
-                                gBufferEffect1.Parameters["TextureE"].SetValue(zombieTex);
+                             //   gBufferEffect1.Parameters["TextureE"].SetValue(zombieTex);
                                 //    DrawZombie(entity,gBufferShader);
                                 Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
@@ -231,7 +238,115 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                 });
                                 break;
                             case 1:
-                                gBufferEffect1.Parameters["TextureE"].SetValue(pigTex);
+                         //       gBufferEffect1.Parameters["TextureE"].SetValue(pigTex);
+                                //    DrawZombie(entity,gBufferShader);
+                                Matrix world1 = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
+
+
+                                Vector3 headRot = new Vector3();
+                                if (entity.entityOptionalData is Float3Data)
+                                {
+                                    Float3Data? data1 = (entity.entityOptionalData as Float3Data?);
+                                    if (data1 != null)
+                                    {
+                                        headRot = new Vector3(data1.Value.x, data1.Value.y, data1.Value.z);
+                                    }
+                                }
+                                Dictionary<string, Matrix> optionalParams1 = new Dictionary<string, Matrix>
+                                {
+                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), -MathHelper.ToRadians(headRot.X) ,0) },
+                                    {"body", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY),0 ,0)}
+                                };
+
+                                entity.animState.DrawAnimatedModel(device, world1, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect1, optionalParams1, () =>
+                                {
+                                    if (entity.data.isEntityHurt)
+                                    {
+
+
+                                        gBufferEffect1.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+
+                                    }
+                                    else
+                                    {
+
+                                        gBufferEffect1.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+
+                                    }
+                                });
+                                break;
+                        }
+                    }
+              
+
+
+
+
+                }
+            }
+           
+        }
+
+
+
+        public void DrawGBuffer()
+        {
+            BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
+            if (game.clientSideEntityManager == null)
+            {
+                return;
+            }
+            lock (game.clientSideEntityManager.allEntitiesCacheLock)
+            {
+
+                foreach (var entity in game.clientSideEntityManager.allEntitiesCache)
+                {
+
+
+                    if (entity.data.entityInWorldID == ClientSideVoxelWorld.singleInstance.worldID)
+                    {
+                        switch (entity.data.typeid)
+                        {
+                            case 0:
+                         //       gBufferEffect.Parameters["TextureE"].SetValue(zombieTex);
+                                //    DrawZombie(entity,gBufferShader);
+                                Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
+
+
+                                Quaternion bodyQuat = Quaternion.Identity;
+                                if (entity.entityOptionalData is Float4Data)
+                                {
+                                    Float4Data? data1 = (entity.entityOptionalData as Float4Data?);
+                                    if (data1 != null)
+                                    {
+                                        bodyQuat = new Quaternion(data1.Value.x, data1.Value.y, data1.Value.z, data1.Value.w);
+                                    }
+                                }
+                                Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                                {
+                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY), -MathHelper.ToRadians(entity.data.rotX) ,0) },
+                                    {"body", Matrix.CreateFromQuaternion(bodyQuat)}
+                                };
+
+                                entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
+                                {
+                                    if (entity.data.isEntityHurt)
+                                    {
+
+
+                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+
+                                    }
+                                    else
+                                    {
+
+                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+
+                                    }
+                                });
+                                break;
+                            case 1:
+                        //        gBufferEffect.Parameters["TextureE"].SetValue(pigTex);
                                 //    DrawZombie(entity,gBufferShader);
                                 Matrix world1 = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
@@ -270,16 +385,15 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                 break;
                         }
                     }
-              
+
 
 
 
 
                 }
             }
-           
-        }
 
+        }
         public void DrawLowDefForward(Effect forwardEffect)
         {
             throw new NotImplementedException();//mobile multiplayer not supported

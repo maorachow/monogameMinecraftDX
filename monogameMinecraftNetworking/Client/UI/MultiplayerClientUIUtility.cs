@@ -7,8 +7,10 @@ using monogameMinecraftShared.World;
 using monogameMinecraftShared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +24,95 @@ namespace monogameMinecraftNetworking.Client.UI
     {
        // public static SpriteFont sf;
 
-       public void 
+       public static bool TryValidateAddress(List<UIElement> uiElements, string addressString,
+       int port,
+       string name,out IPAddress outIPAddress)
+       {
+           int buttonIndex = uiElements.FindIndex((element) =>
+           {
+               if (element is UIButton)
+               {
+                   UIButton button = element as UIButton;
+                   if (button.optionalTag == "connectResultButton"
+                      )
+                   {
+                       return true;
+                   }
+               }
+
+               return false;
+
+           });
+
+           UIButton errorLogButton = (UIButton)(buttonIndex == -1 ? null : uiElements[buttonIndex]);
+        
+           try
+           {
+               outIPAddress = IPAddress.Parse(addressString);
+              
+               if (port < 0 || port > 65535)
+               {
+                   throw new ArgumentOutOfRangeException("port out of valid range");
+
+               }
+
+               return true;
+           }
+           catch (Exception e)
+           {
+               if (errorLogButton != null)
+               {
+                   Debug.WriteLine("print to button");
+                   errorLogButton.text = "Connection Result : Failed. Error:" + e.GetType();
+               }
+               Debug.WriteLine(e);
+               outIPAddress=null;
+               return false;
+           }
+           
+       }
+
+       public static void TryPresentConnectionResult(List<UIElement> uiElements,bool succeeded)
+       {
+           int buttonIndex = uiElements.FindIndex((element) =>
+           {
+               if (element is UIButton)
+               {
+                   UIButton button = element as UIButton;
+                   if (button.optionalTag == "connectResultButton"
+                      )
+                   {
+                       return true;
+                   }
+               }
+
+               return false;
+
+           });
+
+           UIButton errorLogButton = (UIButton)(buttonIndex == -1 ? null : uiElements[buttonIndex]);
+            if (succeeded == false)
+           {
+               if (errorLogButton != null)
+               {
+                   errorLogButton.text = "Connection Result : Failed.";
+                    
+               }
+           }
+        }
+
+       public static void TryBindChatMessageUIWithClient(List<UIElement> uiElements, IMultiplayerClient client)
+       {
+           int buttonIndex = uiElements.FindIndex((element) => element.optionalTag == "chatMessageList");
+
+           TextListUI chatMessageListElement = (TextListUI)(buttonIndex == -1 ? null : uiElements[buttonIndex]);
+           if (chatMessageListElement != null)
+           {
+               chatMessageListElement.texts = new List<string>();
+               client.chatMessageReceivedAction += chatMessageListElement.AppendText;
+            }
+       
+        }
       /*  public static void InitGameUI(ClientGameBase game)
         {
 

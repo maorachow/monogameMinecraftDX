@@ -12,6 +12,7 @@ using monogameMinecraftNetworking.Client.Rendering;
 using monogameMinecraftNetworking.Protocol;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
+using monogameMinecraftShared.Asset;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
@@ -49,17 +50,85 @@ namespace monogameMinecraftNetworking.Client.Updateables
             client.allEntitiesUpdatedAction += Update;
             client.allEntitiesPreUpdatedAction += PreUpdate;
         }
-
+        [Obsolete]
         public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
 
 
-        public static void LoadEntitySounds(ContentManager cm)
+        public static void LoadEntityAssets(ContentManager cm)
         {
-            entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>("sounds/zombiehurt"));
-            entitySounds.TryAdd("0say", cm.Load<SoundEffect>("sounds/zombiesay"));
-            entitySounds.TryAdd("1hurt", cm.Load<SoundEffect>("sounds/pighurt"));
-            entitySounds.TryAdd("1say", cm.Load<SoundEffect>("sounds/pigsay"));
+            EntityResourcesManager.instance.TryLoadCustomEntitySounds(cm,new Tuple<string, string>("0hurt", "sounds/zombiehurt"),
+
+                new Tuple<string, string>("0say", "sounds/zombiesay"),
+                new Tuple<string, string>( "1hurt","sounds/pighurt"),
+                new Tuple<string, string>("1say","sounds/pigsay")
+
+                );
+            EntityResourcesManager.instance.TryLoadCustomEntityAnims(new Tuple<string, Animation>("zombieAnim", new Animation(new List<AnimationStep> {
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                        { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.5f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                        { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
+                        { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.5f)
+                }, true)),
+                new Tuple<string, Animation>("pigWalkingAnim", new Animation(new List<AnimationStep> {
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                        { "leg0", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg1",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg2",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg3",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.5f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                        { "leg0", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg1",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg2",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leg3",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.5f)
+                }, true)),
+
+                new Tuple<string, Animation>("entityDieAnim", new Animation(new List<AnimationStep> {
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                        { "waist", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.4f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                        { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
+                    }, 0.1f)
+                }, false)),
+                new Tuple<string, Animation>("entityDieAnimRoot", new Animation(new List<AnimationStep> {
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                        { "RootNode", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f,0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.4f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                        { "RootNode", new AnimationTransformation(new Vector3(0f, 0f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
+                    }, 0.1f)
+                }, false))
+             
+                );
+            EntityResourcesManager.instance.TryAddCustomEntityModels(cm,
+                new CustomModelLoadingItem("zombie","zombiefbx","husk"),
+                new CustomModelLoadingItem("pig", "pigfbx", "pig"));
+            //entitySounds.TryAdd("0hurt", cm.Load<SoundEffect>());
+          //  entitySounds.TryAdd("0say", cm.Load<SoundEffect>("sounds/zombiesay"));
+          //  entitySounds.TryAdd("1hurt", cm.Load<SoundEffect>("sounds/pighurt"));
+          //  entitySounds.TryAdd("1say", cm.Load<SoundEffect>("sounds/pigsay"));
         }
+        
 
         public bool isFirstUpdatePassed = false;
         public void Update()
@@ -74,21 +143,22 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     {
                         switch (item1.typeid)
                         {
+                            
                             case 0:
-                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new AnimationBlend(new AnimationState[]
+                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new SingleTexturedAnimatedModel(new AnimationState[]
                                 {
-                                    new AnimationState(ClientSideEntitiesRenderer. zombieAnim, ClientSideEntitiesRenderer.zombieModel),
+                                    new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["zombieAnim"],EntityResourcesManager.instance.loadedEntityModels["zombie"].model),
 
-                                    new AnimationState(ClientSideEntitiesRenderer. entityDieAnim, ClientSideEntitiesRenderer.zombieModel)
-                                }, ClientSideEntitiesRenderer.zombieModel), 0f));
+                                    new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["entityDieAnim"],EntityResourcesManager.instance.loadedEntityModels["zombie"].model)
+                                }, EntityResourcesManager.instance.loadedEntityModels["zombie"].model, EntityResourcesManager.instance.loadedEntityModels["zombie"].texture), 0f));
                                 break;
                             case 1:
-                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new AnimationBlend(new AnimationState[]
+                                allEntitiesCache.Add(new ClientSideEntityCacheObject(item1, new SingleTexturedAnimatedModel(new AnimationState[]
                                 {
-                                    new AnimationState(ClientSideEntitiesRenderer. pigWalkingAnim, ClientSideEntitiesRenderer.pigModel),
+                                    new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["pigWalkingAnim"],  EntityResourcesManager.instance.loadedEntityModels["pig"].model),
 
-                                    new AnimationState(ClientSideEntitiesRenderer. entityDieAnimRoot, ClientSideEntitiesRenderer.pigModel)
-                                }, ClientSideEntitiesRenderer.pigModel), 0f));
+                                    new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["entityDieAnimRoot"],  EntityResourcesManager.instance.loadedEntityModels["pig"].model)
+                                }, EntityResourcesManager.instance.loadedEntityModels["pig"].model, EntityResourcesManager.instance.loadedEntityModels["pig"].texture), 0f));
                                 break;
                         }
                     

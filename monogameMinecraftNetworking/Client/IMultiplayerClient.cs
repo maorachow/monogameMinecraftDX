@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,9 @@ namespace monogameMinecraftNetworking.Client
         public ClientGameBase game { get; }
 
         public bool isGoingToQuitGame { get; set; }
+        public void Initialize(IPAddress address, int port, ClientSideGamePlayer gamePlayer, ClientGameBase game);
         public bool Connect();
+
 
         public bool PlayerLogin();
 

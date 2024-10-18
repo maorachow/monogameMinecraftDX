@@ -22,9 +22,11 @@ using Vector4 = Microsoft.Xna.Framework.Vector4;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
-    public class ClientSidePlayersRenderer:IEntityRenderer
+    public class ClientSidePlayersRenderer:IEntityRenderer, IPostRenderingRenderer, IShadowDrawableRenderer, IGBufferDrawableRenderer
     {
-        public static Model playerModel;
+        [Obsolete]
+        public static Model playerModel; 
+        [Obsolete]
         public Texture2D playerTex;
         public IGamePlayer curGamePlayer;
         public string curUserName;
@@ -33,9 +35,10 @@ namespace monogameMinecraftNetworking.Client.Rendering
         public GraphicsDevice device;
         public SpriteBatch spriteBatch;
         public SpriteFont spriteFont;
-       // public List<(UserData data, AnimationBlend animState)> allUsersCache;
-   //     public List<UserData> latestAllUserDatas;
-     //   public IMultiplayerClient client;
+        // public List<(UserData data, AnimationBlend animState)> allUsersCache;
+        //     public List<UserData> latestAllUserDatas;
+        //   public IMultiplayerClient client;
+        [Obsolete]
         public static Animation playerAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -53,7 +56,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
             }, 0.5f)
             
         }, true);
-
+        [Obsolete]
         public static Animation playerAttackAnim = new Animation(new List<AnimationStep>
         {
            
@@ -101,14 +104,14 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
         }, true);
         public ClientGameBase game;
-        public ClientSidePlayersRenderer(Model playerModel, Effect gBufferEffect, IGamePlayer gamePlayer,
-            Texture2D playerTex,IMultiplayerClient client, GraphicsDevice device, SpriteBatch spriteBatch, SpriteFont spriteFont,ClientGameBase game)
+        public ClientSidePlayersRenderer(Effect gBufferEffect, IGamePlayer gamePlayer,
+            IMultiplayerClient client, GraphicsDevice device, SpriteBatch spriteBatch, SpriteFont spriteFont,ClientGameBase game)
         {
             this.curGamePlayer = gamePlayer;
             curUserName = client.gamePlayer.playerName;
-            this.playerTex = playerTex;
+         //   this.playerTex = playerTex;
             this.gBufferEffect = gBufferEffect;
-            ClientSidePlayersRenderer.playerModel = playerModel;
+           // ClientSidePlayersRenderer.playerModel = playerModel;
             //this.client = client;
          //   client.allUsersUpdatedAction += Update;
            // allUsersCache = new List<(UserData data, AnimationBlend animState)>();
@@ -217,7 +220,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                     continue;
                 }
 
-                gBufferEffect1.Parameters["TextureE"].SetValue(playerTex);
+              //  gBufferEffect1.Parameters["TextureE"].SetValue(playerTex);
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -237,6 +240,48 @@ namespace monogameMinecraftNetworking.Client.Rendering
             }
         }
 
+
+        public void DrawGBuffer()
+        {
+            BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
+            foreach (var entity in game.clientSidePlayersManager.allUsersCache)
+            {
+                if (entity.data.userName == curUserName)
+                {
+                    continue;
+                }
+
+                if (entity.data.curWorldID != ClientSideVoxelWorld.singleInstance.worldID)
+                {
+                    continue;
+                }
+
+           //     gBufferEffect.Parameters["TextureE"].SetValue(playerTex);
+                //    DrawZombie(entity,gBufferShader);
+                Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
+                Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+                {
+                    {"head", Matrix.CreateFromYawPitchRoll(-MathHelper.ToRadians(entity.data.rotX), MathHelper.ToRadians(entity.data.rotY) ,0) },
+                    {"body", Matrix.CreateFromYawPitchRoll(-MathHelper.ToRadians(entity.data.rotX),0,0)}
+                };
+
+                entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
+                {
+                    gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+                });
+
+
+
+
+            }
+        }
+
+        public void DrawPostRendering()
+        {
+            DrawPlayerNames();
+        }
+
+        private static readonly float playerNameTextWidth = 0.2f;
         public void DrawPlayerNames()
         {
             float screenWidth = device.PresentationParameters.BackBufferWidth;
@@ -256,8 +301,8 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 }
                 Vector4 positionWS = new Vector4(entity.data.posX, entity.data.posY+1.8f, entity.data.posZ, 1);
                 Vector4 positionVS= Vector4.Transform(positionWS, curGamePlayer.cam.viewMatrix);
-                float distance = MathF.Max(-positionVS.Z, 1f);
-                float scale = (screenWidth/UIElement.ScreenRectInital.Width)*10f ;
+                float distance = MathF.Max(-positionVS.Z, 0.05f);
+                float scale =1;
                 Vector4 projectionPos = Vector4.Transform(positionWS, curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
                 Vector4 screenSpacePos = new Vector4(projectionPos.X / projectionPos.W, projectionPos.Y / projectionPos.W, projectionPos.Z / projectionPos.W, projectionPos.W / projectionPos.W);
                 screenSpacePos.Y = -screenSpacePos.Y;
@@ -270,8 +315,10 @@ namespace monogameMinecraftNetworking.Client.Rendering
                     screenSpacePos = new Vector4(-10f, -10f, 0f, 0f);
                 }
                 Vector2 pixelPos= new Vector2(screenSpacePos.X*screenWidth, screenSpacePos.Y*screenHeight);
-              Vector2   textSize = (spriteFont.MeasureString(entity.data.userName) / 2f)* (scale / distance);
-                spriteBatch.DrawString(spriteFont,entity.data.userName,pixelPos-textSize,Color.White,0f,new Vector2(0f,0f),new Vector2(scale/ distance),SpriteEffects.None,1);
+                Vector2 textSizeMeasured = spriteFont.MeasureString(entity.data.userName);
+                float textScale = playerNameTextWidth * screenWidth / (MathF.Max(textSizeMeasured.X, textSizeMeasured.Y) );
+              Vector2   textSize = (textSizeMeasured / 2f)* (scale / distance) * textScale;
+                spriteBatch.DrawString(spriteFont,entity.data.userName,pixelPos-textSize,Color.White,0f,new Vector2(0f,0f),new Vector2(scale/ distance) * textScale, SpriteEffects.None,1);
 
             }
             spriteBatch.End();

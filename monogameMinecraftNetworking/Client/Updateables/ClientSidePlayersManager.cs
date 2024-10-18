@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Content;
 using monogameMinecraftNetworking.Client.Rendering;
+using monogameMinecraftShared.Asset;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
@@ -42,6 +44,76 @@ namespace monogameMinecraftNetworking.Client.Updateables
             client.prevAllUsersUpdatedAction += PrevUpdate;
         }
 
+        public static void LoadPlayerResources(ContentManager cm)
+        {
+            EntityResourcesManager.instance.TryAddCustomEntityModels(cm,
+                new CustomModelLoadingItem("player", "playermodel", "steve")
+                );
+            EntityResourcesManager.instance.TryLoadCustomEntityAnims(new Tuple<string, Animation>("playerAnim", new Animation(new List<AnimationStep> {
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+                        { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leftLeg",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leftArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) }
+                    }, 0.5f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+                        { "rightLeg", new AnimationTransformation(new Vector3(0f, 0.0f, 0f), new Vector3(0f, 75f, 0f),  new Vector3(1f, 1f, 1f)) },
+                        { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
+                        { "leftArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 75f, 0f), new Vector3(1f, 1f, 1f)) }
+                    }, 0.5f)
+
+                }, true))
+            , new Tuple<string, Animation>("playerAttackAnim", new Animation(new List<AnimationStep>
+                {
+
+
+
+
+
+
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(-20f,30f , 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(-40f,110f , 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3( 50f,80f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3( 60f,30f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+                    new AnimationStep(new Dictionary<string, AnimationTransformation> {
+
+
+                        { "rightArm",new AnimationTransformation(new Vector3(0f,0f,0f),new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 1f)) },
+
+                    }, 0.05f),
+
+                }, true))
+            );
+        }
         public void Update()
         {
 
@@ -53,7 +125,15 @@ namespace monogameMinecraftNetworking.Client.Updateables
                 {
                     if (allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; }) == -1)
                     {
-                        allUsersCache.Add(new ClientSidePlayersCacheObject(item1, new AnimationBlend(new AnimationState[] { new AnimationState(ClientSidePlayersRenderer. playerAnim, ClientSidePlayersRenderer.playerModel), new AnimationState(ClientSidePlayersRenderer.playerAttackAnim, ClientSidePlayersRenderer.playerModel) }, ClientSidePlayersRenderer.playerModel)));
+                        allUsersCache.Add(new ClientSidePlayersCacheObject(item1,
+                            new SingleTexturedAnimatedModel(
+                                new AnimationState[]
+                                {
+                                    new AnimationState( EntityResourcesManager.instance.loadedEntityAnims["playerAnim"],
+                                        EntityResourcesManager.instance.loadedEntityModels["player"].model),
+                                    new AnimationState( EntityResourcesManager.instance.loadedEntityAnims["playerAttackAnim"],
+                                        EntityResourcesManager.instance.loadedEntityModels["player"].model)
+                                }, EntityResourcesManager.instance.loadedEntityModels["player"].model, EntityResourcesManager.instance.loadedEntityModels["player"].texture)));
                     }
                 }
 

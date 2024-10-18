@@ -28,6 +28,7 @@ namespace monogameMinecraftShared.Rendering
         public SkyboxRenderer skyboxRenderer;
         public GBufferRenderer gBufferRenderer;
         public List<IEntityRenderer> entityRenderers { get; set; }
+        public List<IPostRenderingRenderer> postRenderingRenderers { get; set; }
         public TerrainMipmapGenerator terrainMipmapGenerator;
         public HDRCubemapRendererLowDef hdrCubemapRenderer;
         public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
@@ -45,6 +46,7 @@ namespace monogameMinecraftShared.Rendering
         public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction = null)
         {
             entityRenderers = new List<IEntityRenderer>();
+            postRenderingRenderers = new List<IPostRenderingRenderer>();
             if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
             {
                 curRenderingWorld = VoxelWorld.currentWorld;
@@ -165,8 +167,11 @@ namespace monogameMinecraftShared.Rendering
                 }
             }
 
-           
-           
+
+            foreach (var item in postRenderingRenderers)
+            {
+                item.DrawPostRendering();
+            }
 
         }
 

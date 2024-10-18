@@ -19,8 +19,8 @@ namespace monogameMinecraftShared.UI
         public Texture2D selectedHotbarTex;
         public Vector2[] hotbarItemNodes;
         public float hotbarItemWidth;
-
-        
+        public readonly float crosshairHeight = 0.09f;
+        public readonly float playerPosTextHeight = 0.02f;
         //   public static List<UIElement> UIElements = new List<UIElement>();
         string UIElement.text { get; set; }
         public string optionalTag { get; set; }
@@ -35,11 +35,19 @@ namespace monogameMinecraftShared.UI
             selectedHotbarTex = selectedHotbar;
             //    this.player = player;
         }
-        public void Drawposition(UIStateManager state)
+        public void DrawPlayerosition(UIStateManager state)
         {
             if (gamePlayer != null)
             {
-                spriteBatch.DrawString(font, new StringBuilder("Position:" + (int)gamePlayer.gamePlayer.position.X + " " + (int)gamePlayer.gamePlayer.position.Y + " " + (int)gamePlayer.gamePlayer.position.Z), new Vector2(0, 0), Color.White, 0f, new Vector2(0f, 0f), 1f, SpriteEffects.None, 1);
+                StringBuilder s = new StringBuilder("Position:" + (int)gamePlayer.gamePlayer.position.X + " " +
+                                                    (int)gamePlayer.gamePlayer.position.Y + " " +
+                                                    (int)gamePlayer.gamePlayer.position.Z);
+                Vector2 textSize = font.MeasureString(s) / 2f;
+                float playerPosTextHeightPixel =(float) state.ScreenRect.Height * playerPosTextHeight;
+                float textSizeScaling = playerPosTextHeightPixel / (textSize.Y * 2f);
+                textSize *= textSizeScaling;
+
+                spriteBatch.DrawString(font,s, new Vector2(0, 0), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
             }
 
         }
@@ -51,16 +59,17 @@ namespace monogameMinecraftShared.UI
         void DrawCrosshair(UIStateManager state)
         {
             Vector2 textSize = font.MeasureString(playerCrosshair) / 2f;
-            float textSizeScaling = state.ScreenRect.Height / (float)state.ScreenRectInital.Height * 2f;
+            float crosshairHeightPixel = state.ScreenRect.Height * crosshairHeight;
+            float textSizeScaling = crosshairHeightPixel / (textSize.Y * 2f);
             textSize *= textSizeScaling;
 
-            spriteBatch.DrawString(font, playerCrosshair, new Vector2(state.ScreenRect.Width / 2 - textSize.X, state.ScreenRect.Height / 2 - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
+            spriteBatch.DrawString(font, playerCrosshair, new Vector2(state.ScreenRect.Width / 2.0f - textSize.X, state.ScreenRect.Height / 2.0f - textSize.Y), Color.White, 0f, new Vector2(0f, 0f), textSizeScaling, SpriteEffects.None, 1);
         }
         public void DrawString(UIStateManager state,string text)
         {
             // this. Draw();
             DrawCrosshair(state);
-            Drawposition(state);
+            DrawPlayerosition(state);
             DrawHotbar(state);
         }
 

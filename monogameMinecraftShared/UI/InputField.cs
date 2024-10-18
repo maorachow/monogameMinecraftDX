@@ -121,11 +121,11 @@ namespace monogameMinecraftShared.UI
             float textSizeScaling;
             if (state.ScreenRect.Height < state.ScreenRect.Width)
             {
-                textSizeScaling = state.ScreenRect.Height / (float)state.ScreenRectInital.Height * 2f * textScale;
+                textSizeScaling = inputFieldRect.Height / ((float)textSize.Y * 2f ) * textScale;
             }
             else
             {
-                textSizeScaling = state.ScreenRect.Width / (float)state.ScreenRectInital.Width * 2f * textScale;
+                textSizeScaling = inputFieldRect.Width / ((float)textSize.X * 2f ) * textScale;
             }
 
             textSize *= textSizeScaling;

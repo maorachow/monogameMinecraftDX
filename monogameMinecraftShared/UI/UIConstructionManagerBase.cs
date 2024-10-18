@@ -10,5 +10,16 @@ namespace monogameMinecraftShared.UI
     {
         public UIStateManager uiStateManager;
         public MinecraftGameBase game;
+
+        public UIConstructionManagerBase(UIStateManager uiStateManager)
+        {
+            this.uiStateManager = uiStateManager;
+          
+        }
+
+        public virtual void ConstructAll()
+        {
+
+        }
     }
 }

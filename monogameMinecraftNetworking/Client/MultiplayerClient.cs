@@ -16,6 +16,7 @@ using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftNetworking.Data;
 using monogameMinecraftNetworking.Protocol;
 using monogameMinecraftNetworking.Utility;
+using monogameMinecraftShared.Asset;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
@@ -117,9 +118,9 @@ namespace monogameMinecraftNetworking.Client
         public IPAddress address;
         public int port;
 
-        public MultiplayerClient(IPAddress address, int port, ClientSideGamePlayer gamePlayer, ClientGameBase game)
+        public MultiplayerClient()
         {
-            this.gamePlayer = gamePlayer;
+          /*  this.gamePlayer = gamePlayer;
             this.address = address;
             this.port = port;
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -127,7 +128,7 @@ namespace monogameMinecraftNetworking.Client
             isLoggedIn = false;
             isGoingToQuitGame=false;
             messageParser = new MessageParserSingleSocket(todoList, socket, todoListLock);
-            this.game = game;
+            this.game = game;*/
         }
 
         public void Initialize(IPAddress address, int port, ClientSideGamePlayer gamePlayer, ClientGameBase game)
@@ -144,10 +145,14 @@ namespace monogameMinecraftNetworking.Client
             this.todoList = new ConcurrentQueue<MessageProtocol>();
             isLoggedIn = false;
             isGoingToQuitGame = false;
-            if (messageParser.isMessageParsingThreadRunning == true)
+            if (messageParser != null)
             {
-                messageParser.Stop();
+                if (messageParser.isMessageParsingThreadRunning == true)
+                {
+                    messageParser.Stop();
+                }
             }
+            
             messageParser = new MessageParserSingleSocket(todoList, socket, todoListLock);
             this.game = game;
         }
@@ -386,9 +391,9 @@ namespace monogameMinecraftNetworking.Client
                         case MessageCommandType.EntitySoundBroadcast:
                             EntitySoundBroadcastData data6 =
                                 MessagePackSerializer.Deserialize<EntitySoundBroadcastData>(item.messageData);
-                            if (ClientSideEntityManager.entitySounds .ContainsKey(data6.soundID))
+                            if (EntityResourcesManager.instance.loadedEntitySounds .ContainsKey(data6.soundID))
                             {
-                                SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data6.posX, data6.posY, data6.posZ), ClientSideEntityManager.entitySounds[data6.soundID], 20f);
+                                SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data6.posX, data6.posY, data6.posZ), EntityResourcesManager.instance.loadedEntitySounds[data6.soundID], 20f);
                             }
                             break;
                         case MessageCommandType.WorldTimeDataBroadcast:
@@ -468,6 +473,9 @@ namespace monogameMinecraftNetworking.Client
             {
                 _clientDisconnectedAction("Client Logged Out");
             }
+
+            executeTodoListThread.Join();
+            disconnectIfSocketClosedThread.Join();
             messageParser.Stop();
             socket.Shutdown(SocketShutdown.Both);
             socket.Close(5000);

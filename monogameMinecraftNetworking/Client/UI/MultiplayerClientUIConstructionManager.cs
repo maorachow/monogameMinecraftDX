@@ -17,14 +17,14 @@ namespace monogameMinecraftNetworking.Client.UI
 {
     public class MultiplayerClientUIConstructionManager:UIConstructionManagerBase
     {
-        public MultiplayerClientUIConstructionManager(UIStateManager uiStateManager, ClientGameBase game)
+        public MultiplayerClientUIConstructionManager(UIStateManager uiStateManager, ClientGameBase game):base(uiStateManager)
         {
 
-            this.uiStateManager = uiStateManager;
+            
             this.game = game;
         }
 
-        public void ConstructAll()
+        public override void ConstructAll()
         {
             ConstructStartMenu();
             ConstructSettings();
@@ -32,6 +32,7 @@ namespace monogameMinecraftNetworking.Client.UI
             ConstructPauseMenu();
        //     ConstructStructureOperations();
             ConstructInventory();
+            ConstructChatMessages();
         }
 
         public void ConstructStartMenu()
@@ -142,6 +143,7 @@ namespace monogameMinecraftNetworking.Client.UI
             UIPanel middleDownPanel = new UIPanel(uiStateManager, new Vector2(0.2f, 0.85f), 0.6f, 0.15f, false);
             TextListUI chatMessageListElement = new TextListUI(uiStateManager, new Vector2(0f, 0.1f), 0.4f, 0.2f,
                 UIResourcesManager.instance.UITextures["menubackgroundtransparent"], UIResourcesManager.instance.sf, game._spriteBatch, 1f, 8);
+            chatMessageListElement.optionalTag = "chatMessageList";
             if (game.gamePlatformType == GamePlatformType.VeryLowDefMobile)
             {
                 uiStateManager.inGameUIs = new List<UIElement>
@@ -358,6 +360,48 @@ namespace monogameMinecraftNetworking.Client.UI
             }
 
 
+        }
+
+        public void ConstructChatMessages()
+        {
+            ClientGameBase gameClient = game as ClientGameBase;
+
+
+            InputField chatMessageField = new InputField(uiStateManager, new Vector2(0.0f, 0.95f), 0.8f, 0.05f,
+                UIResourcesManager.instance.UITextures["inputfield"], UIResourcesManager.instance.UITextures["inputfieldhighlighted"], UIResourcesManager.instance.sf,
+                game._spriteBatch, game.Window, null, "", 0.7f, 64, false, true, 0.01f, true);
+            chatMessageField.onEnterPressedAction = (inputField) =>
+            {
+                if (chatMessageField.text.Length > 0)
+                {
+                    gameClient.SendChatMessage(inputField, chatMessageField.text);
+                    chatMessageField.text = "";
+                }
+            };
+            UIButton sendChatMessageButton = new UIButton(uiStateManager, new Vector2(0.8f, 0.95f), 0.2f, 0.05f,
+                UIResourcesManager.instance.UITextures["buttontexture"], new Vector2(0.4f, 0.55f), UIResourcesManager.instance.sf, game._spriteBatch,
+                game.Window, (ub) =>
+                {
+                    if (chatMessageField.text.Length > 0)
+                    {
+                        gameClient.SendChatMessage(ub, chatMessageField.text);
+                        chatMessageField.text = "";
+                    }
+
+                }, "Send Message", null, 0.7f, false, true);
+            UIButton closeChatUIButton = new UIButton(uiStateManager, new Vector2(0.8f, 0.85f), 0.2f, 0.05f,
+                UIResourcesManager.instance.UITextures["buttontexture"], new Vector2(0.4f, 0.55f), UIResourcesManager.instance.sf, game._spriteBatch,
+                game.Window, (ub) =>
+                {
+                    gameClient.CloseChatUI();
+
+                }, "Close", null, 0.7f, false, true);
+            uiStateManager.chatMessagesUIs = new List<UIElement>()
+            {
+                chatMessageField,
+                sendChatMessageButton,
+                closeChatUIButton
+            };
         }
     }
 }

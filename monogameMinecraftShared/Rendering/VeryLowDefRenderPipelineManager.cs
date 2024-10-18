@@ -27,6 +27,7 @@ using monogameMinecraftShared.World;
             public ChunkRenderer chunkRenderer { get; set; }
             public ParticleRenderer particleRenderer { get; set; }
             public List<IEntityRenderer> entityRenderers { get; set; }
+            public List<IPostRenderingRenderer> postRenderingRenderers { get; set; }
             public Texture2D environmentHDRITex;
             public Texture2D environmentHDRITexNight;
 
@@ -52,7 +53,8 @@ using monogameMinecraftShared.World;
             public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction = null)
             {
                 entityRenderers = new List<IEntityRenderer>();
-                if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+                postRenderingRenderers = new List<IPostRenderingRenderer>();
+            if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
                 {
                     curRenderingWorld = VoxelWorld.currentWorld;
                 }
@@ -171,7 +173,11 @@ using monogameMinecraftShared.World;
 
                 }
                 }
-             
+
+                foreach (var item in postRenderingRenderers)
+                {
+                    item.DrawPostRendering();
+                }
 
             }
 

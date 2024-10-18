@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Xml.Linq;
 
 namespace monogameMinecraftClientDX
 {
@@ -27,6 +28,8 @@ namespace monogameMinecraftClientDX
     //    private SpriteBatch _spriteBatch;
         public RandomTextureGenerator randomTextureGenerator;
         public MouseMovementManager mouseMovementManager;
+
+     //   private IUIState multiplayerInGameUIState;
     //    public ParticleManager particleManager;
         public MinecraftGameClient()
         {
@@ -48,20 +51,34 @@ namespace monogameMinecraftClientDX
                 var renderPipelineManager1 = (renderPipelineManager as HighDefRenderPipelineManager);
                 if (renderPipelineManager1.entityRenderers.Count > 0)
                 {
-                    renderPipelineManager1.entityRenderers[0] = new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                    renderPipelineManager1.entityRenderers[0] = new ClientSideEntitiesRenderer(
                         effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
-                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this);
+                        this.networkingClient, this.GraphicsDevice, this);
 
                 }
                 else
                 {
-                    renderPipelineManager1.entityRenderers.Add(new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                    renderPipelineManager1.entityRenderers.Add(new ClientSideEntitiesRenderer(
                         effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
-                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this));
+                       this.networkingClient, this.GraphicsDevice, this));
                 }
+                ClientSidePlayersRenderer playerRenderer = new ClientSidePlayersRenderer(
+                    effectsManager.gameEffects["gbufferentityeffect"], gamePlayerR.gamePlayer,
+                    networkingClient, GraphicsDevice, _spriteBatch, UIResourcesManager.instance.sf, this);
+                if (renderPipelineManager1.entityRenderers.Count > 1)
+                {
+                    renderPipelineManager1.entityRenderers[1] = playerRenderer;
 
+                }
+                else
+                {
+                    renderPipelineManager1.entityRenderers.Add(playerRenderer);
+
+                }
                 renderPipelineManager1.gBufferRenderer.entityRenderer = renderPipelineManager1. entityRenderers[0];
-                renderPipelineManager1.shadowRenderer.entityRenderer= renderPipelineManager1.entityRenderers[0];
+                renderPipelineManager1.gBufferRenderer.optionalRenderer = renderPipelineManager1.entityRenderers[1] as IGBufferDrawableRenderer;
+                renderPipelineManager1.shadowRenderer.entityRenderer= renderPipelineManager1.entityRenderers[0] as IShadowDrawableRenderer;
+                renderPipelineManager1.postRenderingRenderers.Add(playerRenderer);
             });
             gamePlayerR = new GamePlayerReference();
             gamePlatformType = GamePlatformType.HighDefDX;
@@ -69,14 +86,16 @@ namespace monogameMinecraftClientDX
 
         }
 
-        public void OnResize(object sender, EventArgs e)
+        public override void OnResize(object sender, EventArgs e)
         {
-            UIElement.ScreenRect = Window.ClientBounds;
+          //  UIElement.ScreenRect = Window.ClientBounds;
             if (mouseMovementManager != null)
             {
                 mouseMovementManager.windowBounds = Window.ClientBounds;
             }
-            MultiplayerClientUIResizingManager.Resize(this);
+            uiStateManager.ScreenRect = Window.ClientBounds;
+            uiResizingManager.Resize(this);
+            //  MultiplayerClientUIResizingManager.Resize(this);
             switch (status)
             {
                 case GameStatus.Started:
@@ -96,12 +115,15 @@ namespace monogameMinecraftClientDX
             {
                 mouseMovementManager.isMouseLocked = false;
                 IsMouseVisible = true;
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGameChatMessages]);
             }
             else
             {
                 mouseMovementManager.isMouseLocked = true;
                 IsMouseVisible = false;
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
             }
+        
         }
         public override void CloseChatUI()
         {
@@ -110,11 +132,13 @@ namespace monogameMinecraftClientDX
             {
                 mouseMovementManager.isMouseLocked = false;
                 IsMouseVisible = true;
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGameChatMessages]);
             }
             else
             {
                 mouseMovementManager.isMouseLocked = true;
                 IsMouseVisible = false;
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
             }
         }
 
@@ -130,7 +154,7 @@ namespace monogameMinecraftClientDX
             
            gamePlayerR. gamePlayer =
                 new ClientSideGamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this, "default user");
-         
+           networkingClient = new MultiplayerClient();
            //  InitGameplay();
            //    sf = Content.Load<SpriteFont>("defaultfont");
            //   UIUtility.InitGameUI(this);
@@ -138,17 +162,22 @@ namespace monogameMinecraftClientDX
            UIResourcesManager.instance.LoadDefaultBlockSpriteResources(this);
 
            uiStateManager = new UIStateManager(this);
+           uiStateManager.SetUIConstructionManager(new MultiplayerClientUIConstructionManager(uiStateManager,this));
            uiStateManager.Initialize();
            uiResizingManager = new UIResizingManager(uiStateManager);
            GameOptions.ReadOptionsJson();
-           // Chunk c = new Chunk(new Vector2Int(0,0));
-           //  chunkSolidEffect = new Effect();
+            // Chunk c = new Chunk(new Vector2Int(0,0));
+            //  chunkSolidEffect = new Effect();
+        //    multiplayerInGameUIState = new UIStateClientInGame(uiStateManager, networkingClient);
            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
 
 
            EntityResourcesManager.instance.Initialize();
            EntityResourcesManager.instance.LoadAllDefaultDesources(Content);
-           BlockResourcesManager.instance.LoadDefaultResources(Content, GraphicsDevice);
+           ClientSideEntityManager.LoadEntityAssets(Content);
+           ClientSidePlayersManager.LoadPlayerResources(Content);
+            BlockResourcesManager.instance.LoadDefaultResources(Content, GraphicsDevice);
+
            base.Initialize();
         }
 
@@ -239,6 +268,7 @@ namespace monogameMinecraftClientDX
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
             mouseMovementManager.isMouseLocked = false;
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
         }
         public  void QuitGameplayDirectly()
         {
@@ -246,6 +276,7 @@ namespace monogameMinecraftClientDX
             ClientSideVoxelWorld.singleInstance.Stop();
             status = GameStatus.Menu;
             mouseMovementManager.isMouseLocked = false;
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
         }
         public UIButton errorLogButton;
 
@@ -266,60 +297,68 @@ namespace monogameMinecraftClientDX
             ClientSideVoxelWorld.singleInstance.InitWorld(this);
             (gamePlayerR.gamePlayer as ClientSideGamePlayer).Reset();
         }
-        public override void InitGameplay(UIButton obj)
+        public override void InitGameplay(object obj)
         {
-          
-                
-                int buttonIndex = UIElement.menuUIs.FindIndex((element) =>
-            {
-                if (element is UIButton)
-                {
-                    UIButton button = element as UIButton;
-                    if (button.optionalTag == "connectResultButton"
-                       )
-                    {
-                        return true;
-                    }
-                }
 
-                return false;
 
-            });
-            errorLogButton = (UIButton)(buttonIndex == -1 ? (UIElement.menuUIs.Count >= 8 ? UIElement.menuUIs[7] : null) : UIElement.menuUIs[buttonIndex]);
-            IPAddress address;
-            int port;
-            string name;
-            try
-            {
-                address = IPAddress.Parse(inputIPAddress);
-                port = inputPort;
-                if (port < 0 || port > 65535)
-                {
-                    throw new ArgumentOutOfRangeException("port out of valid range");
+            /*         int buttonIndex = UIElement.menuUIs.FindIndex((element) =>
+                 {
+                     if (element is UIButton)
+                     {
+                         UIButton button = element as UIButton;
+                         if (button.optionalTag == "connectResultButton"
+                            )
+                         {
+                             return true;
+                         }
+                     }
 
-                }
+                     return false;
 
-                name = inputUserName;
-            }
-            catch (Exception e)
-            {
-                if (errorLogButton != null)
-                {
-                    Debug.WriteLine("print to button");
-                    errorLogButton.text = "Connection Result : Failed. Error:" + e.GetType();
-                }
-                Debug.WriteLine(e);
-                return;
-            }
-            if (errorLogButton != null)
-            {
-                errorLogButton.text = "Connection Result : Success";
-            }
+                 });
+                 errorLogButton = (UIButton)(buttonIndex == -1 ? (UIElement.menuUIs.Count >= 8 ? UIElement.menuUIs[7] : null) : UIElement.menuUIs[buttonIndex]);
+                 IPAddress address;
+                 int port;
+                 string name;
+                 try
+                 {
+                     address = IPAddress.Parse(inputIPAddress);
+                     port = inputPort;
+                     if (port < 0 || port > 65535)
+                     {
+                         throw new ArgumentOutOfRangeException("port out of valid range");
+
+                     }
+
+                     
+                 }
+                 catch (Exception e)
+                 {
+                     if (errorLogButton != null)
+                     {
+                         Debug.WriteLine("print to button");
+                         errorLogButton.text = "Connection Result : Failed. Error:" + e.GetType();
+                     }
+                     Debug.WriteLine(e);
+                     return;
+                 }
+                 if (errorLogButton != null)
+                 {
+                     errorLogButton.text = "Connection Result : Success";
+                 }*/
+           string name = inputUserName;
+         
+          bool isAddressValid= MultiplayerClientUIUtility.TryValidateAddress(uiStateManager.menuUIs, inputIPAddress, inputPort,
+               inputUserName,out var address);
+          if (!isAddressValid)
+          {
+              return;
+          }
             GameOptions.ReadOptionsJson();
             randomTextureGenerator = new RandomTextureGenerator();
         
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
-            font =Content.Load<SpriteFont>("defaultfont");
+         //   font =Content.Load<SpriteFont>("defaultfont");
 
            (gamePlayerR.gamePlayer as ClientSideGamePlayer).playerName = name;
            (gamePlayerR.gamePlayer as ClientSideGamePlayer).Reset();
@@ -331,14 +370,14 @@ namespace monogameMinecraftClientDX
             gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer,false);
             effectsManager.LoadEffects(Content);
          
-            networkingClient = new MultiplayerClient(address, port, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
-            networkingClient.clientDisconnectedAction += (string s) => { errorLogButton.text = s; };
-            TextListUI chatMessageListElement = (UIElement.inGameUIs.Find((item) => { return item is TextListUI; })) as TextListUI;
+            networkingClient.Initialize(address, inputPort, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
+         //   networkingClient.clientDisconnectedAction += (string s) => { errorLogButton.text = s; };
+          /*  TextListUI chatMessageListElement = (UIElement.inGameUIs.Find((item) => { return item is TextListUI; })) as TextListUI;
             if (chatMessageListElement != null)
             {
                 chatMessageListElement.texts = new List<string>();
                 networkingClient.chatMessageReceivedAction += chatMessageListElement.AppendText;
-            }
+            }*/
 
           
             clientSideEntityManager = new ClientSideEntityManager(this.networkingClient);
@@ -353,24 +392,19 @@ namespace monogameMinecraftClientDX
               //  item.entityRenderer    
                 }
             });
-            ClientSideEntityManager.LoadEntitySounds(Content);
+          
 
 
 
            bool succeeded= networkingClient.Connect();
-          
+           MultiplayerClientUIUtility.TryPresentConnectionResult(uiStateManager.menuUIs, succeeded);
+           MultiplayerClientUIUtility.TryBindChatMessageUIWithClient(uiStateManager.inGameUIs,networkingClient);
             ClientSideVoxelWorld.singleInstance.InitWorld(this);
-            if (succeeded == false)
-            {
-                if (errorLogButton != null)
-                {
-                    errorLogButton.text = "Connection Result : Failed.";
-                    return;
-                }
-            }
+          
             status = GameStatus.Started;
             mouseMovementManager.isMouseLocked = true;
             OnResize(null, null);
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
         }
         
         protected override void LoadContent()
@@ -434,10 +468,9 @@ namespace monogameMinecraftClientDX
                    
                     if (Keyboard.GetState().IsKeyUp(Keys.T) && !lastKeyState1.IsKeyUp(Keys.T) && !isStructureOperationsUIOpened&&!isInventoryOpen)
                     {
-                        if (isChatMessageSendingUIOpen == false)
-                        {
+                        
                             OpenChatUI();
-                        }
+                         
                     
 
                     }

@@ -29,6 +29,14 @@ namespace monogameMinecraftShared.Asset
         public string name;
         public string modelAssetPath;
         public string textureAssetPath;
+
+        public CustomModelLoadingItem(string name, string modelAssetPath, string textureAssetPath)
+        {
+            this.modelAssetPath
+                = modelAssetPath;
+            this.textureAssetPath = textureAssetPath;
+            this.name = name;
+        }
     }
 
     

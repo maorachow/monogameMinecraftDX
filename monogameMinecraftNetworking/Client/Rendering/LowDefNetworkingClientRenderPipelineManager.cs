@@ -64,18 +64,18 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
             //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
 
-            BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
+         //   BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
             particleRenderer = new ClientSideParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
                 effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer, true);
-            BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
-            clientSidePlayersRenderer = new ClientSidePlayersRenderer(game.Content.Load<Model>("playermodel"),
+         //   BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
+            clientSidePlayersRenderer = new ClientSidePlayersRenderer(
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
-                game.Content.Load<Texture2D>("steve"), game.networkingClient, game.GraphicsDevice,game._spriteBatch,MultiplayerClientUIUtility.sf,game);
-            clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(game.Content.Load<Model>("zombiefbx"), game.Content.Load<Model>("pigfbx"),
+               game.networkingClient, game.GraphicsDevice,game._spriteBatch,UIResourcesManager.instance.sf,game);
+            clientSideEntitiesRenderer = new ClientSideEntitiesRenderer(
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
-                game.Content.Load<Texture2D>("husk"), game.Content.Load<Texture2D>("pig"), game.networkingClient, game.GraphicsDevice, game);
+                 game.networkingClient, game.GraphicsDevice, game);
             //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
           //  gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer, clientSideEntitiesRenderer);
 
