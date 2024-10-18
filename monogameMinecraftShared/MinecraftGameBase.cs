@@ -36,13 +36,18 @@ namespace monogameMinecraftShared
         public SpriteBatch _spriteBatch;
 
         public GameTimeManager gameTimeManager;
+
+        public ParticleManagerBase particleManager;
         public GameStatus status { get; set; }
         public PlayerInputManager playerInputManager;
         public GamePlatformType gamePlatformType { get; set; }
 
+        public GameArchitecturePatternType gameArchitecturePatternType { get; set; }
         public IEffectsManager effectsManager;
 
         public IRenderPipelineManager renderPipelineManager;
+        public UIStateManager uiStateManager;
+        public UIResizingManager uiResizingManager;
         public virtual void UpdateStaticPlayerPos()
         {
             gameposition = gamePlayerR.gamePlayer.position;
@@ -81,7 +86,7 @@ namespace monogameMinecraftShared
         }
 
 
-        public virtual void CloseStructureOperationsUI()
+        public virtual void CloseStructureOperationsUI(object obj)
         {
            
         }
@@ -112,5 +117,10 @@ namespace monogameMinecraftShared
 
 
         public virtual void OnResize(Object sender, EventArgs e) {}
+
+        public virtual void OpenStructureOperationsUI(object obj)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

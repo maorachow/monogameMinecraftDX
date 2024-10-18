@@ -20,9 +20,10 @@ namespace monogameMinecraftNetworking.Client.UI
 {
     public class MultiplayerClientUIUtility
     {
-        public static SpriteFont sf;
+       // public static SpriteFont sf;
 
-        public static void InitGameUI(ClientGameBase game)
+       public void 
+      /*  public static void InitGameUI(ClientGameBase game)
         {
 
 
@@ -225,7 +226,7 @@ namespace monogameMinecraftNetworking.Client.UI
                     new UIButton(new Vector2(0.25f, 0.85f), 0.5f, 0.1f, UIElement.UITextures["buttontexture"],new Vector2(0.4f,0.55f),sf,game._spriteBatch,game.Window,game.GoToMenuFromSettings ,"Return To Menu",null ,1),
 
                 };
-            }*/
+            } 
 
             UIPanel leftDownPanel = new UIPanel(new Vector2(0.05f, 0.6f), 0.3f, 0.3f, true);
 
@@ -486,6 +487,6 @@ namespace monogameMinecraftNetworking.Client.UI
                 }
             }
           
-        }
+       } */
     }
 }

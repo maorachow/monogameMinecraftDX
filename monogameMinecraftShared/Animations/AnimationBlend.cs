@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 namespace monogameMinecraftShared.Animations
 {
     
- public class AnimationBlend
+    public class AnimationBlend
     {
         public AnimationState[] animationStates;
         public Model model;
+
         public AnimationTransformation GetAnimationBoneTransformation(AnimationState animState, string bone)
         {
             var a = animState.stepProgress;
@@ -89,7 +90,7 @@ namespace monogameMinecraftShared.Animations
                 }
             }
         
-        public void DrawAnimatedModel(GraphicsDevice device,Matrix world, Matrix view, Matrix projection, Effect shader, Dictionary<string, Matrix> optionalParams, Action optionalAction = null)
+        public virtual void DrawAnimatedModel(GraphicsDevice device,Matrix world, Matrix view, Matrix projection, Effect shader, Dictionary<string, Matrix> optionalParams, Action optionalAction = null)
         {
            
             foreach (var bone in model.Bones)

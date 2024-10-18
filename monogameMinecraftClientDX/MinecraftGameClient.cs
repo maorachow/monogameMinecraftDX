@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using monogameMinecraftNetworking.Client;
@@ -15,13 +8,16 @@ using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftShared;
 using monogameMinecraftShared.Asset;
-using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.UI;
 using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.World;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
 
 namespace monogameMinecraftClientDX
 {
@@ -31,7 +27,7 @@ namespace monogameMinecraftClientDX
     //    private SpriteBatch _spriteBatch;
         public RandomTextureGenerator randomTextureGenerator;
         public MouseMovementManager mouseMovementManager;
-        public ParticleManager particleManager;
+    //    public ParticleManager particleManager;
         public MinecraftGameClient()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -47,9 +43,29 @@ namespace monogameMinecraftClientDX
             this.IsFixedTimeStep = false;
             effectsManager = new EffectsManager();
           
-            renderPipelineManager = new HighDefNetworkingRenderPipelineManager(this, effectsManager);
+            renderPipelineManager = new HighDefRenderPipelineManager(this, effectsManager, () =>
+            {
+                var renderPipelineManager1 = (renderPipelineManager as HighDefRenderPipelineManager);
+                if (renderPipelineManager1.entityRenderers.Count > 0)
+                {
+                    renderPipelineManager1.entityRenderers[0] = new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                        effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
+                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this);
+
+                }
+                else
+                {
+                    renderPipelineManager1.entityRenderers.Add(new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                        effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
+                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this));
+                }
+
+                renderPipelineManager1.gBufferRenderer.entityRenderer = renderPipelineManager1. entityRenderers[0];
+                renderPipelineManager1.shadowRenderer.entityRenderer= renderPipelineManager1.entityRenderers[0];
+            });
             gamePlayerR = new GamePlayerReference();
             gamePlatformType = GamePlatformType.HighDefDX;
+            gameArchitecturePatternType = GameArchitecturePatternType.ClientServer;
 
         }
 
@@ -114,17 +130,82 @@ namespace monogameMinecraftClientDX
             
            gamePlayerR. gamePlayer =
                 new ClientSideGamePlayer(new Vector3(-0.3f, 100, -0.3f), new Vector3(0.3f, 101.8f, 0.3f), this, "default user");
-            MultiplayerClientUIUtility.InitGameUI(this);
-            GameOptions.ReadOptionsJson();
-            status = GameStatus.Menu;
-            base.Initialize();
+         
+           //  InitGameplay();
+           //    sf = Content.Load<SpriteFont>("defaultfont");
+           //   UIUtility.InitGameUI(this);
+           UIResourcesManager.instance.LoadTextures(this);
+           UIResourcesManager.instance.LoadDefaultBlockSpriteResources(this);
+
+           uiStateManager = new UIStateManager(this);
+           uiStateManager.Initialize();
+           uiResizingManager = new UIResizingManager(uiStateManager);
+           GameOptions.ReadOptionsJson();
+           // Chunk c = new Chunk(new Vector2Int(0,0));
+           //  chunkSolidEffect = new Effect();
+           uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
+
+
+           EntityResourcesManager.instance.Initialize();
+           EntityResourcesManager.instance.LoadAllDefaultDesources(Content);
+           BlockResourcesManager.instance.LoadDefaultResources(Content, GraphicsDevice);
+           base.Initialize();
         }
 
 
-        public override void OpenInventory(UIButton ub)
+        public override void GoToSettings(object obj)
+        {
+            GameOptions.ReadOptionsJson();
+
+            this.status = GameStatus.Settings;
+
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Settings]);
+        }
+
+        public override void GoToMenuFromSettings(object obj)
+        {
+            GameOptions.SaveOptions(null);
+            this.status = GameStatus.Menu;
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
+        }
+
+
+        public override void OpenInventory(object obj)
         {
             isInventoryOpen = !isInventoryOpen;
             if (isInventoryOpen == true)
+            {
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGameInventoryOpened]);
+                mouseMovementManager.isMouseLocked = false;
+                IsMouseVisible = true;
+            }
+            else
+            {
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
+                mouseMovementManager.isMouseLocked = true;
+                IsMouseVisible = false;
+            }
+        }
+        public override void ResumeGame()
+        {
+            isGamePaused = false;
+            IsMouseVisible = false;
+            mouseMovementManager.isMouseLocked = true;
+
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
+        }
+        public override void PauseGame(object obj)
+        {
+            isGamePaused = true;
+            IsMouseVisible = true;
+            mouseMovementManager.isMouseLocked = false;
+
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGamePaused]);
+        }
+        public override void CloseStructureOperationsUI(object obj = null)
+        {
+            isStructureOperationsUIOpened = false;
+            if (isStructureOperationsUIOpened == true)
             {
                 IsMouseVisible = true;
             }
@@ -132,45 +213,25 @@ namespace monogameMinecraftClientDX
             {
                 IsMouseVisible = false;
             }
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
         }
 
-        
-
-        public override void GoToSettings(object obj)
+        public override void OpenStructureOperationsUI(object obj = null)
         {
-            //  throw new NotImplementedException();
 
-            GameOptions.ReadOptionsJson();
-            foreach (UIElement element1 in UIElement.settingsUIsPage1)
+            isStructureOperationsUIOpened = true;
+            if (isStructureOperationsUIOpened == true)
             {
-                element1.Initialize();
+                mouseMovementManager.isMouseLocked = false;
+                IsMouseVisible = true;
             }
-            foreach (UIElement element1 in UIElement.settingsUIsPage2)
+            else
             {
-                element1.Initialize();
+                mouseMovementManager.isMouseLocked = true;
+                IsMouseVisible = false;
             }
-            this.status = GameStatus.Settings;
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.StructureOperations]);
         }
-        public override void GoToMenuFromSettings(object obj)
-        {
-            GameOptions.SaveOptions(null);
-            this.status = GameStatus.Menu;
-
-        }
-        public override void PauseGame(object _)
-        {
-            isGamePaused = true;
-            IsMouseVisible = true;
-            mouseMovementManager.isMouseLocked = false;
-        }
-
-        public override void ResumeGame(object o)
-        {
-            isGamePaused = false;
-            IsMouseVisible = false;
-            mouseMovementManager.isMouseLocked = true;
-        }
-
         public override void QuitGameplay()
         {
             particleManager.ReleaseResources();
@@ -214,8 +275,8 @@ namespace monogameMinecraftClientDX
                 if (element is UIButton)
                 {
                     UIButton button = element as UIButton;
-                    if (button.isClickable == false &&
-                        button.text.Contains("Connection Result : "))
+                    if (button.optionalTag == "connectResultButton"
+                       )
                     {
                         return true;
                     }
@@ -282,9 +343,16 @@ namespace monogameMinecraftClientDX
           
             clientSideEntityManager = new ClientSideEntityManager(this.networkingClient);
             clientSidePlayersManager=new ClientSidePlayersManager(networkingClient);
-            particleManager = new ParticleManager();
+            particleManager = new ClientSideParticleManager();
             particleManager.Initialize();
-            renderPipelineManager.InitRenderPipeline();
+            renderPipelineManager.InitRenderPipeline((item) =>
+            {
+
+                if (item.game.gameArchitecturePatternType == GameArchitecturePatternType.ClientServer)
+                {
+              //  item.entityRenderer    
+                }
+            });
             ClientSideEntityManager.LoadEntitySounds(Content);
 
 
@@ -335,37 +403,7 @@ namespace monogameMinecraftClientDX
 
             switch (status)
             {
-                case GameStatus.Menu:
-                    foreach (var el in UIElement.menuUIs)
-                    {
-                        el.Update();
-                    }
-                    break;
-
-
-                case GameStatus.Settings:
-                    switch (UIElement.settingsUIsPageID)
-                    {
-                        case 0:
-                            foreach (var el in UIElement.settingsUIsPage1)
-                            {
-                                el.Update();
-                            }
-                            break;
-                        case 1:
-                            foreach (var el in UIElement.settingsUIsPage2)
-                            {
-                                el.Update();
-                            }
-                            break;
-                        default:
-                            foreach (var el in UIElement.settingsUIsPage1)
-                            {
-                                el.Update();
-                            }
-                            break;
-                    }
-                    break;
+               
                 case GameStatus.Started:
 
                     if (networkingClient.isGoingToQuitGame == true)
@@ -379,7 +417,7 @@ namespace monogameMinecraftClientDX
 
                     if (particleManager.isResourcesReleased == false)
                     {
-                        ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                        ParticleManagerBase.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                     }
                  
                     (gamePlayerR.gamePlayer as ClientSideGamePlayer).UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
@@ -387,9 +425,9 @@ namespace monogameMinecraftClientDX
                     if (isGamePaused)
                     {
 
-                        foreach (var el in UIElement.pauseMenuUIs)
+                        if (uiStateManager.curState is not UIStateInGamePaused)
                         {
-                            el.Update();
+                            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGamePaused]);
                         }
                         break;
                     }
@@ -406,18 +444,8 @@ namespace monogameMinecraftClientDX
                     
                     if (Keyboard.GetState().IsKeyUp(Keys.E) && !lastKeyState1.IsKeyUp(Keys.E) && !isStructureOperationsUIOpened&&!isChatMessageSendingUIOpen)
                     {
-                      
-                        isInventoryOpen = !isInventoryOpen;
-                        if (isInventoryOpen == true)
-                        {
-                            mouseMovementManager.isMouseLocked = false;
-                            IsMouseVisible = true;
-                        }
-                        else
-                        {
-                            IsMouseVisible = false;
-                            mouseMovementManager.isMouseLocked = true;
-                        }
+
+                        OpenInventory(null);
 
                     }
              
@@ -433,20 +461,13 @@ namespace monogameMinecraftClientDX
                     lastKeyState1 = Keyboard.GetState();
                     if (isChatMessageSendingUIOpen)
                     {
-                        foreach (var el in UIElement.chatMessagesUIs)
-                        {
-                            el.Update();
-                        }
-
+                        
                         break;
                     }
                     //       Debug.WriteLine(isInventoryOpen);
                     if (isInventoryOpen)
                     {
-                        foreach (var el in UIElement.inventoryUIs)
-                        {
-                            el.Update();
-                        }
+                        
                         break;
                     }
                   
@@ -470,10 +491,7 @@ namespace monogameMinecraftClientDX
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-                    foreach (var el in UIElement.inGameUIs)
-                    {
-                        el.Update();
-                    }
+               
 
                    
                     gameTimeManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
@@ -492,6 +510,9 @@ namespace monogameMinecraftClientDX
                    
                     break;
             }
+
+            uiStateManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
             base.Update(gameTime);
         }
 
@@ -517,7 +538,7 @@ namespace monogameMinecraftClientDX
             GraphicsDevice.Clear(Color.CornflowerBlue);
             // Debug.WriteLine(ChunkManager.chunks.Count);
             gamePlayerR.gamePlayer.cam.updateCameraVectors();
-
+            renderPipelineManager.curRenderingWorld = ClientSideVoxelWorld.singleInstance;
             renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
             //        _spriteBatch.Begin(blendState:BlendState.Additive);
             //        _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth , GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
@@ -525,19 +546,19 @@ namespace monogameMinecraftClientDX
 
             _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-            foreach (var el in UIElement.inGameUIs)
+        /*    foreach (var el in UIElement.inGameUIs)
             {
                 el.DrawString(el.text);
-            }
+            }*/
             _spriteBatch.End();
 
             _spriteBatch.Begin();
 
             if (GameOptions.showGraphicsDebug == true)
             {
-                if (renderPipelineManager is HighDefNetworkingRenderPipelineManager)
+                if (renderPipelineManager is HighDefRenderPipelineManager)
                 {
-                    HighDefNetworkingRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefNetworkingRenderPipelineManager;
+                    HighDefRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as HighDefRenderPipelineManager;
                     _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
                     _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
                     for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
@@ -559,7 +580,7 @@ namespace monogameMinecraftClientDX
           
                     _spriteBatch.End();
 
-                        if (isInventoryOpen)
+            /*            if (isInventoryOpen)
                     {
                         _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
 
@@ -590,9 +611,9 @@ namespace monogameMinecraftClientDX
                             el.DrawString(el.text);
                         }
                         _spriteBatch.End();
-                    }
+                    }*/
                     break;
-                case GameStatus.Menu:
+           /*     case GameStatus.Menu:
                     GraphicsDevice.Clear(Color.CornflowerBlue);
                     _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
@@ -629,12 +650,17 @@ namespace monogameMinecraftClientDX
                                 el.DrawString(el.text);
                             }
                             break;
-                    }
+                    }*/
 
-                    _spriteBatch.End();
-                    break;
+                 
+                 
 
             }
+
+            _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
+
+            uiStateManager.Draw();
+            _spriteBatch.End();
             base.Draw(gameTime);
         }
     }

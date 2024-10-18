@@ -17,7 +17,7 @@ namespace monogameMinecraftShared.Rendering
         public GraphicsDevice device;
         //  public AlphaTestEffect basicNSShader;
         public Effect basicShader;
-        public Effect deferredShader;
+       
         public Texture2D atlas;
         public Texture2D atlasNormal;
         public Texture2D atlasDepth;

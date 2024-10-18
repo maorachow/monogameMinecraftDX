@@ -22,7 +22,7 @@ namespace monogameMinecraftShared.World
             {
                 for (int z = origin.z; z < origin.z + blockData.GetLength(2); z++)
                 {
-                    Chunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)));
+                    Chunk c = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z)));
                     if (c == null)
                     {
                         continue;
@@ -146,7 +146,7 @@ namespace monogameMinecraftShared.World
             {
                 for (int z = origin.z; z < origin.z + blockData.GetLength(2); z++)
                 {
-                    Chunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)));
+                    Chunk c = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z)));
                     if (c == null)
                     {
                         continue;
@@ -171,7 +171,7 @@ namespace monogameMinecraftShared.World
             {
                 for (int z = origin.z; z < origin.z + blockData.GetLength(1); z++)
                 {
-                    Chunk c = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)));
+                    Chunk c = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z)));
                     if (c == null)
                     {
                         continue;

@@ -48,7 +48,7 @@ namespace monogameMinecraftShared.Rendering
         public IGamePlayer player;
         public VertexBuffer quadVertexBuffer;
         public ChunkRenderer chunkRenderer;
-        public EntityRenderer entityRenderer;
+        public IEntityRenderer entityRenderer;
         public ParticleRenderer particleRenderer;
         public IGBufferDrawableRenderer optionalRenderer;
         public IGBufferDrawableRenderer optionalRenderer1;
@@ -101,7 +101,7 @@ namespace monogameMinecraftShared.Rendering
             quadVertices[3].TextureCoordinate = new Vector2(0, 1);
         }
         public IndexBuffer quadIndexBuffer;
-        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, Effect gBufferDepthPeelingEffect, IGamePlayer player, ChunkRenderer cr, EntityRenderer er, ParticleRenderer pr, bool chunksOnly=false,IGBufferDrawableRenderer optionalRenderer=null, IGBufferDrawableRenderer optionalRenderer1 = null)
+        public GBufferRenderer(GraphicsDevice device, Effect gBufferEffect, Effect gBufferEntityEffect, Effect gBufferDepthPeelingEffect, IGamePlayer player, ChunkRenderer cr, IEntityRenderer er, ParticleRenderer pr, bool chunksOnly=false,IGBufferDrawableRenderer optionalRenderer=null, IGBufferDrawableRenderer optionalRenderer1 = null)
         {
             graphicsDevice = device;
             this.gBufferEffect = gBufferEffect;
@@ -241,7 +241,7 @@ namespace monogameMinecraftShared.Rendering
 
             if (entityRenderer != null)
             {
-                entityRenderer.DrawGBuffer(gBufferEntityEffect);
+                entityRenderer.DrawGBuffer();
             }
         
             particleRenderer.DrawGBuffer();

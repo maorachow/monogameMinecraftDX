@@ -36,7 +36,7 @@ namespace monogameMinecraftShared.Updateables
                         }
 
                         Vector3 particleMotionVector = Vector3.Normalize(randPos) * param.motionVectorSpeed;
-                        ParticleManager.instance.SpawnNewParticleTexturedGravity(position + randPos, param.size, new Vector2(param.uvWidthCorner.X, param.uvWidthCorner.Y), new Vector2(param.uvWidthCorner.Z, param.uvWidthCorner.W), param.lifeTime, particleMotionVector, param.friction);
+                        ParticleManagerBase.instance.SpawnNewParticleTexturedGravity(position + randPos, param.size, new Vector2(param.uvWidthCorner.X, param.uvWidthCorner.Y), new Vector2(param.uvWidthCorner.Z, param.uvWidthCorner.W), param.lifeTime, particleMotionVector, param.friction);
                     }
                     break;
                 default:
@@ -64,7 +64,7 @@ namespace monogameMinecraftShared.Updateables
                         Vector3 particleMotionVector = Vector3.Normalize(randPos) * param.motionVectorSpeed;
                         Vector2 randOffset = new Vector2(rand.NextSingle() % randomOffset.X,
                             rand.NextSingle() % randomOffset.Y);
-                        ParticleManager.instance.SpawnNewParticleTexturedGravity(position + randPos, param.size, new Vector2(uvCornerWidth.X + randOffset.X, uvCornerWidth.Y + randOffset.Y), new Vector2(uvCornerWidth.Z, uvCornerWidth.W), param.lifeTime, particleMotionVector, param.friction);
+                        ParticleManagerBase.instance.SpawnNewParticleTexturedGravity(position + randPos, param.size, new Vector2(uvCornerWidth.X + randOffset.X, uvCornerWidth.Y + randOffset.Y), new Vector2(uvCornerWidth.Z, uvCornerWidth.W), param.lifeTime, particleMotionVector, param.friction);
                     }
                     break;
                 default:

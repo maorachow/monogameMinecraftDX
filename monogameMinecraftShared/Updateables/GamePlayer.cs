@@ -161,12 +161,12 @@ namespace monogameMinecraftShared.Updateables
         public List<BoundingBox> GetBlocksAround(BoundingBox aabb)
         {
 
-            int minX = ChunkHelper.FloorFloat(aabb.Min.X - 0.1f);
-            int minY = ChunkHelper.FloorFloat(aabb.Min.Y - 0.1f);
-            int minZ = ChunkHelper.FloorFloat(aabb.Min.Z - 0.1f);
-            int maxX = ChunkHelper.CeilFloat(aabb.Max.X + 0.1f);
-            int maxY = ChunkHelper.CeilFloat(aabb.Max.Y + 0.1f);
-            int maxZ = ChunkHelper.CeilFloat(aabb.Max.Z + 0.1f);
+            int minX = ChunkCoordsHelper.FloorFloat(aabb.Min.X - 0.1f);
+            int minY = ChunkCoordsHelper.FloorFloat(aabb.Min.Y - 0.1f);
+            int minZ = ChunkCoordsHelper.FloorFloat(aabb.Min.Z - 0.1f);
+            int maxX = ChunkCoordsHelper.CeilFloat(aabb.Max.X + 0.1f);
+            int maxY = ChunkCoordsHelper.CeilFloat(aabb.Max.Y + 0.1f);
+            int maxZ = ChunkCoordsHelper.CeilFloat(aabb.Max.Z + 0.1f);
 
             blocksAround = new List<BoundingBox>();
 
@@ -300,7 +300,7 @@ namespace monogameMinecraftShared.Updateables
 
 
 
-            Vector3Int setBlockPointInt = ChunkHelper.Vec3ToBlockPos(setBlockPoint);
+            Vector3Int setBlockPointInt = ChunkCoordsHelper.Vec3ToBlockPos(setBlockPoint);
             BoundingBox box = BlockBoundingBoxUtility.GetBoundingBox(setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, inventoryData[currentSelectedHotbar]);
             box.Max -= new Vector3(0.01f, 0.01f, 0.01f);
             box.Min += new Vector3(0.01f, 0.01f, 0.01f);
@@ -642,7 +642,7 @@ namespace monogameMinecraftShared.Updateables
             if (ChunkHelper.CheckIsPosInChunkBorder(position, curChunk) || !ChunkHelper.CheckIsPosInChunk(position, curChunk))
             {
                 isChunkNeededUpdate = true;
-                curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
+                curChunk = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(position));
             }
             //  isChunkNeededUpdate = true;
         }
@@ -717,7 +717,12 @@ namespace monogameMinecraftShared.Updateables
         public bool isRightMouseButtonDown = false;
         public void UpdatePlayerMovement(float deltaTime)
         {
-
+            playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
+            if (playerCurIntPos != playerLastIntPos)
+            {
+                GetBlocksAround(bounds);
+            }
+            playerLastIntPos = playerCurIntPos;
             if (breakBlockCD > 0f)
             {
                 breakBlockCD -= deltaTime;
@@ -791,12 +796,7 @@ namespace monogameMinecraftShared.Updateables
         public void ProcessPlayerInputs(Vector3 dir, float deltaTime, KeyboardState kState, MouseState mState, MouseState prevMouseState,bool isFlyingPressed,bool isSpeedUpPressed,bool isLMBPressed,bool isRMBPressed,float scrollDelta)
         {
 
-            playerCurIntPos = new Vector3Int((int)position.X, (int)position.Y, (int)position.Z);
-            if (playerCurIntPos != playerLastIntPos)
-            {
-                GetBlocksAround(bounds);
-            }
-            playerLastIntPos = playerCurIntPos;
+         
 
             finalMoveVec = deltaTime * moveVelocity * new Vector3(dir.X, dir.Y, dir.Z);
             //    Debug.WriteLine(finalMoveVec);

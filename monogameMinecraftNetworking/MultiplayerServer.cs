@@ -137,7 +137,7 @@ namespace monogameMinecraftNetworking
                 }
 
 
-                //    Thread.Sleep(0);
+                    Thread.Sleep(1);
                 lock (serverTodoLists[listIndex].queueLock)
                 {
                     if (serverTodoLists[listIndex].value.Count > 0)
@@ -383,7 +383,7 @@ namespace monogameMinecraftNetworking
             validateClientsThread.Join();
             foreach (var client in remoteClients)
             {
-              client.messageParser.Stop();  
+              client.Close(); 
             }
             foreach (var item in updatingManagers)
             {

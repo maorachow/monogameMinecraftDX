@@ -13,7 +13,7 @@ using monogameMinecraftNetworking.Client.World;
 
 namespace monogameMinecraftNetworking.Client.Updateables
 {
-    public struct ClientSideTexturedGravityParticle : IParticle
+ /*   public struct ClientSideTexturedGravityParticle : IParticle
     {
         public void Update(float deltaTime)
         {
@@ -47,12 +47,12 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public List<BoundingBox> GetBlocksAround(BoundingBox aabb)
         {
 
-            int minX = ChunkHelper.FloorFloat(aabb.Min.X - 0.1f);
-            int minY = ChunkHelper.FloorFloat(aabb.Min.Y - 0.1f);
-            int minZ = ChunkHelper.FloorFloat(aabb.Min.Z - 0.1f);
-            int maxX = ChunkHelper.CeilFloat(aabb.Max.X + 0.1f);
-            int maxY = ChunkHelper.CeilFloat(aabb.Max.Y + 0.1f);
-            int maxZ = ChunkHelper.FloorFloat(aabb.Max.Z + 0.1f);
+            int minX = ChunkCoordsHelper.FloorFloat(aabb.Min.X - 0.1f);
+            int minY = ChunkCoordsHelper.FloorFloat(aabb.Min.Y - 0.1f);
+            int minZ = ChunkCoordsHelper.FloorFloat(aabb.Min.Z - 0.1f);
+            int maxX = ChunkCoordsHelper.CeilFloat(aabb.Max.X + 0.1f);
+            int maxY = ChunkCoordsHelper.CeilFloat(aabb.Max.Y + 0.1f);
+            int maxZ = ChunkCoordsHelper.FloorFloat(aabb.Max.Z + 0.1f);
 
             List<BoundingBox> blocksAround = new List<BoundingBox>();
 
@@ -155,6 +155,6 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public Vector2 uvCorner;
         public Vector2 uvWidth;
         public float lifeTime;
-    }
+    }*/
 
 }

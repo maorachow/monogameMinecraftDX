@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,6 +16,7 @@ using monogameMinecraftShared.World;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
+    [Obsolete]
     public class HighDefNetworkingRenderPipelineManager:INetworkClientRenderPipelineManager
     {
         //public EntityRenderer entityRenderer;
@@ -91,14 +93,14 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("husk"), game.Content.Load<Texture2D>("pig"),game.networkingClient, game.GraphicsDevice, game);
             //   entityRenderer = new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, effectsManager.gameEffects["entityeffect"], game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, null, particleRenderer, true, clientSidePlayersRenderer, clientSideEntitiesRenderer);
+       //     gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, null, particleRenderer, true, clientSidePlayersRenderer, clientSideEntitiesRenderer);
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
             skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultCubeCollection.resultSpecularCubemapMip0;
             skyboxRenderer.skyboxTextureNight = hdrCubemapRenderer.resultCubeCollectionNight.resultSpecularCubemapMip0;
             contactShadowRenderer = new ContactShadowRenderer(game.GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, game.gameTimeManager, game.gamePlayerR.gamePlayer);
-            shadowRenderer = new ShadowRenderer(game.gamePlayerR, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, null, game.gameTimeManager, clientSidePlayersRenderer, clientSideEntitiesRenderer);
+     //       shadowRenderer = new ShadowRenderer(game.gamePlayerR, game.GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, null, game.gameTimeManager, clientSidePlayersRenderer, clientSideEntitiesRenderer);
             motionVectorRenderer = new MotionVectorRenderer(game.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, game.gamePlayerR.gamePlayer);
             ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, game.GraphicsDevice, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("randomnormal"));
             fxaaRenderer = new FXAARenderer(game.GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);

@@ -17,7 +17,7 @@ namespace monogameMinecraftShared.Input
         public IGamePlayer gamePlayer;
         public bool isTouchEnabled;
         public bool suppressMouseMovement=false;
-
+      //  public 
       
         public PlayerInputManager(IGamePlayer gamePlayer, bool isTouchEnabled)
         {
@@ -53,14 +53,14 @@ namespace monogameMinecraftShared.Input
             if (isTouchEnabled)
             {
 
-                foreach (var tc in UIElement.allTouches)
+                foreach (var tc in UITouchscreenInputHelper.allTouches)
                 {
                     TouchLocation prevTouch;
                     if (prevTouches.FindById(tc.Id, out prevTouch) == false)
                     {
                         continue;
                     }
-                    if (UIElement.CheckIsPointColliding(ref UIElement.inGameUIs, tc.Position))
+                    if (UITouchscreenInputHelper.CheckIsPointColliding(ref UIElement.inGameUIs, tc.Position))
                     {
                         continue;
                     }
@@ -225,7 +225,7 @@ namespace monogameMinecraftShared.Input
             gamePlayer.cam.ProcessMouseMovement(mouseDelta.X, mouseDelta.Y);
             lastKeyboardState = kState;
             lastMouseState = mState;
-            prevTouches = UIElement.allTouches;
+            prevTouches = UITouchscreenInputHelper.allTouches;
 
         }
         public void Update(float deltaTime)

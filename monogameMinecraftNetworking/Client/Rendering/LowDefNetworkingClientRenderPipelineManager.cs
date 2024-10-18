@@ -19,6 +19,7 @@ using monogameMinecraftNetworking.Client.World;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
+    [Obsolete]
     public class LowDefNetworkingClientRenderPipelineManager : INetworkClientRenderPipelineManager
     {
         public ClientGameBase game { get; set; }
@@ -76,7 +77,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                 effectsManager.gameEffects["gbufferentityeffect"], game.gamePlayerR.gamePlayer,
                 game.Content.Load<Texture2D>("husk"), game.Content.Load<Texture2D>("pig"), game.networkingClient, game.GraphicsDevice, game);
             //   entityRenderer = new EntityRenderer(game, game.GraphicsDevice, game.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager);
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer, clientSideEntitiesRenderer);
+          //  gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer,true,clientSidePlayersRenderer, clientSideEntitiesRenderer);
 
 
 

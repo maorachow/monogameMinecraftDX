@@ -6,6 +6,8 @@ using System;
 using System.Diagnostics;
 using monogameMinecraftShared.Core;
 using Microsoft.Xna.Framework.Input.Touch;
+using monogameMinecraftShared.Asset;
+
 namespace monogameMinecraftShared.UI
 {
 
@@ -43,11 +45,12 @@ namespace monogameMinecraftShared.UI
         public Vector2 initalWidthHeight;
         public bool keepsAspectRatio = false;
         public string text { get; set; }
+        public string optionalTag { get; set; }
         public bool isClickable = true;
         public UIPanel optionalBasePanel;
          
         public bool isConstantPressed=false;
-        public UIButton(Vector2 position, float width, float height, Texture2D tex, Vector2 tPos, SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction, float textScale, bool keepsAspectRatio = false, bool isClickable = true, UIPanel optionalBasePanel = null, bool isConstantPressable = false, Texture2D texturePressed = null)
+        public UIButton(UIStateManager state, Vector2 position, float width, float height, Texture2D tex, Vector2 tPos, SpriteFont font, SpriteBatch sb, GameWindow window, Action<UIButton> action, string text, Action<UIButton> buttonUpdateAction, float textScale, bool keepsAspectRatio = false, bool isClickable = true, UIPanel optionalBasePanel = null, bool isConstantPressable = false, Texture2D texturePressed = null)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -63,7 +66,7 @@ namespace monogameMinecraftShared.UI
             ButtonAction = action;
             this.text = text;
             this.textScale = textScale;
-            OnResize();
+            OnResize(state);
             ButtonUpdateAction = buttonUpdateAction;
             this.keepsAspectRatio = keepsAspectRatio;
             if (this.keepsAspectRatio)
@@ -75,19 +78,19 @@ namespace monogameMinecraftShared.UI
             this.optionalBasePanel = optionalBasePanel;
             if (optionalBasePanel != null)
             {
-                optionalBasePanel.OnResize();
-                OnResize();
+                optionalBasePanel.OnResize(state);
+                OnResize(state);
             }
 
             this.isConstantPressable = isConstantPressable;
             this.texturePressed = texturePressed;
         }
-        public void Draw()
+        public void Draw(UIStateManager state)
         {
-            DrawString(null);
+            DrawString(state,null);
         }
 
-        public void DrawString(string text1)
+        public void DrawString(UIStateManager state, string text1)
         {
           //  this.text = text;
             text = text == null ? " " : text;
@@ -125,7 +128,7 @@ namespace monogameMinecraftShared.UI
             {
                 textSize = font.MeasureString(text) / 2f;
             }
-            float textSizeScaling = UIElement.ScreenRect.Height / (float)UIElement.ScreenRectInital.Height * 2f * textScale;
+            float textSizeScaling = state.ScreenRect.Height / (float)state.ScreenRectInital.Height * 2f * textScale;
 
             float horizontalTextSizeScaling = (ButtonRect.Width / (float)(textSize.X*2));
             textSize *= MathF.Min(textSizeScaling, horizontalTextSizeScaling) ;
@@ -141,9 +144,9 @@ namespace monogameMinecraftShared.UI
 
         }
 
-        public void OnResize()
+        public void OnResize(UIStateManager state)
         {
-            GetScreenSpaceRect();
+            GetScreenSpaceRect(state);
         }
         MouseState mouseState;
         MouseState lastMouseState;
@@ -155,10 +158,17 @@ namespace monogameMinecraftShared.UI
                 //     Debug.WriteLine(ButtonRect.X+" "+ ButtonRect.Y + " "+ ButtonRect.Width + " "+ ButtonRect.Height);
                 //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
                 bool isTouchHovered = false;
-                foreach (var touch in UIElement.allTouches)
+                foreach (var touch in UITouchscreenInputHelper.allTouches)
                 {
-                    if (this.ButtonRect.Contains(touch.Position + UIElement.screenRectOffset))
+                    if (touch.Position.X<10|| touch.Position.Y < 10)
                     {
+             //           isTouchHovered = true;
+                      
+                    }
+             //       Debug.WriteLine(touch.Position);
+                    if (this.ButtonRect.Contains(touch.Position+ UITouchscreenInputHelper.screenRectOffset))
+                    {
+               //         Debug.WriteLine(UITouchscreenInputHelper.screenRectOffset);
                         isTouchHovered = true;
                         break;
                     }
@@ -178,7 +188,7 @@ namespace monogameMinecraftShared.UI
 
         }
         public UIButton() { }
-        public void Update()
+        public void Update(UIStateManager state)
         {
             mouseState = Mouse.GetState();
 
@@ -186,7 +196,7 @@ namespace monogameMinecraftShared.UI
 
             if (!isConstantPressable)
             {
-                foreach (var tc in UIElement.allTouches)
+                foreach (var tc in UITouchscreenInputHelper.allTouches)
                 {
 
                     if (tc.State == TouchLocationState.Released && isHovered)
@@ -200,16 +210,16 @@ namespace monogameMinecraftShared.UI
                     //   Debug.WriteLine("pressed");
 
 
-                    if (UIElement.uiSounds.ContainsKey("uiclick"))
+                    if (UIResourcesManager.instance.uiSounds.ContainsKey("uiclick"))
                     {
-                        UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
+                        UIResourcesManager.instance.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
                     }
                     ButtonAction(this);
                 }
             }
             else
             {
-                foreach (var tc in UIElement.allTouches)
+                foreach (var tc in UITouchscreenInputHelper.allTouches)
                 {
 
                     if ((tc.State == TouchLocationState.Pressed|| tc.State == TouchLocationState.Moved) && isHovered)
@@ -237,19 +247,19 @@ namespace monogameMinecraftShared.UI
 
             lastMouseState = mouseState;
         }
-        public void GetScreenSpaceRect()
+        public void GetScreenSpaceRect(UIStateManager state)
         {
           //  Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
             Rectangle alignedRect;
             bool originAligned = false;
             if (optionalBasePanel == null)
             {
-                alignedRect = UIElement.ScreenRect;
+                alignedRect = state.ScreenRect;
                 originAligned= true;
             }
             else
             {
-                optionalBasePanel.OnResize();
+                optionalBasePanel.OnResize(state);
                 alignedRect = optionalBasePanel.screenSpaceRect;
                 originAligned = false;  
             }

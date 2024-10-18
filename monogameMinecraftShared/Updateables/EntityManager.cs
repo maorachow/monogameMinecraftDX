@@ -9,6 +9,7 @@ using monogameMinecraftShared.Animations;
 using monogameMinecraftShared.Utility;
 using monogameMinecraftShared.Pathfinding;
 using monogameMinecraftShared.World;
+using monogameMinecraftShared.Core;
 
 namespace monogameMinecraftShared.Updateables
 {
@@ -54,7 +55,7 @@ namespace monogameMinecraftShared.Updateables
                     return;
                 }
                 Vector3 spawnPos = new Vector3(randSpawnPos.X, ChunkHelper.GetChunkLandingPoint(randSpawnPos.X, randSpawnPos.Y), randSpawnPos.Y);
-                if(ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(spawnPos))==null)
+                if(ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(spawnPos))==null)
                 {
                     return;
                 }
@@ -166,7 +167,7 @@ namespace monogameMinecraftShared.Updateables
             pathfindingManager.Initialize();
         }
 
-
+        [Obsolete]
         public static Animation zombieAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -179,6 +180,7 @@ namespace monogameMinecraftShared.Updateables
                 { "leftLeg", new AnimationTransformation(new Vector3(0f,0.0f, 0f),new Vector3(0f, -75f, 0f), new Vector3(1f, 1f, 1f)) },
             }, 0.5f)
         }, true);
+        [Obsolete]
         public static Animation entityDieAnim = new Animation(new List<AnimationStep> {
 
             new AnimationStep(new Dictionary<string, AnimationTransformation> {
@@ -190,6 +192,7 @@ namespace monogameMinecraftShared.Updateables
                 { "waist", new AnimationTransformation(new Vector3(0f, -0.75f, 0f), new Vector3(0f,0f, -90f), new Vector3(1f, 1f, 1f)) },
             }, 0.1f)
         }, false);
+        [Obsolete]
         public static Dictionary<string, SoundEffect> entitySounds = new Dictionary<string, SoundEffect>();
 
 

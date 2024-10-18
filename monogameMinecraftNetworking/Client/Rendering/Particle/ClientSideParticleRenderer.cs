@@ -19,7 +19,7 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
               300, BufferUsage.WriteOnly);
         }
 
-        public override void DrawGBuffer()
+      /*  public override void DrawGBuffer()
         {
             if (isEnabled == false)
             {
@@ -80,6 +80,6 @@ namespace monogameMinecraftNetworking.Client.Rendering.Particle
                 device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 6, instancingDataGravityTextured.Count);
 
             }
-        }
+        }*/
     }
 }

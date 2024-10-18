@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using monogameMinecraftShared.Core;
 using Microsoft.Xna.Framework.Input.Touch;
+using monogameMinecraftShared.Asset;
 
 namespace monogameMinecraftShared.UI
 {
@@ -52,6 +53,7 @@ namespace monogameMinecraftShared.UI
         public bool numbersOnly = false;
         //  public bool keepsAspectRatio = false;
         public string text { get; set; }
+        public string optionalTag { get; set; }
         public bool leftAligned=false;
         public float leftAlignedOffset = 0;
         public int pixelOffset = 0;
@@ -60,7 +62,7 @@ namespace monogameMinecraftShared.UI
         public bool useEnterActions=false;
         public Action<InputField> onTextChangedAction;
         public Action<InputField> onEnterPressedAction;
-        public InputField(Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly,bool leftAligned=false,float leftAlignedOffset = 0,bool useEnterActions=false)
+        public InputField(UIStateManager state, Vector2 position, float width, float height, Texture2D tex, Texture2D texSelected, SpriteFont font, SpriteBatch sb, GameWindow window, Action<InputField> action, string text, float textScale, int maxAllowedCharacters, bool numbersOnly,bool leftAligned=false,float leftAlignedOffset = 0,bool useEnterActions=false)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -82,17 +84,17 @@ namespace monogameMinecraftShared.UI
             this.leftAligned= leftAligned;
             this.leftAlignedOffset = leftAlignedOffset;
             this.useEnterActions = useEnterActions;
-            OnResize();
+            OnResize(state);
 
 
 
         }
-        public void Draw()
+        public void Draw(UIStateManager state)
         {
-            DrawString(null);
+            DrawString(state,null);
         }
 
-        public void DrawString(string text1)
+        public void DrawString(UIStateManager state,string text1)
         {
             //  this.text = text;
             this.text = text == null ? " " : text;
@@ -117,13 +119,13 @@ namespace monogameMinecraftShared.UI
             }
 
             float textSizeScaling;
-            if (UIElement.ScreenRect.Height < UIElement.ScreenRect.Width)
+            if (state.ScreenRect.Height < state.ScreenRect.Width)
             {
-                textSizeScaling = UIElement.ScreenRect.Height / (float)UIElement.ScreenRectInital.Height * 2f * textScale;
+                textSizeScaling = state.ScreenRect.Height / (float)state.ScreenRectInital.Height * 2f * textScale;
             }
             else
             {
-                textSizeScaling = UIElement.ScreenRect.Width / (float)UIElement.ScreenRectInital.Width * 2f * textScale;
+                textSizeScaling = state.ScreenRect.Width / (float)state.ScreenRectInital.Width * 2f * textScale;
             }
 
             textSize *= textSizeScaling;
@@ -158,9 +160,9 @@ namespace monogameMinecraftShared.UI
             }
             return value;
         }
-        public void OnResize()
+        public void OnResize(UIStateManager state)
         {
-            GetScreenSpaceRect();
+            GetScreenSpaceRect(state);
         }
         MouseState mouseState;
         MouseState lastMouseState;
@@ -174,9 +176,9 @@ namespace monogameMinecraftShared.UI
                 //     Debug.WriteLine(UIElement.ScreenRect.X + " " + UIElement.ScreenRect.Y + " " + UIElement.ScreenRect.Width + " " + UIElement.ScreenRect.Height);
                 bool isTouchHovered = false;
 
-                foreach (var touch in UIElement.allTouches)
+                foreach (var touch in UITouchscreenInputHelper.allTouches)
                 {
-                    if (this.inputFieldRect.Contains(touch.Position + UIElement.screenRectOffset))
+                    if (this.inputFieldRect.Contains(touch.Position + UITouchscreenInputHelper.screenRectOffset))
                     {
                         isTouchHovered = true;
                         break;
@@ -197,12 +199,12 @@ namespace monogameMinecraftShared.UI
 
         }
         public InputField() { }
-        public void Update()
+        public void Update(UIStateManager state)
         {
             mouseState = Mouse.GetState();
             keyboardState = Keyboard.GetState();
             bool isTouched = false;
-            foreach (var tc in UIElement.allTouches)
+            foreach (var tc in UITouchscreenInputHelper.allTouches)
             {
 
                 if (tc.State == TouchLocationState.Released)
@@ -218,13 +220,13 @@ namespace monogameMinecraftShared.UI
                 if (isHovered)
                 {
                     isSelected = true;
-                    if (UIElement.uiSounds.ContainsKey("uiclick"))
+                    if (UIResourcesManager.instance.uiSounds.ContainsKey("uiclick"))
                     {
-                        UIElement.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
+                        UIResourcesManager.instance.uiSounds["uiclick"].Play(1f, 0.5f, 0f);
                     }
 
-                    UIElement.androidCurEditingElement = this;
-                    UIElement.androidIsInputPanelOpened= true;
+                    UITouchscreenInputHelper.androidCurEditingElement = this;
+                    UITouchscreenInputHelper.androidIsInputPanelOpened= true;
                 }
                 else
                 {
@@ -335,13 +337,13 @@ namespace monogameMinecraftShared.UI
             lastKeyboardState = keyboardState;
 
         }
-        public void GetScreenSpaceRect()
+        public void GetScreenSpaceRect(UIStateManager state)
         {
             Debug.WriteLine(element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
 
-            Vector2 transformedP00 = new Vector2(element00Pos.X * UIElement.ScreenRect.Width, element00Pos.Y * UIElement.ScreenRect.Height);
-            float width = (element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
-            float height = (element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
+            Vector2 transformedP00 = new Vector2(element00Pos.X * state.ScreenRect.Width, element00Pos.Y * state.ScreenRect.Height);
+            float width = (element10Pos - element00Pos).X * state.ScreenRect.Width;
+            float height = (element01Pos - element00Pos).Y * state.ScreenRect.Height;
             /* if (keepsAspectRatio)
              {
                  if (width > height)

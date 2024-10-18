@@ -141,7 +141,7 @@ namespace monogameMinecraftNetworking.World
         public static short GetBlock(Vector3Int pos, int worldID)
         {
 
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
 
             if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
             {
@@ -174,7 +174,7 @@ namespace monogameMinecraftNetworking.World
         public static BlockData GetBlockData(Vector3 pos,int worldID)
         {
             Vector3Int intPos = Vector3Int.FloorToIntVec3(pos);
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(pos), worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos), worldID);
 
             if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
             {
@@ -197,7 +197,7 @@ namespace monogameMinecraftNetworking.World
         public static BlockData GetBlockData(Vector3Int pos, int worldID)
         {
 
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)), worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)), worldID);
 
             if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
             {
@@ -361,8 +361,8 @@ namespace monogameMinecraftNetworking.World
         public static void SetBlockWithUpdate(Vector3 pos, short blockID, int worldID)
         {
 
-            Vector3Int intPos = new Vector3Int(ChunkHelper.FloatToInt(pos.X), ChunkHelper.FloatToInt(pos.Y), ChunkHelper.FloatToInt(pos.Z));
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(pos), worldID);
+            Vector3Int intPos = new Vector3Int(ChunkCoordsHelper.FloatToInt(pos.X), ChunkCoordsHelper.FloatToInt(pos.Y), ChunkCoordsHelper.FloatToInt(pos.Z));
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos), worldID);
             if (chunkNeededUpdate == null )
             {
                 return;
@@ -385,7 +385,7 @@ namespace monogameMinecraftNetworking.World
         {
 
             Vector3Int intPos = pos;
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
             if (chunkNeededUpdate == null )
             {
                 return;
@@ -405,7 +405,7 @@ namespace monogameMinecraftNetworking.World
         {
 
             Vector3Int intPos = pos;
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
             if (chunkNeededUpdate == null )
             {
                 return;
@@ -427,7 +427,7 @@ namespace monogameMinecraftNetworking.World
         {
 
             Vector3Int intPos = pos;
-            ServerSideChunk chunkNeededUpdate =GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate =GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
             if (chunkNeededUpdate == null)
             {
                 return;
@@ -449,7 +449,7 @@ namespace monogameMinecraftNetworking.World
         {
 
             Vector3Int intPos = pos;
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
             if (chunkNeededUpdate == null)
             {
                 return;
@@ -471,7 +471,7 @@ namespace monogameMinecraftNetworking.World
         public static void SendPlaceBlockOperation(Vector3Int position, BlockData data,int worldID)
         {
             ServerSideVoxelWorld.voxelWorlds[worldID].worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(position, ServerSideVoxelWorld.voxelWorlds[worldID].worldUpdater, data,worldID));
-            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
             if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
             {
                 return;
@@ -535,7 +535,7 @@ namespace monogameMinecraftNetworking.World
         {
 
             Vector3Int intPos = pos;
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)),worldID);
             if (chunkNeededUpdate == null )
             {
                 return;
@@ -556,8 +556,8 @@ namespace monogameMinecraftNetworking.World
         public static void SetBlockWithUpdate(Vector3 pos, BlockData blockData, int worldID)
         {
 
-            Vector3Int intPos = new Vector3Int(ChunkHelper.FloatToInt(pos.X), ChunkHelper.FloatToInt(pos.Y), ChunkHelper.FloatToInt(pos.Z));
-            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkHelper.Vec3ToChunkPos(pos),worldID);
+            Vector3Int intPos = new Vector3Int(ChunkCoordsHelper.FloatToInt(pos.X), ChunkCoordsHelper.FloatToInt(pos.Y), ChunkCoordsHelper.FloatToInt(pos.Z));
+            ServerSideChunk chunkNeededUpdate = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos),worldID);
             if (chunkNeededUpdate == null )
             {
                 return;

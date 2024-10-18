@@ -28,7 +28,7 @@ namespace monogameMinecraftClient
     //    private SpriteBatch _spriteBatch;
         public RandomTextureGenerator randomTextureGenerator;
         public MouseMovementManager mouseMovementManager;
-        public ParticleManager particleManager;
+  //      public ParticleManager particleManager;
         public MinecraftGameClient()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -43,14 +43,31 @@ namespace monogameMinecraftClient
             IsMouseVisible = true;
             this.IsFixedTimeStep = false;
             effectsManager = new LowDefEffectsManager();
-          
-            renderPipelineManager = new LowDefNetworkingClientRenderPipelineManager(this, effectsManager);
+            
+            renderPipelineManager = new LowDefRenderPipelineManager(this, effectsManager, () =>
+            {
+                var renderPipelineManager1 = (renderPipelineManager as LowDefRenderPipelineManager);
+                if (renderPipelineManager1.entityRenderers.Count > 0)
+                {
+                    renderPipelineManager1.entityRenderers[0] = new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                        effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
+                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this);
+
+                }
+                else
+                {
+                    renderPipelineManager1.entityRenderers.Add(new ClientSideEntitiesRenderer(this.Content.Load<Model>("zombiefbx"), this.Content.Load<Model>("pigfbx"),
+                        effectsManager.gameEffects["gbufferentityeffect"], this.gamePlayerR.gamePlayer,
+                        this.Content.Load<Texture2D>("husk"), this.Content.Load<Texture2D>("pig"), this.networkingClient, this.GraphicsDevice, this));
+                }
+                renderPipelineManager1.gBufferRenderer.entityRenderer = renderPipelineManager1.entityRenderers[0];
+            });
             gamePlayerR = new GamePlayerReference();
             gamePlatformType = GamePlatformType.LowDefGL;
-
+            gameArchitecturePatternType = GameArchitecturePatternType.ClientServer;
         }
 
-        public void OnResize(object sender, EventArgs e)
+        public override void OnResize(object sender, EventArgs e)
         {
             UIElement.ScreenRect = Window.ClientBounds;
             if (mouseMovementManager != null)
@@ -277,7 +294,7 @@ namespace monogameMinecraftClient
             }
             clientSideEntityManager = new ClientSideEntityManager(this.networkingClient);
             clientSidePlayersManager=new ClientSidePlayersManager(networkingClient);
-            particleManager = new ParticleManager();
+            particleManager = new ClientSideParticleManager();
             particleManager.Initialize();
             renderPipelineManager.InitRenderPipeline();
             ClientSideEntityManager.LoadEntitySounds(Content);
@@ -312,10 +329,10 @@ namespace monogameMinecraftClient
 
         protected override void Update(GameTime gameTime)
         {
-       if (!IsActive)
-          {
+            if (!IsActive)
+            {
               return;
-          }
+            }
      /*       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();*/
             
@@ -369,9 +386,9 @@ namespace monogameMinecraftClient
                     clientSidePlayersManager.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                     ClientSideVoxelWorld.singleInstance.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-                    if (ParticleManager.instance.isResourcesReleased == false)
+                    if (ParticleManagerBase.instance.isResourcesReleased == false)
                     {
-                        ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                        ParticleManagerBase.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
                     }
                  
                     (gamePlayerR.gamePlayer as ClientSideGamePlayer).UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
@@ -535,7 +552,7 @@ namespace monogameMinecraftClient
                     GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
                     gamePlayerR.gamePlayer.cam.updateCameraVectors();
-
+                    renderPipelineManager.curRenderingWorld = ClientSideVoxelWorld.singleInstance;
                     renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
                     //        _spriteBatch.Begin(blendState:BlendState.Additive);
                     //        _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth , GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
@@ -552,9 +569,9 @@ namespace monogameMinecraftClient
                     _spriteBatch.Begin();
 
 
-                    if (renderPipelineManager is LowDefNetworkingClientRenderPipelineManager)
+                    if (renderPipelineManager is LowDefRenderPipelineManager)
                     {
-                        LowDefNetworkingClientRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as LowDefNetworkingClientRenderPipelineManager;
+                        LowDefRenderPipelineManager renderPipelineManagerLowDef = renderPipelineManager as LowDefRenderPipelineManager;
                         /*    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
                             for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)

@@ -5,7 +5,7 @@ namespace monogameMinecraftShared.UI
 {
     public class UIImage : UIElement
     {
-        public Rectangle ImageRect;
+        public Rectangle imageRect;
 
 
         public Vector2 element00Pos;
@@ -13,11 +13,11 @@ namespace monogameMinecraftShared.UI
         public Vector2 element11Pos;
         public Vector2 element10Pos;
         public string text { get; set; }
+        public string optionalTag { get; set; }
         SpriteBatch spriteBatch;
         public Texture2D texture;
-
-        public GameWindow window;
-        public UIImage(Vector2 position, float width, float height, Texture2D tex, SpriteBatch sb)
+ 
+        public UIImage(UIStateManager state, Vector2 position, float width, float height, Texture2D tex, SpriteBatch sb)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -27,30 +27,30 @@ namespace monogameMinecraftShared.UI
 
 
             spriteBatch = sb;
-            OnResize();
+            OnResize(state);
         }
-        public void OnResize()
+        public void OnResize(UIStateManager state)
         {
-            GetScreenSpaceRect();
+            GetScreenSpaceRect(state);
         }
-        public void DrawString(string text)
+        public void DrawString(UIStateManager state, string text)
         {
             //   this.text = text;
             //     text = text == null ? " " : text;
 
-            spriteBatch.Draw(texture, ImageRect, Color.White);
+            spriteBatch.Draw(texture, imageRect, Color.White);
         }
-        public void Update() { }
-        public void Draw()
+        public void Update(UIStateManager state) { }
+        public void Draw(UIStateManager state)
         {
-            DrawString(null);
+            DrawString(state,null);
         }
-        public void GetScreenSpaceRect()
+        public void GetScreenSpaceRect(UIStateManager state)
         {
-            Vector2 transformedP00 = new Vector2(element00Pos.X * UIElement.ScreenRect.Width, element00Pos.Y * UIElement.ScreenRect.Height);
-            float width = (element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
-            float height = (element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
-            ImageRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
+            Vector2 transformedP00 = new Vector2(element00Pos.X * state.ScreenRect.Width, element00Pos.Y * state.ScreenRect.Height);
+            float width = (element10Pos - element00Pos).X * state.ScreenRect.Width;
+            float height = (element01Pos - element00Pos).Y * state.ScreenRect.Height;
+            imageRect = new Rectangle((int)transformedP00.X, (int)transformedP00.Y, (int)width, (int)height);
 
 
         }

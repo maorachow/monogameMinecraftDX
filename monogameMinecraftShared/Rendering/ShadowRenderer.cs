@@ -21,7 +21,7 @@ namespace monogameMinecraftShared.Rendering
         public RenderTarget2D shadowMapTargetFar;
         public Effect shadowMapShader;
         public ChunkRenderer chunkRenderer;
-        public EntityRenderer entityRenderer;
+        public IEntityRenderer entityRenderer;
         public GameTimeManager gameTimeManager;
         public GamePlayerReference gamePlayerR;
         public Model zombieModel;
@@ -38,7 +38,7 @@ namespace monogameMinecraftShared.Rendering
         public float shadowBias;
         public IShadowDrawableRenderer optionalRenderer1;
         public IShadowDrawableRenderer optionalRenderer2;
-        public ShadowRenderer(GamePlayerReference gamePlayerR, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, EntityRenderer er, GameTimeManager gtr, IShadowDrawableRenderer optionalRenderer1 =null, IShadowDrawableRenderer optionalRenderer2 = null)
+        public ShadowRenderer(GamePlayerReference gamePlayerR, GraphicsDevice device, Effect shadowMapShader, ChunkRenderer cr, IEntityRenderer er, GameTimeManager gtr, IShadowDrawableRenderer optionalRenderer1 =null, IShadowDrawableRenderer optionalRenderer2 = null)
         {
             this.gamePlayerR = gamePlayerR;
             this.device = device;

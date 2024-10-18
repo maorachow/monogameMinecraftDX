@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -128,6 +129,29 @@ namespace monogameMinecraftNetworking.Client
             messageParser = new MessageParserSingleSocket(todoList, socket, todoListLock);
             this.game = game;
         }
+
+        public void Initialize(IPAddress address, int port, ClientSideGamePlayer gamePlayer, ClientGameBase game)
+        {
+            if (isLoggedIn == true && isGoingToQuitGame == false)
+            {
+                throw new Exception("cannot initialize client while running");
+            }
+            this.gamePlayer = gamePlayer;
+            this.address = address;
+            this.port = port;
+            this.socket?.Dispose();
+            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this.todoList = new ConcurrentQueue<MessageProtocol>();
+            isLoggedIn = false;
+            isGoingToQuitGame = false;
+            if (messageParser.isMessageParsingThreadRunning == true)
+            {
+                messageParser.Stop();
+            }
+            messageParser = new MessageParserSingleSocket(todoList, socket, todoListLock);
+            this.game = game;
+        }
+       
 
         public Thread executeTodoListThread;
      
@@ -342,7 +366,7 @@ namespace monogameMinecraftNetworking.Client
                     //        SoundsUtility.PlaySound(gamePlayer.position, new Vector3(data4.posX, data4.posY, data4.posZ), Chunk.blockSoundInfo[data4.blockID], 20f);
                             if (Chunk.blockInfosNew.ContainsKey(data5.blockID))
                             {
-                                ClientSideParticleEmittingHelper.EmitParticleWithParamCustomUV(new Vector3(data5.posX, data5.posY, data5.posZ), ParticleEmittingHelper.allParticles["blockbreakingclientside"],
+                                ParticleEmittingHelper.EmitParticleWithParamCustomUV(new Vector3(data5.posX, data5.posY, data5.posZ), ParticleEmittingHelper.allParticles["blockbreaking"],
                                     new Vector4(Chunk.blockInfosNew[data5.blockID].uvCorners[0].X,
                                 Chunk.blockInfosNew[data5.blockID].uvCorners[0].Y,
                                 Chunk.blockInfosNew[data5.blockID].uvSizes[0].X / 4.0f,

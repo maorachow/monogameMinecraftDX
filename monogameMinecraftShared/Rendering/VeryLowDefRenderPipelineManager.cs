@@ -26,12 +26,13 @@ using monogameMinecraftShared.World;
             public BoundingBoxVisualizationRenderer boundingBoxVisualizationRenderer { get; set; }
             public ChunkRenderer chunkRenderer { get; set; }
             public ParticleRenderer particleRenderer { get; set; }
+            public List<IEntityRenderer> entityRenderers { get; set; }
             public Texture2D environmentHDRITex;
             public Texture2D environmentHDRITexNight;
 
             public SkyboxRenderer skyboxRenderer;
             public GBufferRenderer gBufferRenderer;
-            public EntityRenderer entityRenderer;
+         
             public TerrainMipmapGenerator terrainMipmapGenerator;
             public HDRCubemapRendererLowDef hdrCubemapRenderer;
             public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
@@ -39,14 +40,23 @@ using monogameMinecraftShared.World;
 
             public Effect chunkForwardEffect;
             public Effect entityForwardEffect;
-        public VeryLowDefRenderPipelineManager(MinecraftGameBase game, IEffectsManager em)
+            public IVoxelWorldWithRenderingChunkBuffers curRenderingWorld { get; set; }
+            public Action optionalPostInitRenderPipelineAction { get; set; }
+            public Action<IRenderPipelineManager> optionalPostRenderingAction { get; set; }
+        public VeryLowDefRenderPipelineManager(MinecraftGameBase game, IEffectsManager em,Action optionalPostInitRenderPipelineAction=null)
             {
                 this.game = game;
                 effectsManager = em;
+                this.optionalPostInitRenderPipelineAction= optionalPostInitRenderPipelineAction;
             }
-            public void InitRenderPipeline()
+            public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction = null)
             {
-                environmentHDRITex = game.Content.Load<Texture2D>("environmenthdri");
+                entityRenderers = new List<IEntityRenderer>();
+                if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+                {
+                    curRenderingWorld = VoxelWorld.currentWorld;
+                }
+            environmentHDRITex = game.Content.Load<Texture2D>("environmenthdri");
                 environmentHDRITexNight = game.Content.Load<Texture2D>("environmenthdrinight");
                 chunkForwardEffect = effectsManager.gameEffects["blockforwardeffect"];
                 entityForwardEffect = effectsManager.gameEffects["entityforwardeffect"];
@@ -59,16 +69,23 @@ using monogameMinecraftShared.World;
 
                 chunkRenderer = new ChunkRenderer(game, game.GraphicsDevice, null, null, game.gameTimeManager);
 
-                //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
+            //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
 
-                BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
-                /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
-                 gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
-                particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-                  null, game.gamePlayerR.gamePlayer,false);
-                BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
-                entityRenderer = new EntityRenderer( game.GraphicsDevice, game.gamePlayerR.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"), null, null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-                gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbuffereffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
+            //     BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
+            /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
+             gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
+                chunkRenderer.SetTexture(BlockResourcesManager.instance.atlasNormal, null, BlockResourcesManager.instance.atlas, BlockResourcesManager.instance.atlasMER);
+
+                particleRenderer = new ParticleRenderer(game.GraphicsDevice,
+                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer, true);
+                particleRenderer.SetTexture(BlockResourcesManager.instance.particleAtlas, BlockResourcesManager.instance.particleAtlasNormal, BlockResourcesManager.instance.particleAtlasMER);
+            //     BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
+            if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+                {
+                    entityRenderers .Add(new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, null, null, game.gameTimeManager,null));
+            }
+              
+                gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbuffereffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderers.Count>0? entityRenderers[0] : null, particleRenderer);
                 skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                    game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                    );
@@ -109,12 +126,21 @@ using monogameMinecraftShared.World;
                 boundingBoxVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"], gBufferRenderer);
                 walkablePathVisualizationRenderer = new WalkablePathVisualizationRenderer();
                 walkablePathVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"], gBufferRenderer);
-            }
+                if (optionalPostInitRenderPipelineAction != null)
+                {
+                    optionalPostInitRenderPipelineAction();
+                }
+                this.optionalPostRenderingAction = optionalPostRenderingAction;
+        }
 
             public void RenderWorld(GameTime gameTime, SpriteBatch sb)
             {
 
-                game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+                if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+                {
+                    curRenderingWorld = VoxelWorld.currentWorld;
+                }
+            game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
                 //  GraphicsDevice.RasterizerState = rasterizerState;
                 game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
@@ -123,7 +149,11 @@ using monogameMinecraftShared.World;
 
               //  deferredShadingRendererLowDef.Draw(game.gamePlayer, game._spriteBatch);
               chunkRenderer.RenderAllChunksLowDefForward(VoxelWorld.currentWorld.chunks,game.gamePlayerR.gamePlayer, chunkForwardEffect);
-              entityRenderer.DrawLowDefForward(entityForwardEffect);
+              if (entityRenderers[0] != null)
+              {
+                  entityRenderers[0].DrawLowDefForward(entityForwardEffect);
+            }
+              
                 game.GraphicsDevice.DepthStencilState = DepthStencilState.None;
                 game.GraphicsDevice.BlendState = BlendState.Additive;
 

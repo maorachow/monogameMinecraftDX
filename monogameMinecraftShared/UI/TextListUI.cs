@@ -27,7 +27,7 @@ namespace monogameMinecraftShared.UI
         public SpriteBatch spriteBatch;
         public int maxAllowedLines;
         public float textScale;
-        public TextListUI(Vector2 position, float width, float height, Texture2D tex, SpriteFont font, SpriteBatch sb, float textScale,int maxAllowedLines,UIPanel optionalBasePanel=null)
+        public TextListUI(UIStateManager state, Vector2 position, float width, float height, Texture2D tex, SpriteFont font, SpriteBatch sb, float textScale,int maxAllowedLines,UIPanel optionalBasePanel=null)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -42,7 +42,7 @@ namespace monogameMinecraftShared.UI
             
             this.text = text;
            
-            OnResize();
+            OnResize(state);
             this.textScale= textScale;
             this.maxAllowedLines=maxAllowedLines;
             if (optionalBasePanel != null)
@@ -59,8 +59,8 @@ namespace monogameMinecraftShared.UI
             this.optionalBasePanel = optionalBasePanel;
             if (optionalBasePanel != null)
             {
-                optionalBasePanel.OnResize();
-                OnResize();
+                optionalBasePanel.OnResize(state);
+                OnResize(state);
             }
 
             texts = new List<string>();
@@ -77,18 +77,18 @@ namespace monogameMinecraftShared.UI
             }
          
         }
-        public void GetScreenSpaceRect()
+        public void GetScreenSpaceRect(UIStateManager state)
         {
             Rectangle alignedRect;
             bool originAligned = false;
             if (optionalBasePanel == null)
             {
-                alignedRect = UIElement.ScreenRect;
+                alignedRect = state.ScreenRect;
                 originAligned = true;
             }
             else
             {
-                optionalBasePanel.OnResize();
+                optionalBasePanel.OnResize(state);
                 alignedRect = optionalBasePanel.screenSpaceRect;
                 originAligned = false;
             }
@@ -129,7 +129,7 @@ namespace monogameMinecraftShared.UI
 
         }
 
-        public void Draw()
+        public void Draw(UIStateManager state)
         {
             spriteBatch.Draw(texture,textListRect,Color.White);
             float curPixel = textListRect.Height - ((float)textListRect.Height / maxAllowedLines);
@@ -173,12 +173,12 @@ namespace monogameMinecraftShared.UI
 
         }
 
-        public void DrawString(string text)
+        public void DrawString(UIStateManager state,string text)
         {
-          Draw();
+          Draw(state);
         }
 
-        public void Update()
+        public void Update(UIStateManager state)
         {
            
         }
@@ -188,11 +188,12 @@ namespace monogameMinecraftShared.UI
            
         }
 
-        public void OnResize()
+        public void OnResize(UIStateManager state)
         {
-           GetScreenSpaceRect();
+           GetScreenSpaceRect(state);
         }
 
         public string text { get; set; }
+        public string optionalTag { get; set; }
     }
 }

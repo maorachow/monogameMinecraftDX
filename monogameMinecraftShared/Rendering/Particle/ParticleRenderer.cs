@@ -14,6 +14,7 @@ namespace monogameMinecraftShared.Rendering.Particle
 {
     public class ParticleRenderer
     {
+       
         public Texture2D atlas;
         public Texture2D atlasNormal;
         public Texture2D atlasMER;
@@ -23,7 +24,7 @@ namespace monogameMinecraftShared.Rendering.Particle
         public VertexBuffer instancingBufferGravityTextured;
         public VertexBuffer quadVertexBuffer;
         public IndexBuffer quadIndexBuffer;
-     public bool isEnabled=true;
+        public bool isEnabled=true;
         public IGamePlayer gamePlayer;
 
         public ushort[] quadIndices =
@@ -94,18 +95,19 @@ namespace monogameMinecraftShared.Rendering.Particle
         }
 
 
-        public ParticleRenderer(Texture2D atlas, Texture2D atlasNormal, Texture2D atlasMER, GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer,bool isEnabled)
+        public ParticleRenderer( GraphicsDevice device, Effect gBufferParticleEffect, IGamePlayer gamePlayer,bool isEnabled)
         {
-            this.atlas = atlas;
             this.device = device;
-            this.atlasNormal = atlasNormal;
-            this.atlasMER = atlasMER;
+            /*    this.atlas = atlas;
+
+                this.atlasNormal = atlasNormal;
+                this.atlasMER = atlasMER;*/
             this.gBufferParticleEffect = gBufferParticleEffect;
             InitializeVertices();
             InitializeQuadBuffers(this.device);
       this.isEnabled=isEnabled;
-            instancingBufferGravityTextured = new VertexBuffer(device, typeof(VertexMatrix4x4UVScale),
-               1, BufferUsage.WriteOnly);
+            instancingBufferGravityTextured = new DynamicVertexBuffer(device, typeof(VertexMatrix4x4UVScale),
+               ParticleManagerBase.maxParticlesCount, BufferUsage.WriteOnly);
             this.gamePlayer = gamePlayer;
         }
 
@@ -118,7 +120,7 @@ namespace monogameMinecraftShared.Rendering.Particle
             }
             instancingDataGravityTextured = new List<VertexMatrix4x4UVScale>();
             //   Debug.WriteLine(ParticleManager.instance.allParticles.Count);
-            foreach (var item in ParticleManager.instance.allParticles.Values)
+            foreach (var item in ParticleManagerBase.instance.allParticles.ToArray())
             {
                 if (item is TexturedGravityParticle)
                 {
@@ -140,9 +142,9 @@ namespace monogameMinecraftShared.Rendering.Particle
             {
                 return;
             }
-            instancingBufferGravityTextured?.Dispose();
+          /*  instancingBufferGravityTextured?.Dispose();
             instancingBufferGravityTextured = new VertexBuffer(device, typeof(VertexMatrix4x4UVScale),
-                instancingDataGravityTextured.Count, BufferUsage.WriteOnly);
+                instancingDataGravityTextured.Count, BufferUsage.WriteOnly);*/
             instancingBufferGravityTextured.SetData(instancingDataGravityTextured.ToArray());
 
             device.SetVertexBuffers(new VertexBufferBinding(instancingBufferGravityTextured, 0, 1), new VertexBufferBinding(quadVertexBuffer, 0));

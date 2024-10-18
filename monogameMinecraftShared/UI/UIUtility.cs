@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -12,11 +13,12 @@ using monogameMinecraftShared.World;
 
 namespace monogameMinecraftShared.UI
 {
+    [Obsolete]
     public static class UIUtility
     {
         public static SpriteFont sf;
 
-        public static void InitGameUI(MinecraftGameBase game)
+       /* public static void InitGameUI(MinecraftGameBase game)
         {
 
 
@@ -133,7 +135,7 @@ namespace monogameMinecraftShared.UI
                 UIElement.UITextures.TryAdd("mobiletouchpause", touchPauseTex);
                 UIElement.UITextures.TryAdd("mobiletouchinventory", touchInventoryTex);
             }
-            BlockResourcesManager.LoadDefaultUIResources(game.Content, game);
+        //    BlockResourcesManager.LoadDefaultUIResources(game.Content, game);
 
             UIElement.menuUIs = new List<UIElement> {
 
@@ -432,7 +434,9 @@ namespace monogameMinecraftShared.UI
             }
             } 
            
-        }
+        }*/
 
     }
+
+ 
 }

@@ -68,10 +68,10 @@ namespace monogameMinecraftNetworking.World
                         }
                         updateOper.Update();
                         if (!chunksNeededRebuild.Contains(
-                                ServerSideChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position),
+                                ServerSideChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos((Vector3)updateOper.position),
                                     world.worldID)))
                         {
-                            chunksNeededRebuild.Add(ServerSideChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position), world.worldID));
+                            chunksNeededRebuild.Add(ServerSideChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos((Vector3)updateOper.position), world.worldID));
                         }
                         
                     }

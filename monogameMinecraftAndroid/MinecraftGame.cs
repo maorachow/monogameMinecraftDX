@@ -27,91 +27,20 @@ using monogameMinecraftShared;
 using monogameMinecraftShared.Input;
 using monogameMinecraftShared.Rendering;
 using monogameMinecraftShared.Updateables;
- 
 
+ 
 namespace monogameMinecraftAndroid
 {
-  /*  public enum GameStatus
-    {
-        Menu,
-        Settings,
-        Started,
-        Quiting
-    }*/
+  
     public class MinecraftGame : MinecraftGameBase
     {
         private GraphicsDeviceManager _graphics;
-     //   public SpriteBatch _spriteBatch;
-        /*    public Effect chunkSolidEffect;
-            public Effect chunkShadowEffect;
-            public Effect entityEffect;
-            public Effect ssaoEffect;
-            public Effect gBufferEffect;
-            public Effect gBufferEntityEffect;
-            public Effect skyboxEffect;
-            public Effect lightShaftEffect;
-            public Effect ssrEffect;
-            public Effect deferredBlockEffect;
-            public Effect contactShadowEffect;
-            public Effect ssidEffect;
-            public Effect deferredBlendEffect;
-            public Effect brdfLUTEffect;
-            public Effect motionVectorEffect;
-            public Effect textureCopyEffect;
-            public Effect terrainMipmapEffect;
-            public Effect hiZBufferEffect;
-            public Effect fxaaEffect;
-            public Effect motionBlurEffect;*/
+     
         public AlphaTestEffect chunkNSEffect;
-    //    public GamePlayer gamePlayer;
-     //   public static Vector3 gameposition;
-    /*
-        public Thread updateWorldThread;
-        public Thread tryRemoveChunksThread;
-        public int renderDistance = 512;*/
-    //    public GameStatus status = GameStatus.Menu;
-
-        public RandomTextureGenerator randomTextureGenerator;
-        public GlobalMaterialParamsManager globalMaterialParamsManager;
-
-      //  public GameTimeManager gameTimeManager;
-     //   public IRenderPipelineManager renderPipelineManager { get; set; }
-        public ParticleManager particleManager;
-        /*
-        public EntityRenderer entityRenderer;
-        public ChunkRenderer chunkRenderer;
-        public ShadowRenderer shadowRenderer;
-        public SSAORenderer ssaoRenderer;
-        public SkyboxRenderer skyboxRenderer;
-        public GBufferRenderer gBufferRenderer;
-        public SSRRenderer ssrRenderer;
-        public TextureCube skyboxTex;
-        public VolumetricLightRenderer volumetricLightRenderer;
-        
-        public PointLightUpdater pointLightUpdater;
-        public ContactShadowRenderer contactShadowRenderer;
-        public SSIDRenderer ssidRenderer;
-        DeferredShadingRenderer deferredShadingRenderer;
-      
     
-        public BRDFLUTRenderer brdfLUTRenderer;
-        public MotionVectorRenderer motionVectorRenderer;
-        public TerrainMipmapGenerator terrainMipmapGenerator;
-        public FXAARenderer fxaaRenderer;
-        public HiZBufferRenderer hiZBufferRenderer;
-        public MotionBlurRenderer motionBlurRenderer;
-        HDRCubemapRenderer hdrCubemapRenderer;*/
-       // public EffectsManager effectsManager = new EffectsManager();
-      //  public List<CustomPostProcessor> customPostProcessors = new List<CustomPostProcessor>();
-    /* 
-        Texture2D terrainTex;
-        Texture2D terrainTexNoMip;
-        Texture2D terrainNormal;
-        Texture2D terrainDepth;
-        Texture2D terrainMER;*/
-        
-
-//    public PlayerInputManager playerInputManager;
+        public RandomTextureGenerator randomTextureGenerator;
+     
+ 
         public MinecraftGame(Android.App.Activity activity)
         {
            
@@ -134,9 +63,7 @@ namespace monogameMinecraftAndroid
             renderPipelineManager = new VeryLowDefRenderPipelineManager(this, effectsManager);
             _graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
-            //    TargetElapsedTime = System.TimeSpan.FromMilliseconds(10);
-            //         TargetElapsedTime = System.TimeSpan.FromMilliseconds(33);
-            //this.OnExiting += OnExit;
+ 
         }
 
         public void PrepareGraphicsDevice(object sender, PreparingDeviceSettingsEventArgs e)
@@ -147,9 +74,8 @@ namespace monogameMinecraftAndroid
         }
        public override void OnResize(Object sender, EventArgs e)
         {
-            UIElement.ScreenRect = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-            UIElement.screenRectOffset = new Vector2(GraphicsDevice.Viewport.X, GraphicsDevice.Viewport.Y);
-          UIResizingManager.Resize(this);
+            //    UIElement.ScreenRect = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+          
             switch (status)
             {
                 case GameStatus.Started:
@@ -246,101 +172,20 @@ namespace monogameMinecraftAndroid
                  tryRemoveChunksThread.Start();*/
 
             effectsManager.LoadEffects(Content);
+            renderPipelineManager.InitRenderPipeline();
             randomTextureGenerator = new RandomTextureGenerator();
             RandomTextureGenerator.instance.GenerateTexture(1024, 1024, GraphicsDevice);
 
-            globalMaterialParamsManager = new GlobalMaterialParamsManager();
-            /*     chunkSolidEffect = Content.Load<Effect>("blockeffect");
-                 chunkShadowEffect = Content.Load<Effect>("createshadowmapeffect");
-                 entityEffect = Content.Load<Effect>("entityeffect");
-                 //  chunkEffect = Content.Load<Effect>("blockeffect");
-                 gBufferEffect = Content.Load<Effect>("gbuffereffect");
-                 gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");
-                 ssaoEffect = Content.Load<Effect>("ssaoeffect");
-                 lightShaftEffect = Content.Load<Effect>("lightshafteffect");
-                 skyboxEffect = Content.Load<Effect>("skyboxeffect");
-                 ssrEffect = Content.Load<Effect>("ssreffect");
-                 ssidEffect = Content.Load<Effect>("ssideffect");
-                 deferredBlockEffect = Content.Load<Effect>("deferredblockeffect");
-                 contactShadowEffect = Content.Load<Effect>("contactshadoweffect");
-                 deferredBlendEffect = Content.Load<Effect>("deferredblendeffect");
-                 brdfLUTEffect = Content.Load<Effect>("brdfluteffect");
-                 motionVectorEffect = Content.Load<Effect>("motionvectoreffect");
-                 textureCopyEffect = Content.Load<Effect>("texturecopyraweffect");
-                 terrainMipmapEffect = Content.Load<Effect>("texturecopyeffect");
-                 hiZBufferEffect = Content.Load<Effect>("hizbuffereffect");
-                 fxaaEffect = Content.Load<Effect>("fxaaeffect");
-                 motionBlurEffect = Content.Load<Effect>("motionblureffect");*/
-        /*    terrainTex = Content.Load<Texture2D>("terrain");
-            terrainTexNoMip = Content.Load<Texture2D>("terrainnomipmap");
-            terrainNormal = Content.Load<Texture2D>("terrainnormal");
-            //   chunkSolidEffect = Content.Load<Effect>("blockeffect");
-            terrainDepth = Content.Load<Texture2D>("terrainheight");
-            terrainMER = Content.Load<Texture2D>("terrainmer");*/
+         
+          
           
             gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer);
-        //    BlockResourcesManager.LoadDefaultResources(Content, GraphicsDevice, chunkRenderer);
-         //   effectsManager.LoadCustomPostProcessEffects(GraphicsDevice, customPostProcessors, Content);
-
-
-            renderPipelineManager.InitRenderPipeline();
-      /*      terrainMipmapGenerator = new TerrainMipmapGenerator(GraphicsDevice, effectsManager.gameEffects["texturecopyeffect"]);
-            brdfLUTRenderer = new BRDFLUTRenderer(GraphicsDevice, effectsManager.gameEffects["brdfluteffect"]);
-            brdfLUTRenderer.CalculateLUT();
-            hdrCubemapRenderer = new HDRCubemapRenderer(GraphicsDevice, effectsManager.gameEffects["hdricubeeffect"], environmentHDRITex, effectsManager.gameEffects["hdriirradianceeffect"], effectsManager.gameEffects["hdriprefiltereffect"]);
-            hdrCubemapRenderer.Render();
-           
-            chunkRenderer = new ChunkRenderer(this, GraphicsDevice, effectsManager.gameEffects["blockforwardeffect"], null, gameTimeManager);
-            pointLightUpdater = new PointLightUpdater(gamePlayer);*/
-            //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
-          
-            /* gBufferEffect = Content.Load<Effect>("gbuffereffect");
-             gBufferEntityEffect = Content.Load<Effect>("gbufferentityeffect");*/
-    /*        entityRenderer = new EntityRenderer(this, GraphicsDevice, gamePlayer, effectsManager.gameEffects["entityeffect"], Content.Load<Model>("zombiefbx"), Content.Load<Texture2D>("husk"), Content.Load<Model>("zombiemodelref"), effectsManager.gameEffects["createshadowmapeffect"], null, gameTimeManager);
-            gBufferRenderer = new GBufferRenderer(this.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], gamePlayer, chunkRenderer, entityRenderer);
-            skyboxRenderer = new SkyboxRenderer(GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, gamePlayer, Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxup"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skybox"), Content.Load<Texture2D>("skybox/skyboxdown"), Content.Load<Texture2D>("skybox/skybox"),
-               Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightup"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnight"), Content.Load<Texture2D>("skybox/skyboxnightdown"), Content.Load<Texture2D>("skybox/skyboxnight"), gameTimeManager
-               );
-            skyboxRenderer.skyboxTexture = hdrCubemapRenderer.resultSpecularCubemapMip0;
-            contactShadowRenderer = new ContactShadowRenderer(GraphicsDevice, effectsManager.gameEffects["contactshadoweffect"], gBufferRenderer, gameTimeManager, gamePlayer);
-            shadowRenderer = new ShadowRenderer(this, GraphicsDevice, effectsManager.gameEffects["createshadowmapeffect"], chunkRenderer, entityRenderer, gameTimeManager);
-            motionVectorRenderer = new MotionVectorRenderer(this.GraphicsDevice, effectsManager.gameEffects["motionvectoreffect"], gBufferRenderer, gamePlayer);
-            ssaoRenderer = new SSAORenderer(effectsManager.gameEffects["ssaoeffect"], gBufferRenderer, chunkRenderer, this.GraphicsDevice, gamePlayer, Content.Load<Texture2D>("randomnormal"));
-            fxaaRenderer = new FXAARenderer(GraphicsDevice, effectsManager.gameEffects["fxaaeffect"]);
-            motionBlurRenderer = new MotionBlurRenderer(GraphicsDevice, effectsManager.gameEffects["motionblureffect"], motionVectorRenderer);
-            deferredShadingRenderer = new DeferredShadingRenderer(GraphicsDevice, effectsManager.gameEffects["deferredblockeffect"], shadowRenderer, ssaoRenderer, gameTimeManager, pointLightUpdater, gBufferRenderer, contactShadowRenderer, null, null, effectsManager.gameEffects["deferredblendeffect"], skyboxRenderer, fxaaRenderer, motionBlurRenderer, hdrCubemapRenderer);
-
-
-            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess0"));
-            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess1"));
-            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess2"));
-            customPostProcessors.Add(new CustomPostProcessor(GraphicsDevice, motionVectorRenderer, gBufferRenderer, "postprocess3"));
-         
-            hiZBufferRenderer = new HiZBufferRenderer(GraphicsDevice, effectsManager.gameEffects["hizbuffereffect"], gBufferRenderer, effectsManager.gameEffects["texturecopyraweffect"]);
-            ssrRenderer = new SSRRenderer(GraphicsDevice, gamePlayer, gBufferRenderer, effectsManager.gameEffects["ssreffect"], deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer);
-            ssidRenderer = new SSIDRenderer(GraphicsDevice, effectsManager.gameEffects["ssideffect"], gBufferRenderer, gamePlayer, deferredShadingRenderer, effectsManager.gameEffects["texturecopyraweffect"], motionVectorRenderer, hiZBufferRenderer);
-
-            deferredShadingRenderer.customPostProcessors = customPostProcessors;
-            deferredShadingRenderer.ssidRenderer = ssidRenderer;
-            deferredShadingRenderer.ssrRenderer = ssrRenderer;
-            chunkRenderer.shadowRenderer = shadowRenderer;
-            chunkRenderer.SSAORenderer = ssaoRenderer;
-            entityRenderer.shadowRenderer = shadowRenderer;
-            chunkRenderer.lightUpdater = pointLightUpdater;
-            shadowRenderer.zombieModel = Content.Load<Model>("zombiemodelref");
-
-            volumetricLightRenderer = new VolumetricLightRenderer(GraphicsDevice, gBufferRenderer, _spriteBatch, effectsManager.gameEffects["volumetricmaskblendeffect"], effectsManager.gameEffects["lightshafteffect"], gamePlayer, gameTimeManager);
-            chunkRenderer.SSRRenderer = ssrRenderer;
-            volumetricLightRenderer.entityRenderer = entityRenderer;*/
-
-
+       
 
    
             EntityManager.InitEntityList();
             EntityManager.LoadEntitySounds(Content);
-            //  rasterizerState.CullMode = CullMode.None;
-            //   rasterizerState1.CullMode = CullMode.CullCounterClockwiseFace;
-            // EntityBeh.SpawnNewEntity(new Vector3(0, 100, 0), 0f, 0f, 0f, 0, this);
+           
             EntityManager.ReadEntityData();
             Debug.WriteLine(EntityManager.entityDataReadFromDisk.Count);
             EntityManager.SpawnEntityFromData(this);
@@ -348,13 +193,13 @@ namespace monogameMinecraftAndroid
             isGamePaused = false;
             status = GameStatus.Started;
             VoxelWorld.currentWorld.InitWorld(this);
-          
-        
-             
-         
-           
-           
-         
+
+
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
+
+
+
+
         }
 
         public override void QuitGameplay()
@@ -394,10 +239,10 @@ namespace monogameMinecraftAndroid
 
             //    ChunkManager.chunks =null;
             //   ChunkManager.chunkDataReadFromDisk=new Dictionary<Vector2Int, ChunkData> ();
-           UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
+        //   UIUtility. InitStructureOperationsUI(this, UIUtility. sf);
            EntityManager.StopAllThreads();
        //     EntityManager.InitEntityList();
-            ParticleManager.instance.ReleaseResources();
+            ParticleManagerBase.instance.ReleaseResources();
             GC.Collect();
 
 
@@ -405,27 +250,41 @@ namespace monogameMinecraftAndroid
             status = GameStatus.Menu;
             // updateWorldThread.Abort();
             //   tryRemoveChunksThread.Abort();
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
         }
 
         public override void GoToSettings(object obj)
         {
             GameOptions.ReadOptionsJson();
-            foreach (UIElement element1 in UIElement.settingsUIsPage1)
-            {
-                element1.Initialize();
-            }
-            foreach (UIElement element1 in UIElement.settingsUIsPage2)
-            {
-                element1.Initialize();
-            }
+
             this.status = GameStatus.Settings;
+
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Settings]);
         }
 
         public override void GoToMenuFromSettings(object obj)
         {
             GameOptions.SaveOptions(null);
             this.status = GameStatus.Menu;
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
+        }
 
+
+        public override void OpenInventory(object obj)
+        {
+            isInventoryOpen = !isInventoryOpen;
+            if (isInventoryOpen == true)
+            {
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGameInventoryOpened]);
+            //    mouseMovementManager.isMouseLocked = false;
+                IsMouseVisible = true;
+            }
+            else
+            {
+                uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGame]);
+            //    mouseMovementManager.isMouseLocked = true;
+                IsMouseVisible = false;
+            }
         }
         SpriteFont sf;
         protected override void Initialize()
@@ -435,11 +294,26 @@ namespace monogameMinecraftAndroid
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             //  InitGameplay();
             //    sf = Content.Load<SpriteFont>("defaultfont");
-            UIUtility.InitGameUI(this);
+            //   UIUtility.InitGameUI(this);
+          
+            UIResourcesManager.instance.LoadTextures(this);
+            UIResourcesManager.instance.LoadDefaultBlockSpriteResources(this);
+            uiStateManager = new UIStateManager(this);
+            uiStateManager.ScreenRect = Window.ClientBounds;
+            uiStateManager.Initialize();
+            uiResizingManager = new UIResizingManager(uiStateManager);
             GameOptions.ReadOptionsJson();
             // Chunk c = new Chunk(new Vector2Int(0,0));
             //  chunkSolidEffect = new Effect();
-            OnResize(null, null);
+            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.Menu]);
+            EntityResourcesManager.instance.Initialize();
+            EntityResourcesManager.instance.LoadAllDefaultDesources(Content);
+
+
+            UITouchscreenInputHelper.screenRectOffset = new Vector2(GraphicsDevice.Viewport.X, GraphicsDevice.Viewport.Y);
+            // UIResizingManager.Resize(this);
+            uiStateManager.ScreenRect = Window.ClientBounds;
+            uiResizingManager.Resize(this);
             base.Initialize();
         }
 
@@ -474,19 +348,8 @@ namespace monogameMinecraftAndroid
            
         }
 
-        public override void OpenInventory(object obj)
-        {
-            isInventoryOpen = !isInventoryOpen;
-            if (isInventoryOpen == true)
-            {
-                IsMouseVisible = true;
-            }
-            else
-            {
-                IsMouseVisible = false;
-            }
-        }
-        public override void CloseStructureOperationsUI()
+      
+        public override void CloseStructureOperationsUI(object o)
         {
             isStructureOperationsUIOpened = false;
             if (isStructureOperationsUIOpened == true)
@@ -509,12 +372,12 @@ namespace monogameMinecraftAndroid
        //     Debug.WriteLine("input string received:" + s);
             if (!IsActive) return;
             //  Draw1(gameTime);
-            UIElement.UpdateTouches();
+            UITouchscreenInputHelper.UpdateTouches();
             AndroidTextInputManager.Update();
             switch (status)
             {
                
-                case GameStatus.Menu:
+            /*    case GameStatus.Menu:
                     foreach (var el in UIElement.menuUIs)
                     {
                         el.Update();
@@ -544,15 +407,15 @@ namespace monogameMinecraftAndroid
                             }
                             break;
                     }
-                    break;
+                    break;*/
                 case GameStatus.Started:
 
                     if (isGamePaused)
                     {
 
-                        foreach (var el in UIElement.pauseMenuUIs)
+                        if (uiStateManager.curState is not UIStateInGamePaused)
                         {
-                            el.Update();
+                            uiStateManager.SwitchToState(UIStateManager.allStates[UIStateTypes.InGamePaused]);
                         }
                         break;
                     }
@@ -567,7 +430,7 @@ namespace monogameMinecraftAndroid
 
 
                     }
-                    if (Keyboard.GetState().IsKeyUp(Keys.H) && !lastKeyState1.IsKeyUp(Keys.H)&&!isInventoryOpen)
+                   /* if (Keyboard.GetState().IsKeyUp(Keys.H) && !lastKeyState1.IsKeyUp(Keys.H)&&!isInventoryOpen)
                     {
                         //     status = GameStatus.Quiting;
                         //  QuitGameplay();
@@ -627,7 +490,7 @@ namespace monogameMinecraftAndroid
                                 }
                                 EntityManager.pathfindingManager.curDebuggingPath= path;
                             }
-                        }*/
+                        }
 
                         
                        
@@ -636,106 +499,100 @@ namespace monogameMinecraftAndroid
                     if (Keyboard.GetState().IsKeyUp(Keys.N) && !lastKeyState1.IsKeyUp(Keys.N))
                     {
                     EntityManager.SpawnNewEntity(gamePlayerR.gamePlayer.position,0,0,0,0,this);
-                    }
+                    }*/
                     /*      if (Keyboard.GetState().IsKeyUp(Keys.K) && !lastKeyState1.IsKeyUp(Keys.K))
                           {
                               //  ChunkHelper.FillBlocks(new BlockData[50,50,50],(Vector3Int)gamePlayer.position+ new Vector3Int(-25,-25,-25));
                               ChunkHelper.FillBlocks(StructureManager.LoadStructure(Directory.GetCurrentDirectory() + "/defaultstructure.bin"), (Vector3Int)gamePlayer.position + new Vector3Int(-5, -5, -5),BlockFillMode.ReplaceAir); ;
                           }*/
                     lastKeyState1 = Keyboard.GetState();
-             //       Debug.WriteLine(isInventoryOpen);
-                    if (isInventoryOpen)
-                    {
-                        foreach (var el in UIElement.inventoryUIs)
-                        {
-                            el.Update();
-                        }
-                        break;
-                    }
-
-                    if (isStructureOperationsUIOpened)
-                    {
-                        switch (UIElement.structureOperationsUIsPageID)
-                        {
-                            case 0:
-                                foreach (var el in UIElement.structureOperationsSavingUIs)
-                                {
-                                    el.Update();
-                                }
-
-                                break;
-                            case 1:
-                                foreach (var el in UIElement.structureOperationsPlacingUIs)
-                                {
-                                    el.Update();
-                                }
-
-                                break;
-                            default:
-                                foreach (var el in UIElement.structureOperationsSavingUIs)
-                                {
-                                    el.Update();
-                                }
-
-                                break;
-                        }
-                      
-                        break;
-                    }
-                    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                    {
-                        //     status = GameStatus.Quiting;
-                        //  QuitGameplay();
-                        //  Exit();
-                        //   Environment.Exit(0);
-                        isGamePaused = true;
-                        IsMouseVisible = true;
-                    }
-                    //       ProcessPlayerKeyboardInput(gameTime);
+                    //       Debug.WriteLine(isInventoryOpen);
+                    lastKeyState1 = Keyboard.GetState();
+                    //       Debug.WriteLine(isInventoryOpen);
 
 
-                    //      ProcessPlayerMouseInput(true);
-                    playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
 
                     if (gamePlayerR.gamePlayer is GamePlayer player1)
                     {
                         player1.UpdatePlayer(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
                     }
-               
+
 
                     //    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-                    foreach (var el in UIElement.inGameUIs)
-                    {
-                        el.Update();
-                    }
+                    /*  foreach (var el in UIElement.inGameUIs)
+                      {
+                          el.Update();
+                      }*/
 
                     if (VoxelWorld.currentWorld.isThreadsStopping == false)
                     {
                         VoxelWorld.currentWorld.FrameUpdate((float)gameTime.ElapsedGameTime.TotalSeconds);
                     }
-                  
+
                     gameTimeManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
-                    //    _spriteBatch.End();
-                    // TODO: Add your update logic here
+
                     EntityManager.UpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
                     EntityManager.FixedUpdateAllEntity((float)gameTime.ElapsedGameTime.TotalSeconds);
-                    ParticleManager.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
-                   EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
-                    GlobalMaterialParamsManager.instance.Update(gameTime);
-                    gameposition = gamePlayerR.gamePlayer.position;
-                 //   Debug.WriteLine(gamePlayer.position);
+                    ParticleManagerBase.instance.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                    EntityManager.TrySpawnNewZombie(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
-                    /*      float curFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
-                          float deltaFps = Math.Abs(curFps - prevFPS);
-                          Window.Title = deltaFps < 20f ? deltaFps.ToString() : "delta fps more than 20";
-                          prevFPS = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;*/
-                 
-                
+                    if (isInventoryOpen || isStructureOperationsUIOpened)
+                    {
+
+                        break;
+                    }
+
+                    /*     if (isStructureOperationsUIOpened)
+                         {
+                             switch (UIElement.structureOperationsUIsPageID)
+                             {
+                                 case 0:
+                                     foreach (var el in UIElement.structureOperationsSavingUIs)
+                                     {
+                                         el.Update();
+                                     }
+
+                                     break;
+                                 case 1:
+                                     foreach (var el in UIElement.structureOperationsPlacingUIs)
+                                     {
+                                         el.Update();
+                                     }
+
+                                     break;
+                                 default:
+                                     foreach (var el in UIElement.structureOperationsSavingUIs)
+                                     {
+                                         el.Update();
+                                     }
+
+                                     break;
+                             }
+
+                             break;
+                         }*/
+                    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                    {
+
+                        /*   mouseMovementManager.isMouseLocked = false;
+                           isGamePaused = true;
+                           IsMouseVisible = true;*/
+                        PauseGame(null);
+                    }
+
+
+
+
+                    //      GlobalMaterialParamsManager.instance.Update(gameTime);
+                    gameposition = gamePlayerR.gamePlayer.position;
+                    playerInputManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                  
                     break;
             }
-
-            prevTouches = UIElement.allTouches;
+            uiStateManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+            prevTouches = UITouchscreenInputHelper.allTouches;
             //     Debug.WriteLine(gamePlayer.position);
             //     Debug.WriteLine(gamePlayer.cam.Pitch+" "+ gamePlayer.cam.Yaw);
             //    Debug.WriteLine(gamePlayer.cam.position + " " + gamePlayer.cam.front+" "+gamePlayer.cam.up);
@@ -809,102 +666,85 @@ namespace monogameMinecraftAndroid
         }*/
         RasterizerState rasterizerState = new RasterizerState();
         RasterizerState rasterizerState1 = new RasterizerState{DepthClipEnable=false};
-        
-      /*  public void RenderWorld(GameTime gameTime, SpriteBatch sb)
-        {
-            shadowRenderer.UpdateLightMatrices(gamePlayer);
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-            //  GraphicsDevice.RasterizerState = rasterizerState;
-            shadowRenderer.RenderShadow(gamePlayer);
-           gBufferRenderer.Draw();
-            ssaoRenderer.Draw();
-          hiZBufferRenderer.Draw();
-            contactShadowRenderer.Draw();
-           deferredShadingRenderer.Draw(gamePlayer);
-             volumetricLightRenderer.Draw();
-           motionVectorRenderer.Draw();
+        /*  public void RenderWorld(GameTime gameTime, SpriteBatch sb)
+          {
               shadowRenderer.UpdateLightMatrices(gamePlayer);
+              GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-                  shadowRenderer.UpdateLightMatrices(gamePlayer);
-            ssrRenderer.Draw(gameTime);
-            ssidRenderer.Draw(gameTime, sb);
+              //  GraphicsDevice.RasterizerState = rasterizerState;
+              shadowRenderer.RenderShadow(gamePlayer);
+             gBufferRenderer.Draw();
+              ssaoRenderer.Draw();
+            hiZBufferRenderer.Draw();
+              contactShadowRenderer.Draw();
+             deferredShadingRenderer.Draw(gamePlayer);
+               volumetricLightRenderer.Draw();
+             motionVectorRenderer.Draw();
+                shadowRenderer.UpdateLightMatrices(gamePlayer);
 
-            //    skyboxRenderer.Draw(null);
+                    shadowRenderer.UpdateLightMatrices(gamePlayer);
+              ssrRenderer.Draw(gameTime);
+              ssidRenderer.Draw(gameTime, sb);
 
-            //   GraphicsDevice.RasterizerState = rasterizerState1;
-            pointLightUpdater.UpdatePointLight();
-            //        chunkRenderer.RenderAllChunksOpq(ChunkManager.chunks, gamePlayer);
+              //    skyboxRenderer.Draw(null);
 
-            //    entityRenderer.Draw();
+              //   GraphicsDevice.RasterizerState = rasterizerState1;
+              pointLightUpdater.UpdatePointLight();
+              //        chunkRenderer.RenderAllChunksOpq(ChunkManager.chunks, gamePlayer);
 
-            //        chunkRenderer.RenderAllChunksTransparent(ChunkManager.chunks, gamePlayer);
+              //    entityRenderer.Draw();
+
+              //        chunkRenderer.RenderAllChunksTransparent(ChunkManager.chunks, gamePlayer);
 
 
-            deferredShadingRenderer.FinalBlend(_spriteBatch, volumetricLightRenderer, GraphicsDevice, gamePlayer);
-            GraphicsDevice.DepthStencilState = DepthStencilState.None;
-          
-           
+              deferredShadingRenderer.FinalBlend(_spriteBatch, volumetricLightRenderer, GraphicsDevice, gamePlayer);
+              GraphicsDevice.DepthStencilState = DepthStencilState.None;
 
-        }*/
+
+
+          }*/
         protected override void Draw(GameTime gameTime)
         {
             //     if (!IsActive) return;
-        
+
             switch (status)
             {
                 case GameStatus.Started:
-                   
+
                     //            Debug.WriteLine("started");
 
                     GraphicsDevice.Clear(Color.CornflowerBlue);
                     // Debug.WriteLine(ChunkManager.chunks.Count);
                     gamePlayerR.gamePlayer.cam.updateCameraVectors();
 
-                    renderPipelineManager.RenderWorld(gameTime,_spriteBatch);
-                    //        _spriteBatch.Begin(blendState:BlendState.Additive);
-                    //        _spriteBatch.Draw(volumetricLightRenderer.lightShaftTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth , GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                    //       _spriteBatch.End();
+                    renderPipelineManager.RenderWorld(gameTime, _spriteBatch);
+
 
                     _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
 
-                    foreach (var el in UIElement.inGameUIs)
-                    {
-                        el.DrawString(el.text);
-                    }
+
                     _spriteBatch.End();
                 //    GraphicsDevice.RasterizerState = rasterizerState1;
-            /*        foreach (var block in VoxelCast.blocksTmp)
-                    {
-                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
-                        VoxelCast.line.ReCreateVisualLine(null, block.Min, block.Max, 0.01f, new Color(1f, 1f, 1f));
-                        VoxelCast.line.Draw(GraphicsDevice);
-                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
-                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Min.X, block.Max.Y, block.Min.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
-                        VoxelCast.line.Draw(GraphicsDevice);
-                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
-                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Min.X, block.Min.Y, block.Max.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
-                        VoxelCast.line.Draw(GraphicsDevice);
-                        VoxelCast.line.SetUpBasicEffect(GraphicsDevice, RandomTextureGenerator.instance.randomTex, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
-                        VoxelCast.line.ReCreateVisualLine(null, new Vector3(block.Max.X, block.Min.Y, block.Min.Z), block.Max, 0.01f, new Color(1f, 1f, 1f));
-                        VoxelCast.line.Draw(GraphicsDevice);
-                    }*/
-                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap,blendState:BlendState.AlphaBlend);
+                 
+                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
 
                     if (GameOptions.showGraphicsDebug)
                     {
                         if (renderPipelineManager is HighDefRenderPipelineManager)
                         {
-                            HighDefRenderPipelineManager renderPipelineManagerHighDef=renderPipelineManager as HighDefRenderPipelineManager;
+                            HighDefRenderPipelineManager renderPipelineManagerHighDef = renderPipelineManager as HighDefRenderPipelineManager;
                             _spriteBatch.Draw(renderPipelineManagerHighDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerHighDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
+                            _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(1000, 200, 200, 200), Color.White);
                             for (int i = 0; i < renderPipelineManagerHighDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
                             {
                                 _spriteBatch.Draw(renderPipelineManagerHighDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
                             }
 
 
-                            _spriteBatch.Draw(renderPipelineManagerHighDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+                            //   _spriteBatch.Draw(renderPipelineManagerHighDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
+
                             _spriteBatch.Draw(renderPipelineManagerHighDef.contactShadowRenderer.contactShadowRenderTarget, new Rectangle(1200, 800, 400, 400), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumAllDiffuse, new Rectangle(1600, 800, 400, 400), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLum, new Rectangle(1600, 0, 400, 400), Color.White);
@@ -917,130 +757,30 @@ namespace monogameMinecraftAndroid
                             _spriteBatch.Draw(renderPipelineManagerHighDef.volumetricLightRenderer.lightShaftTarget, new Rectangle(800, 400, 200, 200), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerHighDef.motionVectorRenderer.renderTargetMotionVector, new Rectangle(800, 800, 400, 400), Color.White);
                             _spriteBatch.Draw(renderPipelineManagerHighDef.ssrRenderer.renderTargetSSR, new Rectangle(200, 800, 400, 400), Color.White);
-                        }else if (renderPipelineManager is LowDefRenderPipelineManager)
-                        {
-                            LowDefRenderPipelineManager renderPipelineManagerLowDef= renderPipelineManager as LowDefRenderPipelineManager;
-                        /*    _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTarget, new Rectangle(200, 0, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.shadowRenderer.shadowMapTargetFar, new Rectangle(200, 200, 200, 200), Color.White);
-                            for (int i = 0; i < renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips.Length; i++)
-                            {
-                                _spriteBatch.Draw(renderPipelineManagerLowDef.hiZBufferRenderer.hiZBufferTargetMips[i], new Rectangle(1200 + i * 200, 200, 200, 200), Color.White);
-                            }*/
 
+                            /*    _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumTransparent, new Rectangle(400, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.deferredShadingRenderer.renderTargetLumSpecTransparent, new Rectangle(400, 1200, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans0, new Rectangle(0, 400, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans1, new Rectangle(0, 800, 400, 400), Color.White);
+                                 _spriteBatch.Draw(renderPipelineManagerHighDef.gBufferRenderer.renderTargetNormalWSTrans2, new Rectangle(0, 1200, 400, 400), Color.White);*/
 
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.ssaoRenderer.ssaoTarget, new Rectangle(400, 400, 400, 400), Color.White);
-                          
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetProjectionDepth, new Rectangle(400, 200, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetNormalWS, new Rectangle(600, 200, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetAlbedo, new Rectangle(200, 600, 200, 200), Color.White);
-                            _spriteBatch.Draw(renderPipelineManagerLowDef.gBufferRenderer.renderTargetMER, new Rectangle(1600, 400, 400, 400), Color.White);
-                    
                         }
-                       
+
                     }
 
 
                     _spriteBatch.End();
-                    if (isInventoryOpen)
-                    {
-                        _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
-
-                        foreach (var el in UIElement.inventoryUIs)
-                        {
-                            el.DrawString(el.text);
-                        }
-                        _spriteBatch.End();
-                    }
-
-                    if (isStructureOperationsUIOpened)
-                    {
-                        switch (UIElement.structureOperationsUIsPageID)
-                        {
-                            case 0:
-                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
-
-                                foreach (var el in UIElement.structureOperationsSavingUIs)
-                                {
-                                    el.DrawString(el.text);
-                                }
-                                _spriteBatch.End();
-                                break;
-                            case 1:
-                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
-
-                                foreach (var el in UIElement.structureOperationsPlacingUIs)
-                                {
-                                    el.DrawString(el.text);
-                                }
-                                _spriteBatch.End();
-                                break;
-                            default:
-                                _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
-
-                                foreach (var el in UIElement.structureOperationsSavingUIs)
-                                {
-                                    el.DrawString(el.text);
-                                }
-                                _spriteBatch.End();
-                                break;
-                              
-                        }
-                       
-                    }
-                    if (isGamePaused)
-                    {
-                        _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
-
-                        foreach (var el in UIElement.pauseMenuUIs)
-                        {
-                            el.DrawString(el.text);
-                        }
-                        _spriteBatch.End();
-                    }
+  
                     break;
-                case GameStatus.Menu:
-                    GraphicsDevice.Clear(Color.CornflowerBlue);
-                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
+              
 
-                    foreach (var el in UIElement.menuUIs)
-                    {
-                        el.DrawString(el.text);
-                    }
-                    _spriteBatch.End();
-                    break;
-
-
-
-                case GameStatus.Settings:
-                    GraphicsDevice.Clear(Color.CornflowerBlue);
-                    _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
-
-                    switch (UIElement.settingsUIsPageID)
-                    {
-                        case 0:
-                            foreach (var el in UIElement.settingsUIsPage1)
-                            {
-                                el.DrawString(el.text);
-                            }
-                            break;
-                        case 1:
-                            foreach (var el in UIElement.settingsUIsPage2)
-                            {
-                                el.DrawString(el.text);
-                            }
-                            break;
-                        default:
-                            foreach (var el in UIElement.settingsUIsPage1)
-                            {
-                                el.DrawString(el.text);
-                            }
-                            break;
-                    }
-
-                    _spriteBatch.End();
-                    break;
 
             }
+            _spriteBatch.Begin(samplerState: SamplerState.PointWrap);
+
+            uiStateManager.Draw();
+            _spriteBatch.End();
+
             base.Draw(gameTime);
             //    _
 

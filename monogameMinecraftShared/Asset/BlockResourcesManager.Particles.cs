@@ -7,11 +7,11 @@ namespace monogameMinecraftShared.Asset
 {
     public partial class BlockResourcesManager
     {
-        public static Texture2D particleAtlas;
-        public static Texture2D particleAtlasNormal;
-        public static Texture2D particleAtlasMER;
+        public Texture2D particleAtlas;
+        public Texture2D particleAtlasNormal;
+        public Texture2D particleAtlasMER;
 
-        public static void LoadDefaultParticleResources(ContentManager cm, GraphicsDevice device, ParticleRenderer pr)
+        public void LoadDefaultParticleResources(ContentManager cm, GraphicsDevice device)
         {
             try
             {
@@ -57,10 +57,10 @@ namespace monogameMinecraftShared.Asset
             {
                 particleAtlasMER = null;
             }
-            pr.SetTexture(particleAtlas,particleAtlasNormal,particleAtlasMER);
+           // pr.SetTexture(particleAtlas,particleAtlasNormal,particleAtlasMER);
         }
 
-        public static void LoadParticleResources(ContentManager cm, GraphicsDevice device, ParticleRenderer pr)
+        public void LoadParticleResources(ContentManager cm, GraphicsDevice device)
         {
             try
             {
@@ -106,10 +106,10 @@ namespace monogameMinecraftShared.Asset
             {
                 particleAtlasMER = null;
             }
-            if (particleAtlas != null && particleAtlasNormal != null && particleAtlasMER != null)
+           /* if (particleAtlas != null && particleAtlasNormal != null && particleAtlasMER != null)
             {
                 pr.SetTexture(particleAtlasNormal, particleAtlas, particleAtlasMER);
-            }
+            }*/
 
         }
     }

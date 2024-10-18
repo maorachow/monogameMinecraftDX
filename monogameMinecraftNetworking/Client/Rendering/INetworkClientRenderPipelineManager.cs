@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
+    [Obsolete]
     public interface INetworkClientRenderPipelineManager
     {
         public ClientGameBase game { get; set; }

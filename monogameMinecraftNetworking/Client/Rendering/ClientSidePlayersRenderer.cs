@@ -22,7 +22,7 @@ using Vector4 = Microsoft.Xna.Framework.Vector4;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
-    public class ClientSidePlayersRenderer:IGBufferDrawableRenderer,IShadowDrawableRenderer
+    public class ClientSidePlayersRenderer:IEntityRenderer
     {
         public static Model playerModel;
         public Texture2D playerTex;
@@ -119,87 +119,90 @@ namespace monogameMinecraftNetworking.Client.Rendering
             this.game= game;
         }
 
-     /*   public void Update()
-        {
-            lock (allUsersCacheLock)
-            {
-           //     Debug.WriteLine("update user");
-            latestAllUserDatas = client.allUserDatas;
-            foreach (var item1 in latestAllUserDatas)
-            {
-                if (allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; }) == -1)
-                {
-                    allUsersCache.Add(new ValueTuple<UserData, AnimationBlend>(item1,new AnimationBlend(new AnimationState[]{new AnimationState(playerAnim,playerModel)},playerModel)));
-                }
-            }
+        /*   public void Update()
+           {
+               lock (allUsersCacheLock)
+               {
+              //     Debug.WriteLine("update user");
+               latestAllUserDatas = client.allUserDatas;
+               foreach (var item1 in latestAllUserDatas)
+               {
+                   if (allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; }) == -1)
+                   {
+                       allUsersCache.Add(new ValueTuple<UserData, AnimationBlend>(item1,new AnimationBlend(new AnimationState[]{new AnimationState(playerAnim,playerModel)},playerModel)));
+                   }
+               }
 
-            for (int i=0;i< allUsersCache.Count;i++)
-            {
-                ValueTuple < UserData, AnimationBlend > item2 = allUsersCache[i];
-                if (latestAllUserDatas.FindIndex((item) => { return item.userName == item2.Item1.userName; }) == -1)
-                {
-                    allUsersCache.RemoveAt(i);
-                    i--;
-                }
-            }
-            }
-           
+               for (int i=0;i< allUsersCache.Count;i++)
+               {
+                   ValueTuple < UserData, AnimationBlend > item2 = allUsersCache[i];
+                   if (latestAllUserDatas.FindIndex((item) => { return item.userName == item2.Item1.userName; }) == -1)
+                   {
+                       allUsersCache.RemoveAt(i);
+                       i--;
+                   }
+               }
+               }
+
+           }
+
+           public void FrameUpdate(float deltaTime)
+           {
+               lock (allUsersCacheLock)
+               {
+                   foreach (var item1 in latestAllUserDatas)
+                   {
+                       int idx = allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; });
+                       if ( idx!= -1)
+                       {
+
+                           Vector3 curPos = new Vector3(allUsersCache[idx].data.posX, allUsersCache[idx].data.posY,
+                               allUsersCache[idx].data.posZ);
+                           Vector3 targetPos = new Vector3(item1.posX, item1.posY,
+                               item1.posZ);
+                           Vector3 curRot= new Vector3(allUsersCache[idx].data.rotX, allUsersCache[idx].data.rotY,
+                               allUsersCache[idx].data.rotZ);
+                           Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
+                               item1.rotZ);
+
+                           Vector3 lerpPos = Vector3.Lerp(curPos, targetPos, 1f * deltaTime);
+                           Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 1f * deltaTime);
+                           float moveLength =
+                               (new Vector3(curPos.X, 0, curPos.Z) - new Vector3(targetPos.X, 0, targetPos.Z)).Length();
+                           allUsersCache[idx].data.posX=lerpPos.X;
+                           allUsersCache[idx].data.posY = lerpPos.Y;
+                           allUsersCache[idx].data.posZ = lerpPos.Z;
+                           allUsersCache[idx].data.rotX = lerpRot.X;
+                           allUsersCache[idx].data.rotY = lerpRot.Y;
+                           allUsersCache[idx].data.rotZ = lerpRot.Z;
+                          // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
+
+                          if ((moveLength / deltaTime) / 5f < 0.1f)
+                          {
+                              float lerpValue =
+                                  MathHelper.Lerp(
+                                      allUsersCache[idx].animState.animationStates[0].elapsedTimeInStep, 0.25f,
+                                      deltaTime * 10f);
+                              float animationUpdateDelta = lerpValue - allUsersCache[idx].animState
+                                  .animationStates[0].elapsedTimeInStep;
+                              allUsersCache[idx].animState.Update(animationUpdateDelta, 1);
+                          }
+                          else
+                          {
+                              Debug.WriteLine("player speed:"+(moveLength / deltaTime) / 5f);
+                              allUsersCache[idx].animState.Update(deltaTime, (moveLength / deltaTime) / 5f);
+                          }
+
+                       }
+                   }
+               }
+
+           }*/
+        public void DrawLowDefForward(Effect forwardEffect)
+        {
+            throw new NotImplementedException();//mobile multiplayer not supported
         }
-
-        public void FrameUpdate(float deltaTime)
-        {
-            lock (allUsersCacheLock)
-            {
-                foreach (var item1 in latestAllUserDatas)
-                {
-                    int idx = allUsersCache.FindIndex((item) => { return item.data.userName == item1.userName; });
-                    if ( idx!= -1)
-                    {
-
-                        Vector3 curPos = new Vector3(allUsersCache[idx].data.posX, allUsersCache[idx].data.posY,
-                            allUsersCache[idx].data.posZ);
-                        Vector3 targetPos = new Vector3(item1.posX, item1.posY,
-                            item1.posZ);
-                        Vector3 curRot= new Vector3(allUsersCache[idx].data.rotX, allUsersCache[idx].data.rotY,
-                            allUsersCache[idx].data.rotZ);
-                        Vector3 targetRot = new Vector3(item1.rotX, item1.rotY,
-                            item1.rotZ);
-
-                        Vector3 lerpPos = Vector3.Lerp(curPos, targetPos, 1f * deltaTime);
-                        Vector3 lerpRot = Vector3.Lerp(curRot, targetRot, 1f * deltaTime);
-                        float moveLength =
-                            (new Vector3(curPos.X, 0, curPos.Z) - new Vector3(targetPos.X, 0, targetPos.Z)).Length();
-                        allUsersCache[idx].data.posX=lerpPos.X;
-                        allUsersCache[idx].data.posY = lerpPos.Y;
-                        allUsersCache[idx].data.posZ = lerpPos.Z;
-                        allUsersCache[idx].data.rotX = lerpRot.X;
-                        allUsersCache[idx].data.rotY = lerpRot.Y;
-                        allUsersCache[idx].data.rotZ = lerpRot.Z;
-                       // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
-
-                       if ((moveLength / deltaTime) / 5f < 0.1f)
-                       {
-                           float lerpValue =
-                               MathHelper.Lerp(
-                                   allUsersCache[idx].animState.animationStates[0].elapsedTimeInStep, 0.25f,
-                                   deltaTime * 10f);
-                           float animationUpdateDelta = lerpValue - allUsersCache[idx].animState
-                               .animationStates[0].elapsedTimeInStep;
-                           allUsersCache[idx].animState.Update(animationUpdateDelta, 1);
-                       }
-                       else
-                       {
-                           Debug.WriteLine("player speed:"+(moveLength / deltaTime) / 5f);
-                           allUsersCache[idx].animState.Update(deltaTime, (moveLength / deltaTime) / 5f);
-                       }
-                       
-                    }
-                }
-            }
-          
-        }*/
-
-        public void DrawGBuffer()
+        public void DrawGBuffer(Effect gBufferEffect1)
         {
             BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
             foreach (var entity in game.clientSidePlayersManager. allUsersCache)
@@ -214,7 +217,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                     continue;
                 }
 
-                gBufferEffect.Parameters["TextureE"].SetValue(playerTex);
+                gBufferEffect1.Parameters["TextureE"].SetValue(playerTex);
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY, entity.data.posZ));
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -223,9 +226,9 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                 {"body", Matrix.CreateFromYawPitchRoll(-MathHelper.ToRadians(entity.data.rotX),0,0)}
                             };
 
-                            entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
+                            entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect1, optionalParams, () =>
                             {
-                                gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+                                gBufferEffect1.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
                             });
                           
                     

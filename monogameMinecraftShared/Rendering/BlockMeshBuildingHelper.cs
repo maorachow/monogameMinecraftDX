@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows.Markup;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Core;
@@ -789,7 +790,8 @@ namespace monogameMinecraftShared.Rendering
                        
                 }
             }
-           
+
+            [Obsolete]
             static void BuildFace(int typeid, Vector3 corner, Vector3 up, Vector3 right, bool reversed, List<VertexPositionNormalTangentTexture> verts, int side, List<ushort> indices)
             {
                 VertexPositionNormalTangentTexture vert00 = new VertexPositionNormalTangentTexture();

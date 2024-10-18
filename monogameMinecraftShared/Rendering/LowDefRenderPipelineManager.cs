@@ -27,20 +27,28 @@ namespace monogameMinecraftShared.Rendering
 
         public SkyboxRenderer skyboxRenderer;
         public GBufferRenderer gBufferRenderer;
-        public EntityRenderer entityRenderer;
+        public List<IEntityRenderer> entityRenderers { get; set; }
         public TerrainMipmapGenerator terrainMipmapGenerator;
         public HDRCubemapRendererLowDef hdrCubemapRenderer;
         public DeferredShadingRendererLowDef deferredShadingRendererLowDef;
         public SSAORenderer ssaoRenderer;
 
-
-        public LowDefRenderPipelineManager(MinecraftGameBase game, IEffectsManager em)
+        public IVoxelWorldWithRenderingChunkBuffers curRenderingWorld { get; set; }
+        public LowDefRenderPipelineManager(MinecraftGameBase game, IEffectsManager em,Action optionalPostInitRenderPipelineAction=null)
         {
             this.game = game;
             effectsManager = em;
+            this.optionalPostInitRenderPipelineAction= optionalPostInitRenderPipelineAction;
         }
-        public void InitRenderPipeline()
+        public Action optionalPostInitRenderPipelineAction { get; set; }
+        public Action<IRenderPipelineManager> optionalPostRenderingAction { get; set; }
+        public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction = null)
         {
+            entityRenderers = new List<IEntityRenderer>();
+            if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+            {
+                curRenderingWorld = VoxelWorld.currentWorld;
+            }
             environmentHDRITex = game.Content.Load<Texture2D>("environmenthdri");
             environmentHDRITexNight = game.Content.Load<Texture2D>("environmenthdrinight");
             terrainMipmapGenerator = new TerrainMipmapGenerator(game.GraphicsDevice, effectsManager.gameEffects["texturecopyeffect"]);
@@ -51,17 +59,24 @@ namespace monogameMinecraftShared.Rendering
             hdrCubemapRenderer.Render(hdrCubemapRenderer.resultCubeCollectionNight, 1);
 
             chunkRenderer = new ChunkRenderer(game, game.GraphicsDevice,null, null, game.gameTimeManager);
-         
+
             //    chunkRenderer.SetTexture(terrainTexNoMip, terrainNormal, terrainDepth, terrainTexNoMip, terrainMER);
 
-            BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
+            //     BlockResourcesManager.LoadDefaultResources(game.Content, game.GraphicsDevice, chunkRenderer);
             /* gBufferEffect = game.Content.Load<Effect>("gbuffereffect");
              gBufferEntityEffect = game.Content.Load<Effect>("gbufferentityeffect");*/
-            particleRenderer = new ParticleRenderer(chunkRenderer.atlas, chunkRenderer.atlasNormal, chunkRenderer.atlasMER, game.GraphicsDevice,
-                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer,true);
-            BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
-            entityRenderer = new EntityRenderer( game.GraphicsDevice, game.gamePlayerR.gamePlayer, null, game.Content.Load<Model>("zombiefbx"), game.Content.Load<Texture2D>("husk"), game.Content.Load<Model>("zombiemodelref"),null, null, game.gameTimeManager, game.Content.Load<Model>("playermodel"), game.Content.Load<Texture2D>("steve"));
-            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderer, particleRenderer);
+            chunkRenderer.SetTexture(BlockResourcesManager.instance.atlasNormal, null, BlockResourcesManager.instance.atlas, BlockResourcesManager.instance.atlasMER);
+
+            particleRenderer = new ParticleRenderer(game.GraphicsDevice,
+                effectsManager.gameEffects["gbufferparticleeffect"], game.gamePlayerR.gamePlayer, true);
+            particleRenderer.SetTexture(BlockResourcesManager.instance.particleAtlas, BlockResourcesManager.instance.particleAtlasNormal, BlockResourcesManager.instance.particleAtlasMER);
+            //       BlockResourcesManager.LoadDefaultParticleResources(game.Content, game.GraphicsDevice, particleRenderer);
+            if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+            {
+                entityRenderers.Add(new EntityRenderer(game.GraphicsDevice, game.gamePlayerR.gamePlayer, null, null, game.gameTimeManager, effectsManager.gameEffects["gbufferentityeffect"]));
+            }
+          
+            gBufferRenderer = new GBufferRenderer(game.GraphicsDevice, effectsManager.gameEffects["gbuffereffect"], effectsManager.gameEffects["gbufferentityeffect"], effectsManager.gameEffects["gbufferdepthpeelingeffect"], game.gamePlayerR.gamePlayer, chunkRenderer, entityRenderers.Count>0? entityRenderers[0]:null, particleRenderer);
             skyboxRenderer = new SkyboxRenderer(game.GraphicsDevice, effectsManager.gameEffects["skyboxeffect"], null, game.gamePlayerR.gamePlayer, game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxup"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skybox"), game.Content.Load<Texture2D>("skybox/skyboxdown"), game.Content.Load<Texture2D>("skybox/skybox"),
                game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightup"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.Content.Load<Texture2D>("skybox/skyboxnightdown"), game.Content.Load<Texture2D>("skybox/skyboxnight"), game.gameTimeManager
                );
@@ -102,16 +117,28 @@ namespace monogameMinecraftShared.Rendering
             boundingBoxVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"], gBufferRenderer);
             walkablePathVisualizationRenderer = new WalkablePathVisualizationRenderer();
             walkablePathVisualizationRenderer.Initialize(environmentHDRITex, game.GraphicsDevice, effectsManager.gameEffects["debuglineeffect"], gBufferRenderer);
+            if (optionalPostInitRenderPipelineAction != null)
+            {
+                optionalPostInitRenderPipelineAction();
+            }
+            this.optionalPostRenderingAction = optionalPostRenderingAction;
         }
 
         public void RenderWorld(GameTime gameTime, SpriteBatch sb)
         {
-         
+            if (game.gameArchitecturePatternType == GameArchitecturePatternType.Local)
+            {
+                curRenderingWorld = VoxelWorld.currentWorld;
+            }
+            if (curRenderingWorld == null)
+            {
+                return;
+            }
             game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //  GraphicsDevice.RasterizerState = rasterizerState;
             game.GraphicsDevice.BlendState = BlendState.Opaque;
-            gBufferRenderer.Draw(VoxelWorld.currentWorld.renderingChunks);
+            gBufferRenderer.Draw(curRenderingWorld.renderingChunks);
             ssaoRenderer.Draw();
         
             deferredShadingRendererLowDef.Draw(game.gamePlayerR.gamePlayer,game._spriteBatch);
@@ -120,20 +147,25 @@ namespace monogameMinecraftShared.Rendering
             game.GraphicsDevice.BlendState = BlendState.Additive;
 
 
-            if (game.gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
+            if (curRenderingWorld is VoxelWorld)
             {
-            if (VoxelWorld.currentWorld.structureOperationsManager != null)
-            {
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(gamePlayer1, this);
-                VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(gamePlayer1, this);
+                if (game.gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
+                {
+                    if (VoxelWorld.currentWorld.structureOperationsManager != null)
+                    {
+                        VoxelWorld.currentWorld.structureOperationsManager.DrawStructureSavingBounds(gamePlayer1, this);
+                        VoxelWorld.currentWorld.structureOperationsManager.DrawStructurePlacingBounds(gamePlayer1, this);
+                    }
+
+                    if (gamePlayer1.curChunk != null)
+                    {
+                        EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), gamePlayer1, this);
+
+                    }
+                }
             }
 
-            if (gamePlayer1.curChunk != null)
-            {
-                EntityManager.pathfindingManager.DrawDebuggingPath(new Vector3(0, 0, 0), gamePlayer1, this);
-
-            }
-            }
+           
            
 
         }

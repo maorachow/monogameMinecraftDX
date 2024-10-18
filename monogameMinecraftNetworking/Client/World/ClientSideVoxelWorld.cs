@@ -22,7 +22,7 @@ using monogameMinecraftNetworking.Protocol;
 
 namespace monogameMinecraftNetworking.Client.World
 {
-    public class ClientSideVoxelWorld
+    public class ClientSideVoxelWorld: IVoxelWorldWithRenderingChunkBuffers
     {
         public int worldGenType = 0;
         public int worldID = 0;
@@ -48,6 +48,7 @@ namespace monogameMinecraftNetworking.Client.World
         {
             get
             {
+             
                 foreach (var kvp in chunks)
                 {
                     if (!_renderingChunks.ContainsKey(kvp.Key))
@@ -55,7 +56,7 @@ namespace monogameMinecraftNetworking.Client.World
                         _renderingChunks.TryAdd(kvp.Key, (IRenderableChunkBuffers)kvp.Value);
                     }
                 }
-                foreach (var kvp in _renderingChunks)
+               foreach (var kvp in _renderingChunks)
                 {
                     if (!chunks.ContainsKey(kvp.Key))
                     {
@@ -154,7 +155,7 @@ namespace monogameMinecraftNetworking.Client.World
                                 for (float z = player.position.Z - 128; z < player.position.Z + 128; z += Chunk.chunkWidth)
                                 {
                                     //   Thread.Sleep(1);
-                                    Vector2Int chunkPos = ChunkHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
+                                    Vector2Int chunkPos = ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
 
                                     if (GetChunk(chunkPos) == null && !chunks.ContainsKey(chunkPos))
                                     {

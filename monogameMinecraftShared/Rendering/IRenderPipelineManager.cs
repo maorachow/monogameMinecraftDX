@@ -17,7 +17,7 @@ namespace monogameMinecraftShared.Rendering
         public IEffectsManager effectsManager { get; set; }
 
         public void RenderWorld(GameTime gameTime, SpriteBatch sb);
-        public void InitRenderPipeline();
+        public void InitRenderPipeline(Action<IRenderPipelineManager> postRenderingAction =null);
         public void Resize();
 
         public WalkablePathVisualizationRenderer walkablePathVisualizationRenderer { get; set; }
@@ -28,6 +28,13 @@ namespace monogameMinecraftShared.Rendering
 
         public ParticleRenderer particleRenderer { get; set; }
 
-   
+
+        public List<IEntityRenderer> entityRenderers { get; set; }
+
+        public IVoxelWorldWithRenderingChunkBuffers curRenderingWorld { get; set; }
+
+        public Action optionalPostInitRenderPipelineAction { get; set; }
+        public Action<IRenderPipelineManager> optionalPostRenderingAction { get; set; }
+        
     }
 }

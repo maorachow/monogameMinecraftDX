@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using monogameMinecraftShared.Pathfinding;
 using monogameMinecraftShared.Animations;
+using monogameMinecraftShared.Asset;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Physics;
 using monogameMinecraftShared.Rendering;
@@ -29,7 +30,23 @@ namespace monogameMinecraftShared.Updateables
             this.isEntityHurt = isEntityHurt;
             this.game = game;
             isEntityDying = false;
-            animationBlend = new AnimationBlend(new AnimationState[] { new AnimationState(EntityManager.zombieAnim, EntityRenderer.zombieModel), new AnimationState(EntityManager.entityDieAnim, EntityRenderer.zombieModel) }, EntityRenderer.zombieModel);
+            try
+            {
+                animationBlend = new SingleTexturedAnimatedModel(
+                    new AnimationState[]
+                    {
+                        new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["zombieAnim"],
+                            EntityResourcesManager.instance.loadedEntityModels["zombie"].model),
+                        new AnimationState(EntityResourcesManager.instance.loadedEntityAnims["entityDieAnim"],
+                            EntityResourcesManager.instance.loadedEntityModels["zombie"].model)
+                    }, EntityResourcesManager.instance.loadedEntityModels["zombie"].model,
+                    EntityResourcesManager.instance.loadedEntityModels["zombie"].texture);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        
             entitySize = new Vector3(0.6f, 1.8f, 0.6f);
             InitBounds();
             EntityManager.worldEntities.Add(this);
@@ -55,7 +72,7 @@ namespace monogameMinecraftShared.Updateables
                 //      bool isNewPathValid=false;
                 //      EntityManager.pathfindingManager.GetThreeDimensionalMapPath(ChunkHelper.Vec3ToBlockPos(position+new Vector3(0f,0.1f,0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayer.position+new Vector3(0,-0.5f,0f)),
                 //          out isNewPathValid,ref entityPath);
-                EntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ChunkHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ChunkHelper.Vec3ToBlockPos(game.gamePlayerR.gamePlayer.position + new Vector3(0, -0.5f, 0f)), this);
+                EntityManager.pathfindingManager.GetThreeDimensionalMapPathAsync(ChunkCoordsHelper.Vec3ToBlockPos(position + new Vector3(0f, 0.1f, 0f)), ChunkCoordsHelper.Vec3ToBlockPos(game.gamePlayerR.gamePlayer.position + new Vector3(0, -0.5f, 0f)), this);
                 /*         if (entityPath == null)
                          {
                              isNewPathValid = false;
@@ -70,7 +87,7 @@ namespace monogameMinecraftShared.Updateables
             {
                 entityDyingTime += deltaTime;
                 isEntityHurt = true;
-                animationBlend.Update(deltaTime, 0f, 1f);
+                animationBlend?.Update(deltaTime, 0f, 1f);
 
                 if (entityDyingTime >= 1f && isEntityDying)
                 {
@@ -80,7 +97,7 @@ namespace monogameMinecraftShared.Updateables
                 }
                 return;
             }
-            animationBlend.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
+            animationBlend?.Update(deltaTime, MathHelper.Clamp(curSpeed / 3f, 0f, 1f), 0f);
             entityLifetime += deltaTime;
             if (!isPathValid)
             {
@@ -98,7 +115,7 @@ namespace monogameMinecraftShared.Updateables
             lastPos = position;
             Vector3Int intPos = Vector3Int.FloorToIntVec3(position);
 
-            curChunk = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(position));
+            curChunk = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(position));
             if (curChunk == null)
             {
                 timeInUnloadedChunks += deltaTime;
@@ -146,7 +163,7 @@ namespace monogameMinecraftShared.Updateables
             GetEntitiesAround();
 
 
-            if (Vector3.Distance(position, targetPos) < 0.6f || BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds, targetPos))
+            if (Vector3.Distance(position, targetPos) < 0.9f || BlockCollidingBoundingBoxHelper.BoundingBoxIntersectsPoint(bounds, targetPos))
             {
 
                 hasReachedCurStep = true;

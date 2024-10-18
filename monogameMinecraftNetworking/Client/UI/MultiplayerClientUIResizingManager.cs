@@ -14,7 +14,7 @@ namespace monogameMinecraftNetworking.Client.UI
     {
         public static void Resize(Game game)
         {
-            if (game is ClientGameBase)
+         /*   if (game is ClientGameBase)
             {
                 ClientGameBase game1= (ClientGameBase)game; 
             foreach (UIElement element in UIElement.menuUIs)
@@ -67,7 +67,7 @@ namespace monogameMinecraftNetworking.Client.UI
                 
                     break;
             }
-            }
+            }*/
         
         }
     }

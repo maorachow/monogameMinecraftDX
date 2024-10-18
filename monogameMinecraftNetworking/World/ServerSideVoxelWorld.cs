@@ -280,7 +280,7 @@ namespace monogameMinecraftNetworking.World
         {
             while (true)
             {
-             //   Thread.Sleep(50);
+                Thread.Sleep(10);
                 if (isThreadsStopping == true)
                 {
                     Console.WriteLine("quit update world thread:"+Thread.CurrentThread.ManagedThreadId);

@@ -18,27 +18,27 @@ using monogameMinecraftShared.World;
 
 namespace monogameMinecraftNetworking.Client
 {
-    public class ClientGameBase:Game
+    public class ClientGameBase: MinecraftGameBase
     {
 
-        public GamePlatformType gamePlatformType;
-        public GameStatus status;
+        
+     //   public GameStatus status;
         public string inputIPAddress;
         public int inputPort;
         public string inputUserName;
        
-        public GamePlayerReference gamePlayerR { get; set; }
-        public GameTimeManager gameTimeManager { get; set; }
-        public static Vector3 gameposition;
+      //  public GamePlayerReference gamePlayerR { get; set; }
+       // public GameTimeManager gameTimeManager { get; set; }
+      //  public static Vector3 gameposition;
 
-        public SpriteBatch _spriteBatch;
-        public PlayerInputManager playerInputManager;
+   //     public SpriteBatch _spriteBatch;
+     //   public PlayerInputManager playerInputManager;
 
         public ClientSideEntityManager clientSideEntityManager;
         public ClientSidePlayersManager clientSidePlayersManager;
-        public IEffectsManager effectsManager;
+    //    public IEffectsManager effectsManager;
 
-        public INetworkClientRenderPipelineManager renderPipelineManager;
+      //  public INetworkClientRenderPipelineManager renderPipelineManager;
         public IMultiplayerClient networkingClient;
 
         public virtual void OpenInventory(UIButton ub)
@@ -51,22 +51,22 @@ namespace monogameMinecraftNetworking.Client
           //  throw new NotImplementedException();
         }
 
-        public virtual void GoToSettings(object obj)
+      /*  public virtual void GoToSettings(object obj)
         {
           //  throw new NotImplementedException();
-        }
+        }*/
 
-        public virtual void PauseGame(object o)
-        {
+      //  public virtual void PauseGame(object o)
+     //   {
         //    throw new NotImplementedException();
-        }
+      //  }
 
         
 
-        public virtual void QuitGameplay()
-        {
+     //   public virtual void QuitGameplay()
+     //   {
           //  throw new NotImplementedException();
-        }
+     //   }
 
         public virtual void ResumeGame(object obj)
         {
@@ -78,10 +78,10 @@ namespace monogameMinecraftNetworking.Client
 
         }
 
-        public virtual void GoToMenuFromSettings(object obj)
-        {
+      //  public virtual void GoToMenuFromSettings(object obj)
+     //   {
            
-        }
+     //   }
 
         public virtual void SendChatMessage(object obj, string text)
         {

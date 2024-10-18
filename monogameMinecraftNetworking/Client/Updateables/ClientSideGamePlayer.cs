@@ -193,12 +193,12 @@ namespace monogameMinecraftNetworking.Client.Updateables
         public List<BoundingBox> GetBlocksAround(BoundingBox aabb)
         {
 
-            int minX = ClientSideChunkHelper.FloorFloat(aabb.Min.X - 0.1f);
-            int minY = ClientSideChunkHelper.FloorFloat(aabb.Min.Y - 0.1f);
-            int minZ = ClientSideChunkHelper.FloorFloat(aabb.Min.Z - 0.1f);
-            int maxX = ClientSideChunkHelper.CeilFloat(aabb.Max.X + 0.1f);
-            int maxY = ClientSideChunkHelper.CeilFloat(aabb.Max.Y + 0.1f);
-            int maxZ = ClientSideChunkHelper.CeilFloat(aabb.Max.Z + 0.1f);
+            int minX = ChunkCoordsHelper.FloorFloat(aabb.Min.X - 0.1f);
+            int minY = ChunkCoordsHelper.FloorFloat(aabb.Min.Y - 0.1f);
+            int minZ = ChunkCoordsHelper.FloorFloat(aabb.Min.Z - 0.1f);
+            int maxX = ChunkCoordsHelper.CeilFloat(aabb.Max.X + 0.1f);
+            int maxY = ChunkCoordsHelper.CeilFloat(aabb.Max.Y + 0.1f);
+            int maxZ = ChunkCoordsHelper.CeilFloat(aabb.Max.Z + 0.1f);
 
             blocksAround = new List<BoundingBox>();
 
@@ -383,7 +383,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
 
 
 
-            Vector3Int setBlockPointInt = ClientSideChunkHelper.Vec3ToBlockPos(setBlockPoint);
+            Vector3Int setBlockPointInt = ChunkCoordsHelper.Vec3ToBlockPos(setBlockPoint);
             BoundingBox box = BlockBoundingBoxUtility.GetBoundingBox(setBlockPointInt.x, setBlockPointInt.y, setBlockPointInt.z, inventoryData[currentSelectedHotbar]);
             box.Max -= new Vector3(0.01f, 0.01f, 0.01f);
             box.Min += new Vector3(0.01f, 0.01f, 0.01f);
@@ -748,7 +748,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
             if (ClientSideChunkHelper.CheckIsPosInChunkBorder(position, curChunk) || !ClientSideChunkHelper.CheckIsPosInChunk(position, curChunk))
             {
                 isChunkNeededUpdate = true;
-                curChunk = ClientSideChunkHelper.GetChunk(ClientSideChunkHelper.Vec3ToChunkPos(position));
+                curChunk = ClientSideChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(position));
             }
             //  isChunkNeededUpdate = true;
         }

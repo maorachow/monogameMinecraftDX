@@ -60,7 +60,7 @@ namespace monogameMinecraftShared.World
                     {
                         IChunkUpdateOperation updateOper = queuedChunkUpdatePoints.Dequeue();
                         updateOper.Update();
-                        chunksNeededRebuild.Add(ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos((Vector3)updateOper.position)));
+                        chunksNeededRebuild.Add(ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos((Vector3)updateOper.position)));
                     }
                 }
 

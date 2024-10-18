@@ -4,35 +4,42 @@ using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.World;
 using System;
 using System.Collections.Generic;
+using monogameMinecraftShared.Animations;
 
 namespace monogameMinecraftShared.Rendering
 {
-    public class EntityRenderer:IShadowDrawableRenderer
+    public class EntityRenderer:IShadowDrawableRenderer, IEntityRenderer
     {
         public Effect basicShader;
         public Effect shadowMapShader;
+        public Effect gBufferShader;
         public GraphicsDevice device;
+        [Obsolete]
         public static Model zombieModel;
+        [Obsolete]
         public static Model playerModel;
-        public Model zombieModelRef;
+
+       // public Dictionary<>
+      
        
-        public Texture2D zombieTex;
-        public Texture2D playerTex;
+     //   public Texture2D zombieTex;
+      //  public Texture2D playerTex;
         public IGamePlayer gamePlayer;
-        public ShadowRenderer shadowRenderer;
+      //  public ShadowRenderer shadowRenderer;
         public GameTimeManager gameTimeManager;
-        public EntityRenderer( GraphicsDevice device, IGamePlayer player, Effect shader, Model model, Texture2D zombieTex, Model zombieModelRef, Effect shadowmapShader, ShadowRenderer sr, GameTimeManager gameTimeManager,Model playerModel,Texture2D playerTex)
+        public EntityRenderer( GraphicsDevice device, IGamePlayer player, Effect shader, Effect shadowmapShader, GameTimeManager gameTimeManager,Effect gBufferShader )
         {
             this.device = device;
             basicShader = shader;
-            EntityRenderer.playerModel=playerModel;
-            zombieModel = model;
-            this.zombieModelRef = zombieModelRef;
+            //EntityRenderer.playerModel=playerModel;
+          //  zombieModel = model;
+           
             this.gamePlayer = player;
             shadowMapShader = shadowmapShader;
-            this.zombieTex = zombieTex;
-            shadowRenderer = sr;
-         this.playerTex=playerTex;
+       
+       //     shadowRenderer = sr;
+       
+         this.gBufferShader = gBufferShader;
             this.gameTimeManager = gameTimeManager;
             /*  foreach(var modelMesh in zombieModel.Meshes)
                {
@@ -80,9 +87,9 @@ namespace monogameMinecraftShared.Rendering
             //    basicShader.Parameters["View"].SetValue(player.cam.GetViewMatrix());
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
             //      
-            basicShader.Parameters["TextureE"].SetValue(zombieTex);
-            basicShader.Parameters["ShadowMapC"]?.SetValue(shadowRenderer.shadowMapTarget);
-            basicShader.Parameters["LightSpaceMat"].SetValue(shadowRenderer.lightSpaceMat);
+       //     basicShader.Parameters["TextureE"].SetValue(zombieTex);
+      //      basicShader.Parameters["ShadowMapC"]?.SetValue(shadowRenderer.shadowMapTarget);
+        //    basicShader.Parameters["LightSpaceMat"].SetValue(shadowRenderer.lightSpaceMat);
             //          basicShader.Parameters["LightSpaceMatFar"].SetValue(shadowRenderer.lightSpaceMatFar);
             //        basicShader.Parameters["ShadowMapCFar"].SetValue(shadowRenderer.shadowMapTargetFar);
             //      zombieModel.Bones["head"].Transform = Matrix.CreateScale(0.5f);
@@ -102,7 +109,7 @@ namespace monogameMinecraftShared.Rendering
                     switch (entity.typeID)
                     {
                         case 0:
-                            DrawZombie(entity);
+                        //    DrawZombie(entity);
                             break;
                     }
                 }
@@ -113,7 +120,7 @@ namespace monogameMinecraftShared.Rendering
         }
 
 
-        public void DrawGBuffer(Effect gBufferShader)
+        public void DrawGBuffer()
         {
             //    basicShader.Parameters["View"].SetValue(player.cam.GetViewMatrix());
             //   basicShader.Parameters["Projection"].SetValue(player.cam.projectionMatrix);
@@ -127,7 +134,10 @@ namespace monogameMinecraftShared.Rendering
                     switch (entity.typeID)
                     {
                         case 0:
-                            gBufferShader.Parameters["TextureE"].SetValue(zombieTex);
+                            if (entity.animationBlend is not SingleTexturedAnimatedModel)
+                            {
+                                break;
+                            }
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(entity.position);
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -136,7 +146,7 @@ namespace monogameMinecraftShared.Rendering
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
 
-                            entity.animationBlend.DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, gBufferShader, optionalParams, () =>
+                          (entity.animationBlend as SingleTexturedAnimatedModel).DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, gBufferShader, optionalParams, () =>
                             {
                                 if (entity.isEntityHurt)
                                 {
@@ -176,7 +186,11 @@ namespace monogameMinecraftShared.Rendering
                     switch (entity.typeID)
                     {
                         case 0:
-                            forwardShader.Parameters["TextureE"].SetValue(zombieTex);
+                            if (entity.animationBlend is not SingleTexturedAnimatedModel)
+                            {
+                                break;
+                            }
+                            //forwardShader.Parameters["TextureE"].SetValue(zombieTex);
                             //    DrawZombie(entity,gBufferShader);
                             Matrix world = Matrix.CreateTranslation(entity.position);
                             Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
@@ -185,7 +199,7 @@ namespace monogameMinecraftShared.Rendering
                                 {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
                             };
 
-                            entity.animationBlend.DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, forwardShader, optionalParams, () =>
+                            (entity.animationBlend as SingleTexturedAnimatedModel).DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, forwardShader, optionalParams, () =>
                             {
                                 if (entity.isEntityHurt)
                                 {
@@ -210,7 +224,7 @@ namespace monogameMinecraftShared.Rendering
 
         }
         public static Matrix[] sharedDrawBoneMatrices;
-        public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
+        /*  public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
         {
             foreach (var bone in model.Bones)
             {
@@ -247,7 +261,7 @@ namespace monogameMinecraftShared.Rendering
                 mesh.Draw();
             }
         }
-        public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection, Effect shader)
+      public void DrawModel(Model model, Matrix world, Matrix view, Matrix projection, Effect shader)
         {
             foreach (var bone in model.Bones)
             {
@@ -323,8 +337,8 @@ namespace monogameMinecraftShared.Rendering
 
                 mesh.Draw();
             }
-        }
-        public void DrawZombieShadow(EntityBeh entity, Matrix lightSpaceMat, Effect shadowMapShader)
+        }*/
+        public void DrawZombieShadow(EntityBeh entity, Matrix lightSpaceMat)
         {
 
             Matrix world = Matrix.CreateTranslation(entity.position);
@@ -341,112 +355,131 @@ namespace monogameMinecraftShared.Rendering
 
             entity.animationBlend.DrawAnimatedModel(device,world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shadowMapShader, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
-        public void DrawZombie(EntityBeh entity)
+
+        public void DrawZombieShadow(EntityBeh entity, Matrix lightSpaceMat,Effect shadowMapShader1)
         {
-            // Debug.WriteLine(zombieModelRef.Equals(zombieModel));
-
-            //              Debug.WriteLine(entity.rotationX + "  " + entity.rotationY + "  " + entity.rotationZ);
-            foreach (var bone in zombieModel.Bones)
-            {
-
-
-                foreach (var mesh in bone.Meshes)
-                {
-                    foreach (var meshPart in mesh.MeshParts)
-                    {
-                        meshPart.Effect = basicShader;
-                    }
-
-
-                }
-            }
-
-            if (entity.isEntityHurt)
-            {
-                foreach (ModelMesh mesh in zombieModel.Meshes)
-                {
-                    foreach (Effect effect in mesh.Effects)
-                    {
-
-                        effect.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
-                    }
-
-                }
-            }
-            else
-            {
-                foreach (ModelMesh mesh in zombieModel.Meshes)
-                {
-                    foreach (Effect effect in mesh.Effects)
-                    {
-                        effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
-                    }
-
-                }
-            }
 
             Matrix world = Matrix.CreateTranslation(entity.position);
+            //   zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) * zombieModelRef.Bones["head"].Transform;
+            //      zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+            //   zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+            //   zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+            //  DrawModelShadow(zombieModel, world, lightSpaceMat,shadowMapShader);
+            Dictionary<string, Matrix> optionalParams = new Dictionary<string, Matrix>
+            {
+                {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0) },
+                {"body", Matrix.CreateFromQuaternion(entity.bodyQuat)}
+            };
 
-            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0)/* * zombieModelRef.Bones["head"].Transform*/;
-            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
-            zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
-            zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
-
+            entity.animationBlend.DrawAnimatedModel(device, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shadowMapShader1, optionalParams, () => { shadowMapShader.Parameters["LightSpaceMat"].SetValue(lightSpaceMat); });
         }
 
+        /*  public void DrawZombie(EntityBeh entity)
+          {
+              // Debug.WriteLine(zombieModelRef.Equals(zombieModel));
+
+              //              Debug.WriteLine(entity.rotationX + "  " + entity.rotationY + "  " + entity.rotationZ);
+              foreach (var bone in zombieModel.Bones)
+              {
+
+
+                  foreach (var mesh in bone.Meshes)
+                  {
+                      foreach (var meshPart in mesh.MeshParts)
+                      {
+                          meshPart.Effect = basicShader;
+                      }
+
+
+                  }
+              }
+
+              if (entity.isEntityHurt)
+              {
+                  foreach (ModelMesh mesh in zombieModel.Meshes)
+                  {
+                      foreach (Effect effect in mesh.Effects)
+                      {
+
+                          effect.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
+                      }
+
+                  }
+              }
+              else
+              {
+                  foreach (ModelMesh mesh in zombieModel.Meshes)
+                  {
+                      foreach (Effect effect in mesh.Effects)
+                      {
+                          effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
+                      }
+
+                  }
+              }
+
+              Matrix world = Matrix.CreateTranslation(entity.position);
+
+              zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), -MathHelper.ToRadians(entity.rotationX), 0)/* * zombieModelRef.Bones["head"].Transform;
+              zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModelRef.Bones["body"].Transform;
+              zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+              zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+              DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix);
+
+          }*/
 
 
 
 
 
 
-        public void DrawZombie(EntityBeh entity, Effect shader)
-        {
-            // Debug.WriteLine(zombieModelRef.Equals(zombieModel));
 
-            //              Debug.WriteLine(entity.rotationX + "  " + entity.rotationY + "  " + entity.rotationZ);
-            foreach (var bone in zombieModel.Bones)
-            {
+        /*   public void DrawZombie(EntityBeh entity, Effect shader)
+           {
+               // Debug.WriteLine(zombieModelRef.Equals(zombieModel));
 
-
-                foreach (var mesh in bone.Meshes)
-                {
-                    foreach (var meshPart in mesh.MeshParts)
-                    {
-                        meshPart.Effect = shader;
-                    }
+               //              Debug.WriteLine(entity.rotationX + "  " + entity.rotationY + "  " + entity.rotationZ);
+               foreach (var bone in zombieModel.Bones)
+               {
 
 
-                }
-            }
+                   foreach (var mesh in bone.Meshes)
+                   {
+                       foreach (var meshPart in mesh.MeshParts)
+                       {
+                           meshPart.Effect = shader;
+                       }
 
-            if (entity.isEntityHurt)
-            {
+
+                   }
+               }
+
+               if (entity.isEntityHurt)
+               {
 
 
-                shader.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
+                   shader.Parameters["DiffuseColor"].SetValue(Color.Red.ToVector3());
 
-            }
-            else
-            {
+               }
+               else
+               {
 
-                shader.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
+                   shader.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
 
-            }
+               }
 
-            Matrix world = Matrix.CreateTranslation(entity.position);
-            //  zombieModel.Root.Transform=world * Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(entity.rotationX), 0);
-            zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), MathHelper.ToRadians(entity.rotationX), 0) * zombieModel.Bones["head"].Parent.Transform; /** zombieModelRef.Bones["head"].Transform*/;
-            zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModel.Bones["body"].Parent.Transform;
-            zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
-            zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
-            DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shader);
+               Matrix world = Matrix.CreateTranslation(entity.position);
+               //  zombieModel.Root.Transform=world * Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(entity.rotationX), 0);
+               zombieModel.Bones["head"].Transform = Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.rotationY), MathHelper.ToRadians(entity.rotationX), 0) * zombieModel.Bones["head"].Parent.Transform; /** zombieModelRef.Bones["head"].Transform
+               zombieModel.Bones["body"].Transform = Matrix.CreateFromQuaternion(entity.bodyQuat) * zombieModel.Bones["body"].Parent.Transform;
+               zombieModel.Bones["rightLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["rightLeg"].Transform;
+               zombieModel.Bones["leftLeg"].Transform = Matrix.CreateFromYawPitchRoll(0, -MathHelper.ToRadians(MathHelper.Clamp(MathF.Cos(entity.entityLifetime * 6f) * entity.curSpeed * 15f, -55f, 55f)), 0) * zombieModelRef.Bones["leftLeg"].Transform;
+               DrawModel(zombieModel, world, gamePlayer.cam.viewMatrix, gamePlayer.cam.projectionMatrix, shader);
 
-        }
+           }*/
         //      basicShader.Parameters["World"].SetValue(world * bone.Transform);
 
-        public void DrawShadow(Matrix shadowMat, Effect shadowMapShader1)
+        public void DrawShadow(Matrix shadowMat)
         {
             BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
             foreach (var entity in EntityManager.worldEntities)
@@ -456,7 +489,27 @@ namespace monogameMinecraftShared.Rendering
                     case 0:
                         if (frustum.Intersects(entity.bounds))
                         {
-                            DrawZombieShadow(entity, shadowMat, shadowMapShader1);
+                            DrawZombieShadow(entity, shadowMat);
+                        }
+
+                        break;
+                }
+                //       entityRenderer.DrawModelShadow(entityRenderer.zombieModel, Matrix.CreateTranslation(entity.position), lightSpaceMat,shadowMapShader);
+
+
+            }
+        }
+        public void DrawShadow(Matrix shadowMat,Effect shadowmapShader)
+        {
+            BoundingFrustum frustum = new BoundingFrustum(gamePlayer.cam.viewMatrix * gamePlayer.cam.projectionMatrix);
+            foreach (var entity in EntityManager.worldEntities)
+            {
+                switch (entity.typeID)
+                {
+                    case 0:
+                        if (frustum.Intersects(entity.bounds))
+                        {
+                            DrawZombieShadow(entity, shadowMat, shadowmapShader);
                         }
 
                         break;

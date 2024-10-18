@@ -22,9 +22,9 @@ namespace monogameMinecraftAndroid
         public static string resultText = "";
         public static void Update()
         {
-            if (UIElement.androidIsInputPanelOpened == true)
+            if (UITouchscreenInputHelper.androidIsInputPanelOpened == true)
             {
-                if (UIElement.androidCurEditingElement != null)
+                if (UITouchscreenInputHelper.androidCurEditingElement != null)
                 {
                    
                   
@@ -49,30 +49,30 @@ namespace monogameMinecraftAndroid
                         alert.SetButton(-1, "Ok", (EventHandler<DialogClickEventArgs>)((sender, args) =>
                         {
                             resultText = input.Text;
-                            if (UIElement.androidCurEditingElement is InputField)
+                            if (UITouchscreenInputHelper.androidCurEditingElement is InputField)
                             {
 
-                                (UIElement.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UIElement.androidCurEditingElement as InputField).maxAllowedCharacters));
+                                (UITouchscreenInputHelper.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UITouchscreenInputHelper.androidCurEditingElement as InputField).maxAllowedCharacters));
                             }
                             isDialogOpened = false;
                         }));
                         alert.SetButton(-2, "Cancel", (EventHandler<DialogClickEventArgs>)((sender, args) =>
                         {
                             resultText = "";
-                            if (UIElement.androidCurEditingElement is InputField)
+                            if (UITouchscreenInputHelper.androidCurEditingElement is InputField)
                             {
 
-                                (UIElement.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UIElement.androidCurEditingElement as InputField).maxAllowedCharacters));
+                                (UITouchscreenInputHelper.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UITouchscreenInputHelper.androidCurEditingElement as InputField).maxAllowedCharacters));
                             }
                             isDialogOpened = false;
                         }));
                         alert.CancelEvent += (EventHandler)((sender, args) =>
                         {
                             resultText = input.Text;
-                            if (UIElement.androidCurEditingElement is InputField)
+                            if (UITouchscreenInputHelper.androidCurEditingElement is InputField)
                             {
 
-                                (UIElement.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UIElement.androidCurEditingElement as InputField).maxAllowedCharacters));
+                                (UITouchscreenInputHelper.androidCurEditingElement as InputField).text = resultText.Substring(0, Math.Min(resultText.Length, (UITouchscreenInputHelper.androidCurEditingElement as InputField).maxAllowedCharacters));
                             }
                             isDialogOpened = false;
                         });
@@ -82,7 +82,7 @@ namespace monogameMinecraftAndroid
 
                 }
 
-               UIElement. androidIsInputPanelOpened = false;
+                UITouchscreenInputHelper. androidIsInputPanelOpened = false;
             }
 
         }

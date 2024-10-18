@@ -197,6 +197,7 @@ namespace monogameMinecraftNetworking.Protocol
                 if (isThreadsStopping == true)
                 {
                     Debug.WriteLine("message parsing thread stopped");
+                    isMessageParsingThreadRunning = false;
                     return;
                 }
                 if (s == null || s.Connected == false)

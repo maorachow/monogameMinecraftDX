@@ -17,7 +17,7 @@ using monogameMinecraftShared.Utility;
 namespace monogameMinecraftShared.World
 {
    
-        public class VoxelWorld
+        public class VoxelWorld: IVoxelWorldWithRenderingChunkBuffers
     {
         public int worldGenType = 0;
         public int worldID = 0;
@@ -146,7 +146,7 @@ namespace monogameMinecraftShared.World
                                     for (float z = player.position.Z - GameOptions.renderDistance; z < player.position.Z + GameOptions.renderDistance; z += Chunk.chunkWidth)
                                     {
                                         //   Thread.Sleep(1);
-                                        Vector2Int chunkPos = ChunkHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
+                                        Vector2Int chunkPos = ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z));
 
                                         if (GetChunk(chunkPos) == null && !chunks.ContainsKey(chunkPos))
                                         {
@@ -387,7 +387,7 @@ namespace monogameMinecraftShared.World
                 if (playerInWorldID != worldID)
                 {
                     SwitchToWorldWithoutSaving(playerInWorldID, game);
-                    // return;
+                     return;
                 }
             }
 
@@ -415,10 +415,13 @@ namespace monogameMinecraftShared.World
             updateWorldThread = new Thread(() => UpdateWorldThread(game.gamePlayerR.gamePlayer, game));
            
             updateWorldThread.IsBackground = true;
+            updateWorldThread.Name = "updateWorldThread";
             updateWorldThread.Start();
             tryRemoveChunksThread = new Thread(() => TryDeleteChunksThread(game.gamePlayerR.gamePlayer, game));
             tryRemoveChunksThread.IsBackground = true;
+            tryRemoveChunksThread.Name = "tryRemoveChunksThread";
             tryRemoveChunksThread.Start();
+
             if (game.gamePlayerR.gamePlayer is GamePlayer gamePlayer1)
             {
                 gamePlayer1.curChunk = null;
@@ -454,9 +457,10 @@ namespace monogameMinecraftShared.World
                     }
                     chunks.Clear();
                     chunkDataReadFromDisk.Clear();
-
+                    _renderingChunks.Clear();
                 }
             }
+            
             GC.Collect();
 
 
@@ -558,7 +562,7 @@ namespace monogameMinecraftShared.World
             Debug.WriteLine("main thread is threads stopping:"+isThreadsStopping);
             SaveWorldData();
             structureOperationsManager.SaveAllStructures();
-            Task.Run(DestroyAllChunks) ;
+            Task.Run(DestroyAllChunks)  ;
           //       chunks.Clear();
          //      isGoingToQuitWorld = true;
 

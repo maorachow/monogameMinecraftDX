@@ -6,71 +6,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using monogameMinecraftNetworking.Client.World;
 using monogameMinecraftShared.Core;
 using monogameMinecraftShared.Physics;
+using monogameMinecraftShared.Updateables;
 using monogameMinecraftShared.World;
 
-namespace monogameMinecraftShared.Updateables
+namespace monogameMinecraftNetworking.Client.Updateables
 {
-
-    public class ParticleManagerBase
+    public class ClientSideParticleManager : ParticleManagerBase
     {
-        public static readonly int maxParticlesCount = 1000;
-        public static ParticleManagerBase instance;
-        public List<IParticle> allParticles = new List<IParticle>();
-        public Dictionary<Vector3Int, BoundingBox> cachedBlockColliders;
-        public bool isResourcesReleased = false;
-        public virtual BoundingBox GetOrFetchBoundingBox(Vector3Int pos, BlockData? blockData)
-        {
-            throw new NotImplementedException();
-        }
 
-        public virtual void Initialize()
-        {
-            
-        }
 
-        public virtual void ReleaseResources()
-        {
-           
-        }
 
-        public virtual void Update(float deltaTime)
-        {
 
-        }
-
-        public virtual void SpawnNewParticleTexturedGravity(Vector3 position, float size, Vector2 uvCorner,
-            Vector2 uvWidth, float lifeTime,
-            Vector3 initalMotionVector, float friction)
-        {
-
-        }
-    }
-    public class ParticleManager: ParticleManagerBase
-    {
-    
-       
-
-        
-        public ParticleManager()
+        public ClientSideParticleManager()
         {
             instance = this;
         }
 
         public object allParticlesLock = new object();
-       
 
-      
+
+
         public override void Initialize()
         {
             lock (allParticlesLock)
             {
-                allParticles = new List< IParticle>();
+                allParticles = new List<IParticle>();
                 cachedBlockColliders = new Dictionary<Vector3Int, BoundingBox>();
                 isResourcesReleased = false;
             }
-           
+
         }
 
         public override void ReleaseResources()
@@ -79,18 +46,18 @@ namespace monogameMinecraftShared.Updateables
             {
                 allParticles = null;
                 cachedBlockColliders = null;
-                isResourcesReleased=true;
+                isResourcesReleased = true;
             }
-        
+
         }
-        public override BoundingBox GetOrFetchBoundingBox(Vector3Int pos,BlockData? blockData)
+        public override BoundingBox GetOrFetchBoundingBox(Vector3Int pos, BlockData? blockData)
         {
             if (cachedBlockColliders.ContainsKey(pos))
             {
                 return cachedBlockColliders[pos];
             }
 
-            blockData ??= ChunkHelper.GetBlockData(pos);
+            blockData ??= ClientSideChunkHelper.GetBlockData(pos);
 
 
             if (blockData.Value.blockID != 0 && Chunk.blockInfosNew.ContainsKey(blockData.Value.blockID) &&
@@ -106,9 +73,9 @@ namespace monogameMinecraftShared.Updateables
 
         public override void Update(float deltaTime)
         {
-            
+
             cachedBlockColliders.Clear();
-              
+
             foreach (var particle in allParticles.ToArray())
             {
                 if (particle != null && particle.isAlive == true)
@@ -117,31 +84,31 @@ namespace monogameMinecraftShared.Updateables
                 }
 
             }
-            
-          
+
+
             // RemoveDeadParticles();
         }
-        public Random rand=new Random();
+        public Random rand = new Random();
         public override void SpawnNewParticleTexturedGravity(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime,
             Vector3 initalMotionVector, float friction)
         {
-            
+
             TexturedGravityParticle particle = new TexturedGravityParticle(position, size, uvCorner, uvWidth, lifeTime, initalMotionVector, friction);
-               bool hasDeadParticles= FindAndRemoveDeadParticle();
-               while (hasDeadParticles)
-               {
-                   hasDeadParticles = FindAndRemoveDeadParticle();
-               }
+            bool hasDeadParticles = FindAndRemoveDeadParticle();
+            while (hasDeadParticles)
+            {
+                hasDeadParticles = FindAndRemoveDeadParticle();
+            }
 
-               if (allParticles.Count >= maxParticlesCount-1)
-               {
-                   return;
-               }
-               allParticles.Add(particle) ;
-           
+            if (allParticles.Count >= maxParticlesCount - 1)
+            {
+                return;
+            }
+            allParticles.Add(particle);
 
-            
-           
+
+
+
         }
 
         public bool FindAndRemoveDeadParticle()

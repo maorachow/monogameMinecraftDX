@@ -97,15 +97,47 @@ namespace monogameMinecraftShared.Asset
 
         public partial class BlockResourcesManager
         {
-            public static Dictionary<int, BlockInfo> blockInfo;
-            public static Dictionary<int, SoundEffect> blockSoundInfo;
 
-            public static Texture2D atlas;
-            public static Texture2D atlasNormal;
-            public static Texture2D atlasMER;
+            private static BlockResourcesManager _instance;
+            
 
 
-            public static void WriteDefaultBlockInfo(string path)
+
+            private static readonly object locker = new object();
+
+            private BlockResourcesManager()
+            {
+
+            }
+            public static BlockResourcesManager instance
+            {
+                get
+                {
+                    if (_instance == null)
+                    {
+                        lock (locker)
+                        {
+
+                            if (_instance == null)
+                            {
+                                _instance = new BlockResourcesManager();
+                            }
+                        }
+                    }
+                    return _instance;
+                }
+            }
+
+
+        public Dictionary<int, BlockInfo> blockInfo;
+            public Dictionary<int, SoundEffect> blockSoundInfo;
+
+            public Texture2D atlas;
+            public Texture2D atlasNormal;
+            public Texture2D atlasMER;
+
+
+            public void WriteDefaultBlockInfo(string path)
             {
                 Dictionary<int, BlockInfoJsonData> blockInfoData = new Dictionary<int, BlockInfoJsonData>();
                 foreach (var item in Chunk.blockInfosNew)
@@ -239,9 +271,9 @@ namespace monogameMinecraftShared.Asset
                 File.WriteAllText(path, blockInfoDataString);
             }
 
-            public static ContentManager contentManager;
+         //   public static ContentManager contentManager;
 
-            public static void LoadDefaultResources(ContentManager cm, GraphicsDevice device, ChunkRenderer cr)
+            public void LoadDefaultResources( ContentManager cm, GraphicsDevice device)
             {
                 blockSoundInfo = new Dictionary<int, SoundEffect>();
                 try
@@ -347,76 +379,12 @@ namespace monogameMinecraftShared.Asset
                 }
 
                 Chunk.blockSoundInfo = blockSoundInfo;
-                cr.SetTexture(atlasNormal, null, atlas, atlasMER);
-            }
+            LoadDefaultParticleResources(cm, device);
+        }
 
-            public static void LoadDefaultUIResources(ContentManager content, Game game)
-            {
-                Dictionary<int, string> blockSpriteInfoData = new Dictionary<int, string>
-                {
-                    { 1, "blocksprites/stone" },
-                    { 2, "blocksprites/grass_side_carried" },
-                    { 3, "blocksprites/dirt" },
-                    { 4, "blocksprites/grass_side_carried" },
-                    { 5, "blocksprites/bedrock" },
-                    { 6, "blocksprites/log_oak" },
-                    { 7, "blocksprites/log_oak" },
-                    { 8, "blocksprites/log_oak" },
-                    { 9, "blocksprites/leaves_oak_carried" },
-                    { 10, "blocksprites/diamond_ore" },
-                    { 11, "blocksprites/sand" },
-                    { 12, "blocksprites/end_stone" },
-                    { 13, "blocksprites/endframe_top" },
-                    { 14, "blocksprites/sea_lantern" },
-                    { 15, "blocksprites/iron_block" },
-                    { 16, "blocksprites/cobblestone" },
-                    { 17, "blocksprites/planks_oak" },
-                    { 18, "blocksprites/wool_colored_red" },
-                    { 19, "blocksprites/wool_colored_green" },
-                    { 20, "blocksprites/wool_colored_blue" },
-                    { 21, "blocksprites/planks_oak" },
-                    { 22, "blocksprites/wool_colored_white" },
-                    { 23, "blocksprites/wool_colored_black" },
-                    { 100, "blocksprites/water" },
-                    { 101, "blocksprites/grass" },
-                    { 102, "blocksprites/torch_on" },
-                    { 103, "blocksprites/fences" },
-                    { 104, "blocksprites/woodendoor" },
-                    { 105, "blocksprites/ladder" },
-                    { 106, "blocksprites/glass_green" },
-                    { 107, "blocksprites/glass_blue" },
-                    { 108, "blocksprites/glass_black" },
-                    { 109, "blocksprites/glass" },
-                    { 110, "blocksprites/glass_white" },
-                    { 111, "blocksprites/glass_red" },
-                };
-                foreach (var item in blockSpriteInfoData)
-                {
-                    try
-                    {
-                        Texture2D sprite = content.Load<Texture2D>(item.Value);
 
-                        //    se.Play(1, 0, 0);
-                        if (!UIElement.UITextures.ContainsKey("blocktexture" + item.Key))
-                        {
-                            UIElement.UITextures.Add("blocktexture" + item.Key, sprite);
-                        }
-                        else
-                        {
-                            UIElement.UITextures["blocktexture" + item.Key] = sprite;
-                        }
-                    }
-                    catch
-                    {
-                        UIElement.UITextures["blocktexture" + item.Key] = null;
-                    }
-                }
-
-                UIUtility.InitInventoryUI(game, UIUtility.sf);
-            }
-
-            public static void LoadResources(string path, ContentManager cm, GraphicsDevice device, ChunkRenderer cr,ParticleRenderer pr,
-                Game game)
+            public ContentManager contentManager;
+            public void LoadResources(string path, ContentManager cm, GraphicsDevice device)
             {
                 string blockInfoDataString;
                 string blockSoundInfoDataString;
@@ -543,16 +511,13 @@ namespace monogameMinecraftShared.Asset
 
                 Chunk.blockSoundInfo = blockSoundInfo;
                 Chunk.blockInfosNew = blockInfo;
-                UIUtility.InitInventoryUI(game, UIUtility.sf);
+              // UIUtility.InitInventoryUI(game, UIUtility.sf);
                 //   cmTemp.Dispose();
-                if (atlasNormal != null && atlas != null && atlasMER != null)
-                {
-                    cr.SetTexture(atlasNormal, null, atlas, atlasMER);
-                }
+             
                
                 ChunkHelper.RebuildAllChunks();
 
-                LoadParticleResources(contentManager, device, pr);
+                LoadDefaultParticleResources(contentManager, device);
             }
         }
     }

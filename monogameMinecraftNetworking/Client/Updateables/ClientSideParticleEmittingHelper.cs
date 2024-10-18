@@ -14,21 +14,21 @@ using monogameMinecraftShared.World;
 namespace monogameMinecraftNetworking.Client.Updateables
 {
 
-    public class ClientSideParticleEmittingHelper
+   /* public class ClientSideParticleEmittingHelper
     {
         public static void ClientSideSpawnNewParticleTexturedGravity(Vector3 position, float size, Vector2 uvCorner, Vector2 uvWidth, float lifeTime,
             Vector3 initalMotionVector, float friction)
         {
-            if (ParticleManager.instance == null)
+            if (ParticleManagerBase.instance == null)
             {
                 Debug.WriteLine("null particle manager");
                 return;
             }
            
                 ClientSideTexturedGravityParticle particle = new ClientSideTexturedGravityParticle(position, size, uvCorner, uvWidth, lifeTime, initalMotionVector, friction);
-                ParticleManager.instance.FindAndRemoveDeadParticle();
-               
-                    ParticleManager.instance.allParticles.TryAdd(rand.Next(),particle);
+                ParticleManagerBase.instance.FindAndRemoveDeadParticle();
+
+                ParticleManagerBase.instance.allParticles.TryAdd(rand.Next(),particle);
                
 
             
@@ -68,9 +68,9 @@ namespace monogameMinecraftNetworking.Client.Updateables
     {
         public static BoundingBox GetOrFetchBoundingBox(Vector3Int pos)
         {
-            if (ParticleManager.instance. cachedBlockColliders.ContainsKey(pos))
+            if (ParticleManagerBase.instance. cachedBlockColliders.ContainsKey(pos))
             {
-                return ParticleManager.instance.cachedBlockColliders[pos];
+                return ParticleManagerBase.instance.cachedBlockColliders[pos];
             }
             else
             {
@@ -79,12 +79,12 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     BlockBoundingBoxUtility.IsBlockWithBoundingBox(Chunk.blockInfosNew[data.blockID].shape) ==
                     true)
                 {
-                    ParticleManager.instance.cachedBlockColliders.TryAdd(pos, BlockBoundingBoxUtility.GetBoundingBox(pos.x, pos.y, pos.z, data));
-                    return ParticleManager.instance.cachedBlockColliders[pos];
+                    ParticleManagerBase.instance.cachedBlockColliders.TryAdd(pos, BlockBoundingBoxUtility.GetBoundingBox(pos.x, pos.y, pos.z, data));
+                    return ParticleManagerBase.instance.cachedBlockColliders[pos];
                 }
             }
 
             return new BoundingBox();
         }
-    }
+    }*/
 }

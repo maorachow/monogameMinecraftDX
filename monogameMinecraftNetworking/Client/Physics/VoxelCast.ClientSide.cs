@@ -27,7 +27,7 @@ namespace monogameMinecraftShared.Physics
                 {
                     for (int k = -radius + 1; k < radius; k++)
                     {
-                        Vector3Int blockPos = ClientSideChunkHelper.Vec3ToBlockPos(new Vector3(ray.origin.X + i, ray.origin.Y + j, ray.origin.Z + k));
+                        Vector3Int blockPos = ChunkCoordsHelper.Vec3ToBlockPos(new Vector3(ray.origin.X + i, ray.origin.Y + j, ray.origin.Z + k));
                         BlockData data = ClientSideChunkHelper.GetBlockData(blockPos);
                         BoundingBox blockBounds;
 
@@ -69,7 +69,7 @@ namespace monogameMinecraftShared.Physics
                 {
                     for (int k = -radius + 1; k < radius; k++)
                     {
-                        Vector3Int blockPos = ClientSideChunkHelper.Vec3ToBlockPos(new Vector3(ray.origin.X + i, ray.origin.Y + j, ray.origin.Z + k));
+                        Vector3Int blockPos = ChunkCoordsHelper.Vec3ToBlockPos(new Vector3(ray.origin.X + i, ray.origin.Y + j, ray.origin.Z + k));
                         BlockData data = ClientSideChunkHelper.GetBlockData(blockPos);
                         BoundingBox blockBounds;
 

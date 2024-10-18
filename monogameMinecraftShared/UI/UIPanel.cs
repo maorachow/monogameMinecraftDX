@@ -24,7 +24,7 @@ namespace monogameMinecraftShared.UI
         public bool keepsAspectRatio = false;
 
 
-        public UIPanel(Vector2 position, float width, float height, bool keepsAspectRatio = false)
+        public UIPanel(UIStateManager state, Vector2 position, float width, float height, bool keepsAspectRatio = false)
         {
             element00Pos = position;
             element10Pos = new Vector2(position.X + width, position.Y);
@@ -34,7 +34,7 @@ namespace monogameMinecraftShared.UI
           
             this.text = text;
          
-            OnResize();
+            OnResize(state);
          
             this.keepsAspectRatio = keepsAspectRatio;
             if (this.keepsAspectRatio)
@@ -44,13 +44,13 @@ namespace monogameMinecraftShared.UI
             }
         
         }
-        public void GetScreenSpaceRect()
+        public void GetScreenSpaceRect(UIStateManager state)
         {
             Debug.WriteLine("Panel:"+element00Pos + " " + element01Pos + " " + element10Pos + " " + element11Pos);
 
-            Vector2 transformedP00 = new Vector2(element00Pos.X * UIElement.ScreenRect.Width, element00Pos.Y * UIElement.ScreenRect.Height);
-            float width = (element10Pos - element00Pos).X * UIElement.ScreenRect.Width;
-            float height = (element01Pos - element00Pos).Y * UIElement.ScreenRect.Height;
+            Vector2 transformedP00 = new Vector2(element00Pos.X * state.ScreenRect.Width, element00Pos.Y * state.ScreenRect.Height);
+            float width = (element10Pos - element00Pos).X * state.ScreenRect.Width;
+            float height = (element01Pos - element00Pos).Y * state.ScreenRect.Height;
             if (keepsAspectRatio)
             {
                 if (width > height)
@@ -79,17 +79,17 @@ namespace monogameMinecraftShared.UI
  
         }
 
-        public void Draw()
+        public void Draw(UIStateManager state)
         {
            
         }
 
-        public void DrawString(string text)
+        public void DrawString(UIStateManager state,string text)
         {
              
         }
 
-        public void Update()
+        public void Update(UIStateManager state)
         {
             
         }
@@ -99,11 +99,12 @@ namespace monogameMinecraftShared.UI
            
         }
 
-        public void OnResize()
+        public void OnResize(UIStateManager state)
         {
-            GetScreenSpaceRect();
+            GetScreenSpaceRect( state);
         }
 
         public string text { get; set; }
+        public string optionalTag { get; set; }
     }
 }

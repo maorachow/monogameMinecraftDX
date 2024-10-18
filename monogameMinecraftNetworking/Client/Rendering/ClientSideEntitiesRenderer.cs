@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using monogameMinecraftNetworking.Client.Updateables;
 using monogameMinecraftNetworking.Client.World;
@@ -18,7 +19,7 @@ using EntityData = monogameMinecraftNetworking.Data.EntityData;
 
 namespace monogameMinecraftNetworking.Client.Rendering
 {
-    public class ClientSideEntitiesRenderer:IGBufferDrawableRenderer,IShadowDrawableRenderer
+    public class ClientSideEntitiesRenderer:IEntityRenderer
     {
         public static Model zombieModel;
         public static Model pigModel;
@@ -173,7 +174,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
 
         }*/
 
-        public void DrawGBuffer()
+        public void DrawGBuffer(Effect gBufferEffect1)
         {
             BoundingFrustum frustum = new BoundingFrustum(curGamePlayer.cam.viewMatrix * curGamePlayer.cam.projectionMatrix);
             if (game.clientSideEntityManager == null)
@@ -192,7 +193,7 @@ namespace monogameMinecraftNetworking.Client.Rendering
                         switch (entity.data.typeid)
                         {
                             case 0:
-                                gBufferEffect.Parameters["TextureE"].SetValue(zombieTex);
+                                gBufferEffect1.Parameters["TextureE"].SetValue(zombieTex);
                                 //    DrawZombie(entity,gBufferShader);
                                 Matrix world = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
@@ -212,25 +213,25 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                     {"body", Matrix.CreateFromQuaternion(bodyQuat)}
                                 };
 
-                                entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams, () =>
+                                entity.animState.DrawAnimatedModel(device, world, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect1, optionalParams, () =>
                                 {
                                     if (entity.data.isEntityHurt)
                                     {
 
 
-                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
+                                        gBufferEffect1.Parameters["DiffuseColor"]?.SetValue(Color.Red.ToVector3());
 
                                     }
                                     else
                                     {
 
-                                        gBufferEffect.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
+                                        gBufferEffect1.Parameters["DiffuseColor"]?.SetValue(Color.White.ToVector3());
 
                                     }
                                 });
                                 break;
                             case 1:
-                                gBufferEffect.Parameters["TextureE"].SetValue(pigTex);
+                                gBufferEffect1.Parameters["TextureE"].SetValue(pigTex);
                                 //    DrawZombie(entity,gBufferShader);
                                 Matrix world1 = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
@@ -279,7 +280,10 @@ namespace monogameMinecraftNetworking.Client.Rendering
            
         }
 
-
+        public void DrawLowDefForward(Effect forwardEffect)
+        {
+            throw new NotImplementedException();//mobile multiplayer not supported
+        }
         public void DrawZombieShadow(ClientSideEntityCacheObject entity, Matrix lightSpaceMat, Effect shadowMapShader)
         {
 

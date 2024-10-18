@@ -34,42 +34,7 @@ namespace monogameMinecraftShared.World
               }
 
           }*/
-        public static Vector3Int Vec3ToBlockPos(Vector3 pos)
-        {
-            Vector3Int intPos = new Vector3Int(FloatToInt(pos.X), FloatToInt(pos.Y), FloatToInt(pos.Z));
-            return intPos;
-        }
-        public static int FloatToInt(float f)
-        {
-            if (f >= 0)
-            {
-                return (int)f;
-            }
-            else
-            {
-                return (int)f - 1;
-            }
-        }
-        public static int FloorFloat(float n)
-        {
-            int i = (int)n;
-            return n >= i ? i : i - 1;
-        }
-
-        public static int CeilFloat(float n)
-        {
-            int i = (int)(n + 1);
-            return n >= i ? i : i - 1;
-        }
-        public static Vector2Int Vec3ToChunkPos(Vector3 pos)
-        {
-            Vector3 tmp = pos;
-            tmp.X = MathF.Floor(tmp.X / (float)Chunk.chunkWidth) * Chunk.chunkWidth;
-            tmp.Z = MathF.Floor(tmp.Z / (float)Chunk.chunkWidth) * Chunk.chunkWidth;
-            Vector2Int value = new Vector2Int((int)tmp.X, (int)tmp.Z);
-            //  mainForm.LogOnTextbox(value.x+" "+value.y+"\n");
-            return value;
-        }
+   
         public static bool isJsonReadFromDisk { get; set; }
         public static bool isWorldDataSaved { get; private set; }
         public static string gameWorldDataPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -312,7 +277,7 @@ namespace monogameMinecraftShared.World
         public static short GetBlock(Vector3 pos)
         {
             Vector3Int intPos = Vector3Int.FloorToIntVec3(pos);
-            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(pos));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos));
 
             if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
             {
@@ -335,7 +300,7 @@ namespace monogameMinecraftShared.World
             public static short GetBlock(Vector3Int pos)
             {
                 
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x,pos.y,pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x,pos.y,pos.z)));
 
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
                 {
@@ -368,7 +333,7 @@ namespace monogameMinecraftShared.World
             public static BlockData GetBlockData(Vector3 pos)
         {
             Vector3Int intPos = Vector3Int.FloorToIntVec3(pos);
-            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(pos));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos));
 
             if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
             {
@@ -391,7 +356,7 @@ namespace monogameMinecraftShared.World
             public static BlockData GetBlockData(Vector3Int pos)
             {
                
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
 
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isMapGenCompleted == false || chunkNeededUpdate.isUnused == true)
                 {
@@ -450,7 +415,7 @@ namespace monogameMinecraftShared.World
         public static int GetChunkLandingPoint(float x, float z)
         {
             Vector2Int intPos = new Vector2Int((int)x, (int)z);
-            Chunk locChunk = GetChunk(Vec3ToChunkPos(new Vector3(x, 0, z)));
+            Chunk locChunk = GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(x, 0, z)));
             if (locChunk == null || locChunk.isMapGenCompleted == false)
             {
 
@@ -497,7 +462,7 @@ namespace monogameMinecraftShared.World
 
         public static Vector2Int GetChunkSpacePos(Vector3 worldPos, Chunk c)
         {
-            Vector2Int intPos = new Vector2Int(FloatToInt(worldPos.X), FloatToInt(worldPos.Z));
+            Vector2Int intPos = new Vector2Int(ChunkCoordsHelper.FloatToInt(worldPos.X), ChunkCoordsHelper.FloatToInt(worldPos.Z));
          
             Vector2Int chunkSpacePos = intPos - c.chunkPos;
             return chunkSpacePos;
@@ -527,8 +492,8 @@ namespace monogameMinecraftShared.World
         public static void SetBlockWithUpdate(Vector3 pos, short blockID)
         {
 
-            Vector3Int intPos = new Vector3Int(ChunkHelper.FloatToInt(pos.X), ChunkHelper.FloatToInt(pos.Y), ChunkHelper.FloatToInt(pos.Z));
-            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(pos));
+            Vector3Int intPos = new Vector3Int(ChunkCoordsHelper.FloatToInt(pos.X), ChunkCoordsHelper.FloatToInt(pos.Y), ChunkCoordsHelper.FloatToInt(pos.Z));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos));
             if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
             {
                 return;
@@ -586,7 +551,7 @@ namespace monogameMinecraftShared.World
             {
 
                 Vector3Int intPos = pos;
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -643,7 +608,7 @@ namespace monogameMinecraftShared.World
             {
 
                 Vector3Int intPos = pos;
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -665,7 +630,7 @@ namespace monogameMinecraftShared.World
             {
 
                 Vector3Int intPos = pos;
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -687,7 +652,7 @@ namespace monogameMinecraftShared.World
             {
 
                 Vector3Int intPos = pos;
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -709,7 +674,7 @@ namespace monogameMinecraftShared.World
             public static void SendPlaceBlockOperation(Vector3Int position, BlockData data)
             {
                 VoxelWorld.currentWorld.worldUpdater.queuedChunkUpdatePoints.Enqueue(new PlacingBlockOperation(position, VoxelWorld.currentWorld.worldUpdater,data));
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -763,7 +728,7 @@ namespace monogameMinecraftShared.World
               
               
              
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(position.x, position.y, position.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -804,7 +769,7 @@ namespace monogameMinecraftShared.World
             {
 
                 Vector3Int intPos = pos;
-                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
+                Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(new Vector3(pos.x, pos.y, pos.z)));
                 if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
                 {
                     return;
@@ -825,8 +790,8 @@ namespace monogameMinecraftShared.World
             public static void SetBlockWithUpdate(Vector3 pos, BlockData blockData)
         {
 
-            Vector3Int intPos = new Vector3Int(ChunkHelper.FloatToInt(pos.X), ChunkHelper.FloatToInt(pos.Y), ChunkHelper.FloatToInt(pos.Z));
-            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkHelper.Vec3ToChunkPos(pos));
+            Vector3Int intPos = new Vector3Int(ChunkCoordsHelper.FloatToInt(pos.X), ChunkCoordsHelper.FloatToInt(pos.Y), ChunkCoordsHelper.FloatToInt(pos.Z));
+            Chunk chunkNeededUpdate = ChunkHelper.GetChunk(ChunkCoordsHelper.Vec3ToChunkPos(pos));
             if (chunkNeededUpdate == null || chunkNeededUpdate.isReadyToRender == false)
             {
                 return;

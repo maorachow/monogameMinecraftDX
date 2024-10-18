@@ -48,10 +48,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
 	
     float2 texCoords = input.TexCoord;
-    float2 texCoords1 = input.TexCoord + float2(-1.1, -1.1) * pixelSize;
-    float2 texCoords2 = input.TexCoord + float2(1.1, 1.1) * pixelSize;
-    float2 texCoords3 = input.TexCoord + float2(1.1, -1.1) * pixelSize;
-    float2 texCoords4 = input.TexCoord + float2(-1.1, 1.1) * pixelSize;
+    float2 texCoords1 = input.TexCoord + float2(-0.5, -0.5) * pixelSize;
+    float2 texCoords2 = input.TexCoord + float2(0.5, 0.5) * pixelSize;
+    float2 texCoords3 = input.TexCoord + float2(0.5, -0.5) * pixelSize;
+    float2 texCoords4 = input.TexCoord + float2(-0.5, 0.5) * pixelSize;
     float2 texCoordsOrigin = input.TexCoord * 16.0;
    
     float2 ceilTexCoords = float2(floor(texCoordsOrigin.x) + 1, floor(texCoordsOrigin.y) + 1);
