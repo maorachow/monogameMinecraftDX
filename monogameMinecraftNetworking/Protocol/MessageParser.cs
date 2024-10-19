@@ -206,6 +206,7 @@ namespace monogameMinecraftNetworking.Protocol
                     isMessageParsingThreadRunning = false;
                     return;
                 }
+           //     Thread.Sleep(1);
                 try
                 {//public int Receive (System.Collections.Generic.IList<ArraySegment<byte>> buffers);
 

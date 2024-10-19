@@ -17,7 +17,7 @@ namespace monogameMinecraftShared.Rendering
             int height = device.PresentationParameters.BackBufferHeight;
 
 
-            renderTargetProcessed = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            renderTargetProcessed = new RenderTarget2D(device, width, height, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
             InitializeVertices();
             InitializeQuadBuffers(device);
         }

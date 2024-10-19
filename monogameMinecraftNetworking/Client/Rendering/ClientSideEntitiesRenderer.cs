@@ -243,19 +243,19 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                 Matrix world1 = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
 
-                                Vector3 headRot = new Vector3();
-                                if (entity.entityOptionalData is Float3Data)
+                                Quaternion bodyQuat1 = Quaternion.Identity;
+                                if (entity.entityOptionalData is Float4Data)
                                 {
-                                    Float3Data? data1 = (entity.entityOptionalData as Float3Data?);
+                                    Float4Data? data1 = (entity.entityOptionalData as Float4Data?);
                                     if (data1 != null)
                                     {
-                                        headRot = new Vector3(data1.Value.x, data1.Value.y, data1.Value.z);
+                                        bodyQuat1 = new Quaternion(data1.Value.x, data1.Value.y, data1.Value.z, data1.Value.w);
                                     }
                                 }
                                 Dictionary<string, Matrix> optionalParams1 = new Dictionary<string, Matrix>
                                 {
-                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), -MathHelper.ToRadians(headRot.X) ,0) },
-                                    {"body", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY),0 ,0)}
+                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY), -MathHelper.ToRadians(entity.data.rotX) ,0) },
+                                    {"body",Matrix.CreateFromQuaternion(bodyQuat1)}
                                 };
 
                                 entity.animState.DrawAnimatedModel(device, world1, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect1, optionalParams1, () =>
@@ -351,19 +351,19 @@ namespace monogameMinecraftNetworking.Client.Rendering
                                 Matrix world1 = Matrix.CreateTranslation(new Vector3(entity.data.posX, entity.data.posY + 0.0005f, entity.data.posZ));
 
 
-                                Vector3 headRot = new Vector3();
-                                if (entity.entityOptionalData is Float3Data)
+                                Quaternion bodyQuat1 = Quaternion.Identity;
+                                if (entity.entityOptionalData is Float4Data)
                                 {
-                                    Float3Data? data1 = (entity.entityOptionalData as Float3Data?);
+                                    Float4Data? data1 = (entity.entityOptionalData as Float4Data?);
                                     if (data1 != null)
                                     {
-                                        headRot = new Vector3(data1.Value.x, data1.Value.y, data1.Value.z);
+                                        bodyQuat1 = new Quaternion(data1.Value.x, data1.Value.y, data1.Value.z, data1.Value.w);
                                     }
                                 }
                                 Dictionary<string, Matrix> optionalParams1 = new Dictionary<string, Matrix>
                                 {
-                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), -MathHelper.ToRadians(headRot.X) ,0) },
-                                    {"body", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY),0 ,0)}
+                                    {"head", Matrix.CreateFromYawPitchRoll(MathHelper.ToRadians(entity.data.rotY), -MathHelper.ToRadians(entity.data.rotX) ,0) },
+                                    {"body",Matrix.CreateFromQuaternion(bodyQuat1)}
                                 };
 
                                 entity.animState.DrawAnimatedModel(device, world1, curGamePlayer.cam.viewMatrix, curGamePlayer.cam.projectionMatrix, gBufferEffect, optionalParams1, () =>

@@ -183,7 +183,45 @@ namespace monogameMinecraftShared.Rendering
             }
 
         }
+        public void RenderQuad(GraphicsDevice device, RenderTarget2D target, Effect quadEffect,BlendState blendState, bool isPureWhite = false, bool isRenderingOnDcreen = false, bool clearColor = true)
+        {
+            if (isRenderingOnDcreen == false)
+            {
+                device.SetRenderTarget(target);
+                if (clearColor == true)
+                {
+                    device.Clear(Color.Transparent);
+                }
 
+            }
+            if (isPureWhite)
+            {
+
+                device.Clear(Color.White);
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+                return;
+            }
+
+            device.SetVertexBuffer(quadVertexBuffer);
+            device.Indices = quadIndexBuffer;
+            //     RasterizerState rasterizerState = new RasterizerState();
+            //  rasterizerState.CullMode = CullMode.None;
+            //   device.RasterizerState = rasterizerState;
+            device.BlendState = blendState;
+            foreach (var pass in quadEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 4);
+            }
+            //    graphicsDevice.Clear(Color.White);
+            if (isRenderingOnDcreen == false)
+            {
+                device.SetRenderTarget(null);
+                device.Clear(Color.CornflowerBlue);
+            }
+
+        }
         public void RenderQuadVertsOnly(GraphicsDevice device, RenderTarget2D target, Effect quadEffect, bool isPureWhite = false, bool isRenderingOnDcreen = false, bool clearColor = true)
         {
             if (isRenderingOnDcreen == false)

@@ -1421,7 +1421,9 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     
     
     float3 vDir = normalize(worldPos - CameraPos);
-    float3 rDir = reflect(vDir, (normal));
+    
+   
+   // float3 rDir = reflect(vDir, (normal));
     
     float3 rayOrigin = worldPos;
     float NdotL = 2 - max(dot(normal, -vDir), 0.0) * 1.5;
@@ -1439,7 +1441,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     float maxBlendDistance = length(PixelSize) * 2;
     float deltaLength = length(prevTexCoord - input.TexCoord);
     float blendFactor = clamp(deltaLength / maxBlendDistance, 0, 1);
-    float3 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyz : 0;
+    float4 prevColor = prevTexCoord.x > 0 && prevTexCoord.y > 0 && prevTexCoord.x < 1 && prevTexCoord.y < 1 ? tex2D(prevSSRTex, prevTexCoord).xyzw : 0;
     
     
     
@@ -1459,7 +1461,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     
     float2 brdf = tex2D(texBRDFLUT, float2(max(dot(N, V), 0.0), 1 - mer.z)).rg;
     
-    float3 finalColor = 0;
+    float4 finalColor = 0;
  
     if (mer.z > 0.8f)
     {
@@ -1473,7 +1475,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
       //  finalColor += specularEnv;
      
    
-        return float4(specularEnv.xyz, 1);
+        return float4(0,0,0,0);
         
         
     }
@@ -1483,7 +1485,7 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
      
         
     
-    float3 curRDir = rDir;
+  //  float3 curRDir = rDir;
     float noiseValue1 = tex2D(texNoise, input.TexCoord * 4.0 + GameTime * 5).g + 0.5;
     
     
@@ -1494,10 +1496,10 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
         
   
     float2 noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (0 + 1)).rg;
-    float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
+    float3 halfwayDir = ImportanceSampleGGX(noiseValue2.xy, normal, mer.z);
+    float3 importanceSampleDir = reflect(vDir, normalize(halfwayDir));
     
-    
-    curRDir = importanceSampleDir;
+    float3 curRDir = importanceSampleDir;
   
    
     int miplevel = 0;
@@ -1509,8 +1511,8 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     {
         //    float3 noiseValue3 = tex2D(texNoise, input.TexCoord * 5.0 * (k + 1 + 1) + GameTime * 8 * (k + 1)).rgb;
         noiseValue2 = tex2D(texNoise, input.TexCoord * 5.0 * (0 + 1 + 1) + GameTime * 8 * (k + 1)).rg;
-        float3 importanceSampleDir = ImportanceSampleGGX(noiseValue2.xy, rDir, mer.z);
-    
+        halfwayDir = ImportanceSampleGGX(noiseValue2.xy, normal, mer.z);
+        importanceSampleDir = reflect(vDir, normalize(halfwayDir));
     
         curRDir = importanceSampleDir;
      
@@ -1694,14 +1696,26 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
     
     float3 R = reflect(-V, normal);
     R = normalize(R);
+    float finalAlpha = 0;
     if (isIntersecting == true)
     {
         float3 lum = LumTex.Sample(defaultSampler, uv.xy).xyz;
            
+        float depth = ProjectionDepthTexMip0.Sample(depthPyramidSampler, uv.xy).x;
         float3 specular = lum * (F * brdf.x + brdf.y);
          
         result = specular;
-        finalColor += result;
+        if (depth > 0.1 && depth < 900)
+        {
+            finalColor.xyz += result;
+            finalAlpha += 1;
+        }
+        else
+        {
+            finalColor.xyz += 0;
+            finalAlpha += 0;
+        }
+      
 
     }
     else
@@ -1711,16 +1725,18 @@ float4 MainPSRealHiZ(VertexShaderOutput input) : COLOR
          //   float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
         float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
     
-        finalColor += specularEnv;
+        finalColor.xyz += 0;
+        finalAlpha = 0;
 
     }
     
    
     
   //  finalColor /= 1;
-    finalColor = lerp(finalColor, prevColor, 0.75);
+    finalColor.a = finalAlpha;
+    finalColor = lerp(finalColor, prevColor, 0.8);
    
-        return float4(finalColor.xyz, 1);
+    return float4(finalColor.xyzw);
    
    
 }

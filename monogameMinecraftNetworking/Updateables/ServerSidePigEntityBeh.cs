@@ -51,13 +51,13 @@ namespace monogameMinecraftNetworking.Updateables
         public Vector3 secondaryTargetPos;
         public override EntityData ToEntityData()
         {
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, bodyRot.X, bodyRot.Y, bodyRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float3Data.ToBytes(new Float3Data(headRot.X, headRot.Y, headRot.Z)));
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, headRot.X, headRot.Y, headRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float4Data.ToBytes(new Float4Data(bodyQuat.X, bodyQuat.Y, bodyQuat.Z, bodyQuat.W)));
             return tmpData;
         }
         public override void SaveSingleEntity()
         {
 
-            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, bodyRot.X, bodyRot.Y, bodyRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float3Data.ToBytes(new Float3Data(headRot.X, headRot.Y, headRot.Z)));
+            EntityData tmpData = new EntityData(typeID, position.X, position.Y, position.Z, headRot.X, headRot.Y, headRot.Z, entityID, entityHealth, curWorldID, isEntityHurt, isEntityDying, Float4Data.ToBytes(new Float4Data(bodyQuat.X, bodyQuat.Y, bodyQuat.Z, bodyQuat.W)));
 
             foreach (EntityData ed in ServerSideEntityManager.entityDataReadFromDisk)
             {
@@ -101,7 +101,7 @@ namespace monogameMinecraftNetworking.Updateables
         Random rand= new Random();
         public Vector3 FindRandomLandingPos()
         {
-            Vector2 landingPos = new Vector2((rand.NextSingle() * 2 - 1) * 20f+position.X, (rand.NextSingle() * 2 - 1) * 20f + position.Z);
+            Vector2 landingPos = new Vector2((rand.NextSingle() * 2 - 1) * 8f+position.X, (rand.NextSingle() * 2 - 1) * 8f + position.Z);
             Vector3 returnVal = new Vector3(landingPos.X,ServerSideChunkHelper.GetChunkLandingPointColliding(landingPos.X, landingPos.Y,curWorldID)+0.5f,landingPos.Y);
             Debug.WriteLine(ServerSideChunkHelper.GetBlock(returnVal,curWorldID));
 
@@ -241,26 +241,38 @@ namespace monogameMinecraftNetworking.Updateables
                 timeSpentToNextStep += deltaTime;
 
             }
-            Vector3 movePos = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
-            float movePosY = movePos.Y;
-            if (movePos.X == 0 && movePos.Y == 0 && movePos.Z == 0)
+            Vector3 moveDir = new Vector3(targetPos.X - position.X, 0, targetPos.Z - position.Z);
+            float movePosY = moveDir.Y;
+            if (moveDir.X == 0 && moveDir.Y == 0 && moveDir.Z == 0)
             {
-                movePos = new Vector3(0.00f, 0.000f, 0.001f);
+              
+                moveDir = new Vector3((rand.NextSingle() * 2 - 1) * 0.001f, (rand.NextSingle()) * 0.001f, (rand.NextSingle() * 2 - 1) * 0.001f);
             }
 
             Vector3 lookDir = new Vector3(secondaryTargetPos.X - position.X, secondaryTargetPos.Y - position.Y - 1f,
                 secondaryTargetPos.Z - position.Z);
             lookDir.Normalize();
-            Vector3 movePosN = Vector3.Normalize(movePos) * 5f * deltaTime;
+
+
+            Vector3 lookDirPrimary = new Vector3(targetPos.X - position.X, targetPos.Y - position.Y,
+                targetPos.Z - position.Z);
+            if (lookDirPrimary.X == 0 && lookDirPrimary.Y == 0 && lookDirPrimary.Z == 0)
+            {
+
+                lookDirPrimary = new Vector3((rand.NextSingle() * 2 - 1) * 0.001f, (rand.NextSingle()) * 0.001f, (rand.NextSingle() * 2 - 1) * 0.001f);
+            }
+            lookDirPrimary.Normalize();
+            lookDir.Normalize();
+            Vector3 movePosN = Vector3.Normalize(moveDir) * 5f * deltaTime;
 
             entityVec = movePosN;
             //              Debug.WriteLine(movePos);
             if (isGround != false || !(entityGravity < 0f))
             {
                 Vector3 entityRot = LookRotation(lookDir);
-                Vector3 entityPrimaryRot=LookRotation(movePos);
+                Vector3 entityPrimaryRot=LookRotation(moveDir);
 
-
+                Vector3 entityRotPrimary = LookRotation(lookDirPrimary);
                 //     Debug.WriteLine(headRot.Y);
 
                 bodyRot.Y = entityPrimaryRot.Y;
@@ -274,9 +286,9 @@ namespace monogameMinecraftNetworking.Updateables
                 }
                 else
                 {
-                    headRot.X = 0f;
-                    headRot.Y = 0f;
-                    headRot.Z =0f;
+                    headRot.X = entityRotPrimary.X;
+                    headRot.Y = entityRotPrimary.Y - bodyRot.Y;
+                   headRot.Z = entityRotPrimary.Z;
                 }
               
                 //       headRot.Y = MathHelper.Clamp(headRot.Y, -90f, 90f);
@@ -288,11 +300,12 @@ namespace monogameMinecraftNetworking.Updateables
             {
             }
 
+           
+            bodyQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(bodyRot.Y), 0, 0);
+            //    Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), 0, 0);
+            //  bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
 
-        //    Quaternion headQuat = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(headRot.Y), 0, 0);
-          //  bodyQuat = Quaternion.Lerp(bodyQuat, headQuat, 10f * deltaTime);
-
-      //      Debug.WriteLine("is pathfinding needed:"+isPathfindingNeeded);
+            //      Debug.WriteLine("is pathfinding needed:"+isPathfindingNeeded);
             if (hasReachedCurStep && isPathValid)
             {
                 if (entityPath.curStep < entityPath.steps.Count - 1)

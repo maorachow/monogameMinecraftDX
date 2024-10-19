@@ -110,7 +110,7 @@ namespace monogameMinecraftClientDX
 
         public override void OpenChatUI()
         {
-            isChatMessageSendingUIOpen = !isChatMessageSendingUIOpen;
+            isChatMessageSendingUIOpen = true; 
             if (isChatMessageSendingUIOpen == true)
             {
                 mouseMovementManager.isMouseLocked = false;
@@ -127,7 +127,7 @@ namespace monogameMinecraftClientDX
         }
         public override void CloseChatUI()
         {
-            isChatMessageSendingUIOpen = !isChatMessageSendingUIOpen;
+            isChatMessageSendingUIOpen = false; 
             if (isChatMessageSendingUIOpen == true)
             {
                 mouseMovementManager.isMouseLocked = false;
@@ -367,7 +367,7 @@ namespace monogameMinecraftClientDX
            playerInputManager = new PlayerInputManager(gamePlayerR.gamePlayer, false);
            mouseMovementManager = new MouseMovementManager(playerInputManager);
            mouseMovementManager.windowBounds = Window.ClientBounds;
-            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer,false);
+            gameTimeManager = new GameTimeManager(gamePlayerR.gamePlayer,true);
             effectsManager.LoadEffects(Content);
          
             networkingClient.Initialize(address, inputPort, (gamePlayerR.gamePlayer as ClientSideGamePlayer), this);
@@ -399,6 +399,7 @@ namespace monogameMinecraftClientDX
            bool succeeded= networkingClient.Connect();
            MultiplayerClientUIUtility.TryPresentConnectionResult(uiStateManager.menuUIs, succeeded);
            MultiplayerClientUIUtility.TryBindChatMessageUIWithClient(uiStateManager.inGameUIs,networkingClient);
+           MultiplayerClientUIUtility.TryBindConnectionResultUIWithClient(uiStateManager.menuUIs,networkingClient);
             ClientSideVoxelWorld.singleInstance.InitWorld(this);
           
             status = GameStatus.Started;

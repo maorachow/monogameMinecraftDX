@@ -23,12 +23,12 @@ namespace monogameMinecraftNetworking.Client
         public List<UserData> allUserDatas { get; set; }
 
         public List<EntityData> allEntityDatas { get; set; }
-        public UserData playerData { get; }
-        public Socket socket { get; }
-        public bool isLoggedIn { get; }
-        public MessageParserSingleSocket  messageParser { get; }
+        public UserData playerData { get; set; }
+        public Socket socket { get; set; }
+        public bool isLoggedIn { get; set; }
+        public MessageParserSingleSocket  messageParser { get; set; }
 
-        public ClientSideGamePlayer gamePlayer { get; }
+        public ClientSideGamePlayer gamePlayer { get; set; }
 
         public ClientGameBase game { get; }
 

@@ -40,7 +40,7 @@ sampler2D texNoise = sampler_state
     AddressU = Wrap;
     AddressV = Wrap;
 };
-#define SHADOW_MAP_BIAS 0.75
+#define SHADOW_MAP_BIAS 0.85
 float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias, in float3 worldPos, in float4x4 lightSpaceMat1, in float3x3 TBN, in float2 TexCoords)
 {
     float shadow = 0;
@@ -75,9 +75,9 @@ float ShadowCalculation(float4 fragPosLightSpace, sampler2D sp, float bias, in f
         float4 projCoords1 = mul(float4(sampleWorldPos, 1), lightSpaceMat1);
         float3 
         projCoords2 = projCoords1.xyz / projCoords1.w;
-      //  float distb = sqrt(projCoords2.x * projCoords2.x + projCoords2.y * projCoords2.y);
-    //    float distortFactor = (1.0 - SHADOW_MAP_BIAS) + distb * SHADOW_MAP_BIAS;
-     //   projCoords2.xy /= distortFactor;
+       float distb = sqrt(projCoords2.x * projCoords2.x + projCoords2.y * projCoords2.y);
+       float distortFactor = (1.0 - SHADOW_MAP_BIAS) + distb * SHADOW_MAP_BIAS;
+        projCoords2.xy /= distortFactor;
         projCoords2.xy = projCoords2 * 0.5 + 0.5;
         projCoords2.y = 1 - projCoords2.y;
         float pcfDepth1 = tex2D(sp, projCoords2.xy).r;

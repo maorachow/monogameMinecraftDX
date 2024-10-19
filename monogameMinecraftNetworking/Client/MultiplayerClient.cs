@@ -33,6 +33,7 @@ namespace monogameMinecraftNetworking.Client
         public UserData playerData
         {
             get { return gamePlayer.ToUserData(); }
+            set{}
         }
 
         public List<UserData> allUserDatas { get; set; }
@@ -169,7 +170,7 @@ namespace monogameMinecraftNetworking.Client
                     Debug.WriteLine("quit game");
                     return;
                 }
-                
+                Thread.Sleep(0);
                 if (todoList.Count > 0)
                 {
                     MessageProtocol item;
@@ -179,7 +180,8 @@ namespace monogameMinecraftNetworking.Client
                         Debug.WriteLine("null message");
                         continue;
                     }
-                    switch ((MessageCommandType)item.command)
+                    NetworkingClientReceivedProtocolActionHelper.ProcessMessageProtocolActions(this,item);
+                /*    switch ((MessageCommandType)item.command)
                     {
                         case MessageCommandType.WorldData:
 
@@ -400,7 +402,7 @@ namespace monogameMinecraftNetworking.Client
                             float timeData = MessagePackSerializer.Deserialize<float>(item.messageData);
                             game.gameTimeManager.SetDateTime(timeData);
                             break;
-                    }
+                    }*/
                 }
                 
                

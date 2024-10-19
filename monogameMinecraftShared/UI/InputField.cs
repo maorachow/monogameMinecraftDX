@@ -118,15 +118,33 @@ namespace monogameMinecraftShared.UI
                 textSize = font.MeasureString(text) / 2f;
             }
 
-            float textSizeScaling;
-            if (state.ScreenRect.Height < state.ScreenRect.Width)
+            float textSizeScaling=1f;
+
+
+           /* if (leftAligned == true)
             {
-                textSizeScaling = inputFieldRect.Height / ((float)textSize.Y * 2f ) * textScale;
+               
+               //     textSizeScaling = (MathF.Min(inputFieldRect.Height, inputFieldRect.Width))  / ((float)MathF.Min(textSize.X, textSize.Y) * 2f) * textScale;
+              
+              //      textSizeScaling = inputFieldRect.Width / ((float)textSize.X * 2f) * textScale;
+               
             }
             else
-            {
-                textSizeScaling = inputFieldRect.Width / ((float)textSize.X * 2f ) * textScale;
-            }
+            { 
+                if (state.ScreenRect.Height < state.ScreenRect.Width)
+                {
+                    textSizeScaling = inputFieldRect.Height / ((float)textSize.Y * 2f) * textScale;
+                }
+                else
+                {
+                    textSizeScaling = inputFieldRect.Width / ((float)textSize.X * 2f) * textScale;
+                }
+                textSizeScaling = (MathF.Min(inputFieldRect.Height, inputFieldRect.Width)) / ((float)MathF.Min(textSize.X, textSize.Y) * 2f) * textScale;
+            }*/
+            float textScalingVertical  = inputFieldRect.Height / ((float)textSize.Y * 2f) * textScale;
+
+            float textScalingHorizontal  = inputFieldRect.Width / ((float)textSize.X * 2f) * textScale;
+            textSizeScaling = MathF.Min(textScalingHorizontal, textScalingVertical);
 
             textSize *= textSizeScaling;
 

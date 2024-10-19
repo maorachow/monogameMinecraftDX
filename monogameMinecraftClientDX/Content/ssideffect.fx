@@ -747,7 +747,7 @@ float4 MainPSHiZ(VertexShaderOutput input) : COLOR
     bool isIntersecting = false;
     
     [loop]
-    while (level >= stopLevel && ray.z * rayDir <= maxZ * rayDir && iter < 25)
+    while (level >= stopLevel && ray.z * rayDir <= maxZ * rayDir && iter < 16)
     {
         
         float2 cellCount = GetCellCount(1.0 / (PixelSize.xy), level);

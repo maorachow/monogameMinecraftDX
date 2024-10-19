@@ -263,7 +263,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     // Debug.WriteLine("speed:"+ (moveLength / deltaTime));
                     if (allEntitiesCache[idx].data.isEntityDying == false)
                     {
-                        if (allEntitiesCache[idx].entitySpeed / 5f < 0.1f)
+                        if (allEntitiesCache[idx].entitySpeed / 4f < 0.1f)
                         {
                             float lerpValue =
                                 MathHelper.Lerp(
@@ -276,7 +276,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                         else
                         {
                             allEntitiesCache[idx].animState
-                                .Update(deltaTime, allEntitiesCache[idx].entitySpeed / 5f, 0);
+                                .Update(deltaTime, allEntitiesCache[idx].entitySpeed / 4f, 0);
                         }
                     }
                     else
@@ -288,12 +288,35 @@ namespace monogameMinecraftNetworking.Client.Updateables
                     switch (allEntitiesCache[idx].data.typeid)
                     {
                         case 0:
+                            Float4Data? curBodyQuatData =
+                                (Float4Data.FromBytes(item1.optionalData) as Float4Data?);
+
+                            Float4Data? prevBodyQuatData =
+                                (Float4Data.FromBytes(lastPreviousAllEntitiesDatas[idxInPreviousData].optionalData) as Float4Data?);
+                            Quaternion curBodyQuat = new Quaternion(curBodyQuatData.Value.x, curBodyQuatData.Value.y,
+                                curBodyQuatData.Value.z, curBodyQuatData.Value.w);
+
+                            Quaternion prevBodyQuat = new Quaternion(prevBodyQuatData.Value.x, prevBodyQuatData.Value.y,
+                                prevBodyQuatData.Value.z, prevBodyQuatData.Value.w);
+                            Quaternion lerpBodyQuat=Quaternion.Lerp(prevBodyQuat,curBodyQuat, timeSinceLastUpdate / previousTimeSinceLastUpdate);
                             allEntitiesCache[idx].entityOptionalData =
-                                (Float4Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float4Data?);
+                                new Float4Data(lerpBodyQuat.X, lerpBodyQuat.Y, lerpBodyQuat.Z, lerpBodyQuat.W) as Float4Data?;
+                              //  (Float4Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float4Data?);
                             break;
                         case 1:
+                            Float4Data? curBodyQuatData1 =
+                                Float4Data.FromBytes(item1.optionalData);
+
+                            Float4Data? prevBodyQuatData1 =
+                                Float4Data.FromBytes(lastPreviousAllEntitiesDatas[idxInPreviousData].optionalData);
+                            Quaternion curBodyQuat1 = new Quaternion(curBodyQuatData1.Value.x, curBodyQuatData1.Value.y,
+                                curBodyQuatData1.Value.z, curBodyQuatData1.Value.w);
+
+                            Quaternion prevBodyQuat1 = new Quaternion(prevBodyQuatData1.Value.x, prevBodyQuatData1.Value.y,
+                                prevBodyQuatData1.Value.z, prevBodyQuatData1.Value.w);
+                            Quaternion lerpBodyQuat1 = Quaternion.Lerp(prevBodyQuat1, curBodyQuat1, timeSinceLastUpdate / previousTimeSinceLastUpdate);
                             allEntitiesCache[idx].entityOptionalData =
-                                (Float3Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float3Data?);
+                                new Float4Data(lerpBodyQuat1.X, lerpBodyQuat1.Y, lerpBodyQuat1.Z, lerpBodyQuat1.W) as Float4Data?;
                             break;
                     }
                 }
@@ -336,7 +359,7 @@ namespace monogameMinecraftNetworking.Client.Updateables
                             break;
                         case 1:
                             allEntitiesCache[idx].entityOptionalData =
-                                (Float3Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float3Data?);
+                                (Float4Data.FromBytes(allEntitiesCache[idx].data.optionalData) as Float4Data?);
                             break;
                     }
                 }

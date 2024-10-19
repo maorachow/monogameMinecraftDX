@@ -686,8 +686,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     
     float3 ambient = ( indirectDiffuse /** 0.5 + reflection*/) * tex2D(AOSampler, input.TexCoords).x;
     
-    output.Color = float4(color + ambient, alpha);
-    output.ColorSpecular = float4(colorSpec, alpha);
+    output.Color = float4(color + ambient, (1 - F.x)*alpha);
+    output.ColorSpecular = float4(colorSpec, F.x);
     return output;
 }
 

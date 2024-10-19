@@ -67,19 +67,28 @@ namespace monogameMinecraftNetworking.World
 
         public ServerSideChunk GetChunk(Vector2Int chunkPos)
         {
-            if (chunks == null)
+            try
             {
+                if (chunks == null)
+                {
+                    return null;
+                }
+                if (chunks.ContainsKey(chunkPos))
+                {
+                    ServerSideChunk tmp = chunks[chunkPos];
+                    return tmp;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("getchunk exception:"+e);
                 return null;
             }
-            if (chunks.ContainsKey(chunkPos))
-            {
-                ServerSideChunk tmp = chunks[chunkPos];
-                return tmp;
-            }
-            else
-            {
-                return null;
-            }
+           
 
         }
 

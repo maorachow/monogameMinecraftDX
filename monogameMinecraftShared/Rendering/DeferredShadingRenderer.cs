@@ -284,7 +284,7 @@ namespace monogameMinecraftShared.Rendering
             //    deferredBlendEffect.Parameters["LightColor"].SetValue(new Vector3(10, 10, 10));
             //   deferredBlendEffect.Parameters["LightDir"].SetValue(gameTimeManager.sunDir);
             device.BlendState = BlendState.AlphaBlend;
-            device.DepthStencilState = DepthStencilState.None;
+            device.DepthStencilState = DepthStencilState.Default;
             deferredBlendEffect.Parameters["TextureDepth"]?.SetValue(gBufferRenderer.renderTargetProjectionDepth);
             deferredBlendEffect.Parameters["viewPos"]?.SetValue(player.cam.position);
             deferredBlendEffect.Parameters["TextureNormals"]?.SetValue(gBufferRenderer.renderTargetNormalWS);
@@ -296,23 +296,24 @@ namespace monogameMinecraftShared.Rendering
             deferredBlendEffect.Parameters["HDRIrradianceTexNight"]?.SetValue(hdrCubemapRenderer.resultCubeCollectionNight.resultIrradianceCubemap);
             deferredBlendEffect.Parameters["mixValue"]?.SetValue(gameTimeManager.skyboxMixValue);
          
-            deferredBlendEffect.Parameters["TextureAlbedo"].SetValue(gBufferRenderer.renderTargetAlbedo);
-            deferredBlendEffect.Parameters["TextureDeferredLum"].SetValue(renderTargetLumAllDiffuse);
+            deferredBlendEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
+            deferredBlendEffect.Parameters["TextureDeferredLum"]?.SetValue(renderTargetLumAllDiffuse);
 
-            deferredBlendEffect.Parameters["TextureDeferredLumSpec"].SetValue(renderTargetLumSpec);
+            deferredBlendEffect.Parameters["TextureDeferredLumSpec"]?.SetValue(renderTargetLumSpec);
 
             deferredBlendEffect.Parameters["TextureDeferredLumTrans"]?.SetValue(renderTargetLumTransparent);
             deferredBlendEffect.Parameters["TextureDeferredLumSpecTrans"]?.SetValue(renderTargetLumSpecTransparent);
-            deferredBlendEffect.Parameters["TextureAO"].SetValue(SSAORenderer.ssaoTarget);
+            deferredBlendEffect.Parameters["TextureAO"]?.SetValue(SSAORenderer.ssaoTarget);
             deferredBlendEffect.Parameters["TextureReflection"]?.SetValue(ssrRenderer.renderTargetSSR);
             deferredBlendEffect.Parameters["TextureIndirectDiffuse"]?.SetValue(ssidRenderer.renderTargetSSID);
             deferredBlendEffect.Parameters["TextureAlbedo"]?.SetValue(gBufferRenderer.renderTargetAlbedo);
             deferredBlendEffect.Parameters["TextureMER"]?.SetValue(gBufferRenderer.renderTargetMER);
-            RenderQuad(device, finalImage, deferredBlendEffect, false, false, clearColor: false);
-            device.BlendState = BlendState.Opaque;
+            
+            RenderQuad(device, finalImage, deferredBlendEffect, BlendState.NonPremultiplied, false, false, clearColor: false);
+            device.BlendState = BlendState.AlphaBlend;
             device.DepthStencilState = DepthStencilState.Default;
             motionBlurRenderer.ProcessImage(finalImage);
-            // motionBlurRenderer.renderTargetMotionBlur;
+                // motionBlurRenderer.renderTargetMotionBlur;
 
 
             for (int i = 0; i < customPostProcessors.Count; i++)
@@ -320,19 +321,20 @@ namespace monogameMinecraftShared.Rendering
                 customPostProcessors[i].cam = player.cam;
                 if (i == 0)
                 {
-                    customPostProcessors[i].ProcessImage(motionBlurRenderer.processedImage);
+                    customPostProcessors[i].ProcessImage(finalImage);
                 }
                 else
                 {
                     customPostProcessors[i].ProcessImage(customPostProcessors[i - 1].processedImage);
                 }
             }
-            fxaaRenderer.Draw(true, customPostProcessors[customPostProcessors.Count - 1].processedImage);
+
+            fxaaRenderer.Draw(true,customPostProcessors[customPostProcessors.Count - 1].processedImage);
             //   sb.Begin(blendState: BlendState.Opaque);
             //    sb.Draw(finalImage, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
             //   sb.End();
             sb.Begin(blendState: BlendState.Additive);
-            sb.Draw(vlr.lightShaftTarget, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
+           sb.Draw(vlr.lightShaftTarget, new Rectangle(0, 0, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight), Color.White);
             sb.End();
         }
     }

@@ -24,7 +24,7 @@ sampler textureSampler = sampler_state
    
     Filter = Point;
     Mipfilter = Linear;
-    MipLODBias = -2;
+    MipLODBias =0;
     MaxLOD = 8;
    
 };

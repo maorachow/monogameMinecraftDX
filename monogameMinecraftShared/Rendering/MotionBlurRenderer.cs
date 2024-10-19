@@ -20,7 +20,7 @@ namespace monogameMinecraftShared.Rendering
             InitializeQuadBuffers(device);
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            processedImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.None);
+            processedImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24);
         }
 
         public void ProcessImage(in RenderTarget2D tex)

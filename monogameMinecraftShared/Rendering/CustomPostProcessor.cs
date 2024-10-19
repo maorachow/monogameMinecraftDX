@@ -22,7 +22,7 @@ namespace monogameMinecraftShared.Rendering
             this.device = device;
             int width = device.PresentationParameters.BackBufferWidth;
             int height = device.PresentationParameters.BackBufferHeight;
-            processedImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.None);
+            processedImage = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth16);
             this.gBufferRenderer = gBufferRenderer;
             this.motionVectorRenderer = motionVectorRenderer;
             this.effectNameInDic = effectNameInDic;

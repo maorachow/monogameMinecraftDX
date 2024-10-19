@@ -279,7 +279,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
   
     float3 color = tex2D(deferredLumSampler, input.TexCoords).xyz + tex2D(deferredLumSpecSampler, input.TexCoords).xyz;
     float3 reflection = tex2D(reflectionSampler, input.TexCoords).xyz;
-  
+    float reflectionAlpha = tex2D(reflectionSampler, input.TexCoords).w;
     
     float3 worldPos = ReconstructViewPos(input.TexCoords, tex2D(DepthSampler, input.TexCoords).r) + viewPos;
     float3 V = normalize(viewPos - worldPos);
@@ -304,20 +304,24 @@ float4 MainPS(VertexShaderOutput input) : COLOR
      
    /* const float MAX_REFLECTION_LOD = 4.0;
     float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
-    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+    
     float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y) * 0.1;*/
+    float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+    const float MAX_REFLECTION_LOD = 4.0;
+    float3 prefilteredColor = lerp(texCUBElod(preFilteredSpecularSampler, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, texCUBElod(preFilteredSpecularSamplerNight, float4(R, mer.z * MAX_REFLECTION_LOD)).rgb, mixValue);
+         //   float2 brdf = tex2D(texBRDFLUT, float2(max(dot(normal, V), 0.0), 1 - mer.z)).rg;
+    float3 specularEnv = prefilteredColor * (F * brdf.x + brdf.y);
     
-    
-    float3 ambient = (reflection /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
+    float3 ambient = (lerp(specularEnv,reflection, reflectionAlpha) /** 0.5 + reflection*/) * tex2D(aoSampler, input.TexCoords).x;
     float3 final = color + ambient ;
    
-    float3 finalTrans = tex2D(deferredLumSpecTransSampler, input.TexCoords).xyz + tex2D(deferredLumTransSampler, input.TexCoords).xyz;
-    finalTrans = finalTrans / (finalTrans + float3(1.0, 1.0, 1.0));
-    finalTrans = pow(finalTrans, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
+    float4 finalTrans = float4(tex2D(deferredLumSpecTransSampler, input.TexCoords).xyz + tex2D(deferredLumTransSampler, input.TexCoords).xyz, tex2D(deferredLumTransSampler, input.TexCoords).w+ tex2D(deferredLumSpecTransSampler, input.TexCoords).w);
+    finalTrans.xyz = finalTrans.xyz / (finalTrans.xyz + float3(1.0, 1.0, 1.0));
+    finalTrans.xyz = pow(finalTrans.xyz, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
     final = final / (final + float3(1.0, 1.0, 1.0));
     final = pow(final, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
-    final = lerp(final, finalTrans, tex2D(deferredLumTransSampler, input.TexCoords).a);
-    return float4(final.xyz, tex2D(albedoSampler, input.TexCoords).a  > 0.0001 ? 1 : tex2D(deferredLumTransSampler, input.TexCoords).a);
+    final = lerp(final, finalTrans.xyz, finalTrans.w);
+    return float4(final.xyz, tex2D(albedoSampler, input.TexCoords).a > 0.0001 ? 1 : finalTrans.w);
 }
 
 technique DeferredBlend
